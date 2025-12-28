@@ -15,7 +15,7 @@
         <section class="container mx-auto py-4 px-2">
             <h2 class="text-2xl font-[600]">Recent Articles</h2>
             @foreach($articles as $article)
-                <div class="card bg-base-100 my-8 shadow-lg">
+                <div class="card bg-base-100 my-8 shadow-lg rounded-sm">
                     <div class="card-body">
                         <h2 class="card-title">Card title!</h2>
                         <p>{{ Str::limit($article, 280) }}</p>

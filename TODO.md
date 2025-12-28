@@ -3,10 +3,10 @@ A FOSS solution for owning your own web presence letting you easily implement In
 
 ### Todo
 
-- [ ] Create Home Page
+- [x] Create Home Page
     - `/` route
     - shows a list of articles (dummy data)
-- [ ] Create Article Model + Migration
+- [x] Create Article Model + Migration
 - [ ] Create Single Article View
     - `/article/{name}` route
 - [ ] Replace home page articles with real Article model data
