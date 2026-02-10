@@ -11,7 +11,10 @@ Route::get('/', function () {
 });
 
 // Admin Routes
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+// Auth required in production, optional in local/development
+$adminMiddleware = app()->environment(['local', 'development', 'dev']) ? [] : ['auth'];
+
+Route::middleware($adminMiddleware)->prefix('admin')->name('admin.')->group(function () {
     // Dashboard
     Route::get('/', DashboardController::class)->name('dashboard');
 
