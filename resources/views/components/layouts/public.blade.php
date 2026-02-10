@@ -11,14 +11,14 @@
     <nav class="navbar bg-base-100 border-b border-base-200">
         <div class="container mx-auto px-4">
             <div class="flex-1">
-                <a href="/" class="btn btn-ghost text-xl font-bold">
+                <a href="{{ route('home') }}" class="btn btn-ghost text-xl font-bold">
                     {{ config('app.name', 'BlogWriter') }}
                 </a>
             </div>
             <div class="flex-none gap-2">
-                <a href="/" class="btn btn-ghost">Home</a>
-                <a href="/blog" class="btn btn-ghost">Articles</a>
-                <a href="/about" class="btn btn-ghost">About</a>
+                <a href="{{ route('home') }}" class="btn btn-ghost">Home</a>
+                <a href="{{ route('home') }}" class="btn btn-ghost">Articles</a>
+                <a href="{{ route('about') }}" class="btn btn-ghost">About</a>
                 
                 {{-- Dark Mode Toggle --}}
                 <button x-data="{ darkMode: false }" 
@@ -75,7 +75,7 @@
                     </div>
                     
                     {{-- Hidden h-card properties for microformats --}}
-                    <a href="/" class="u-url hidden">Homepage</a>
+                    <a href="{{ route('home') }}" class="u-url hidden">Homepage</a>
                 </div>
             </div>
         </div>
@@ -91,7 +91,7 @@
         <div>
             <p class="text-sm text-base-content/60">
                 © {{ date('Y') }} {{ config('app.name', 'BlogWriter') }} - 
-                <a href="/admin" class="link link-primary">Admin</a>
+                <a href="{{ route('admin.dashboard') }}" class="link link-primary">Admin</a>
             </p>
             <p class="text-xs text-base-content/40 mt-2">
                 Powered by <a href="https://blogwriter.dev" class="link" target="_blank">BlogWriter</a>

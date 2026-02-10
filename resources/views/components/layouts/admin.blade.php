@@ -25,7 +25,7 @@
                 </div>
 
                 <div class="flex-1">
-                    <a href="/admin" class="btn btn-ghost text-xl font-semibold">
+                    <a href="{{ route('admin.dashboard') }}" class="btn btn-ghost text-xl font-semibold">
                         {{ config('app.name', 'BlogWriter') }}
                     </a>
                 </div>
@@ -49,7 +49,7 @@
                                 <span>{{ auth()->user()?->name ?? 'User' }}</span>
                                 <span class="text-xs text-base-content/60">{{ auth()->user()?->email ?? '' }}</span>
                             </li>
-                            <li><a href="/admin/settings">Settings</a></li>
+                            <li><a href="{{ route('admin.settings') }}">Settings</a></li>
                             <div class="divider my-1"></div>
                             <li>
                                 <form method="POST" action="{{ route('logout') }}" class="w-full">
@@ -81,7 +81,7 @@
             @hasSection('breadcrumb')
                 <div class="breadcrumbs text-sm px-4 py-2 bg-base-100 border-b border-base-300">
                     <ul>
-                        <li><a href="/admin">Dashboard</a></li>
+                        <li><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
                         @yield('breadcrumb')
                     </ul>
                 </div>
@@ -131,28 +131,28 @@
                 <nav class="flex-1">
                     <ul class="menu menu-lg gap-1">
                         <li>
-                            <a href="/admin" class="{{ request()->is('admin') ? 'active' : '' }}">
+                            <a href="{{ route('admin.dashboard') }}" class="{{ request()->is('admin') ? 'active' : '' }}">
                                 <i class="ph ph-house text-lg"></i>
                                 Dashboard
                             </a>
                         </li>
 
                         <li>
-                            <a href="/admin/articles" class="{{ request()->is('admin/articles*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.articles.index') }}" class="{{ request()->is('admin/articles*') ? 'active' : '' }}">
                                 <i class="ph ph-article text-lg"></i>
                                 Articles
                             </a>
                         </li>
 
                         <li>
-                            <a href="/admin/categories" class="{{ request()->is('admin/categories*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.categories.index') }}" class="{{ request()->is('admin/categories*') ? 'active' : '' }}">
                                 <i class="ph ph-folder text-lg"></i>
                                 Categories
                             </a>
                         </li>
 
                         <li>
-                            <a href="/admin/settings" class="{{ request()->is('admin/settings*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.settings') }}" class="{{ request()->is('admin/settings*') ? 'active' : '' }}">
                                 <i class="ph ph-gear text-lg"></i>
                                 Settings
                             </a>
@@ -161,7 +161,7 @@
                         <div class="divider my-2"></div>
 
                         <li>
-                            <a href="/" target="_blank" class="text-primary">
+                            <a href="{{ route('home') }}" target="_blank" class="text-primary">
                                 <i class="ph ph-arrow-square-out text-lg"></i>
                                 View Site
                             </a>

@@ -5,7 +5,7 @@
         {{-- Breadcrumbs --}}
         <nav class="text-sm breadcrumbs mb-6">
             <ul>
-                <li><a href="/" class="link link-hover">Home</a></li>
+                <li><a href="{{ route('home') }}" class="link link-hover">Home</a></li>
                 <li class="text-base-content/60">About</li>
             </ul>
         </nav>

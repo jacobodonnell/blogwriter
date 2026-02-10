@@ -6,7 +6,7 @@
         {{-- Breadcrumbs --}}
         <nav class="text-sm breadcrumbs mb-6">
             <ul>
-                <li><a href="/" class="link link-hover">Home</a></li>
+                <li><a href="{{ route('home') }}" class="link link-hover">Home</a></li>
                 @if($article->categories->count() > 0)
                     <li><a href="{{ route('category.show', $article->categories->first()->slug) }}" class="link link-hover">
                         {{ $article->categories->first()->name }}

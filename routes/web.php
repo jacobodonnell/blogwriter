@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 
 // Public Routes
 Route::get('/', [ArticleController::class, 'index'])->name('home');
+Route::redirect('/blog', '/');
 Route::get('/blog/{slug}', [ArticleController::class, 'show'])->name('article.show');
 Route::get('/category/{slug}', [ArticleController::class, 'category'])->name('category.show');
 Route::view('/about', 'public.about')->name('about');
