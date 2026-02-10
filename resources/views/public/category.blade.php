@@ -7,7 +7,7 @@
         <header class="mb-8">
             <nav class="text-sm breadcrumbs mb-4">
                 <ul>
-                    <li><a href="/" class="link link-hover">Home</a></li>
+                    <li><a href="{{ route('home') }}" class="link link-hover">Home</a></li>
                     <li class="text-base-content/60">{{ $category->name }}</li>
                 </ul>
             </nav>
@@ -83,7 +83,7 @@
                 <div class="text-6xl mb-4">📂</div>
                 <h2 class="text-xl font-bold mb-2">No articles yet</h2>
                 <p class="text-base-content/60 mb-6">This category doesn't have any articles yet.</p>
-                <a href="/" class="btn btn-primary">
+                <a href="{{ route('home') }}" class="btn btn-primary">
                     <i class="ph ph-house"></i>
                     Back to Home
                 </a>

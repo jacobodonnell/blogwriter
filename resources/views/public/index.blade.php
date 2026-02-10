@@ -78,7 +78,7 @@
                 <div class="text-6xl mb-4">📝</div>
                 <h2 class="text-2xl font-bold mb-2">No articles yet</h2>
                 <p class="text-base-content/60 mb-6">Start writing your first article in the admin panel.</p>
-                <a href="/admin/articles/create" class="btn btn-primary">
+                <a href="{{ route('admin.articles.create') }}" class="btn btn-primary">
                     <i class="ph ph-plus"></i>
                     Write Article
                 </a>
