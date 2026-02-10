@@ -7,17 +7,18 @@ This project uses Alpine.js v3.x for client-side interactivity.
 
 ## Architecture Decision
 
-This project is built on the **Livewire Starter Kit for authentication**, but uses **Blade + Alpine.js + Alpine AJAX** for all other features.
+This project uses **Blade + Alpine.js + Alpine AJAX** for all features, including the admin panel.
 
-- **Authentication** - Use Livewire (already built with starter kit, working out of the box)
-- **Everything else** - Use Blade templates + Alpine.js + Alpine AJAX
+- **Authentication** - Custom auth built on Laravel Fortify
+- **Admin Panel** - Blade templates + Alpine.js + Alpine AJAX
+- **Public Frontend** - Blade templates + Alpine.js + Alpine AJAX
 
 ## When to Use Alpine.js
 
-- Use Alpine.js for all client-side interactivity in Blade components
+- Use Alpine.js for all client-side interactivity in Blade components (both admin and public)
 - Prefer Alpine.js over writing custom JavaScript for interactions (dropdowns, modals, toggles, forms)
 - Use Alpine AJAX for dynamic content updates without full page reloads
-- This is the primary frontend stack for non-auth features
+- This is the primary frontend stack for the entire application
 
 ## Alpine AJAX
 
@@ -35,8 +36,8 @@ IMPORTANT: Activate the `alpine-development` skill when:
 - Building forms or links that use AJAX requests
 - The user mentions Alpine, Alpine AJAX, or client-side interactivity
 
-## Integration with Livewire
+## Livewire
 
-- **Auth features only** - Livewire components are used exclusively for authentication (login, register, password reset, etc.)
-- **All other features** - Use Blade + Alpine.js + Alpine AJAX instead of creating new Livewire components
-- Do not create new Livewire components unless working on authentication features
+- This project does NOT use Livewire
+- All interactivity is handled with Alpine.js and Alpine AJAX
+- Do not create Livewire components

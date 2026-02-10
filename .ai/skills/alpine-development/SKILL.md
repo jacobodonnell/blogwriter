@@ -10,6 +10,7 @@ Build reactive, declarative user interfaces using Alpine.js (v3.x) and Alpine AJ
 ## When to use this skill
 
 Use this skill when:
+
 - Creating or modifying Alpine.js components
 - Working with Alpine directives (x-data, x-show, x-if, x-on, x-model, x-bind, x-for, x-ref, etc.)
 - Implementing AJAX functionality with Alpine AJAX (x-target, x-merge, x-headers)
@@ -20,7 +21,8 @@ Use this skill when:
 
 ## Architecture Context
 
-This project uses **Blade + Alpine.js + Alpine AJAX** as the primary frontend stack. Livewire is used exclusively for authentication features (from the starter kit). When building new features, use Blade templates with Alpine.js for interactivity and Alpine AJAX for dynamic updates.
+This project uses **Blade + Alpine.js + Alpine AJAX** as the primary frontend stack for the entire application.
+Authentication is built with Laravel Fortify using custom Blade + Alpine.js UI (not Livewire).
 
 ## Core Alpine.js Concepts
 
@@ -29,6 +31,7 @@ This project uses **Blade + Alpine.js + Alpine AJAX** as the primary frontend st
 The `x-data` directive defines a reactive data scope for a component:
 
 ```html
+
 <div x-data="{ open: false, count: 0 }">
     <!-- Component content with access to 'open' and 'count' -->
 </div>
@@ -39,12 +42,14 @@ The `x-data` directive defines a reactive data scope for a component:
 Listen to DOM events using `x-on:` or the `@` shorthand:
 
 ```html
+
 <button @click="count++">Increment</button>
 <button x-on:click="open = !open">Toggle</button>
 <div @click.outside="open = false">Closes when clicking outside</div>
 ```
 
 Common event modifiers:
+
 - `.prevent` - preventDefault()
 - `.stop` - stopPropagation()
 - `.outside` - trigger when clicking outside element
@@ -63,6 +68,7 @@ Common event modifiers:
 Bind input values to Alpine data:
 
 ```html
+
 <div x-data="{ message: '' }">
     <input type="text" x-model="message">
     <span x-text="message"></span>
@@ -74,12 +80,14 @@ Bind input values to Alpine data:
 **x-show** - Toggle visibility with CSS (element stays in DOM):
 
 ```html
+
 <div x-show="open">Content...</div>
 ```
 
 **x-if** - Add/remove from DOM (must be on `<template>` tag):
 
 ```html
+
 <template x-if="open">
     <div>Content...</div>
 </template>
@@ -90,6 +98,7 @@ Bind input values to Alpine data:
 Iterate over arrays (must be on `<template>` tag):
 
 ```html
+
 <div x-data="{ items: ['apple', 'banana', 'orange'] }">
     <template x-for="item in items">
         <li x-text="item"></li>
@@ -102,6 +111,7 @@ Iterate over arrays (must be on `<template>` tag):
 Access DOM elements directly:
 
 ```html
+
 <div x-data>
     <input x-ref="emailInput" type="email">
     <button @click="$refs.emailInput.focus()">Focus Email</button>
@@ -117,11 +127,12 @@ Alpine AJAX extends Alpine.js with directives for making HTTP requests and updat
 The `x-target` directive specifies which element(s) to update with the response:
 
 ```html
+
 <ul id="comments">
     <li>Comment #1</li>
 </ul>
 <form x-target="comments" method="post" action="/comment">
-    <input name="text" required />
+    <input name="text" required/>
     <button>Submit</button>
 </form>
 ```
@@ -134,7 +145,7 @@ The `x-target` directive specifies which element(s) to update with the response:
     <li>Comment #1</li>
 </ul>
 <form x-target="comments comments_count" method="post" action="/comment">
-    <input name="comment" required />
+    <input name="comment" required/>
     <button>Submit</button>
 </form>
 ```
@@ -152,6 +163,7 @@ Links can also make AJAX requests:
 Add custom HTTP headers to requests:
 
 ```html
+
 <form method="post" action="/comments"
       x-target="comments"
       x-headers="{'Custom-Header': 'Value'}">
@@ -160,6 +172,7 @@ Add custom HTTP headers to requests:
 ```
 
 Alpine AJAX automatically includes these headers:
+
 - `X-Alpine-Request: true` - Identifies Alpine AJAX requests
 - `X-Alpine-Target: {target-ids}` - Lists target element IDs
 
@@ -170,6 +183,7 @@ Control how response content replaces existing content:
 **Replace (default)** - Replace entire element:
 
 ```html
+
 <div id="content" x-target>
     <!-- Will be completely replaced -->
 </div>
@@ -178,6 +192,7 @@ Control how response content replaces existing content:
 **Append** - Add new content to the end:
 
 ```html
+
 <ul id="messages" x-merge="append">
     <li>First message</li>
     <!-- New messages appended here -->
@@ -187,6 +202,7 @@ Control how response content replaces existing content:
 **Prepend** - Add new content to the beginning:
 
 ```html
+
 <ul id="notifications" x-merge="prepend">
     <!-- New notifications prepended here -->
     <li>Old notification</li>
@@ -196,12 +212,14 @@ Control how response content replaces existing content:
 **Morph** - Intelligently merge content (requires @alpinejs/morph plugin):
 
 ```html
+
 <div id="contacts" x-merge="morph">
     <!-- Form state and attributes preserved during update -->
 </div>
 ```
 
 The morph strategy preserves:
+
 - Input focus states
 - Form values
 - Scroll positions
@@ -218,6 +236,7 @@ npm install @alpinejs/morph
 Dynamically switch between view and edit modes:
 
 ```html
+
 <div id="contact_1" x-merge.transition>
     <p><strong>Name:</strong> John Doe</p>
     <p><strong>Email:</strong> john@example.com</p>
@@ -228,6 +247,7 @@ Dynamically switch between view and edit modes:
 When the edit link is clicked, server returns the edit form:
 
 ```html
+
 <form id="contact_1" x-target x-merge.transition method="put" action="/contacts/1">
     <input name="first_name" value="John">
     <input name="email" value="john@example.com">
@@ -254,6 +274,7 @@ document.addEventListener('alpine:init', () => {
 Access in components:
 
 ```html
+
 <div x-data>
     <button @click="$store.darkMode.toggle()">Toggle Dark Mode</button>
     <div x-show="$store.darkMode.on">Dark mode content</div>
@@ -265,6 +286,7 @@ Access in components:
 Send custom events between components:
 
 ```html
+
 <div x-data="{ title: 'Hello' }"
      @set-title.window="title = $event.detail">
     <h1 x-text="title"></h1>
@@ -277,33 +299,21 @@ Send custom events between components:
 </div>
 ```
 
-## Integration with Livewire
+## No Livewire
 
-**Important:** This project uses Livewire exclusively for authentication features. For all other features, use Blade + Alpine + Alpine AJAX instead.
+**Important:** This project does NOT use Livewire at all. Authentication is built with Laravel Fortify using custom Blade + Alpine.js UI.
 
-If you need to work within an existing Livewire auth component, Alpine.js works seamlessly alongside it:
-
-```html
-<div x-data="{ open: false }">
-    <!-- Alpine handles client-side UI state -->
-    <button @click="open = !open">Toggle Dropdown</button>
-
-    <div x-show="open" @click.outside="open = false">
-        <!-- Content here -->
-    </div>
-</div>
-```
-
-**Architecture guidelines:**
-- **Auth features only:** Use existing Livewire components (login, register, password reset, etc.)
-- **All other features:** Use Blade templates with Alpine.js for interactivity and Alpine AJAX for server communication
-- **Do not create new Livewire components** unless explicitly working on authentication features
+All interactivity across the entire application (public site and admin panel) uses:
+- Blade templates for rendering
+- Alpine.js for client-side reactivity
+- Alpine AJAX for server communication
 
 ## Common Patterns
 
 ### Dropdown Menu
 
 ```html
+
 <div x-data="{ open: false }">
     <button @click="open = !open">Menu</button>
     <div x-show="open" @click.outside="open = false">
@@ -316,6 +326,7 @@ If you need to work within an existing Livewire auth component, Alpine.js works 
 ### Modal Dialog
 
 ```html
+
 <div x-data="{ showModal: false }">
     <button @click="showModal = true">Open Modal</button>
 
@@ -333,9 +344,12 @@ If you need to work within an existing Livewire auth component, Alpine.js works 
 ### Infinite Scroll with AJAX
 
 ```html
+
 <table>
     <tbody id="records" x-merge="append">
-        <tr><td>Record 1</td></tr>
+    <tr>
+        <td>Record 1</td>
+    </tr>
     </tbody>
 </table>
 
@@ -345,6 +359,7 @@ If you need to work within an existing Livewire auth component, Alpine.js works 
 ### Live Search with AJAX
 
 ```html
+
 <div id="search-results" x-merge="morph">
     <form action="/search" x-target="search-results">
         <input name="q" type="search" @input.debounce="$el.form.requestSubmit()">

@@ -26,7 +26,8 @@ fees or platform risk.
 ### Identity & Authentication
 
 - [ ] Personal domain setup
-- [ ] IndieAuth login (domain = identity)
+- [ ] Laravel Fortify authentication (custom UI with Blade + Alpine.js)
+- [ ] IndieAuth server implementation (domain = identity)
 - [ ] h-card markup (homepage identity)
 - [ ] rel-me links (identity elsewhere)
 
@@ -370,7 +371,8 @@ fees or platform risk.
 - **Language:** PHP 8.4+
 - **Framework:** Laravel 12
 - **Database:** SQLite (simple, portable, fast)
-- **Frontend:** Livewire OR Alpine.js + Alpine AJAX, Tailwind CSS, DaisyUI
+- **Authentication:** Laravel Fortify
+- **Frontend:** Blade + Alpine.js + Alpine AJAX + Tailwind CSS + DaisyUI
 - **Editor:** Editor.js (with Markdown backups)
 - **Runtime:** FrankenPHP (optional, for performance)
 
