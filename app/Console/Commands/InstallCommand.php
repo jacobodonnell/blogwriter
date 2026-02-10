@@ -55,7 +55,7 @@ class InstallCommand extends Command
         info('║     Welcome to BlogWriter Installer    ║');
         info('╚════════════════════════════════════════╝');
         note('This wizard will help you set up your IndieWeb-native blog.');
-        echo "\n";
+        $this->newLine();
     }
 
     protected function isAlreadyInstalled(): bool
@@ -77,7 +77,7 @@ class InstallCommand extends Command
     protected function gatherConfiguration(): array
     {
         info('Step 1: Site Configuration');
-        echo "\n";
+        $this->newLine();
 
         $siteName = text(
             label: 'What is your site name?',
@@ -91,12 +91,12 @@ class InstallCommand extends Command
             placeholder: 'E.g. https://example.com',
             default: config('app.url', 'http://localhost'),
             required: true,
-            validate: fn (string $value) => filter_var($value, FILTER_VALIDATE_URL) ? null : 'Please enter a valid URL.'
+            validate: [$this, 'validateUrl']
         );
 
-        echo "\n";
+        $this->newLine();
         info('Step 2: Admin User Setup');
-        echo "\n";
+        $this->newLine();
 
         $name = text(
             label: 'What is your name?',
@@ -108,14 +108,14 @@ class InstallCommand extends Command
             label: 'What is your email address?',
             placeholder: 'E.g. you@example.com',
             required: true,
-            validate: fn (string $value) => filter_var($value, FILTER_VALIDATE_EMAIL) ? null : 'Please enter a valid email address.'
+            validate: [$this, 'validateEmail']
         );
 
         $password = $this->promptForPassword();
 
-        echo "\n";
+        $this->newLine();
         info('Step 3: Demo Content');
-        echo "\n";
+        $this->newLine();
 
         $seedData = confirm(
             label: 'Would you like to seed your blog with demo articles?',
@@ -132,13 +132,31 @@ class InstallCommand extends Command
         ];
     }
 
+    protected function validateUrl(string $value): ?string
+    {
+        return filter_var($value, FILTER_VALIDATE_URL) ? null : 'Please enter a valid URL.';
+    }
+
+    protected function validateEmail(string $value): ?string
+    {
+        return filter_var($value, FILTER_VALIDATE_EMAIL) ? null : 'Please enter a valid email address.';
+    }
+
+    protected function validatePasswordLength(string $value): ?string
+    {
+        return strlen($value) >= 8 ? null : 'Password must be at least 8 characters.';
+    }
+
     protected function promptForPassword(): string
     {
-        while (true) {
+        $attempts = 0;
+        $maxAttempts = 3;
+
+        while ($attempts < $maxAttempts) {
             $password = password(
                 label: 'Create a password',
                 placeholder: 'Min 8 characters',
-                validate: fn (string $value) => strlen($value) >= 8 ? null : 'Password must be at least 8 characters.'
+                validate: [$this, 'validatePasswordLength']
             );
 
             $confirm = password(
@@ -151,15 +169,23 @@ class InstallCommand extends Command
             }
 
             warning('Passwords do not match. Please try again.');
-            echo "\n";
+            $this->newLine();
+            $attempts++;
         }
+
+        // If max attempts reached, generate a secure password
+        warning('Maximum attempts reached. Generating a secure password for you.');
+        $password = \Illuminate\Support\Str::random(16);
+        info("Your generated password: {$password}");
+
+        return $password;
     }
 
     protected function install(array $config): void
     {
-        echo "\n";
+        $this->newLine();
         info('Installing BlogWriter...');
-        echo "\n";
+        $this->newLine();
 
         // Update .env file
         $this->updateEnvironmentFile($config);
@@ -187,7 +213,7 @@ class InstallCommand extends Command
         Artisan::call('cache:clear');
         info('✓ Caches cleared');
 
-        echo "\n";
+        $this->newLine();
         $this->displaySuccess($config, $user);
     }
 
@@ -251,10 +277,10 @@ class InstallCommand extends Command
         info('╔════════════════════════════════════════════════╗');
         info('║        Installation Complete! 🎉               ║');
         info('╚════════════════════════════════════════════════╝');
-        echo "\n";
+        $this->newLine();
 
         info('Your BlogWriter site is ready:');
-        echo "\n";
+        $this->newLine();
 
         $this->table(
             ['Setting', 'Value'],
@@ -266,12 +292,12 @@ class InstallCommand extends Command
             ]
         );
 
-        echo "\n";
+        $this->newLine();
         info('Next steps:');
         note('  • Visit your site: '.$config['site_url']);
         note('  • Admin panel: '.rtrim($config['site_url'], '/').'/admin');
         note('  • Login with: '.$user->email);
-        echo "\n";
+        $this->newLine();
 
         info('Happy blogging! Remember: own your content, own your domain.');
     }
