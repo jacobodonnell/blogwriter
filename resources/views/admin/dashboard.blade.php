@@ -38,9 +38,7 @@
                     <h2 class="card-title">Recent Articles</h2>
                     <a href="{{ route('admin.articles.index') }}" class="btn btn-sm btn-ghost">
                         View All
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
+                        <i class="ph ph-caret-right text-lg ml-1"></i>
                     </a>
                 </div>
 
@@ -64,15 +62,10 @@
                                 </div>
                                 <div class="flex items-center gap-2 ml-4">
                                     <a href="{{ route('admin.articles.edit', $article) }}" class="btn btn-sm btn-ghost" title="Edit">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
+                                        <i class="ph ph-pencil-simple text-lg"></i>
                                     </a>
                                     <a href="{{ $article->permalink() }}" target="_blank" class="btn btn-sm btn-ghost" title="View on Site">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
+                                        <i class="ph ph-eye text-lg"></i>
                                     </a>
                                 </div>
                             </div>
@@ -90,15 +83,11 @@
         {{-- Quick Actions --}}
         <div class="flex gap-4">
             <a href="{{ route('admin.articles.create') }}" class="btn btn-primary">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
+                <i class="ph ph-plus text-xl mr-2"></i>
                 New Article
             </a>
             <a href="{{ route('admin.categories.index') }}" class="btn btn-secondary">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                </svg>
+                <i class="ph ph-folder text-xl mr-2"></i>
                 Manage Categories
             </a>
         </div>
