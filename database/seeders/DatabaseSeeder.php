@@ -43,13 +43,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Check for command line options
-        if ($this->command && $this->command->option('user')) {
-            $this->parseUserOption($this->command->option('user'));
-        }
+        // Check for command line options (only available via blogwriter:seed command)
+        if ($this->command && method_exists($this->command, 'hasOption')) {
+            if ($this->command->hasOption('user') && $this->command->option('user')) {
+                $this->parseUserOption($this->command->option('user'));
+            }
 
-        if ($this->command && $this->command->option('state')) {
-            $this->withState($this->command->option('state'));
+            if ($this->command->hasOption('state') && $this->command->option('state')) {
+                $this->withState($this->command->option('state'));
+            }
         }
 
         $this->seed();

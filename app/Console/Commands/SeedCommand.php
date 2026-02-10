@@ -2,31 +2,18 @@
 
 namespace App\Console\Commands;
 
+use Database\Seeders\DatabaseSeeder;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
 
 class SeedCommand extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'blogwriter:seed
                             {--state=demo : The seeding state (empty, minimal, demo, full)}
                             {--user= : User config in format "Name,email,password"}
                             {--clear : Clear all data before seeding}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Seed the database with BlogWriter test data';
 
-    /**
-     * Execute the console command.
-     */
     public function handle(): int
     {
         $state = $this->option('state');
@@ -44,51 +31,52 @@ class SeedCommand extends Command
             $this->info('Data cleared!');
         }
 
-        // Build the command
-        $options = [
-            '--class' => 'DatabaseSeeder',
-            '--state' => $state,
-        ];
+        // Create seeder instance and configure it
+        $seeder = new DatabaseSeeder;
+        $seeder->setContainer($this->laravel);
+        $seeder->setCommand($this);
 
+        // Configure user if provided
         if ($user) {
-            $options['--user'] = $user;
+            $parts = explode(',', $user);
+            if (count($parts) === 3) {
+                $seeder->asUser(trim($parts[0]), trim($parts[1]), trim($parts[2]));
+            } else {
+                $this->warn('User option format invalid. Expected: "Name,email,password"');
+            }
         }
 
-        // Call the seeder
-        $exitCode = Artisan::call('db:seed', $options);
+        // Set state
+        try {
+            $seeder->withState($state);
+        } catch (\InvalidArgumentException $e) {
+            $this->error("Invalid state: {$state}");
+            $this->error('Valid states: empty, minimal, demo, full');
 
-        if ($exitCode === 0) {
-            $this->info('✅ Seeding completed successfully!');
-
-            // Show user info
-            $user = \App\Models\User::first();
-            if ($user) {
-                $this->info("\n👤 User Credentials:");
-                $this->info("   Email: {$user->email}");
-                $this->info('   Password: (as configured)');
-            }
-
-            // Show article stats
-            $published = \App\Models\Article::published()->count();
-            $draft = \App\Models\Article::draft()->count();
-            $hidden = \App\Models\Article::hidden()->count();
-
-            if ($published + $draft + $hidden > 0) {
-                $this->info("\n📝 Articles:");
-                $this->info("   Published: {$published}");
-                $this->info("   Draft: {$draft}");
-                $this->info("   Hidden: {$hidden}");
-            }
-
-            // Show categories
-            $categories = \App\Models\Category::count();
-            $this->info("\n🏷️ Categories: {$categories}");
-
-            return 0;
+            return 1;
         }
 
-        $this->error('❌ Seeding failed!');
+        // Run seeder
+        $seeder->seed();
 
-        return 1;
+        $this->info('✅ Seeding completed successfully!');
+
+        // Show stats
+        $user = \App\Models\User::first();
+        if ($user) {
+            $this->info("\n👤 User: {$user->email}");
+        }
+
+        $published = \App\Models\Article::published()->count();
+        $draft = \App\Models\Article::draft()->count();
+        $hidden = \App\Models\Article::hidden()->count();
+
+        if ($published + $draft + $hidden > 0) {
+            $this->info("\n📝 Articles: {$published} published, {$draft} draft, {$hidden} hidden");
+        }
+
+        $this->info('🏷️ Categories: '.\App\Models\Category::count());
+
+        return 0;
     }
 }
