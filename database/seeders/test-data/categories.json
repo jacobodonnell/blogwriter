@@ -1,0 +1,27 @@
+[
+  {
+    "name": "General",
+    "slug": "general",
+    "description": "General musings and observations"
+  },
+  {
+    "name": "Technology",
+    "slug": "technology",
+    "description": "Tech news, gadgets, and digital culture"
+  },
+  {
+    "name": "Satire",
+    "slug": "satire",
+    "description": "Satirical takes on modern life"
+  },
+  {
+    "name": "Startups",
+    "slug": "startups",
+    "description": "The wild world of startup culture"
+  },
+  {
+    "name": "Programming",
+    "slug": "programming",
+    "description": "Code, developers, and software engineering"
+  }
+]
