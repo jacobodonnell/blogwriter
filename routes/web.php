@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\ArticleController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,4 +26,7 @@ Route::middleware($adminMiddleware)->prefix('admin')->name('admin.')->group(func
 
     // Categories
     Route::resource('categories', CategoryController::class)->except(['show', 'create']);
+
+    // Settings
+    Route::get('settings', [SettingsController::class, 'index'])->name('settings');
 });

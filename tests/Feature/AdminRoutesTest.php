@@ -200,3 +200,20 @@ it('returns successful response for category edit page', function () {
     $response->assertSuccessful()
         ->assertSee($category->name);
 });
+
+it('returns successful response for settings page when authenticated', function () {
+    $response = $this->actingAs($this->user)->get('/admin/settings');
+
+    $response->assertSuccessful()
+        ->assertSee('Settings')
+        ->assertSee('Configure your BlogWriter site.');
+});
+
+it('shows site configuration on settings page', function () {
+    $response = $this->actingAs($this->user)->get('/admin/settings');
+
+    $response->assertSuccessful()
+        ->assertSee('Site Information')
+        ->assertSee('Your Profile')
+        ->assertSee('Environment');
+});
