@@ -1,0 +1,235 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Str;
+
+class Article extends Model
+{
+    /** @use HasFactory<\Database\Factories\ArticleFactory> */
+    use HasFactory;
+
+    protected $fillable = [
+        'title',
+        'slug',
+        'summary',
+        'content',
+        'status',
+        'published_at',
+        'featured_image',
+        'meta',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'meta' => 'array',
+            'past_slugs' => 'array',
+            'published_at' => 'datetime',
+        ];
+    }
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::saving(function ($article) {
+            if (empty($article->slug)) {
+                $article->slug = Str::slug($article->title);
+            }
+
+            if ($article->isDirty('slug') && ! empty($article->getOriginal('slug'))) {
+                $article->addPastSlug($article->getOriginal('slug'));
+            }
+        });
+    }
+
+    /**
+     * @return BelongsToMany<Category, $this>
+     */
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class);
+    }
+
+    /**
+     * Scope for published articles.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopePublished($query)
+    {
+        return $query->where('status', 'published')
+            ->where('published_at', '<=', now());
+    }
+
+    /**
+     * Scope for draft articles.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeDraft($query)
+    {
+        return $query->where('status', 'draft');
+    }
+
+    /**
+     * Scope for hidden articles.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeHidden($query)
+    {
+        return $query->where('status', 'hidden');
+    }
+
+    /**
+     * Scope for articles visible to public.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeVisibleToPublic($query)
+    {
+        return $query->where('status', 'published');
+    }
+
+    /**
+     * Scope for articles visible to owner.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeVisibleToOwner($query)
+    {
+        return $query->whereIn('status', ['published', 'hidden']);
+    }
+
+    /**
+     * Get the HTML content rendered from markdown with XSS protection.
+     */
+    public function getContentHtmlAttribute(): string
+    {
+        return Str::markdown($this->content, [
+            'html_input' => 'strip',
+            'allow_unsafe_links' => false,
+        ]);
+    }
+
+    /**
+     * Get the excerpt - either summary or first 255 chars of content.
+     */
+    public function getExcerptAttribute(): string
+    {
+        if (! empty($this->summary)) {
+            return $this->summary;
+        }
+
+        return Str::limit(strip_tags($this->content), 255);
+    }
+
+    /**
+     * Get the estimated reading time in minutes (200 wpm).
+     */
+    public function getReadingTimeAttribute(): int
+    {
+        $wordCount = str_word_count(strip_tags($this->content));
+
+        return max(1, (int) ceil($wordCount / 200));
+    }
+
+    /**
+     * Get the meta title or fallback to article title.
+     */
+    public function getMetaTitleAttribute(): string
+    {
+        return $this->meta['meta_title'] ?? $this->title;
+    }
+
+    /**
+     * Get the meta description or fallback to excerpt.
+     */
+    public function getMetaDescriptionAttribute(): string
+    {
+        return $this->meta['meta_description'] ?? $this->excerpt;
+    }
+
+    /**
+     * Get the Open Graph image or fallback to featured image.
+     */
+    public function getOgImageAttribute(): ?string
+    {
+        return $this->meta['og_image'] ?? $this->featured_image;
+    }
+
+    /**
+     * Get the permalink for this article.
+     */
+    public function permalink(): string
+    {
+        return route('article.show', $this->slug);
+    }
+
+    /**
+     * Check if the article is published.
+     */
+    public function isPublished(): bool
+    {
+        return $this->status === 'published' && $this->published_at !== null && $this->published_at <= now();
+    }
+
+    /**
+     * Publish the article.
+     */
+    public function publish(): void
+    {
+        $this->status = 'published';
+        $this->published_at = now();
+        $this->save();
+    }
+
+    /**
+     * Unpublish the article (set to draft).
+     */
+    public function unpublish(): void
+    {
+        $this->status = 'draft';
+        $this->save();
+    }
+
+    /**
+     * Hide the article.
+     */
+    public function hide(): void
+    {
+        $this->status = 'hidden';
+        $this->save();
+    }
+
+    /**
+     * Add a slug to the past_slugs array.
+     */
+    public function addPastSlug(string $slug): void
+    {
+        $pastSlugs = $this->past_slugs ?? [];
+
+        if (! in_array($slug, $pastSlugs)) {
+            $pastSlugs[] = $slug;
+            $this->past_slugs = $pastSlugs;
+        }
+    }
+
+    /**
+     * Check if a slug exists in past_slugs.
+     */
+    public function hasPastSlug(string $slug): bool
+    {
+        return in_array($slug, $this->past_slugs ?? []);
+    }
+}
