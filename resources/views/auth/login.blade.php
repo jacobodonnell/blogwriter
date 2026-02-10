@@ -1,0 +1,109 @@
+<x-layouts.guest>
+    @section('title', 'Log In')
+
+    <div class="card bg-base-100 shadow-xl" id="login-card">
+        <div class="card-body">
+            <h2 class="card-title text-2xl font-bold justify-center mb-6">Log In to BlogWriter</h2>
+
+            {{-- Validation Errors --}}
+            @if ($errors->any())
+                <div class="alert alert-error mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <ul class="text-sm">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            {{-- Session Status --}}
+            @if (session('status'))
+                <div class="alert alert-success mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>{{ session('status') }}</span>
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('login') }}" x-target="login-card" x-data="{ processing: false }" @submit="processing = true">
+                @csrf
+
+                {{-- Email Address --}}
+                <div class="form-control mb-4">
+                    <label for="email" class="label">
+                        <span class="label-text">Email</span>
+                    </label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value="{{ old('email') }}"
+                        class="input input-bordered w-full @error('email') input-error @enderror"
+                        required
+                        autofocus
+                        autocomplete="username"
+                    />
+                    @error('email')
+                        <label class="label">
+                            <span class="label-text-alt text-error">{{ $message }}</span>
+                        </label>
+                    @enderror
+                </div>
+
+                {{-- Password --}}
+                <div class="form-control mb-4">
+                    <label for="password" class="label">
+                        <span class="label-text">Password</span>
+                    </label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="input input-bordered w-full @error('password') input-error @enderror"
+                        required
+                        autocomplete="current-password"
+                    />
+                    @error('password')
+                        <label class="label">
+                            <span class="label-text-alt text-error">{{ $message }}</span>
+                        </label>
+                    @enderror
+                </div>
+
+                {{-- Remember Me --}}
+                <div class="form-control mb-6">
+                    <label class="label cursor-pointer justify-start gap-2">
+                        <input
+                            type="checkbox"
+                            name="remember"
+                            class="checkbox checkbox-sm"
+                            {{ old('remember') ? 'checked' : '' }}
+                        />
+                        <span class="label-text">Remember me</span>
+                    </label>
+                </div>
+
+                {{-- Submit Button --}}
+                <div class="form-control">
+                    <button type="submit" class="btn btn-primary w-full" :class="{ 'loading': processing }" :disabled="processing">
+                        <span x-show="!processing">Log in</span>
+                        <span x-show="processing">Logging in...</span>
+                    </button>
+                </div>
+
+                {{-- Forgot Password Link --}}
+                <div class="mt-4 text-center">
+                    @if (Route::has('password.request'))
+                        <a href="{{ route('password.request') }}" class="link link-primary text-sm">
+                            Forgot your password?
+                        </a>
+                    @endif
+                </div>
+            </form>
+        </div>
+    </div>
+</x-layouts.guest>
