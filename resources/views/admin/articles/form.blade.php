@@ -1,43 +1,56 @@
 <x-layouts.admin>
     <x-slot:title>{{ $article->exists ? 'Edit Article' : 'New Article' }}</x-slot:title>
 
-    <div class="space-y-6" x-data="{
-        title: {{ json_encode(old('title', $article->title ?? '')) }},
-        slug: {{ json_encode(old('slug', $article->slug ?? '')) }},
-        content: {{ json_encode(old('content', $article->content ?? '')) }},
-        summary: {{ json_encode(old('summary', $article->summary ?? '')) }},
-        activeTab: 'edit',
-        
-        generateSlug() {
-            if (!this.slug && this.title) {
-                this.slug = this.title.toLowerCase()
-                    .replace(/[^a-z0-9]+/g, '-')
-                    .replace(/^-+|-+$/g, '');
-            }
-        },
-        
-        generateSummary() {
-            if (!this.summary && this.content) {
-                this.summary = this.content.substring(0, 255);
-            }
-        },
+    <div class="space-y-6" 
+         x-data="articleForm()"
+         x-init="
+            title = @js(old('title', $article->title ?? ''));
+            slug = @js(old('slug', $article->slug ?? ''));
+            content = @js(old('content', $article->content ?? ''));
+            summary = @js(old('summary', $article->summary ?? ''));
+         ">
+        <script>
+            function articleForm() {
+                return {
+                    title: '',
+                    slug: '',
+                    content: '',
+                    summary: '',
+                    activeTab: 'edit',
+                    
+                    generateSlug() {
+                        if (!this.slug && this.title) {
+                            this.slug = this.title.toLowerCase()
+                                .replace(/[^a-z0-9]+/g, '-')
+                                .replace(/^-+|-+$/g, '');
+                        }
+                    },
+                    
+                    generateSummary() {
+                        if (!this.summary && this.content) {
+                            this.summary = this.content.substring(0, 255);
+                        }
+                    },
 
-        markdownPreview() {
-            if (!this.content) return '<p class=\"text-base-content/50 italic\">No content to preview...</p>';
-            
-            return this.content
-                .replace(/^### (.*$)/gim, '<h3 class=\"text-xl font-bold mb-2\">$1</h3>')
-                .replace(/^## (.*$)/gim, '<h2 class=\"text-2xl font-bold mb-3\">$1</h2>')
-                .replace(/^# (.*$)/gim, '<h1 class=\"text-3xl font-bold mb-4\">$1</h1>')
-                .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
-                .replace(/\*(.*)\*/gim, '<em>$1</em>')
-                .replace(/`([^`]+)`/gim, '<code class=\"bg-base-300 px-1 rounded\">$1</code>')
-                .replace(/^\> (.*$)/gim, '<blockquote class=\"border-l-4 border-base-300 pl-4 italic\">$1</blockquote>')
-                .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href=\"$2\" class=\"link link-primary\">$1</a>')
-                .replace(/^(\-|\*) (.*$)/gim, '<li class=\"ml-4\">$2</li>')
-                .replace(/\n/gim, '<br>');
-        }
-    }">
+                    markdownPreview() {
+                        if (!this.content) return '<p class=\"text-base-content/50 italic\">No content to preview...</p>';
+                        
+                        return this.content
+                            .replace(/^### (.*$)/gim, '<h3 class=\"text-xl font-bold mb-2\">$1</h3>')
+                            .replace(/^## (.*$)/gim, '<h2 class=\"text-2xl font-bold mb-3\">$1</h2>')
+                            .replace(/^# (.*$)/gim, '<h1 class=\"text-3xl font-bold mb-4\">$1</h1>')
+                            .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+                            .replace(/\*(.*)\*/gim, '<em>$1</em>')
+                            .replace(/`([^`]+)`/gim, '<code class=\"bg-base-300 px-1 rounded\">$1</code>')
+                            .replace(/^\> (.*$)/gim, '<blockquote class=\"border-l-4 border-base-300 pl-4 italic\">$1</blockquote>')
+                            .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href=\"$2\" class=\"link link-primary\">$1</a>')
+                            .replace(/^(\-|\*) (.*$)/gim, '<li class=\"ml-4\">$2</li>')
+                            .replace(/\n/gim, '<br>');
+                    }
+                }
+            }
+        </script>
+
         {{-- Header --}}
         <div class="flex justify-between items-center">
             <div>
