@@ -42,6 +42,23 @@ class InstallCommand extends Command
             }
         }
 
+        // Disable Laravel's Prohibitable trait for installer context
+        // This allows destructive commands to run during installation
+        \Illuminate\Database\Console\Migrations\FreshCommand::prohibit(false);
+        \Illuminate\Database\Console\WipeCommand::prohibit(false);
+
+        try {
+            return $this->runInstallation();
+        } finally {
+            // Restore prohibition based on environment
+            $isProduction = app()->environment('production');
+            \Illuminate\Database\Console\Migrations\FreshCommand::prohibit($isProduction);
+            \Illuminate\Database\Console\WipeCommand::prohibit($isProduction);
+        }
+    }
+
+    protected function runInstallation(): int
+    {
         $this->welcome();
 
         if ($this->isAlreadyInstalled() && ! $this->option('force')) {
