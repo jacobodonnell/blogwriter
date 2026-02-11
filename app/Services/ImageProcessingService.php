@@ -10,7 +10,7 @@ use Intervention\Image\ImageManager;
 
 class ImageProcessingService
 {
-    private ImageManager $manager;
+    private readonly ImageManager $manager;
 
     /**
      * Maximum dimension for the longest side (WordPress-style).
@@ -185,7 +185,7 @@ class ImageProcessingService
             $this->manager->read($fullPath);
 
             return true;
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return false;
         }
     }
@@ -218,7 +218,7 @@ class ImageProcessingService
      * @param  \Intervention\Image\Image  $image
      * @param  array{width: int, height: int, crop: bool}  $dimensions
      */
-    private function generateSize($image, string $path, array $dimensions, string $disk): void
+    private function generateSize(\Intervention\Image\Interfaces\ImageInterface $image, string $path, array $dimensions, string $disk): void
     {
         $clone = clone $image;
         $originalWidth = $clone->width();

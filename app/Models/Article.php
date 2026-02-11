@@ -112,23 +112,20 @@ class Article extends Model
 
             // Process featured image if it's a new file upload (not already processed)
             // Check by seeing if it follows the old storage pattern (articles/featured/*.ext)
-            if (str_starts_with($article->featured_image, 'articles/featured/') && ! str_starts_with($article->featured_image, "articles/featured/{$article->id}/")) {
-                // Check if this is a newly uploaded file (not already processed)
-                if (Storage::disk($targetDisk)->exists($article->featured_image)) {
-                    $sourcePath = $article->featured_image;
+            // Check if this is a newly uploaded file (not already processed)
+            if (str_starts_with((string) $article->featured_image, 'articles/featured/') && !str_starts_with((string) $article->featured_image, "articles/featured/{$article->id}/") && Storage::disk($targetDisk)->exists($article->featured_image)) {
+                $sourcePath = $article->featured_image;
+                // Only process if the image is valid (not corrupted)
+                if ($service->isValidImage($sourcePath, $targetDisk)) {
+                    $metadata = $service->processUpload($article, $sourcePath, $targetDisk);
 
-                    // Only process if the image is valid (not corrupted)
-                    if ($service->isValidImage($sourcePath, $targetDisk)) {
-                        $metadata = $service->processUpload($article, $sourcePath, $targetDisk);
-
-                        // Update the article with processed image info (without triggering events again)
-                        $article->featured_image = $metadata['path'];
-                        $article->featured_image_width = $metadata['width'];
-                        $article->featured_image_height = $metadata['height'];
-                        $article->featured_image_file_size = $metadata['file_size'];
-                        $article->featured_image_mime_type = $metadata['mime_type'];
-                        $article->saveQuietly();
-                    }
+                    // Update the article with processed image info (without triggering events again)
+                    $article->featured_image = $metadata['path'];
+                    $article->featured_image_width = $metadata['width'];
+                    $article->featured_image_height = $metadata['height'];
+                    $article->featured_image_file_size = $metadata['file_size'];
+                    $article->featured_image_mime_type = $metadata['mime_type'];
+                    $article->saveQuietly();
                 }
             }
 
