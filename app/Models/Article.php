@@ -115,17 +115,35 @@ class Article extends Model
             // Check if this is a newly uploaded file (not already processed)
             if (str_starts_with((string) $article->featured_image, 'articles/featured/') && ! str_starts_with((string) $article->featured_image, "articles/featured/{$article->id}/") && Storage::disk($targetDisk)->exists($article->featured_image)) {
                 $sourcePath = $article->featured_image;
-                // Only process if the image is valid (not corrupted)
-                if ($service->isValidImage($sourcePath, $targetDisk)) {
-                    $metadata = $service->processUpload($article, $sourcePath, $targetDisk);
 
-                    // Update the article with processed image info (without triggering events again)
-                    $article->featured_image = $metadata['path'];
-                    $article->featured_image_width = $metadata['width'];
-                    $article->featured_image_height = $metadata['height'];
-                    $article->featured_image_file_size = $metadata['file_size'];
-                    $article->featured_image_mime_type = $metadata['mime_type'];
-                    $article->saveQuietly();
+                try {
+                    // Only process if the image is valid (not corrupted)
+                    if ($service->isValidImage($sourcePath, $targetDisk)) {
+                        $metadata = $service->processUpload($article, $sourcePath, $targetDisk);
+
+                        if ($metadata) {
+                            // Update the article with processed image info (without triggering events again)
+                            $article->featured_image = $metadata['path'];
+                            $article->featured_image_width = $metadata['width'];
+                            $article->featured_image_height = $metadata['height'];
+                            $article->featured_image_file_size = $metadata['file_size'];
+                            $article->featured_image_mime_type = $metadata['mime_type'];
+                            $article->saveQuietly();
+                        }
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Image processing failed', [
+                        'article_id' => $article->id,
+                        'source_path' => $sourcePath,
+                        'disk' => $targetDisk,
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
+                    ]);
+
+                    // Clean up failed upload
+                    if (Storage::disk($targetDisk)->exists($sourcePath)) {
+                        Storage::disk($targetDisk)->delete($sourcePath);
+                    }
                 }
             }
 
@@ -145,6 +163,33 @@ class Article extends Model
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class);
+    }
+
+    /**
+     * Get the correct URL for the featured image based on article status.
+     */
+    public function getFeaturedImageUrlAttribute(): ?string
+    {
+        if (! $this->featured_image) {
+            return null;
+        }
+
+        // External URL
+        if (Str::isUrl($this->featured_image)) {
+            return $this->featured_image;
+        }
+
+        // Local file - use correct disk based on status
+        $disk = $this->status === Status::Published ? 'public' : 'private';
+
+        if ($disk === 'private') {
+            // Extract path after 'articles/featured/'
+            $path = str_replace('articles/featured/', '', $this->featured_image);
+
+            return url('/storage/private/'.$path);
+        }
+
+        return Storage::disk('public')->url($this->featured_image);
     }
 
     /**

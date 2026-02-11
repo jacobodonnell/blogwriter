@@ -53,57 +53,121 @@ class ImageProcessingService
      */
     public function processUpload(Article $article, string $sourcePath, string $disk): array
     {
-        if (! $article->id) {
-            throw new \RuntimeException('Article must be saved before processing images');
+        try {
+            if (! $article->id) {
+                throw new \RuntimeException('Article must be saved before processing images');
+            }
+
+            // Validate source file exists
+            if (! Storage::disk($disk)->exists($sourcePath)) {
+                \Log::warning('Source image not found', ['path' => $sourcePath, 'disk' => $disk]);
+
+                return null;
+            }
+
+            $baseDir = "articles/featured/{$article->id}";
+
+            // Read source image
+            $sourceImage = $this->manager->read(Storage::disk($disk)->path($sourcePath));
+
+            // Get original dimensions
+            $originalWidth = $sourceImage->width();
+            $originalHeight = $sourceImage->height();
+
+            // Pre-flight dimension check
+            if ($originalWidth > 10000 || $originalHeight > 10000) {
+                \Log::error('Image dimensions too large', [
+                    'width' => $originalWidth,
+                    'height' => $originalHeight,
+                    'path' => $sourcePath,
+                    'article_id' => $article->id,
+                ]);
+
+                return null;
+            }
+
+            // Pre-flight memory check (rough estimate: width × height × 4 bytes × 5 copies)
+            $estimatedMemory = ($originalWidth * $originalHeight * 4 * 5) / 1024 / 1024; // MB
+            $memoryLimit = ini_get('memory_limit');
+            $availableMemory = $memoryLimit === '-1' ? PHP_INT_MAX : (int) $memoryLimit;
+
+            if ($estimatedMemory > ($availableMemory * 0.7)) {
+                \Log::error('Insufficient memory for image processing', [
+                    'estimated_mb' => $estimatedMemory,
+                    'available_mb' => $availableMemory,
+                    'path' => $sourcePath,
+                    'article_id' => $article->id,
+                ]);
+
+                return null;
+            }
+
+            // Scale down if needed (WordPress-style 2560px limit)
+            $scaledDimensions = $this->scaleDownIfNeeded($originalWidth, $originalHeight);
+            $scaledWidth = $scaledDimensions['width'];
+            $scaledHeight = $scaledDimensions['height'];
+
+            // Create the full-size image (scaled if needed)
+            $fullImage = clone $sourceImage;
+            if ($scaledWidth !== $originalWidth || $scaledHeight !== $originalHeight) {
+                $fullImage->scale($scaledWidth, $scaledHeight);
+            }
+
+            // Store the main image (full size)
+            $mainPath = "{$baseDir}/full.webp";
+            $this->storeWebp($fullImage, $mainPath, $disk);
+
+            // Generate and store size variants using suffix naming (full-thumbnail.webp, etc.)
+            $generatedSizes = [];
+            foreach (self::SIZES as $sizeName => $dimensions) {
+                // Use suffix naming: full-{size}.webp
+                $sizePath = "{$baseDir}/full-{$sizeName}.webp";
+                $this->generateSize($sourceImage, $sizePath, $dimensions, $disk);
+                $generatedSizes[$sizeName] = $sizePath;
+            }
+
+            // Verify all WebP files exist before deleting original
+            $expectedFiles = [$mainPath];
+            foreach ($generatedSizes as $file) {
+                $expectedFiles[] = $file;
+            }
+
+            foreach ($expectedFiles as $file) {
+                if (! Storage::disk($disk)->exists($file)) {
+                    \Log::error('WebP file missing after processing', [
+                        'file' => $file,
+                        'article_id' => $article->id,
+                    ]);
+                    throw new \RuntimeException("Failed to create {$file}");
+                }
+            }
+
+            // NOW delete original (only if all WebP files confirmed)
+            if (Storage::disk($disk)->exists($sourcePath)) {
+                Storage::disk($disk)->delete($sourcePath);
+            }
+
+            // Get file size of the main image
+            $fileSize = Storage::disk($disk)->size($mainPath);
+
+            return [
+                'path' => $mainPath,
+                'width' => $scaledWidth,
+                'height' => $scaledHeight,
+                'file_size' => $fileSize,
+                'mime_type' => 'image/webp',
+                'sizes' => $generatedSizes,
+            ];
+        } catch (\Exception $e) {
+            \Log::error('Image processing exception', [
+                'source' => $sourcePath,
+                'disk' => $disk,
+                'article_id' => $article->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
         }
-
-        $baseDir = "articles/featured/{$article->id}";
-
-        // Read source image
-        $sourceImage = $this->manager->read(Storage::disk($disk)->path($sourcePath));
-
-        // Get original dimensions
-        $originalWidth = $sourceImage->width();
-        $originalHeight = $sourceImage->height();
-
-        // Scale down if needed (WordPress-style 2560px limit)
-        $scaledDimensions = $this->scaleDownIfNeeded($originalWidth, $originalHeight);
-        $scaledWidth = $scaledDimensions['width'];
-        $scaledHeight = $scaledDimensions['height'];
-
-        // Create the full-size image (scaled if needed)
-        $fullImage = clone $sourceImage;
-        if ($scaledWidth !== $originalWidth || $scaledHeight !== $originalHeight) {
-            $fullImage->scale($scaledWidth, $scaledHeight);
-        }
-
-        // Store the main image (full size)
-        $mainPath = "{$baseDir}/full.webp";
-        $this->storeWebp($fullImage, $mainPath, $disk);
-
-        // Generate and store size variants using suffix naming (full-thumbnail.webp, etc.)
-        $generatedSizes = [];
-        foreach (self::SIZES as $sizeName => $dimensions) {
-            // Use suffix naming: full-{size}.webp
-            $sizePath = "{$baseDir}/full-{$sizeName}.webp";
-            $this->generateSize($sourceImage, $sizePath, $dimensions, $disk);
-            $generatedSizes[$sizeName] = $sizePath;
-        }
-
-        // Delete original source file
-        Storage::disk($disk)->delete($sourcePath);
-
-        // Get file size of the main image
-        $fileSize = Storage::disk($disk)->size($mainPath);
-
-        return [
-            'path' => $mainPath,
-            'width' => $scaledWidth,
-            'height' => $scaledHeight,
-            'file_size' => $fileSize,
-            'mime_type' => 'image/webp',
-            'sizes' => $generatedSizes,
-        ];
     }
 
     /**
@@ -255,7 +319,28 @@ class ImageProcessingService
      */
     private function storeWebp(\Intervention\Image\Interfaces\ImageInterface $image, string $path, string $disk): void
     {
-        $encoded = $image->toWebp(self::WEBP_QUALITY);
-        Storage::disk($disk)->put($path, $encoded->toString());
+        try {
+            $encoded = $image->toWebp(self::WEBP_QUALITY);
+            $encodedString = $encoded->toString();
+
+            // Verify we got valid data
+            if (empty($encodedString)) {
+                throw new \RuntimeException('WebP encoding produced empty output');
+            }
+
+            Storage::disk($disk)->put($path, $encodedString);
+
+            // Verify file was written successfully
+            if (! Storage::disk($disk)->exists($path)) {
+                throw new \RuntimeException('File not found after write operation');
+            }
+        } catch (\Exception $e) {
+            \Log::error('WebP storage failed', [
+                'disk' => $disk,
+                'path' => $path,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e; // Re-throw to let caller handle
+        }
     }
 }

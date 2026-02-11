@@ -31,6 +31,23 @@ Route::middleware($adminMiddleware)->prefix('admin')->name('admin.')->group(func
 
     // Settings
     Route::get('settings', [SettingsController::class, 'index'])->name('settings');
+
+    // Private file serving (requires authentication)
+    Route::get('/storage/private/{path}', function (string $path) {
+        $fullPath = 'articles/featured/'.$path;
+
+        if (! Storage::disk('private')->exists($fullPath)) {
+            abort(404);
+        }
+
+        return response()->file(
+            Storage::disk('private')->path($fullPath),
+            [
+                'Content-Type' => Storage::disk('private')->mimeType($fullPath),
+                'Cache-Control' => 'private, max-age=3600',
+            ]
+        );
+    })->where('path', '.*')->name('private.file');
 });
 
 // Install route (must be accessible without auth)

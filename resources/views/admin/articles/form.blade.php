@@ -245,7 +245,14 @@
                         $initialOriginalUrl = $article->featured_image ?? '';
                         $initialIsRemoved = old('remove_featured_image') ? true : false;
                         $initialActiveTab = $initialImageUrl && !str_starts_with($initialImageUrl, 'http') ? 'upload_file' : 'external_url';
-                        $storageUrl = Storage::disk('public')->url('');
+
+                        // Determine correct disk based on article status
+                        $imageDisk = ($article->exists && in_array($article->status->value, ['draft', 'hidden']))
+                            ? 'private'
+                            : 'public';
+                        $storageUrl = $imageDisk === 'private'
+                            ? url('/storage/private/')
+                            : Storage::disk('public')->url('');
                     @endphp
                     <div class="card bg-base-100 shadow-sm"
                          x-data="featuredImage({{ json_encode($initialImageUrl, JSON_UNESCAPED_SLASHES) }}, {{ json_encode($initialOriginalUrl, JSON_UNESCAPED_SLASHES) }}, {{ json_encode($initialIsRemoved) }}, {{ json_encode($initialActiveTab) }}, {{ json_encode($storageUrl, JSON_UNESCAPED_SLASHES) }})">
