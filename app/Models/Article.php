@@ -59,11 +59,9 @@ class Article extends Model
             }
 
             // Handle status transitions for published_at
-            if ($article->isDirty('status')) {
-                // When status changes TO 'published' and published_at is null, set it to now
-                if ($article->status === 'published' && is_null($article->published_at)) {
-                    $article->published_at = now()->startOfSecond();
-                }
+            // When status changes TO 'published' and published_at is null, set it to now
+            if ($article->isDirty('status') && ($article->status === 'published' && is_null($article->published_at))) {
+                $article->published_at = now()->startOfSecond();
             }
 
             // When saving an article that was already published before (has original published_at),

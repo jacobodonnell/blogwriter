@@ -27,7 +27,8 @@ class SystemEvent extends Model
     /**
      * Scope for filtering error logs only.
      */
-    public function scopeErrors($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function errors($query)
     {
         return $query->where('is_error_log', true);
     }
@@ -35,7 +36,8 @@ class SystemEvent extends Model
     /**
      * Scope for filtering by severity.
      */
-    public function scopeSeverity($query, string $severity)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function severity($query, string $severity)
     {
         return $query->where('severity', $severity);
     }
@@ -43,7 +45,8 @@ class SystemEvent extends Model
     /**
      * Scope for unresolved events.
      */
-    public function scopeUnresolved($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function unresolved($query)
     {
         return $query->where('resolved', false);
     }
@@ -51,7 +54,8 @@ class SystemEvent extends Model
     /**
      * Scope for filtering by event type.
      */
-    public function scopeOfType($query, string $type)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function ofType($query, string $type)
     {
         return $query->where('type', $type);
     }

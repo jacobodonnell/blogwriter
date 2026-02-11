@@ -69,12 +69,12 @@ class StorageAutoRepair
         }
 
         // Log successful repairs
-        if (! empty($repaired)) {
+        if ($repaired !== []) {
             $this->logRepair($repaired);
         }
 
         // Log failures as errors
-        if (! empty($failed)) {
+        if ($failed !== []) {
             $this->logFailures($failed);
         }
     }

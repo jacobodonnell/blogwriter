@@ -45,7 +45,6 @@ it('excludes development-only files from bundle', function (): void {
 
     // Get the addDirectoryToZip method to check exclusions
     $method = $reflection->getMethod('addDirectoryToZip');
-    $method->setAccessible(true);
 
     // Create a mock ZIP
     $zip = new ZipArchive;

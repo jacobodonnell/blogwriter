@@ -20,32 +20,28 @@ class DiagnoseCommand extends Command
         $issues = [];
 
         // Check 1: .env file exists
-        $this->check('ENV file exists', function () {
-            return file_exists(base_path('.env'));
-        }, '.env file is missing - run php artisan blogwriter:install');
+        $this->check('ENV file exists', fn (): bool => file_exists(base_path('.env')), '.env file is missing - run php artisan blogwriter:install');
 
         // Check 2: Database exists
-        $this->check('Database file exists', function () {
+        $this->check('Database file exists', function (): bool {
             $dbPath = config('database.connections.sqlite.database');
 
             return file_exists($dbPath);
         }, 'Database file missing at '.database_path('database.sqlite'));
 
         // Check 3: Database has tables
-        $this->check('Database has tables', function () {
+        $this->check('Database has tables', function (): bool {
             try {
                 DB::select('SELECT 1 FROM users LIMIT 1');
 
                 return true;
-            } catch (\Exception $e) {
+            } catch (\Exception) {
                 return false;
             }
         }, 'Database tables missing - run php artisan migrate');
 
         // Check 4: Controllers exist
-        $this->check('Controllers exist', function () {
-            return file_exists(app_path('Http/Controllers/Admin/SettingsController.php'));
-        }, 'SettingsController.php is missing - re-install from fresh bundle');
+        $this->check('Controllers exist', fn (): bool => file_exists(app_path('Http/Controllers/Admin/SettingsController.php')), 'SettingsController.php is missing - re-install from fresh bundle');
 
         // Check 5: Routes registered
         $this->check('Routes cached', function () {
@@ -53,25 +49,19 @@ class DiagnoseCommand extends Command
                 Route::getRoutes()->refreshNameLookups();
 
                 return Route::has('admin.settings');
-            } catch (\Exception $e) {
+            } catch (\Exception) {
                 return false;
             }
         }, 'Routes not properly registered - run php artisan route:clear');
 
         // Check 6: Storage permissions
-        $this->check('Storage writable', function () {
-            return is_writable(storage_path('logs'));
-        }, 'storage/logs is not writable - run: chmod -R 775 storage');
+        $this->check('Storage writable', fn (): bool => is_writable(storage_path('logs')), 'storage/logs is not writable - run: chmod -R 775 storage');
 
         // Check 7: Vendor exists
-        $this->check('Composer dependencies', function () {
-            return file_exists(base_path('vendor/autoload.php'));
-        }, 'vendor/autoload.php missing - run: composer install');
+        $this->check('Composer dependencies', fn (): bool => file_exists(base_path('vendor/autoload.php')), 'vendor/autoload.php missing - run: composer install');
 
         // Check 8: App key set
-        $this->check('APP_KEY set', function () {
-            return ! empty(env('APP_KEY')) && env('APP_KEY') !== 'base64:';
-        }, 'APP_KEY is not set - run: php artisan key:generate');
+        $this->check('APP_KEY set', fn (): bool => ! empty(env('APP_KEY')) && env('APP_KEY') !== 'base64:', 'APP_KEY is not set - run: php artisan key:generate');
 
         $this->newLine();
         $this->info('📊 Diagnostic complete!');
@@ -83,8 +73,8 @@ class DiagnoseCommand extends Command
             $this->warn('⚠️  Recent errors found in log:');
             $lines = array_slice(file($logPath), -20);
             foreach ($lines as $line) {
-                if (str_contains($line, 'ERROR')) {
-                    $this->error(trim($line));
+                if (str_contains((string) $line, 'ERROR')) {
+                    $this->error(trim((string) $line));
                 }
             }
         }
