@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\InstallController;
 use Illuminate\Support\Facades\Route;
 
 // Public Routes
@@ -31,3 +32,6 @@ Route::middleware($adminMiddleware)->prefix('admin')->name('admin.')->group(func
     // Settings
     Route::get('settings', [SettingsController::class, 'index'])->name('settings');
 });
+
+// Install route (must be accessible without auth)
+Route::get('/install', [InstallController::class, 'index'])->name('install');
