@@ -78,7 +78,7 @@ describe('happy paths', function (): void {
                 'title' => $article->title,
                 'slug' => $article->slug,
                 'content' => $article->content,
-                'status' => $article->status,
+                'status' => $article->status->value,
                 'remove_featured_image' => '1',
             ])
             ->assertRedirect();
@@ -170,7 +170,7 @@ describe('privacy and storage', function (): void {
 
         $article = Article::first();
 
-        expect($article->status)->toBe('published');
+        expect($article->status->value)->toBe('published');
         Storage::disk('public')->assertExists($article->featured_image);
     });
 
@@ -189,7 +189,7 @@ describe('privacy and storage', function (): void {
 
         $article = Article::first();
 
-        expect($article->status)->toBe('draft');
+        expect($article->status->value)->toBe('draft');
         Storage::disk('private')->assertExists($article->featured_image);
     });
 
@@ -208,7 +208,7 @@ describe('privacy and storage', function (): void {
 
         $article = Article::first();
 
-        expect($article->status)->toBe('hidden');
+        expect($article->status->value)->toBe('hidden');
         Storage::disk('private')->assertExists($article->featured_image);
     });
 
@@ -225,7 +225,7 @@ describe('privacy and storage', function (): void {
                 'title' => $article->title,
                 'slug' => $article->slug,
                 'content' => $article->content,
-                'status' => $article->status,
+                'status' => $article->status->value,
                 'featured_image_file' => $file,
             ])
             ->assertRedirect();
@@ -247,7 +247,7 @@ describe('privacy and storage', function (): void {
         $article->refresh();
 
         // Image should have moved to private disk
-        expect($article->status)->toBe('draft');
+        expect($article->status->value)->toBe('draft');
         Storage::disk('public')->assertMissing($originalPath);
         Storage::disk('private')->assertExists($article->featured_image);
     });
@@ -264,7 +264,7 @@ describe('privacy and storage', function (): void {
                 'title' => $article->title,
                 'slug' => $article->slug,
                 'content' => $article->content,
-                'status' => $article->status,
+                'status' => $article->status->value,
                 'featured_image_file' => $file,
             ])
             ->assertRedirect();
@@ -286,7 +286,7 @@ describe('privacy and storage', function (): void {
         $article->refresh();
 
         // Image should have moved to public disk
-        expect($article->status)->toBe('published');
+        expect($article->status->value)->toBe('published');
         Storage::disk('private')->assertMissing($originalPath);
         Storage::disk('public')->assertExists($article->featured_image);
     });
@@ -336,7 +336,7 @@ describe('edge cases', function (): void {
                 'title' => $article->title,
                 'slug' => $article->slug,
                 'content' => $article->content,
-                'status' => $article->status,
+                'status' => $article->status->value,
                 'featured_image' => 'https://example.com/new-image.jpg',
             ])
             ->assertRedirect();

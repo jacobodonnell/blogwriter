@@ -33,6 +33,7 @@ class Article extends Model
             'past_slugs' => 'array',
             'published_at' => 'datetime',
             'last_edited_at' => 'datetime',
+            'status' => Status::class,
         ];
     }
 
@@ -65,7 +66,7 @@ class Article extends Model
             $originalStatus = $article->getOriginal('status');
             $newStatus = $article->status;
 
-            if ($article->isDirty('status') && ($newStatus === 'published' && is_null($article->published_at))) {
+            if ($article->isDirty('status') && ($newStatus === Status::Published && is_null($article->published_at))) {
                 $article->published_at = now()->startOfSecond();
             }
 
@@ -77,7 +78,7 @@ class Article extends Model
             // 1. Status is 'published'
             // 2. The article was already published before this save (has original published_at)
             // 3. last_edited_at hasn't been manually set already
-            if ($newStatus === 'published'
+            if ($newStatus === Status::Published
                 && ! is_null($article->getOriginal('published_at'))
                 && is_null($article->last_edited_at)) {
                 $article->last_edited_at = now()->startOfSecond();
@@ -86,7 +87,7 @@ class Article extends Model
             // Handle featured image disk selection
             // Move file to appropriate disk based on status (for both new and existing articles)
             if ($article->featured_image && ! Str::isUrl($article->featured_image)) {
-                $targetDisk = $newStatus === 'published' ? 'public' : 'private';
+                $targetDisk = $newStatus === Status::Published ? 'public' : 'private';
 
                 // Check current location of the file
                 if (Storage::disk('public')->exists($article->featured_image)) {
@@ -260,7 +261,7 @@ class Article extends Model
      */
     public function isPublished(): bool
     {
-        return $this->status === 'published' && $this->published_at !== null && $this->published_at <= now();
+        return $this->status === Status::Published && $this->published_at !== null && $this->published_at <= now();
     }
 
     /**

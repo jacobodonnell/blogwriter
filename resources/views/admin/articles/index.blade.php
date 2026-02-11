@@ -78,11 +78,11 @@
                                         <td>
                                             <span @class([
                                                 'badge',
-                                                'badge-success' => $article->status === 'published',
-                                                'badge-warning' => $article->status === 'draft',
-                                                'badge-ghost' => $article->status === 'hidden',
+                                                'badge-success' => $article->status->value === 'published',
+                                                'badge-warning' => $article->status->value === 'draft',
+                                                'badge-ghost' => $article->status->value === 'hidden',
                                             ])>
-                                                {{ ucfirst($article->status) }}
+                                                {{ $article->status->label() }}
                                             </span>
                                         </td>
                                         <td>

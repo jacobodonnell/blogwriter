@@ -31,7 +31,7 @@ it('creates article with published status and auto-sets published_at', function 
 
     $article = Article::where('slug', 'test-published-article')->first();
     expect($article)->not->toBeNull();
-    expect($article->status)->toBe('published');
+    expect($article->status->value)->toBe('published');
     expect($article->published_at)->not->toBeNull();
     expect($article->published_at->diffInSeconds(now()))->toBeLessThan(5);
     expect($article->last_edited_at)->toBeNull();
@@ -49,7 +49,7 @@ it('creates article with draft status and keeps published_at null', function ():
 
     $article = Article::where('slug', 'test-draft-article')->first();
     expect($article)->not->toBeNull();
-    expect($article->status)->toBe('draft');
+    expect($article->status->value)->toBe('draft');
     expect($article->published_at)->toBeNull();
     expect($article->last_edited_at)->toBeNull();
 });
@@ -73,7 +73,7 @@ it('updates draft to published and auto-sets published_at', function (): void {
     $response->assertRedirect();
 
     $article->refresh();
-    expect($article->status)->toBe('published');
+    expect($article->status->value)->toBe('published');
     expect($article->published_at)->not->toBeNull();
     expect($article->published_at->diffInSeconds(now()))->toBeLessThan(5);
     expect($article->last_edited_at)->toBeNull();
@@ -105,7 +105,7 @@ it('sets last_edited_at when re-publishing already published article', function 
     $response->assertRedirect();
 
     $article->refresh();
-    expect($article->status)->toBe('published');
+    expect($article->status->value)->toBe('published');
     expect($article->published_at)->toEqual($originalPublishedAt);
     expect($article->last_edited_at)->not->toBeNull();
     expect($article->last_edited_at->diffInSeconds(now()))->toBeLessThan(5);
@@ -156,7 +156,7 @@ it('correctly handles published to draft to published flow', function (): void {
     ])->assertRedirect();
 
     $article->refresh();
-    expect($article->status)->toBe('draft');
+    expect($article->status->value)->toBe('draft');
 
     sleep(1);
 
@@ -169,7 +169,7 @@ it('correctly handles published to draft to published flow', function (): void {
     ])->assertRedirect();
 
     $article->refresh();
-    expect($article->status)->toBe('published');
+    expect($article->status->value)->toBe('published');
     expect($article->published_at)->toEqual($firstPublishedAt);
     expect($article->last_edited_at)->not->toBeNull();
     expect($article->wasEdited())->toBeTrue();
@@ -205,7 +205,7 @@ it('creates hidden article with null timestamps', function (): void {
     $response->assertRedirect();
 
     $article = Article::where('slug', 'hidden-article')->first();
-    expect($article->status)->toBe('hidden');
+    expect($article->status->value)->toBe('hidden');
     expect($article->published_at)->toBeNull();
     expect($article->last_edited_at)->toBeNull();
 });
@@ -282,7 +282,7 @@ it('does not require published_at when updating to published', function (): void
     // Should not fail validation for published_at
     $response->assertRedirect();
     $article->refresh();
-    expect($article->status)->toBe('published');
+    expect($article->status->value)->toBe('published');
     expect($article->published_at)->not->toBeNull();
 });
 
