@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Enums\Status;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Article extends Model
@@ -60,7 +62,10 @@ class Article extends Model
 
             // Handle status transitions for published_at
             // When status changes TO 'published' and published_at is null, set it to now
-            if ($article->isDirty('status') && ($article->status === 'published' && is_null($article->published_at))) {
+            $originalStatus = $article->getOriginal('status');
+            $newStatus = $article->status;
+
+            if ($article->isDirty('status') && ($newStatus === 'published' && is_null($article->published_at))) {
                 $article->published_at = now()->startOfSecond();
             }
 
@@ -72,10 +77,32 @@ class Article extends Model
             // 1. Status is 'published'
             // 2. The article was already published before this save (has original published_at)
             // 3. last_edited_at hasn't been manually set already
-            if ($article->status === 'published'
+            if ($newStatus === 'published'
                 && ! is_null($article->getOriginal('published_at'))
                 && is_null($article->last_edited_at)) {
                 $article->last_edited_at = now()->startOfSecond();
+            }
+
+            // Handle featured image disk selection
+            // Move file to appropriate disk based on status (for both new and existing articles)
+            if ($article->featured_image && ! Str::isUrl($article->featured_image)) {
+                $targetDisk = $newStatus === 'published' ? 'public' : 'private';
+
+                // Check current location of the file
+                if (Storage::disk('public')->exists($article->featured_image)) {
+                    $currentDisk = 'public';
+                } elseif (Storage::disk('private')->exists($article->featured_image)) {
+                    $currentDisk = 'private';
+                } else {
+                    $currentDisk = null;
+                }
+
+                // Move file if it's on the wrong disk
+                if ($currentDisk !== null && $currentDisk !== $targetDisk) {
+                    $fileContent = Storage::disk($currentDisk)->get($article->featured_image);
+                    Storage::disk($targetDisk)->put($article->featured_image, $fileContent);
+                    Storage::disk($currentDisk)->delete($article->featured_image);
+                }
             }
         });
     }

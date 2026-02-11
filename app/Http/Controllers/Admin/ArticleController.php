@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\Status;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreArticleRequest;
 use App\Http\Requests\UpdateArticleRequest;
 use App\Models\Article;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ArticleController extends Controller
@@ -67,11 +69,13 @@ class ArticleController extends Controller
         $article->published_at = $data['published_at'] ?? null;
         $article->meta = $data['meta'] ?? [];
 
-        if ($request->hasFile('featured_image')) {
-            $path = $request->file('featured_image')->store('articles/featured', 'public');
+        // Handle featured image - store on public disk by default
+        // The model's boot method will move to private if status is draft/hidden
+        if ($request->hasFile('featured_image_file')) {
+            $path = $request->file('featured_image_file')->store('articles/featured', 'public');
             $article->featured_image = $path;
-        } elseif ($request->filled('featured_image_url')) {
-            $article->featured_image = $request->input('featured_image_url');
+        } elseif (! empty($data['featured_image'])) {
+            $article->featured_image = $data['featured_image'];
         }
 
         if (empty($data['summary'])) {
@@ -120,11 +124,31 @@ class ArticleController extends Controller
         }
         $article->meta = $data['meta'] ?? [];
 
-        if ($request->hasFile('featured_image')) {
-            $path = $request->file('featured_image')->store('articles/featured', 'public');
+        // Handle featured image removal
+        if (! empty($data['remove_featured_image'])) {
+            // Delete old image from storage if it's a local file
+            if ($article->featured_image && ! Str::isUrl($article->featured_image)) {
+                $oldDisk = $article->getOriginal('status') === Status::Published->value ? 'public' : 'private';
+                Storage::disk($oldDisk)->delete($article->featured_image);
+            }
+            $article->featured_image = null;
+        } elseif ($request->hasFile('featured_image_file')) {
+            // Delete old image if exists
+            if ($article->featured_image && ! Str::isUrl($article->featured_image)) {
+                $oldDisk = $article->status->isPublic() ? 'public' : 'private';
+                Storage::disk($oldDisk)->delete($article->featured_image);
+            }
+            // Store new file on appropriate disk based on status
+            $disk = Status::tryFrom($data['status'])?->isPublic() ? 'public' : 'private';
+            $path = $request->file('featured_image_file')->store('articles/featured', $disk);
             $article->featured_image = $path;
-        } elseif ($request->filled('featured_image_url')) {
-            $article->featured_image = $request->input('featured_image_url');
+        } elseif (! empty($data['featured_image'])) {
+            // Delete old file if switching to URL
+            if ($article->featured_image && ! Str::isUrl($article->featured_image)) {
+                $oldDisk = $article->status->isPublic() ? 'public' : 'private';
+                Storage::disk($oldDisk)->delete($article->featured_image);
+            }
+            $article->featured_image = $data['featured_image'];
         }
 
         if (empty($data['summary'])) {

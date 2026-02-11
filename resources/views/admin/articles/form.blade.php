@@ -251,30 +251,40 @@
                                 <figure class="mt-2">
                                     <img src="{{ $article->featured_image }}" alt="Featured" class="w-full h-32 object-cover rounded-lg">
                                 </figure>
+
+                                {{-- Remove Checkbox --}}
+                                <fieldset class="fieldset mt-4">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" name="remove_featured_image" value="1" class="checkbox checkbox-sm">
+                                        <span class="text-sm">Remove featured image</span>
+                                    </label>
+                                </fieldset>
                             @endif
 
                             {{-- Image URL --}}
                             <fieldset class="fieldset mt-4">
                                 <legend class="fieldset-legend text-sm">Image URL</legend>
-                                <input type="url" 
-                                       name="featured_image" 
-                                       class="input input-bordered w-full text-sm" 
+                                <input type="url"
+                                       name="featured_image"
+                                       class="input input-bordered w-full text-sm @error('featured_image') input-error @enderror"
                                        value="{{ old('featured_image', $article->featured_image) }}"
                                        placeholder="https://example.com/image.jpg">
+                                @error('featured_image')
+                                    <span class="text-error text-sm mt-1">{{ $message }}</span>
+                                @enderror
                             </fieldset>
 
                             {{-- File Upload --}}
                             <fieldset class="fieldset mt-4">
                                 <legend class="fieldset-legend text-sm">Or Upload</legend>
-                                <input type="file" 
-                                       name="featured_image_file" 
-                                       class="file-input file-input-bordered w-full file-input-sm" 
+                                <input type="file"
+                                       name="featured_image_file"
+                                       class="file-input file-input-bordered w-full file-input-sm @error('featured_image_file') input-error @enderror"
                                        accept="image/*">
+                                @error('featured_image_file')
+                                    <span class="text-error text-sm mt-1">{{ $message }}</span>
+                                @enderror
                             </fieldset>
-
-                            @error('featured_image')
-                                <span class="text-error text-sm mt-1">{{ $message }}</span>
-                            @enderror
                         </div>
                     </div>
 

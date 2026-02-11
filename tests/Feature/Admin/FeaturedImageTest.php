@@ -52,7 +52,8 @@ describe('happy paths', function () {
         $article = Article::first();
 
         expect($article->featured_image)->not->toBeNull();
-        Storage::disk('public')->assertExists($article->featured_image);
+        // Draft articles store files on private disk
+        Storage::disk('private')->assertExists($article->featured_image);
     });
 
     it('displays saved image on edit page', function () {
