@@ -228,7 +228,13 @@ class InstallCommand extends Command
         info('Installing BlogWriter...');
         $this->newLine();
 
-        // Update .env file
+        // 1. Setup .env file
+        $this->setupEnvironmentFile();
+
+        // 2. Generate APP_KEY
+        $this->generateAppKey();
+
+        // 3. Update .env with user config
         $this->updateEnvironmentFile($config);
 
         // Run migrations
@@ -262,13 +268,30 @@ class InstallCommand extends Command
         $this->displaySuccess($config, $user);
     }
 
+    protected function setupEnvironmentFile(): void
+    {
+        $envPath = base_path('.env');
+        $envExamplePath = base_path('.env.example');
+
+        if (! file_exists($envPath) && file_exists($envExamplePath)) {
+            info('Creating .env file from .env.example...');
+            copy($envExamplePath, $envPath);
+            info('✓ .env file created');
+        }
+    }
+
+    protected function generateAppKey(): void
+    {
+        info('Generating application key...');
+        Artisan::call('key:generate');
+        info('✓ Application key generated');
+    }
+
     protected function updateEnvironmentFile(array $config): void
     {
         $envPath = base_path('.env');
 
         if (! file_exists($envPath)) {
-            warning('.env file not found. Skipping environment updates.');
-
             return;
         }
 
