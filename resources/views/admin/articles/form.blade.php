@@ -344,6 +344,7 @@
                                            name="featured_image"
                                            x-model="imageUrl"
                                            @input="clearFilePreview()"
+                                           :disabled="activeTab !== 'external_url'"
                                            class="input input-bordered w-full text-sm @error('featured_image') input-error @enderror"
                                            placeholder="https://example.com/image.jpg">
                                     @error('featured_image')
