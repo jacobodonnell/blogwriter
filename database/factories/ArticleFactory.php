@@ -227,7 +227,7 @@ class ArticleFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'status' => 'published',
-            'published_at' => now(),
+            'published_at' => now()->startOfSecond(),
         ]);
     }
 

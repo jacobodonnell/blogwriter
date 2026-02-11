@@ -84,7 +84,7 @@ it('updates draft to published and auto-sets published_at', function (): void {
 // ==========================================
 
 it('sets last_edited_at when re-publishing already published article', function (): void {
-    $originalPublishedAt = now()->subDay();
+    $originalPublishedAt = now()->subDay()->startOfSecond();
     $article = Article::factory()->published()->create([
         'title' => 'Published Article',
         'slug' => 'published-article',
