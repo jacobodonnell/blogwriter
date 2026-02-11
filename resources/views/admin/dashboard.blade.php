@@ -51,11 +51,11 @@
                                     <div class="flex items-center gap-2 mt-1 text-sm text-gray-500">
                                         <span @class([
                                             'badge badge-sm',
-                                            'badge-success' => $article->status === 'published',
-                                            'badge-warning' => $article->status === 'draft',
-                                            'badge-ghost' => $article->status === 'hidden',
+                                            'badge-success' => $article->status->value === 'published',
+                                            'badge-warning' => $article->status->value === 'draft',
+                                            'badge-ghost' => $article->status->value === 'hidden',
                                         ])>
-                                            {{ ucfirst($article->status) }}
+                                            {{ $article->status->label() }}
                                         </span>
                                         <span>{{ $article->updated_at->diffForHumans() }}</span>
                                     </div>

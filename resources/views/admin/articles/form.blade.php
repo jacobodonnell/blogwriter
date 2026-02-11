@@ -199,9 +199,9 @@
                             <fieldset class="fieldset mt-4">
                                 <legend class="fieldset-legend">Status</legend>
                                 <select name="status" class="select select-bordered w-full @error('status') select-error @enderror">
-                                    <option value="draft" {{ old('status', $article->status) === 'draft' ? 'selected' : '' }}>📝 Draft</option>
-                                    <option value="published" {{ old('status', $article->status) === 'published' ? 'selected' : '' }}>✅ Published</option>
-                                    <option value="hidden" {{ old('status', $article->status) === 'hidden' ? 'selected' : '' }}>👁️ Hidden</option>
+                                    <option value="draft" {{ old('status', $article?->status?->value) === 'draft' ? 'selected' : '' }}>📝 Draft</option>
+                                    <option value="published" {{ old('status', $article?->status?->value) === 'published' ? 'selected' : '' }}>✅ Published</option>
+                                    <option value="hidden" {{ old('status', $article?->status?->value) === 'hidden' ? 'selected' : '' }}>👁️ Hidden</option>
                                 </select>
                                 @error('status')
                                     <span class="text-error text-sm mt-1">{{ $message }}</span>

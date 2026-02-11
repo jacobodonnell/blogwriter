@@ -125,7 +125,7 @@ class Article extends Model
     #[\Illuminate\Database\Eloquent\Attributes\Scope]
     protected function published($query)
     {
-        return $query->where('status', 'published')
+        return $query->where('status', Status::Published)
             ->where('published_at', '<=', now());
     }
 
@@ -138,7 +138,7 @@ class Article extends Model
     #[\Illuminate\Database\Eloquent\Attributes\Scope]
     protected function draft($query)
     {
-        return $query->where('status', 'draft');
+        return $query->where('status', Status::Draft);
     }
 
     /**
@@ -150,7 +150,7 @@ class Article extends Model
     #[\Illuminate\Database\Eloquent\Attributes\Scope]
     protected function hidden($query)
     {
-        return $query->where('status', 'hidden');
+        return $query->where('status', Status::Hidden);
     }
 
     /**
@@ -162,7 +162,7 @@ class Article extends Model
     #[\Illuminate\Database\Eloquent\Attributes\Scope]
     protected function visibleToPublic($query)
     {
-        return $query->where('status', 'published');
+        return $query->where('status', Status::Published);
     }
 
     /**
@@ -174,7 +174,7 @@ class Article extends Model
     #[\Illuminate\Database\Eloquent\Attributes\Scope]
     protected function visibleToOwner($query)
     {
-        return $query->whereIn('status', ['published', 'hidden']);
+        return $query->whereIn('status', [Status::Published, Status::Hidden]);
     }
 
     /**
@@ -269,7 +269,7 @@ class Article extends Model
      */
     public function publish(): void
     {
-        $this->status = 'published';
+        $this->status = Status::Published;
         $this->published_at = now();
         $this->save();
     }
@@ -279,7 +279,7 @@ class Article extends Model
      */
     public function unpublish(): void
     {
-        $this->status = 'draft';
+        $this->status = Status::Draft;
         $this->save();
     }
 
@@ -288,7 +288,7 @@ class Article extends Model
      */
     public function hide(): void
     {
-        $this->status = 'hidden';
+        $this->status = Status::Hidden;
         $this->save();
     }
 

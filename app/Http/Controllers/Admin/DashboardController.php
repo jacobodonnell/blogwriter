@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\Status;
 use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\Category;
@@ -21,9 +22,9 @@ class DashboardController extends Controller
 
         $stats = [
             'total_articles' => Article::count(),
-            'published_articles' => Article::where('status', 'published')->count(),
-            'draft_articles' => Article::where('status', 'draft')->count(),
-            'hidden_articles' => Article::where('status', 'hidden')->count(),
+            'published_articles' => Article::where('status', Status::Published)->count(),
+            'draft_articles' => Article::where('status', Status::Draft)->count(),
+            'hidden_articles' => Article::where('status', Status::Hidden)->count(),
             'total_categories' => Category::count(),
         ];
 

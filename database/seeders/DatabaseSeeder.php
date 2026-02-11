@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\User;
@@ -213,11 +214,11 @@ class DatabaseSeeder extends Seeder
         foreach ($articles as $index => $articleData) {
             // Determine status based on distribution
             if ($index < $publishedCount) {
-                $status = 'published';
+                $status = Status::Published;
             } elseif ($index < $publishedCount + $draftCount) {
-                $status = 'draft';
+                $status = Status::Draft;
             } else {
-                $status = 'hidden';
+                $status = Status::Hidden;
             }
 
             // Create article
@@ -227,7 +228,7 @@ class DatabaseSeeder extends Seeder
                 'content' => $articleData['content'],
                 'summary' => $articleData['summary'] ?? substr(strip_tags($articleData['content']), 0, 255),
                 'status' => $status,
-                'published_at' => $status === 'published' ? now()->subDays(rand(1, 30)) : null,
+                'published_at' => $status === Status::Published ? now()->subDays(rand(1, 30)) : null,
                 'featured_image' => $articleData['featured_image'] ?? null,
                 'meta' => $articleData['meta'] ?? null,
             ]);
