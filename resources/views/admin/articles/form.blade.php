@@ -79,8 +79,9 @@
 
         {{-- Form --}}
         <form method="POST" enctype="multipart/form-data"
-              action="{{ $article->exists ? route('admin.articles.update', $article) : route('admin.articles.store') }}" 
-              class="space-y-6">
+              action="{{ $article->exists ? route('admin.articles.update', $article) : route('admin.articles.store') }}"
+              class="space-y-6"
+              novalidate>
             @csrf
             @if($article->exists)
                 @method('PUT')
@@ -473,6 +474,14 @@
                                     setTab(tab) {
                                         this.activeTab = tab;
                                         this.errorMessage = null;
+                                        // Clear URL value when switching to upload tab to prevent form validation issues
+                                        if (tab === 'upload_file' && this.imageUrl) {
+                                            // Store the URL temporarily in case user switches back
+                                            if (!this.originalUrl) {
+                                                this.originalUrl = this.imageUrl;
+                                            }
+                                            this.imageUrl = '';
+                                        }
                                     },
                                     
                                     // Alias methods for test compatibility
