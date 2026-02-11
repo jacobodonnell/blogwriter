@@ -18,17 +18,14 @@ class BundleCommand extends Command
         $this->info('Creating BlogWriter distribution bundle...');
 
         // Check if npm build exists
-        if (! $this->option('skip-build')) {
-            if (! is_dir(public_path('build'))) {
-                $this->warn('No build directory found. Running npm run build...');
-                $process = Process::fromShellCommandline('npm run build');
-                $process->run();
+        if (!$this->option('skip-build') && ! is_dir(public_path('build'))) {
+            $this->warn('No build directory found. Running npm run build...');
+            $process = Process::fromShellCommandline('npm run build');
+            $process->run();
+            if (! $process->isSuccessful()) {
+                $this->error('npm run build failed. Use --skip-build to skip this step.');
 
-                if (! $process->isSuccessful()) {
-                    $this->error('npm run build failed. Use --skip-build to skip this step.');
-
-                    return self::FAILURE;
-                }
+                return self::FAILURE;
             }
         }
 
@@ -99,12 +96,12 @@ class BundleCommand extends Command
 
         foreach ($iterator as $file) {
             $filePath = $file->getRealPath();
-            $relativePath = substr($filePath, strlen($source) + 1);
+            $relativePath = substr((string) $filePath, strlen($source) + 1);
 
             // Check exclusions
             $shouldExclude = false;
             foreach ($exclude as $pattern) {
-                if (strpos($relativePath, $pattern) === 0 || fnmatch($pattern, basename($relativePath))) {
+                if (str_starts_with($relativePath, (string) $pattern) || fnmatch($pattern, basename($relativePath))) {
                     $shouldExclude = true;
                     break;
                 }
