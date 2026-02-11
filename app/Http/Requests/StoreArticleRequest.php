@@ -27,7 +27,9 @@ class StoreArticleRequest extends FormRequest
             'summary' => ['nullable', 'string', 'max:500'],
             'content' => ['required', 'string'],
             'status' => ['required', 'in:draft,published,hidden'],
-            'featured_image' => ['nullable', 'string', 'max:500'],
+            'featured_image' => ['nullable', 'string', 'url', 'max:500'],
+            'featured_image_file' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'remove_featured_image' => ['nullable', 'boolean'],
             'categories' => ['nullable', 'array'],
             'categories.*' => ['exists:categories,id'],
             'meta' => ['nullable', 'array'],
@@ -47,6 +49,21 @@ class StoreArticleRequest extends FormRequest
         return [
             'slug.regex' => 'Slug can only contain lowercase letters, numbers, and hyphens.',
             'categories.*.exists' => 'One or more selected categories do not exist.',
+        ];
+    }
+
+    /**
+     * Configure the validator instance.
+     */
+    public function after(): array
+    {
+        return [
+            function (\Illuminate\Validation\Validator $validator): void {
+                if ($this->has('featured_image') && $this->filled('featured_image') && $this->hasFile('featured_image_file')) {
+                    $validator->errors()->add('featured_image', 'Cannot provide both URL and file upload.');
+                    $validator->errors()->add('featured_image_file', 'Cannot provide both URL and file upload.');
+                }
+            },
         ];
     }
 }
