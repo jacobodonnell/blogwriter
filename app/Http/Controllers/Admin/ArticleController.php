@@ -15,14 +15,14 @@ class ArticleController extends Controller
     /**
      * Display a listing of articles.
      */
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $query = Article::query()
             ->with('categories')
             ->orderBy('updated_at', 'desc');
 
         if ($request->filled('category')) {
-            $query->whereHas('categories', function ($q) use ($request) {
+            $query->whereHas('categories', function ($q) use ($request): void {
                 $q->where('slug', $request->category);
             });
         }
@@ -43,7 +43,7 @@ class ArticleController extends Controller
     /**
      * Show the form for creating a new article.
      */
-    public function create()
+    public function create(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $categories = Category::orderBy('name')->get();
 
@@ -75,7 +75,7 @@ class ArticleController extends Controller
         }
 
         if (empty($data['summary'])) {
-            $article->summary = Str::limit(strip_tags($data['content']), 255);
+            $article->summary = Str::limit(strip_tags((string) $data['content']), 255);
         } else {
             $article->summary = $data['summary'];
         }
@@ -93,7 +93,7 @@ class ArticleController extends Controller
     /**
      * Show the form for editing the specified article.
      */
-    public function edit(Article $article)
+    public function edit(Article $article): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $article->load('categories');
         $categories = Category::orderBy('name')->get();
@@ -126,7 +126,7 @@ class ArticleController extends Controller
         }
 
         if (empty($data['summary'])) {
-            $article->summary = Str::limit(strip_tags($data['content']), 255);
+            $article->summary = Str::limit(strip_tags((string) $data['content']), 255);
         } else {
             $article->summary = $data['summary'];
         }

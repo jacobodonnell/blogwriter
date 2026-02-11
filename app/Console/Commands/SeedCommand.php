@@ -49,7 +49,7 @@ class SeedCommand extends Command
         // Set state
         try {
             $seeder->withState($state);
-        } catch (\InvalidArgumentException $e) {
+        } catch (\InvalidArgumentException) {
             $this->error("Invalid state: {$state}");
             $this->error('Valid states: empty, minimal, demo, full');
 

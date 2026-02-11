@@ -10,7 +10,7 @@ class ArticleController extends Controller
     /**
      * Display the homepage with recent articles.
      */
-    public function index()
+    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $articles = Article::published()
             ->with('categories')
@@ -25,7 +25,7 @@ class ArticleController extends Controller
     /**
      * Display a single article.
      */
-    public function show(string $slug)
+    public function show(string $slug): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $article = Article::published()
             ->where('slug', $slug)
@@ -40,12 +40,12 @@ class ArticleController extends Controller
     /**
      * Display articles by category.
      */
-    public function category(string $slug)
+    public function category(string $slug): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $category = Category::where('slug', $slug)->firstOrFail();
 
         $articles = Article::published()
-            ->whereHas('categories', function ($query) use ($category) {
+            ->whereHas('categories', function ($query) use ($category): void {
                 $query->where('categories.id', $category->id);
             })
             ->with('categories')

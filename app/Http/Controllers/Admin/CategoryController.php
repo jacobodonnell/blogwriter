@@ -11,7 +11,7 @@ class CategoryController extends Controller
     /**
      * Display a listing of categories.
      */
-    public function index()
+    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $categories = Category::query()
             ->withCount('articles')
@@ -39,7 +39,7 @@ class CategoryController extends Controller
     /**
      * Show the form for editing the specified category.
      */
-    public function edit(Category $category)
+    public function edit(Category $category): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         return view('admin.categories.edit', [
             'category' => $category,

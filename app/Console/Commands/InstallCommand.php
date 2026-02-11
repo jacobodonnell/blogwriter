@@ -91,7 +91,7 @@ class InstallCommand extends Command
             placeholder: 'E.g. https://example.com',
             default: config('app.url', 'http://localhost'),
             required: true,
-            validate: [$this, 'validateUrl']
+            validate: $this->validateUrl(...)
         );
 
         $this->newLine();
@@ -108,7 +108,7 @@ class InstallCommand extends Command
             label: 'What is your email address?',
             placeholder: 'E.g. you@example.com',
             required: true,
-            validate: [$this, 'validateEmail']
+            validate: $this->validateEmail(...)
         );
 
         $password = $this->promptForPassword();
@@ -156,7 +156,7 @@ class InstallCommand extends Command
             $password = password(
                 label: 'Create a password',
                 placeholder: 'Min 8 characters',
-                validate: [$this, 'validatePasswordLength']
+                validate: $this->validatePasswordLength(...)
             );
 
             $confirm = password(
@@ -295,7 +295,7 @@ class InstallCommand extends Command
         $this->newLine();
         info('Next steps:');
         note('  • Visit your site: '.$config['site_url']);
-        note('  • Admin panel: '.rtrim($config['site_url'], '/').'/admin');
+        note('  • Admin panel: '.rtrim((string) $config['site_url'], '/').'/admin');
         note('  • Login with: '.$user->email);
         $this->newLine();
 
