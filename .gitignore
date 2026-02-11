@@ -27,3 +27,6 @@ CLAUDE.md
 GEMINI.md
 .claude
 .agents
+
+# BlogWriter installation lock file (environment-specific)
+/storage/installed.lock
