@@ -130,6 +130,9 @@ class InstallCommand extends Command
             info('Fresh database created.');
         }
 
+        // Reconnect to the database with the new file
+        DB::reconnect('sqlite');
+
         info('Running database migrations...');
         $exitCode = Artisan::call('migrate', ['--force' => true]);
 
