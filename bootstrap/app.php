@@ -13,6 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Ensure app is installed before serving requests
         $middleware->append(\App\Http\Middleware\EnsureInstalled::class);
+
+        // Auto-repair storage directories for authenticated users
+        // This catches missing directories from incomplete bundle extractions
+        $middleware->append(\App\Http\Middleware\StorageAutoRepair::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

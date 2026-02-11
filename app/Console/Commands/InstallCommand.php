@@ -325,6 +325,9 @@ class InstallCommand extends Command
         info('Installing BlogWriter...');
         $this->newLine();
 
+        // Ensure storage directories exist before any Laravel operations
+        $this->ensureStorageDirectories();
+
         // 1. Setup .env file
         $this->setupEnvironmentFile();
 
@@ -522,5 +525,35 @@ class InstallCommand extends Command
         warning('Composer install failed. See error output above.');
 
         return false;
+    }
+
+    /**
+     * Ensure required storage directories exist before installation proceeds.
+     * This prevents Laravel errors when bundle extraction misses empty directories.
+     */
+    protected function ensureStorageDirectories(): void
+    {
+        $directories = [
+            'storage/framework/cache',
+            'storage/framework/cache/data',
+            'storage/framework/sessions',
+            'storage/framework/testing',
+            'storage/framework/views',
+            'storage/logs',
+            'bootstrap/cache',
+        ];
+
+        foreach ($directories as $dir) {
+            $path = base_path($dir);
+
+            if (! is_dir($path)) {
+                if (! mkdir($path, 0755, true)) {
+                    throw new \RuntimeException("Failed to create directory: {$dir}. Check file permissions.");
+                }
+                info("✓ Created directory: {$dir}");
+            } elseif (! is_writable($path)) {
+                throw new \RuntimeException("Directory not writable: {$dir}. Check file permissions.");
+            }
+        }
     }
 }

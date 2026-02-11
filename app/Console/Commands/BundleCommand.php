@@ -73,6 +73,9 @@ class BundleCommand extends Command
             '*.log',
         ]);
 
+        // Ensure required storage directories exist in bundle
+        $this->addStorageDirectories($zip);
+
         $zip->close();
 
         $size = $this->formatBytes(filesize($zipPath));
@@ -140,5 +143,30 @@ class BundleCommand extends Command
         }
 
         return round($bytes, 2).' '.$units[$unitIndex];
+    }
+
+    /**
+     * Add required storage directories to the ZIP archive.
+     * These directories are excluded from the file scan but must exist
+     * for Laravel to function properly on fresh installations.
+     */
+    protected function addStorageDirectories(ZipArchive $zip): void
+    {
+        $requiredDirs = [
+            'storage/framework/cache',
+            'storage/framework/cache/data',
+            'storage/framework/sessions',
+            'storage/framework/testing',
+            'storage/framework/views',
+            'storage/logs',
+        ];
+
+        foreach ($requiredDirs as $dir) {
+            // Only add if not already present
+            if ($zip->locateName($dir.'/.gitkeep') === false && $zip->locateName($dir) === false) {
+                $zip->addEmptyDir($dir);
+                $this->info("  Added directory: {$dir}");
+            }
+        }
     }
 }
