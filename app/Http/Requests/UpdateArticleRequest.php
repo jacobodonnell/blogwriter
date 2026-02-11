@@ -74,14 +74,18 @@ class UpdateArticleRequest extends FormRequest
                     $validator->errors()->add('featured_image_file', 'Cannot provide both URL and file upload.');
                 }
 
-                // Validate URL points to an image file
+                // Validate URL file extension if present
+                // Modern CDN URLs (Imgur, Unsplash, Cloudflare Images) don't have file extensions
+                // So we only validate the extension if one is present in the URL path
                 $featuredImage = $this->input('featured_image');
                 if ($this->filled('featured_image') && \Illuminate\Support\Str::isUrl($featuredImage)) {
-                    $validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
-                    $extension = strtolower(pathinfo(parse_url($featuredImage, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION));
+                    $path = parse_url($featuredImage, PHP_URL_PATH) ?? '';
+                    $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
 
-                    if (! in_array($extension, $validExtensions)) {
-                        $validator->errors()->add('featured_image', 'The URL must point to a valid image file (jpg, jpeg, png, gif, webp, svg).');
+                    // If an extension is present, validate it's an image format
+                    // If no extension, allow it (CDN URLs without extensions)
+                    if ($extension && ! in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'])) {
+                        $validator->errors()->add('featured_image', 'The URL must point to an image file (jpg, jpeg, png, gif, webp, svg), not a .'.$extension.' file.');
                     }
                 }
 

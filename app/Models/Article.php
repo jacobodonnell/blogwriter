@@ -113,7 +113,7 @@ class Article extends Model
             // Process featured image if it's a new file upload (not already processed)
             // Check by seeing if it follows the old storage pattern (articles/featured/*.ext)
             // Check if this is a newly uploaded file (not already processed)
-            if (str_starts_with((string) $article->featured_image, 'articles/featured/') && !str_starts_with((string) $article->featured_image, "articles/featured/{$article->id}/") && Storage::disk($targetDisk)->exists($article->featured_image)) {
+            if (str_starts_with((string) $article->featured_image, 'articles/featured/') && ! str_starts_with((string) $article->featured_image, "articles/featured/{$article->id}/") && Storage::disk($targetDisk)->exists($article->featured_image)) {
                 $sourcePath = $article->featured_image;
                 // Only process if the image is valid (not corrupted)
                 if ($service->isValidImage($sourcePath, $targetDisk)) {
@@ -133,7 +133,7 @@ class Article extends Model
             if ($article->wasChanged('status')) {
                 // Status changed - move all image sizes to appropriate disk
                 $oldStatus = $article->getOriginal('status');
-                $oldDisk = $oldStatus === Status::Published->value ? 'public' : 'private';
+                $oldDisk = $oldStatus === Status::Published ? 'public' : 'private';
                 $service->moveImages($article, $oldDisk, $targetDisk);
             }
         });

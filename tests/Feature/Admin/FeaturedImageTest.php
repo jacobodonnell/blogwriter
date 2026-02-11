@@ -52,8 +52,14 @@ describe('happy paths', function (): void {
         $article = Article::first();
 
         expect($article->featured_image)->not->toBeNull();
-        // Files are stored on public disk initially (controller behavior)
-        Storage::disk('public')->assertExists($article->featured_image);
+        // Draft articles store images on private disk
+        // After processing, path will be articles/featured/{id}/full.webp
+        expect($article->featured_image)->toContain('articles/featured');
+
+        // Verify image is on private disk (for draft status)
+        if (extension_loaded('gd')) {
+            Storage::disk('private')->assertExists("articles/featured/{$article->id}/full.webp");
+        }
     });
 
     it('displays saved image on edit page', function (): void {

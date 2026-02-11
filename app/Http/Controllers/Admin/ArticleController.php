@@ -70,10 +70,10 @@ class ArticleController extends Controller
         $article->published_at = $data['published_at'] ?? null;
         $article->meta = $data['meta'] ?? [];
 
-        // Handle featured image - store on public disk by default
-        // The model's boot method will move to private if status is draft/hidden
+        // Handle featured image - store to correct disk based on status
         if ($request->hasFile('featured_image_file')) {
-            $path = $request->file('featured_image_file')->store('articles/featured', 'public');
+            $disk = Status::tryFrom($data['status'])?->isPublic() ? 'public' : 'private';
+            $path = $request->file('featured_image_file')->store('articles/featured', $disk);
             $article->featured_image = $path;
         } elseif (! empty($data['featured_image'])) {
             $article->featured_image = $data['featured_image'];

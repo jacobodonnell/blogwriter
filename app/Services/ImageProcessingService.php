@@ -136,6 +136,11 @@ class ImageProcessingService
             return;
         }
 
+        // Skip if source and destination are the same disk
+        if ($fromDisk === $toDisk) {
+            return;
+        }
+
         $baseDir = "articles/featured/{$article->id}";
         $files = [
             'full.webp',
