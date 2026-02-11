@@ -105,14 +105,38 @@ class InstallCommand extends Command
     protected function freshInstall(): void
     {
         info('Running fresh installation...');
-        info('Disabling foreign key constraints...');
-        DB::statement('PRAGMA foreign_keys = OFF');
-        try {
-            Artisan::call('migrate:fresh', ['--force' => true]);
-        } finally {
-            DB::statement('PRAGMA foreign_keys = ON');
-            info('Re-enabling foreign key constraints...');
+
+        // Delete lock file to signal "installation in progress"
+        if (file_exists(storage_path('installed.lock'))) {
+            unlink(storage_path('installed.lock'));
+            info('Removed installation lock.');
         }
+
+        $dbPath = config('database.connections.sqlite.database');
+
+        if (file_exists($dbPath)) {
+            info('Removing existing database...');
+
+            // Properly close all SQLite connections to release file locks
+            DB::purge('sqlite');
+
+            // Delete the database file
+            if (! unlink($dbPath)) {
+                throw new \RuntimeException("Cannot delete database file: {$dbPath}. Check file permissions.");
+            }
+
+            // Create fresh empty database file
+            touch($dbPath);
+            info('Fresh database created.');
+        }
+
+        info('Running database migrations...');
+        $exitCode = Artisan::call('migrate', ['--force' => true]);
+
+        if ($exitCode !== 0) {
+            throw new \RuntimeException('Database migration failed. Exit code: '.$exitCode);
+        }
+
         info('Database reset complete.');
     }
 
