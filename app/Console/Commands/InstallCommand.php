@@ -190,6 +190,27 @@ class InstallCommand extends Command
 
     protected function promptForPassword(): string
     {
+        $suggestedPassphrase = PasswordGenerator::generate();
+
+        info('Suggested secure passphrase (memorable & strong):');
+        info($suggestedPassphrase);
+        $this->newLine();
+
+        $useSuggested = confirm(
+            label: 'Use this passphrase?',
+            default: false
+        );
+
+        if ($useSuggested) {
+            // Show it one more time for the user to copy
+            info('Your passphrase: '.$suggestedPassphrase);
+            info('Please save this in a password manager!');
+            $this->newLine();
+
+            return $suggestedPassphrase;
+        }
+
+        // Continue with existing manual password flow
         $attempts = 0;
         $maxAttempts = 3;
 
@@ -214,12 +235,13 @@ class InstallCommand extends Command
             $attempts++;
         }
 
-        // If max attempts reached, generate a secure password
-        warning('Maximum attempts reached. Generating a secure password for you.');
-        $password = \Illuminate\Support\Str::random(16);
-        info("Your generated password: {$password}");
+        // If max attempts reached, generate a secure passphrase
+        warning('Maximum attempts reached. Generating a secure passphrase for you.');
+        $generatedPassphrase = PasswordGenerator::generate();
+        info("Your generated passphrase: {$generatedPassphrase}");
+        info('Please save this in a password manager!');
 
-        return $password;
+        return $generatedPassphrase;
     }
 
     protected function install(array $config): void
