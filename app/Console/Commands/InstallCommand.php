@@ -355,8 +355,14 @@ class InstallCommand extends Command
     protected function generateAppKey(): void
     {
         info('Generating application key...');
-        Artisan::call('key:generate');
-        info('✓ Application key generated');
+        $exitCode = Artisan::call('key:generate', ['--force' => true, '--no-interaction' => true]);
+
+        if ($exitCode !== 0) {
+            warning('Could not generate application key automatically.');
+            info('You may need to run: php artisan key:generate');
+        } else {
+            info('✓ Application key generated');
+        }
     }
 
     protected function updateEnvironmentFile(array $config): void
