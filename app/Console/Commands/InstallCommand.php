@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 use function Laravel\Prompts\confirm;
@@ -87,7 +88,14 @@ class InstallCommand extends Command
     protected function freshInstall(): void
     {
         info('Running fresh installation...');
-        Artisan::call('migrate:fresh', ['--force' => true]);
+        info('Disabling foreign key constraints...');
+        DB::statement('PRAGMA foreign_keys = OFF');
+        try {
+            Artisan::call('migrate:fresh', ['--force' => true]);
+        } finally {
+            DB::statement('PRAGMA foreign_keys = ON');
+            info('Re-enabling foreign key constraints...');
+        }
         info('Database reset complete.');
     }
 
