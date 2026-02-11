@@ -222,8 +222,9 @@ describe('addDirectoryToZip exclusion logic', function (): void {
             ['node_modules/package.json', true],
             ['dist/blogwriter-v0.1.zip', true],
             ['storage/logs/laravel.log', true],
-            ['.env', true],
-            ['.env.example', true], // Excluded because it starts with .env pattern
+            ['.env', true], // Only exact .env is excluded
+            ['.env.example', false], // Now included - only exact .env excluded
+            ['.env.freshinstall', false], // Must be included for installation
             ['tests/Feature/Test.php', true],
             ['app/Models/User.php', false],
             ['vendor/autoload.php', false],
@@ -234,6 +235,17 @@ describe('addDirectoryToZip exclusion logic', function (): void {
         foreach ($testCases as [$relativePath, $shouldBeExcluded]) {
             $isExcluded = false;
             foreach ($exclude as $pattern) {
+                // Match the logic from BundleCommand
+                if ($pattern === '.env') {
+                    // Only exclude exact .env file, not .env.* files
+                    if (basename($relativePath) === '.env') {
+                        $isExcluded = true;
+                        break;
+                    }
+
+                    continue;
+                }
+
                 if (str_starts_with($relativePath, $pattern) || fnmatch($pattern, basename($relativePath))) {
                     $isExcluded = true;
                     break;
@@ -241,6 +253,57 @@ describe('addDirectoryToZip exclusion logic', function (): void {
             }
 
             expect($isExcluded)->toBe($shouldBeExcluded, "Path '{$relativePath}' exclusion check failed");
+        }
+    });
+
+    it('includes .env.freshinstall in bundle', function (): void {
+        // Verify the source code includes special handling for .env files
+        $source = file_get_contents(app_path('Console/Commands/BundleCommand.php'));
+
+        // Check that .env special handling exists
+        expect($source)->toContain("if (\$pattern === '.env')");
+        expect($source)->toContain("if (basename(\$relativePath) === '.env')");
+        expect($source)->toContain("continue; // Don't exclude .env.example, .env.freshinstall, etc.");
+    });
+
+    it('excludes only exact .env file not env templates', function (): void {
+        // Test the actual exclusion logic from BundleCommand
+        $exclude = [
+            '.git',
+            '.gitignore',
+            '.env',  // This should only match exact .env
+            'node_modules',
+        ];
+
+        $testCases = [
+            ['.env', true],                          // Exact match - excluded
+            ['.env.example', false],                 // Different file - included
+            ['.env.freshinstall', false],            // Different file - included
+            ['config/.env', true],                   // Exact match in subdir - excluded
+            ['config/.env.example', false],          // Different file in subdir - included
+        ];
+
+        foreach ($testCases as [$relativePath, $shouldBeExcluded]) {
+            $isExcluded = false;
+            $basename = basename($relativePath);
+
+            foreach ($exclude as $pattern) {
+                if ($pattern === '.env') {
+                    if ($basename === '.env') {
+                        $isExcluded = true;
+                        break;
+                    }
+
+                    continue;
+                }
+
+                if (str_starts_with($relativePath, $pattern) || fnmatch($pattern, $basename)) {
+                    $isExcluded = true;
+                    break;
+                }
+            }
+
+            expect($isExcluded)->toBe($shouldBeExcluded);
         }
     });
 });

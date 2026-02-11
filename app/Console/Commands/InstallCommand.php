@@ -368,13 +368,35 @@ class InstallCommand extends Command
     protected function setupEnvironmentFile(): void
     {
         $envPath = base_path('.env');
-        $envExamplePath = base_path('.env.example');
 
-        if (! file_exists($envPath) && file_exists($envExamplePath)) {
+        if (file_exists($envPath)) {
+            return;
+        }
+
+        // Try .env.freshinstall first (for bundled installations)
+        $envFreshPath = base_path('.env.freshinstall');
+        if (file_exists($envFreshPath)) {
+            info('Creating .env file from .env.freshinstall...');
+            copy($envFreshPath, $envPath);
+            info('✓ .env file created');
+
+            return;
+        }
+
+        // Fall back to .env.example (for development environments)
+        $envExamplePath = base_path('.env.example');
+        if (file_exists($envExamplePath)) {
             info('Creating .env file from .env.example...');
             copy($envExamplePath, $envPath);
             info('✓ .env file created');
+
+            return;
         }
+
+        throw new \RuntimeException(
+            'Cannot create .env file. Neither .env.freshinstall nor .env.example found. '.
+            'Please ensure the BlogWriter distribution includes one of these template files.'
+        );
     }
 
     protected function generateAppKey(): void

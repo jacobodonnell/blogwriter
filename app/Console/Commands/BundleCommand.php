@@ -18,7 +18,7 @@ class BundleCommand extends Command
         $this->info('Creating BlogWriter distribution bundle...');
 
         // Check if npm build exists
-        if (!$this->option('skip-build') && ! is_dir(public_path('build'))) {
+        if (! $this->option('skip-build') && ! is_dir(public_path('build'))) {
             $this->warn('No build directory found. Running npm run build...');
             $process = Process::fromShellCommandline('npm run build');
             $process->run();
@@ -101,6 +101,16 @@ class BundleCommand extends Command
             // Check exclusions
             $shouldExclude = false;
             foreach ($exclude as $pattern) {
+                // Special handling for .env - only exclude exact match, not .env.* files
+                if ($pattern === '.env') {
+                    if (basename($relativePath) === '.env') {
+                        $shouldExclude = true;
+                        break;
+                    }
+
+                    continue; // Don't exclude .env.example, .env.freshinstall, etc.
+                }
+
                 if (str_starts_with($relativePath, (string) $pattern) || fnmatch($pattern, basename($relativePath))) {
                     $shouldExclude = true;
                     break;
