@@ -30,3 +30,4 @@ GEMINI.md
 
 # BlogWriter installation lock file (environment-specific)
 /storage/installed.lock
+tests/Browser/Screenshots/
