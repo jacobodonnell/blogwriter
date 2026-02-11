@@ -185,7 +185,15 @@ class InstallCommand extends Command
 
     protected function validatePasswordLength(string $value): ?string
     {
-        return strlen($value) >= 8 ? null : 'Password must be at least 8 characters.';
+        $validator = validator(['password' => $value], [
+            'password' => PasswordRules::rules(),
+        ], PasswordRules::messages());
+
+        if ($validator->fails()) {
+            return $validator->errors()->first('password');
+        }
+
+        return null;
     }
 
     protected function promptForPassword(): string
