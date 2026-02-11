@@ -248,7 +248,7 @@ class ImageProcessingService
      *
      * @param  \Intervention\Image\Image  $image
      */
-    private function storeWebp($image, string $path, string $disk): void
+    private function storeWebp(\Intervention\Image\Interfaces\ImageInterface $image, string $path, string $disk): void
     {
         $encoded = $image->toWebp(self::WEBP_QUALITY);
         Storage::disk($disk)->put($path, $encoded->toString());
