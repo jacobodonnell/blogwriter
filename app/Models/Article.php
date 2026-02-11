@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Status;
+use App\Services\ImageProcessingService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -23,6 +24,10 @@ class Article extends Model
         'published_at',
         'last_edited_at',
         'featured_image',
+        'featured_image_width',
+        'featured_image_height',
+        'featured_image_file_size',
+        'featured_image_mime_type',
         'meta',
     ];
 
@@ -34,6 +39,9 @@ class Article extends Model
             'published_at' => 'datetime',
             'last_edited_at' => 'datetime',
             'status' => Status::class,
+            'featured_image_width' => 'integer',
+            'featured_image_height' => 'integer',
+            'featured_image_file_size' => 'integer',
         ];
     }
 
@@ -84,26 +92,52 @@ class Article extends Model
                 $article->last_edited_at = now()->startOfSecond();
             }
 
-            // Handle featured image disk selection
-            // Move file to appropriate disk based on status (for both new and existing articles)
-            if ($article->featured_image && ! Str::isUrl($article->featured_image)) {
-                $targetDisk = $newStatus === Status::Published ? 'public' : 'private';
+            // Clear metadata when removing image
+            if ($article->isDirty('featured_image') && is_null($article->featured_image)) {
+                $article->featured_image_width = null;
+                $article->featured_image_height = null;
+                $article->featured_image_file_size = null;
+                $article->featured_image_mime_type = null;
+            }
+        });
 
-                // Check current location of the file
-                if (Storage::disk('public')->exists($article->featured_image)) {
-                    $currentDisk = 'public';
-                } elseif (Storage::disk('private')->exists($article->featured_image)) {
-                    $currentDisk = 'private';
-                } else {
-                    $currentDisk = null;
-                }
+        // Process images AFTER save so article ID is available
+        static::saved(function ($article): void {
+            if (! $article->featured_image || Str::isUrl($article->featured_image)) {
+                return;
+            }
 
-                // Move file if it's on the wrong disk
-                if ($currentDisk !== null && $currentDisk !== $targetDisk) {
-                    $fileContent = Storage::disk($currentDisk)->get($article->featured_image);
-                    Storage::disk($targetDisk)->put($article->featured_image, $fileContent);
-                    Storage::disk($currentDisk)->delete($article->featured_image);
+            $targetDisk = $article->status === Status::Published ? 'public' : 'private';
+            $service = app(ImageProcessingService::class);
+
+            // Process featured image if it's a new file upload (not already processed)
+            // Check by seeing if it follows the old storage pattern (articles/featured/*.ext)
+            if (str_starts_with($article->featured_image, 'articles/featured/') && ! str_starts_with($article->featured_image, "articles/featured/{$article->id}/")) {
+                // Check if this is a newly uploaded file (not already processed)
+                if (Storage::disk($targetDisk)->exists($article->featured_image)) {
+                    $sourcePath = $article->featured_image;
+
+                    // Only process if the image is valid (not corrupted)
+                    if ($service->isValidImage($sourcePath, $targetDisk)) {
+                        $metadata = $service->processUpload($article, $sourcePath, $targetDisk);
+
+                        // Update the article with processed image info (without triggering events again)
+                        $article->featured_image = $metadata['path'];
+                        $article->featured_image_width = $metadata['width'];
+                        $article->featured_image_height = $metadata['height'];
+                        $article->featured_image_file_size = $metadata['file_size'];
+                        $article->featured_image_mime_type = $metadata['mime_type'];
+                        $article->saveQuietly();
+                    }
                 }
+            }
+
+            // Handle status change - move images between disks
+            if ($article->wasChanged('status')) {
+                // Status changed - move all image sizes to appropriate disk
+                $oldStatus = $article->getOriginal('status');
+                $oldDisk = $oldStatus === Status::Published->value ? 'public' : 'private';
+                $service->moveImages($article, $oldDisk, $targetDisk);
             }
         });
     }
