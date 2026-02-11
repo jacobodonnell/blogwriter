@@ -29,17 +29,21 @@ class InstallCommand extends Command
         if ($this->isAlreadyInstalled() && ! $this->option('force')) {
             warning('BlogWriter appears to already be installed.');
 
-            $force = confirm(
-                label: 'Do you want to force a fresh installation? This will delete existing data.',
+            $override = confirm(
+                label: 'Do you want to override the existing installation? ⚠️ This will DELETE all content and cannot be undone.',
                 default: false
             );
 
-            if (! $force) {
-                info('Installation cancelled. Use --force to override.');
+            if (! $override) {
+                info('Installation cancelled.');
 
                 return self::SUCCESS;
             }
 
+            // Delete lock file and reset database
+            if (file_exists(storage_path('installed.lock'))) {
+                unlink(storage_path('installed.lock'));
+            }
             $this->freshInstall();
         }
 
@@ -60,11 +64,24 @@ class InstallCommand extends Command
 
     protected function isAlreadyInstalled(): bool
     {
+        // Check lock file first (primary check)
+        if (file_exists(storage_path('installed.lock'))) {
+            return true;
+        }
+
+        // Fallback to database check
         try {
-            return User::exists();
+            if (User::exists()) {
+                // Create lock file for consistency (migration path)
+                file_put_contents(storage_path('installed.lock'), now());
+
+                return true;
+            }
         } catch (\Exception) {
             return false;
         }
+
+        return false;
     }
 
     protected function freshInstall(): void
@@ -212,6 +229,10 @@ class InstallCommand extends Command
         Artisan::call('config:clear');
         Artisan::call('cache:clear');
         info('✓ Caches cleared');
+
+        // Create installation lock file
+        file_put_contents(storage_path('installed.lock'), now());
+        info('✓ Installation lock file created');
 
         $this->newLine();
         $this->displaySuccess($config, $user);
