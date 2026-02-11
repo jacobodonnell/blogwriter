@@ -25,7 +25,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('login') }}" x-target="login-card" x-data="{ processing: false }" @submit="processing = true">
+            <form method="POST" action="{{ route('login') }}" x-target="login-card" x-target.away="_top" x-data="{ processing: false }" @submit="processing = true">
                 @csrf
 
                 {{-- Email Address --}}
