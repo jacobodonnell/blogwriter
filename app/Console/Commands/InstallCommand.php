@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use App\Services\PasswordGenerator;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -185,12 +186,26 @@ class InstallCommand extends Command
 
     protected function validatePasswordLength(string $value): ?string
     {
-        $validator = validator(['password' => $value], [
-            'password' => PasswordRules::rules(),
-        ], PasswordRules::messages());
+        // Check bypass first
+        if (env('BYPASS_PASSWORD_RULES', false)) {
+            return strlen($value) >= 8 ? null : 'Password must be at least 8 characters.';
+        }
 
-        if ($validator->fails()) {
-            return $validator->errors()->first('password');
+        // Manual validation for CLI context (works without container)
+        if (strlen($value) < 16) {
+            return 'Password must be at least 16 characters.';
+        }
+
+        if (! preg_match('/[a-zA-Z]/', $value)) {
+            return 'Password must contain at least one letter.';
+        }
+
+        if (! preg_match('/\d/', $value)) {
+            return 'Password must contain at least one number.';
+        }
+
+        if (! preg_match('/[^a-zA-Z0-9]/', $value)) {
+            return 'Password must contain at least one symbol.';
         }
 
         return null;

@@ -36,34 +36,37 @@ describe('validation methods', function (): void {
         expect($reflection->invoke($this->command, 'user@'))->toBe('Please enter a valid email address.');
     });
 
-    it('validates password length correctly', function (): void {
+    it('validates password requirements correctly', function (): void {
         $reflection = new ReflectionMethod($this->command, 'validatePasswordLength');
 
-        // 8+ characters return null
-        expect($reflection->invoke($this->command, 'password123'))->toBeNull();
-        expect($reflection->invoke($this->command, '12345678'))->toBeNull();
-        expect($reflection->invoke($this->command, 'longpassword'))->toBeNull();
+        // Valid passwords (16+ chars, letter, number, symbol) return null
+        expect($reflection->invoke($this->command, 'StrongP@ssw0rd123!'))->toBeNull();
+        expect($reflection->invoke($this->command, 'MyS3cur3P@ssword!'))->toBeNull();
+        expect($reflection->invoke($this->command, 'C0rrect-H0rs3-B@tt3ry-42'))->toBeNull();
 
-        // < 8 characters return error
-        expect($reflection->invoke($this->command, '1234567'))->toBe('Password must be at least 8 characters.');
-        expect($reflection->invoke($this->command, ''))->toBe('Password must be at least 8 characters.');
-        expect($reflection->invoke($this->command, 'short'))->toBe('Password must be at least 8 characters.');
+        // Too short (< 16 chars) returns error
+        expect($reflection->invoke($this->command, 'Short1!'))->toBe('Password must be at least 16 characters.');
+        expect($reflection->invoke($this->command, ''))->toBe('Password must be at least 16 characters.');
+        expect($reflection->invoke($this->command, '123456789012345'))->toBe('Password must be at least 16 characters.');
+
+        // Missing letter returns error
+        expect($reflection->invoke($this->command, '123456789012345!@#'))->toBe('Password must contain at least one letter.');
+
+        // Missing number returns error
+        expect($reflection->invoke($this->command, 'abcdefghijklmnop!@#'))->toBe('Password must contain at least one number.');
+
+        // Missing symbol returns error
+        expect($reflection->invoke($this->command, 'abcdefghijklmnop123'))->toBe('Password must contain at least one symbol.');
     });
 
     it('handles edge cases for password validation', function (): void {
         $reflection = new ReflectionMethod($this->command, 'validatePasswordLength');
 
-        // Exactly 8 characters
-        expect($reflection->invoke($this->command, 'abcdefgh'))->toBeNull();
+        // Exactly 16 characters with all requirements
+        expect($reflection->invoke($this->command, 'abcd1234!@#$5678'))->toBeNull();
 
-        // Unicode characters
-        expect($reflection->invoke($this->command, 'привет12'))->toBeNull();
-
-        // Special characters
-        expect($reflection->invoke($this->command, '!@#$%^&*'))->toBeNull();
-
-        // Whitespace (8 spaces)
-        expect($reflection->invoke($this->command, '        '))->toBeNull();
+        // Special symbols work
+        expect($reflection->invoke($this->command, 'Strong!Pass@word#123'))->toBeNull();
     });
 });
 
