@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->create();
     Storage::fake('public');
     Storage::fake('private');
@@ -19,8 +19,8 @@ beforeEach(function () {
 // HAPPY PATH TESTS
 // ============================================================================
 
-describe('happy paths', function () {
-    it('persists external URL to database', function () {
+describe('happy paths', function (): void {
+    it('persists external URL to database', function (): void {
         $this->actingAs($this->user)
             ->post(route('admin.articles.store'), [
                 'title' => 'Test Article',
@@ -36,7 +36,7 @@ describe('happy paths', function () {
         expect($article->featured_image)->toBe('https://example.com/image.jpg');
     });
 
-    it('persists file upload to database and storage', function () {
+    it('persists file upload to database and storage', function (): void {
         $file = UploadedFile::fake()->image('featured.jpg');
 
         $this->actingAs($this->user)
@@ -56,7 +56,7 @@ describe('happy paths', function () {
         Storage::disk('private')->assertExists($article->featured_image);
     });
 
-    it('displays saved image on edit page', function () {
+    it('displays saved image on edit page', function (): void {
         $article = Article::factory()->create([
             'featured_image' => 'https://example.com/saved-image.jpg',
         ]);
@@ -68,7 +68,7 @@ describe('happy paths', function () {
         $response->assertSee('https://example.com/saved-image.jpg');
     });
 
-    it('removes featured image when checkbox is checked', function () {
+    it('removes featured image when checkbox is checked', function (): void {
         $article = Article::factory()->create([
             'featured_image' => 'https://example.com/image.jpg',
         ]);
@@ -93,8 +93,8 @@ describe('happy paths', function () {
 // VALIDATION TESTS
 // ============================================================================
 
-describe('validation', function () {
-    it('rejects invalid file types', function () {
+describe('validation', function (): void {
+    it('rejects invalid file types', function (): void {
         $file = UploadedFile::fake()->create('malware.exe', 100);
 
         $this->actingAs($this->user)
@@ -108,7 +108,7 @@ describe('validation', function () {
             ->assertSessionHasErrors('featured_image_file');
     });
 
-    it('rejects oversized files', function () {
+    it('rejects oversized files', function (): void {
         $file = UploadedFile::fake()->image('large.jpg')->size(3000); // 3MB
 
         $this->actingAs($this->user)
@@ -122,7 +122,7 @@ describe('validation', function () {
             ->assertSessionHasErrors('featured_image_file');
     });
 
-    it('rejects invalid URLs', function () {
+    it('rejects invalid URLs', function (): void {
         $this->actingAs($this->user)
             ->post(route('admin.articles.store'), [
                 'title' => 'Test Article',
@@ -134,7 +134,7 @@ describe('validation', function () {
             ->assertSessionHasErrors('featured_image');
     });
 
-    it('rejects when both URL and file are provided', function () {
+    it('rejects when both URL and file are provided', function (): void {
         $file = UploadedFile::fake()->image('featured.jpg');
 
         $this->actingAs($this->user)
@@ -154,8 +154,8 @@ describe('validation', function () {
 // PRIVACY TESTS - STORAGE DISK SELECTION
 // ============================================================================
 
-describe('privacy and storage', function () {
-    it('stores published article images on public disk', function () {
+describe('privacy and storage', function (): void {
+    it('stores published article images on public disk', function (): void {
         $file = UploadedFile::fake()->image('featured.jpg');
 
         $this->actingAs($this->user)
@@ -174,7 +174,7 @@ describe('privacy and storage', function () {
         Storage::disk('public')->assertExists($article->featured_image);
     });
 
-    it('stores draft article images on private disk', function () {
+    it('stores draft article images on private disk', function (): void {
         $file = UploadedFile::fake()->image('featured.jpg');
 
         $this->actingAs($this->user)
@@ -193,7 +193,7 @@ describe('privacy and storage', function () {
         Storage::disk('private')->assertExists($article->featured_image);
     });
 
-    it('stores hidden article images on private disk', function () {
+    it('stores hidden article images on private disk', function (): void {
         $file = UploadedFile::fake()->image('featured.jpg');
 
         $this->actingAs($this->user)
@@ -212,7 +212,7 @@ describe('privacy and storage', function () {
         Storage::disk('private')->assertExists($article->featured_image);
     });
 
-    it('moves image from public to private when published becomes draft', function () {
+    it('moves image from public to private when published becomes draft', function (): void {
         $file = UploadedFile::fake()->image('featured.jpg');
         $article = Article::factory()->create([
             'status' => 'published',
@@ -252,7 +252,7 @@ describe('privacy and storage', function () {
         Storage::disk('private')->assertExists($article->featured_image);
     });
 
-    it('moves image from private to public when draft becomes published', function () {
+    it('moves image from private to public when draft becomes published', function (): void {
         $file = UploadedFile::fake()->image('featured.jpg');
         $article = Article::factory()->create([
             'status' => 'draft',
@@ -296,8 +296,8 @@ describe('privacy and storage', function () {
 // EDGE CASES
 // ============================================================================
 
-describe('edge cases', function () {
-    it('allows creating article without featured image', function () {
+describe('edge cases', function (): void {
+    it('allows creating article without featured image', function (): void {
         $this->actingAs($this->user)
             ->post(route('admin.articles.store'), [
                 'title' => 'Test Article',
@@ -312,7 +312,7 @@ describe('edge cases', function () {
         expect($article->featured_image)->toBeNull();
     });
 
-    it('enforces maximum URL length', function () {
+    it('enforces maximum URL length', function (): void {
         $longUrl = 'https://example.com/'.str_repeat('a', 500);
 
         $this->actingAs($this->user)
@@ -326,7 +326,7 @@ describe('edge cases', function () {
             ->assertSessionHasErrors('featured_image');
     });
 
-    it('handles featured image update on existing article', function () {
+    it('handles featured image update on existing article', function (): void {
         $article = Article::factory()->create([
             'featured_image' => 'https://example.com/old-image.jpg',
         ]);
