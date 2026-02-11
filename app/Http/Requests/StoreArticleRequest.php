@@ -75,6 +75,16 @@ class StoreArticleRequest extends FormRequest
                         $validator->errors()->add('featured_image', 'The URL must point to a valid image file (jpg, jpeg, png, gif, webp, svg).');
                     }
                 }
+
+                // Validate uploaded image file is not empty
+                if ($this->hasFile('featured_image_file')) {
+                    $file = $this->file('featured_image_file');
+
+                    // Check file size is not zero
+                    if ($file->getSize() === 0) {
+                        $validator->errors()->add('featured_image_file', 'The uploaded image file is empty.');
+                    }
+                }
             },
         ];
     }
