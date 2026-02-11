@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 use function Laravel\Prompts\confirm;
+use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\note;
 use function Laravel\Prompts\password;
@@ -25,6 +26,21 @@ class InstallCommand extends Command
 
     public function handle(): int
     {
+        // Check dependencies first
+        if (! $this->hasVendorDirectory()) {
+            if ($this->isComposerAvailable()) {
+                if (! $this->runComposerInstall()) {
+                    return self::FAILURE;
+                }
+            } else {
+                error('Composer is not available and vendor directory is missing.');
+                note('Please run `composer install` from the terminal before running this installer.');
+                note('If you are on shared hosting, you may need to upload the vendor directory manually.');
+
+                return self::FAILURE;
+            }
+        }
+
         $this->welcome();
 
         if ($this->isAlreadyInstalled() && ! $this->option('force')) {
@@ -329,5 +345,34 @@ class InstallCommand extends Command
         $this->newLine();
 
         info('Happy blogging! Remember: own your content, own your domain.');
+    }
+
+    protected function isComposerAvailable(): bool
+    {
+        return ! (in_array(shell_exec('which composer'), ['', '0'], true) || shell_exec('which composer') === false || shell_exec('which composer') === null) || ! (in_array(shell_exec('where composer'), ['', '0'], true) || shell_exec('where composer') === false || shell_exec('where composer') === null);
+    }
+
+    protected function hasVendorDirectory(): bool
+    {
+        return is_dir(base_path('vendor'));
+    }
+
+    protected function runComposerInstall(): bool
+    {
+        info('Installing Composer dependencies...');
+
+        $output = [];
+        $returnCode = 0;
+        exec('composer install --no-interaction --optimize-autoloader 2>&1', $output, $returnCode);
+
+        if ($returnCode === 0) {
+            info('✓ Composer dependencies installed');
+
+            return true;
+        }
+
+        warning('Composer install failed. See error output above.');
+
+        return false;
     }
 }
