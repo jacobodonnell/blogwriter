@@ -249,7 +249,11 @@
                             {{-- Current Image --}}
                             @if($article->featured_image)
                                 <figure class="mt-2">
-                                    <img src="{{ $article->featured_image }}" alt="Featured" class="w-full h-32 object-cover rounded-lg">
+                                    @if(\Illuminate\Support\Str::isUrl($article->featured_image))
+                                        <img src="{{ $article->featured_image }}" alt="Featured" class="w-full h-32 object-cover rounded-lg">
+                                    @else
+                                        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($article->featured_image) }}" alt="Featured" class="w-full h-32 object-cover rounded-lg">
+                                    @endif
                                 </figure>
 
                                 {{-- Remove Checkbox --}}

@@ -328,6 +328,9 @@ class InstallCommand extends Command
         // Ensure storage directories exist before any Laravel operations
         $this->ensureStorageDirectories();
 
+        // Create storage symlink for image uploads
+        $this->createStorageLink();
+
         // 1. Setup .env file
         $this->setupEnvironmentFile();
 
@@ -554,6 +557,37 @@ class InstallCommand extends Command
             } elseif (! is_writable($path)) {
                 throw new \RuntimeException("Directory not writable: {$dir}. Check file permissions.");
             }
+        }
+    }
+
+    /**
+     * Create the storage symlink for public access to uploaded files.
+     * This is required for featured images and other uploaded assets to be accessible.
+     */
+    protected function createStorageLink(): void
+    {
+        $publicStoragePath = public_path('storage');
+        $targetPath = storage_path('app/public');
+
+        // Check if symlink already exists
+        if (is_link($publicStoragePath) || is_dir($publicStoragePath)) {
+            info('✓ Storage link already exists');
+
+            return;
+        }
+
+        // Ensure target directory exists
+        if (! is_dir($targetPath)) {
+            mkdir($targetPath, 0755, true);
+        }
+
+        // Create symlink
+        if (@symlink($targetPath, $publicStoragePath)) {
+            info('✓ Created storage symlink for public file access');
+        } else {
+            warning('Could not create storage symlink automatically');
+            note('You may need to manually run: php artisan storage:link');
+            note('Or on Windows, run as administrator: mklink /D public\\storage storage\\app\\public');
         }
     }
 }

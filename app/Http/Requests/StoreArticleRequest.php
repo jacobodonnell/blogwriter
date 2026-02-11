@@ -59,9 +59,21 @@ class StoreArticleRequest extends FormRequest
     {
         return [
             function (\Illuminate\Validation\Validator $validator): void {
+                // Check for both URL and file upload
                 if ($this->has('featured_image') && $this->filled('featured_image') && $this->hasFile('featured_image_file')) {
                     $validator->errors()->add('featured_image', 'Cannot provide both URL and file upload.');
                     $validator->errors()->add('featured_image_file', 'Cannot provide both URL and file upload.');
+                }
+
+                // Validate URL points to an image file
+                $featuredImage = $this->input('featured_image');
+                if ($this->filled('featured_image') && \Illuminate\Support\Str::isUrl($featuredImage)) {
+                    $validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+                    $extension = strtolower(pathinfo(parse_url($featuredImage, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION));
+
+                    if (! in_array($extension, $validExtensions)) {
+                        $validator->errors()->add('featured_image', 'The URL must point to a valid image file (jpg, jpeg, png, gif, webp, svg).');
+                    }
                 }
             },
         ];

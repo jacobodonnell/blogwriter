@@ -57,6 +57,9 @@ class DiagnoseCommand extends Command
         // Check 6: Storage permissions
         $this->check('Storage writable', fn (): bool => is_writable(storage_path('logs')), 'storage/logs is not writable - run: chmod -R 775 storage');
 
+        // Check 6b: Storage symlink exists (for uploaded images)
+        $this->check('Storage symlink', fn (): bool => is_link(public_path('storage')) || is_dir(public_path('storage')), 'public/storage symlink missing - run: php artisan storage:link');
+
         // Check 7: Vendor exists
         $this->check('Composer dependencies', fn (): bool => file_exists(base_path('vendor/autoload.php')), 'vendor/autoload.php missing - run: composer install');
 
