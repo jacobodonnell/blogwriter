@@ -62,6 +62,8 @@ class InstallCommand extends Command
     {
         $this->welcome();
 
+        $didFreshInstall = false;
+
         if ($this->isAlreadyInstalled() && ! $this->option('force')) {
             warning('BlogWriter appears to already be installed.');
 
@@ -81,10 +83,15 @@ class InstallCommand extends Command
                 unlink(storage_path('installed.lock'));
             }
             $this->freshInstall();
+            $didFreshInstall = true;
         }
 
-        $config = $this->gatherConfiguration();
-        $this->install($config);
+        // Only gather config and run install if we didn't just do a fresh install
+        // freshInstall() already handles the full reset + config flow
+        if (! $didFreshInstall) {
+            $config = $this->gatherConfiguration();
+            $this->install($config);
+        }
 
         return self::SUCCESS;
     }
