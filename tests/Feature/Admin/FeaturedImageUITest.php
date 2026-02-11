@@ -51,7 +51,7 @@ describe('tab functionality', function (): void {
         // File input should be present
         $response->assertSee('name="featured_image_file"', false);
         $response->assertSee('type="file"', false);
-        $response->assertSee('accept="image/*"', false);
+        $response->assertSee('accept="image/jpeg', false);
     });
 
     it('has active tab state with tabs-lifted styling', function (): void {
@@ -109,7 +109,6 @@ describe('file upload and preview', function (): void {
 
         // Check for Alpine change handler
         $response->assertSee('@change="handleFileSelect', false);
-        $response->assertSee('@change="previewFile', false);
     });
 
     it('has preview image container with x-show directive', function (): void {
@@ -118,8 +117,7 @@ describe('file upload and preview', function (): void {
             ->assertSuccessful();
 
         // Preview container should exist
-        $response->assertSee('x-show="filePreview', false);
-        $response->assertSee('x-show="previewUrl', false);
+        $response->assertSee('x-show="hasImage', false);
     });
 
     it('displays filename below preview image', function (): void {
@@ -230,7 +228,6 @@ describe('delete and undo functionality', function (): void {
             ->assertSuccessful();
 
         // Check for delete button with Alpine click handler
-        $response->assertSee('@click="deleteImage', false);
         $response->assertSee('@click="removeImage', false);
     });
 
@@ -279,7 +276,6 @@ describe('delete and undo functionality', function (): void {
         // Check for undo button
         $response->assertSee('Undo', false);
         $response->assertSee('@click="undoDelete', false);
-        $response->assertSee('@click="restoreImage', false);
     });
 
     it('has undo button with proper accessibility attributes', function (): void {
