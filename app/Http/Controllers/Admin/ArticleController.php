@@ -115,7 +115,9 @@ class ArticleController extends Controller
         $article->slug = $data['slug'];
         $article->content = $data['content'];
         $article->status = $data['status'];
-        $article->published_at = $data['published_at'] ?? null;
+        if (array_key_exists('published_at', $data)) {
+            $article->published_at = $data['published_at'];
+        }
         $article->meta = $data['meta'] ?? [];
 
         if ($request->hasFile('featured_image')) {

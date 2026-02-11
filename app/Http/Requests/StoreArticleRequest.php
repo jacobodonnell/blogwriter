@@ -27,7 +27,6 @@ class StoreArticleRequest extends FormRequest
             'summary' => ['nullable', 'string', 'max:500'],
             'content' => ['required', 'string'],
             'status' => ['required', 'in:draft,published,hidden'],
-            'published_at' => ['nullable', 'date', 'required_if:status,published'],
             'featured_image' => ['nullable', 'string', 'max:500'],
             'categories' => ['nullable', 'array'],
             'categories.*' => ['exists:categories,id'],
@@ -48,24 +47,6 @@ class StoreArticleRequest extends FormRequest
         return [
             'slug.regex' => 'Slug can only contain lowercase letters, numbers, and hyphens.',
             'categories.*.exists' => 'One or more selected categories do not exist.',
-            'published_at.required_if' => 'Published date is required when status is published.',
         ];
-    }
-
-    /**
-     * Configure the validator instance.
-     *
-     * @param  \Illuminate\Validation\Validator  $validator
-     */
-    public function withValidator($validator): void
-    {
-        $validator->after(function ($validator): void {
-            $status = $this->input('status');
-            $publishedAt = $this->input('published_at');
-
-            if ($status === 'published' && is_null($publishedAt)) {
-                $this->merge(['published_at' => now()]);
-            }
-        });
     }
 }

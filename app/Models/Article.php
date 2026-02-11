@@ -19,6 +19,7 @@ class Article extends Model
         'content',
         'status',
         'published_at',
+        'last_edited_at',
         'featured_image',
         'meta',
     ];
@@ -29,7 +30,19 @@ class Article extends Model
             'meta' => 'array',
             'past_slugs' => 'array',
             'published_at' => 'datetime',
+            'last_edited_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Set the published_at attribute, stripping microseconds for database consistency.
+     */
+    public function setPublishedAtAttribute($value): void
+    {
+        if ($value !== null) {
+            $value = \Carbon\Carbon::parse($value)->startOfSecond();
+        }
+        $this->attributes['published_at'] = $value;
     }
 
     protected static function boot(): void
@@ -43,6 +56,28 @@ class Article extends Model
 
             if ($article->isDirty('slug') && ! empty($article->getOriginal('slug'))) {
                 $article->addPastSlug($article->getOriginal('slug'));
+            }
+
+            // Handle status transitions for published_at
+            if ($article->isDirty('status')) {
+                // When status changes TO 'published' and published_at is null, set it to now
+                if ($article->status === 'published' && is_null($article->published_at)) {
+                    $article->published_at = now()->startOfSecond();
+                }
+            }
+
+            // When saving an article that was already published before (has original published_at),
+            // track the edit time. This handles both:
+            // 1. Editing an already-published article (status stays published)
+            // 2. Re-publishing a previously-published article (status changes from draft to published)
+            // Only set last_edited_at if:
+            // 1. Status is 'published'
+            // 2. The article was already published before this save (has original published_at)
+            // 3. last_edited_at hasn't been manually set already
+            if ($article->status === 'published'
+                && ! is_null($article->getOriginal('published_at'))
+                && is_null($article->last_edited_at)) {
+                $article->last_edited_at = now()->startOfSecond();
             }
         });
     }
@@ -185,6 +220,14 @@ class Article extends Model
 
         // Return admin preview URL if public route doesn't exist yet
         return url('/blog/'.$this->slug);
+    }
+
+    /**
+     * Check if the article has been edited after initial publish.
+     */
+    public function wasEdited(): bool
+    {
+        return ! is_null($this->last_edited_at);
     }
 
     /**
