@@ -284,7 +284,7 @@
                             </div>
 
                              {{-- Image Preview Area --}}
-                             <div x-show="hasImage" x-show="previewUrl" x-show="filePreview" x-transition class="relative mb-4" role="tabpanel">
+                             <div x-show="hasImage" x-transition class="relative mb-4" role="tabpanel">
                                  <figure class="relative">
                                     {{-- Badge overlay --}}
                                     <div class="absolute top-2 left-2 z-10">
@@ -298,14 +298,13 @@
                                         </span>
                                     </div>
                                     
-                                     {{-- Delete button --}}
-                                     <button type="button" 
-                                             @click="removeImage()"
-                                             @click="deleteImage()"
-                                             class="btn btn-circle btn-error btn-sm absolute top-2 right-2 z-10"
-                                             aria-label="Remove featured image">
-                                         <i class="ph ph-x text-lg"></i>
-                                     </button>
+{{-- Delete button --}}
+                                      <button type="button" 
+                                              @click="removeImage()"
+                                              class="btn btn-circle btn-error btn-sm absolute top-2 right-2 z-10"
+                                              aria-label="Remove featured image">
+                                          <i class="ph ph-x text-lg"></i>
+                                      </button>
                                     
                                     {{-- Preview image --}}
                                     <img :src="previewUrl" 
@@ -322,11 +321,10 @@
 
                              {{-- Undo Button --}}
                              <div x-show="isRemoved && originalUrl" x-transition class="mb-4">
-                                 <button type="button"
-                                         @click="undoDelete()"
-                                         @click="restoreImage()"
-                                         class="btn btn-ghost btn-sm"
-                                         aria-label="Restore featured image">
+<button type="button"
+                                          @click="undoDelete()"
+                                          class="btn btn-ghost btn-sm"
+                                          aria-label="Restore featured image">
                                      <i class="ph ph-arrow-u-up-left mr-1"></i>
                                      Undo
                                  </button>
@@ -358,13 +356,12 @@
                             <div x-show="activeTab === 'upload_file'" x-transition role="tabpanel">
                                 <fieldset class="fieldset">
                                     <legend class="fieldset-legend text-sm">Upload Image</legend>
-                                     <input type="file"
-                                           name="featured_image_file"
-                                           x-ref="fileInput"
-                                           @change="handleFileSelect($event)"
-                                           @change="previewFile($event)"
-                                           class="file-input file-input-bordered w-full file-input-sm @error('featured_image_file') input-error @enderror"
-                                           accept="image/*">
+<input type="file"
+                                            name="featured_image_file"
+                                            x-ref="fileInput"
+                                            @change="handleFileSelect($event)"
+                                            class="file-input file-input-bordered w-full file-input-sm @error('featured_image_file') input-error @enderror"
+                                            accept="image/jpeg,image/jpg,image/png,image/webp,image/gif">
                                     <p class="text-xs text-gray-500 mt-1">Maximum file size: 2MB. Supported formats: JPG, JPEG, PNG, WebP, GIF</p>
                                     @error('featured_image_file')
                                         <span class="text-error text-sm mt-1">{{ $message }}</span>
