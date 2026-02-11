@@ -18,7 +18,7 @@ Route::view('/about', 'public.about')->name('about');
 // Auth required in production, optional in local/development
 $adminMiddleware = app()->environment(['local', 'development', 'dev']) ? [] : ['auth'];
 
-Route::middleware($adminMiddleware)->prefix('admin')->name('admin.')->group(function () {
+Route::middleware($adminMiddleware)->prefix('admin')->name('admin.')->group(function (): void {
     // Dashboard
     Route::get('/', DashboardController::class)->name('dashboard');
 

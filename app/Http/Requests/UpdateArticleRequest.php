@@ -68,7 +68,7 @@ class UpdateArticleRequest extends FormRequest
      */
     public function withValidator($validator): void
     {
-        $validator->after(function ($validator) {
+        $validator->after(function ($validator): void {
             $status = $this->input('status');
             $publishedAt = $this->input('published_at');
 

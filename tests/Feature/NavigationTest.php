@@ -2,11 +2,11 @@
 
 use App\Models\User;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->create();
 });
 
-it('returns successful response for all public navigation links', function () {
+it('returns successful response for all public navigation links', function (): void {
     $publicLinks = [
         route('home'),
         route('about'),
@@ -17,7 +17,7 @@ it('returns successful response for all public navigation links', function () {
     }
 });
 
-it('returns successful response for all admin navigation links when authenticated', function () {
+it('returns successful response for all admin navigation links when authenticated', function (): void {
     $adminLinks = [
         route('admin.dashboard'),
         route('admin.articles.index'),
@@ -31,12 +31,12 @@ it('returns successful response for all admin navigation links when authenticate
     }
 });
 
-it('redirects blog route to home', function () {
+it('redirects blog route to home', function (): void {
     $this->get('/blog')
         ->assertRedirect('/');
 });
 
-it('does not use hardcoded admin URLs in layout files', function () {
+it('does not use hardcoded admin URLs in layout files', function (): void {
     $layoutFiles = [
         resource_path('views/components/layouts/public.blade.php'),
         resource_path('views/components/layouts/admin.blade.php'),
@@ -62,7 +62,7 @@ it('does not use hardcoded admin URLs in layout files', function () {
     }
 });
 
-it('does not use hardcoded public URLs in layout files', function () {
+it('does not use hardcoded public URLs in layout files', function (): void {
     $layoutFiles = [
         resource_path('views/components/layouts/public.blade.php'),
     ];
@@ -86,7 +86,7 @@ it('does not use hardcoded public URLs in layout files', function () {
     expect(true)->toBeTrue('No hardcoded public navigation URLs found');
 });
 
-it('uses named routes in breadcrumb links', function () {
+it('uses named routes in breadcrumb links', function (): void {
     $article = \App\Models\Article::factory()->published()->create();
     $category = \App\Models\Category::factory()->create();
 
@@ -103,7 +103,7 @@ it('uses named routes in breadcrumb links', function () {
     $response->assertSuccessful();
 });
 
-it('has no broken links in public pages smoke test', function () {
+it('has no broken links in public pages smoke test', function (): void {
     $pages = [
         '/',
         '/about',

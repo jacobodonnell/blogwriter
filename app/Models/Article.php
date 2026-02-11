@@ -36,7 +36,7 @@ class Article extends Model
     {
         parent::boot();
 
-        static::saving(function ($article) {
+        static::saving(function ($article): void {
             if (empty($article->slug)) {
                 $article->slug = Str::slug($article->title);
             }
@@ -61,7 +61,8 @@ class Article extends Model
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopePublished($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function published($query)
     {
         return $query->where('status', 'published')
             ->where('published_at', '<=', now());
@@ -73,7 +74,8 @@ class Article extends Model
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeDraft($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function draft($query)
     {
         return $query->where('status', 'draft');
     }
@@ -84,7 +86,8 @@ class Article extends Model
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeHidden($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function hidden($query)
     {
         return $query->where('status', 'hidden');
     }
@@ -95,7 +98,8 @@ class Article extends Model
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeVisibleToPublic($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function visibleToPublic($query)
     {
         return $query->where('status', 'published');
     }
@@ -106,7 +110,8 @@ class Article extends Model
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeVisibleToOwner($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function visibleToOwner($query)
     {
         return $query->whereIn('status', ['published', 'hidden']);
     }

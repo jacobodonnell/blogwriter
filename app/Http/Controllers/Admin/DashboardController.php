@@ -11,7 +11,7 @@ class DashboardController extends Controller
     /**
      * Display the admin dashboard.
      */
-    public function __invoke()
+    public function __invoke(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $recentArticles = Article::query()
             ->with('categories')

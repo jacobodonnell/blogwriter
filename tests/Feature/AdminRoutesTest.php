@@ -5,32 +5,32 @@ use App\Models\Category;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->create([
         'email' => 'admin@example.com',
         'password' => Hash::make('password123'),
     ]);
 });
 
-it('redirects guest to login when accessing admin dashboard', function () {
+it('redirects guest to login when accessing admin dashboard', function (): void {
     $response = $this->get('/admin');
 
     $response->assertRedirect('/login');
 });
 
-it('returns successful response for admin dashboard when authenticated', function () {
+it('returns successful response for admin dashboard when authenticated', function (): void {
     $response = $this->actingAs($this->user)->get('/admin');
 
     $response->assertSuccessful();
 });
 
-it('returns successful response for articles index when authenticated', function () {
+it('returns successful response for articles index when authenticated', function (): void {
     $response = $this->actingAs($this->user)->get('/admin/articles');
 
     $response->assertSuccessful();
 });
 
-it('shows articles list on articles index', function () {
+it('shows articles list on articles index', function (): void {
     $article = Article::factory()->published()->create([
         'title' => 'Test Article in Admin',
     ]);
@@ -41,13 +41,13 @@ it('shows articles list on articles index', function () {
         ->assertSee($article->title);
 });
 
-it('returns successful response for articles create page', function () {
+it('returns successful response for articles create page', function (): void {
     $response = $this->actingAs($this->user)->get('/admin/articles/create');
 
     $response->assertSuccessful();
 });
 
-it('stores a new article', function () {
+it('stores a new article', function (): void {
     $articleData = [
         'title' => 'New Test Article',
         'slug' => 'new-test-article',
@@ -68,7 +68,7 @@ it('stores a new article', function () {
     ]);
 });
 
-it('returns successful response for articles edit page', function () {
+it('returns successful response for articles edit page', function (): void {
     $article = Article::factory()->published()->create([
         'title' => 'Test Edit Article Title',
     ]);
@@ -80,7 +80,7 @@ it('returns successful response for articles edit page', function () {
         ->assertSee('Test Edit Article Title');
 });
 
-it('updates an existing article', function () {
+it('updates an existing article', function (): void {
     $article = Article::factory()->published()->create([
         'title' => 'Original Title',
         'slug' => 'original-title',
@@ -106,7 +106,7 @@ it('updates an existing article', function () {
     ]);
 });
 
-it('deletes an article', function () {
+it('deletes an article', function (): void {
     $article = Article::factory()->published()->create();
 
     $response = $this->actingAs($this->user)
@@ -119,13 +119,13 @@ it('deletes an article', function () {
     ]);
 });
 
-it('returns successful response for categories index', function () {
+it('returns successful response for categories index', function (): void {
     $response = $this->actingAs($this->user)->get('/admin/categories');
 
     $response->assertSuccessful();
 });
 
-it('shows categories list on categories index', function () {
+it('shows categories list on categories index', function (): void {
     $category = Category::factory()->create([
         'name' => 'Test Category',
     ]);
@@ -136,7 +136,7 @@ it('shows categories list on categories index', function () {
         ->assertSee($category->name);
 });
 
-it('stores a new category', function () {
+it('stores a new category', function (): void {
     $categoryData = [
         'name' => 'New Test Category',
         'slug' => 'new-test-category',
@@ -154,7 +154,7 @@ it('stores a new category', function () {
     ]);
 });
 
-it('updates an existing category', function () {
+it('updates an existing category', function (): void {
     $category = Category::factory()->create([
         'name' => 'Original Category',
         'slug' => 'original-category',
@@ -178,7 +178,7 @@ it('updates an existing category', function () {
     ]);
 });
 
-it('deletes a category', function () {
+it('deletes a category', function (): void {
     $category = Category::factory()->create();
 
     $response = $this->actingAs($this->user)
@@ -191,7 +191,7 @@ it('deletes a category', function () {
     ]);
 });
 
-it('returns successful response for category edit page', function () {
+it('returns successful response for category edit page', function (): void {
     $category = Category::factory()->create();
 
     $response = $this->actingAs($this->user)
@@ -201,7 +201,7 @@ it('returns successful response for category edit page', function () {
         ->assertSee($category->name);
 });
 
-it('returns successful response for settings page when authenticated', function () {
+it('returns successful response for settings page when authenticated', function (): void {
     $response = $this->actingAs($this->user)->get('/admin/settings');
 
     $response->assertSuccessful()
@@ -209,7 +209,7 @@ it('returns successful response for settings page when authenticated', function 
         ->assertSee('Configure your BlogWriter site.');
 });
 
-it('shows site configuration on settings page', function () {
+it('shows site configuration on settings page', function (): void {
     $response = $this->actingAs($this->user)->get('/admin/settings');
 
     $response->assertSuccessful()

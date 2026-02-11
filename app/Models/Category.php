@@ -22,7 +22,7 @@ class Category extends Model
     {
         parent::boot();
 
-        static::saving(function ($category) {
+        static::saving(function ($category): void {
             if (empty($category->slug)) {
                 $category->slug = Str::slug($category->name);
             }
