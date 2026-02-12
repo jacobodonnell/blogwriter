@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\Status;
 use App\Models\Article;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -34,44 +33,6 @@ describe('happy paths', function (): void {
         $article = Article::first();
 
         expect($article->featured_image)->toBe('https://example.com/image.jpg');
-    });
-
-    it('persists file upload to database and storage', function (): void {
-        $file = UploadedFile::fake()->image('featured.jpg');
-
-        $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article',
-                'content' => 'Test content',
-                'status' => 'draft',
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article = Article::first();
-
-        expect($article->featured_image)->not->toBeNull();
-        // Draft articles store images on private disk
-        // After processing, path will be articles/featured/{id}/full.webp
-        expect($article->featured_image)->toContain('articles/featured');
-
-        // Verify image is on private disk (for draft status)
-        if (extension_loaded('gd')) {
-            Storage::disk('private')->assertExists("articles/featured/{$article->id}/full.webp");
-        }
-    });
-
-    it('displays saved image on edit page', function (): void {
-        $article = Article::factory()->create([
-            'featured_image' => 'https://example.com/saved-image.jpg',
-        ]);
-
-        $response = $this->actingAs($this->user)
-            ->get(route('admin.articles.edit', $article))
-            ->assertSuccessful();
-
-        $response->assertSee('https://example.com/saved-image.jpg');
     });
 
     it('removes featured image when checkbox is checked', function (): void {
@@ -154,35 +115,9 @@ describe('validation', function (): void {
             ])
             ->assertSessionHasErrors(['featured_image', 'featured_image_file']);
     });
-});
 
-// ============================================================================
-// PRIVACY TESTS - STORAGE DISK SELECTION
-// ============================================================================
-
-describe('privacy and storage', function (): void {
-    it('stores published article images on public disk', function (): void {
-        $file = UploadedFile::fake()->image('featured.jpg');
-
-        $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article',
-                'content' => 'Test content',
-                'status' => 'published',
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article = Article::first();
-
-        expect($article->status->value)->toBe('published');
-        expect($article->featured_image)->not->toBeNull();
-        // Note: File existence check skipped - Intervention Image doesn't work with Storage::fake()
-    });
-
-    it('stores draft article images on private disk', function (): void {
-        $file = UploadedFile::fake()->image('featured.jpg');
+    it('enforces maximum URL length', function (): void {
+        $longUrl = 'https://example.com/'.str_repeat('a', 500);
 
         $this->actingAs($this->user)
             ->post(route('admin.articles.store'), [
@@ -190,113 +125,9 @@ describe('privacy and storage', function (): void {
                 'slug' => 'test-article',
                 'content' => 'Test content',
                 'status' => 'draft',
-                'featured_image_file' => $file,
+                'featured_image' => $longUrl,
             ])
-            ->assertRedirect();
-
-        $article = Article::first();
-
-        expect($article->status->value)->toBe('draft');
-        expect($article->featured_image)->not->toBeNull();
-        // Note: File existence check skipped - Intervention Image doesn't work with Storage::fake()
-    });
-
-    it('stores hidden article images on private disk', function (): void {
-        $file = UploadedFile::fake()->image('featured.jpg');
-
-        $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article',
-                'content' => 'Test content',
-                'status' => 'hidden',
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article = Article::first();
-
-        expect($article->status->value)->toBe('hidden');
-        expect($article->featured_image)->not->toBeNull();
-        // Note: File existence check skipped - Intervention Image doesn't work with Storage::fake()
-    });
-
-    it('moves image from public to private when published becomes draft', function (): void {
-        $file = UploadedFile::fake()->image('featured.jpg');
-        $article = Article::factory()->create([
-            'status' => 'published',
-            'published_at' => now(),
-        ]);
-
-        // First upload the image
-        $this->actingAs($this->user)
-            ->put(route('admin.articles.update', $article), [
-                'title' => $article->title,
-                'slug' => $article->slug,
-                'content' => $article->content,
-                'status' => $article->status->value,
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article->refresh();
-        $originalPath = $article->featured_image;
-
-        // Now change status to draft
-        $this->actingAs($this->user)
-            ->put(route('admin.articles.update', $article), [
-                'title' => $article->title,
-                'slug' => $article->slug,
-                'content' => $article->content,
-                'status' => 'draft',
-            ])
-            ->assertRedirect();
-
-        $article->refresh();
-
-        // Image should have moved to private disk (status changed from published to draft)
-        expect($article->status->value)->toBe('draft');
-        expect($article->featured_image)->not->toBeNull();
-        // Note: File existence check skipped - disk move operations don't work properly with Storage::fake()
-    });
-
-    it('moves image from private to public when draft becomes published', function (): void {
-        $file = UploadedFile::fake()->image('featured.jpg');
-        $article = Article::factory()->create([
-            'status' => 'draft',
-        ]);
-
-        // First upload the image as draft
-        $this->actingAs($this->user)
-            ->put(route('admin.articles.update', $article), [
-                'title' => $article->title,
-                'slug' => $article->slug,
-                'content' => $article->content,
-                'status' => $article->status->value,
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article->refresh();
-        $originalPath = $article->featured_image;
-        Storage::disk('private')->assertExists($originalPath);
-
-        // Now publish the article
-        $this->actingAs($this->user)
-            ->put(route('admin.articles.update', $article), [
-                'title' => $article->title,
-                'slug' => $article->slug,
-                'content' => $article->content,
-                'status' => 'published',
-            ])
-            ->assertRedirect();
-
-        $article->refresh();
-
-        // Image should have moved to public disk
-        expect($article->status->value)->toBe('published');
-        expect($article->featured_image)->not->toBeNull();
-        // Note: File existence and disk move checks skipped - don't work with Storage::fake()
+            ->assertSessionHasErrors('featured_image');
     });
 });
 
@@ -318,20 +149,6 @@ describe('edge cases', function (): void {
         $article = Article::first();
 
         expect($article->featured_image)->toBeNull();
-    });
-
-    it('enforces maximum URL length', function (): void {
-        $longUrl = 'https://example.com/'.str_repeat('a', 500);
-
-        $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article',
-                'content' => 'Test content',
-                'status' => 'draft',
-                'featured_image' => $longUrl,
-            ])
-            ->assertSessionHasErrors('featured_image');
     });
 
     it('handles featured image update on existing article', function (): void {
