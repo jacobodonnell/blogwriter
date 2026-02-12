@@ -8,9 +8,7 @@ use App\Http\Requests\StoreArticleRequest;
 use App\Http\Requests\UpdateArticleRequest;
 use App\Models\Article;
 use App\Models\Category;
-use App\Services\ImageProcessingService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ArticleController extends Controller
@@ -70,15 +68,6 @@ class ArticleController extends Controller
         $article->published_at = $data['published_at'] ?? null;
         $article->meta = $data['meta'] ?? [];
 
-        // Handle featured image - store to correct disk based on status
-        if ($request->hasFile('featured_image_file')) {
-            $disk = Status::tryFrom($data['status'])?->isPublic() ? 'public' : 'private';
-            $path = $request->file('featured_image_file')->store('articles/featured', $disk);
-            $article->featured_image = $path;
-        } elseif (! empty($data['featured_image'])) {
-            $article->featured_image = $data['featured_image'];
-        }
-
         if (empty($data['summary'])) {
             $article->summary = Str::limit(strip_tags((string) $data['content']), 255);
         } else {
@@ -86,6 +75,18 @@ class ArticleController extends Controller
         }
 
         $article->save();
+
+        // Handle featured image upload
+        if ($request->hasFile('featured_image_file')) {
+            $article->addMediaFromRequest('featured_image_file')
+                ->toMediaCollection('featured_image');
+        }
+
+        // Handle external URL
+        if ($request->filled('featured_image') && filter_var($request->featured_image, FILTER_VALIDATE_URL)) {
+            $article->addMediaFromUrl($request->featured_image)
+                ->toMediaCollection('featured_image');
+        }
 
         if (! empty($data['categories'])) {
             $article->categories()->attach($data['categories']);
@@ -125,36 +126,6 @@ class ArticleController extends Controller
         }
         $article->meta = $data['meta'] ?? [];
 
-        // Handle featured image removal
-        $service = app(ImageProcessingService::class);
-
-        if (! empty($data['remove_featured_image'])) {
-            // Delete all old image sizes from storage if it's a local file
-            if ($article->featured_image && ! Str::isUrl($article->featured_image)) {
-                $oldDisk = $article->status->isPublic() ? 'public' : 'private';
-                $service->deleteOldImages($article->featured_image, $oldDisk);
-            }
-            $article->featured_image = null;
-        } elseif ($request->hasFile('featured_image_file')) {
-            // Delete old images if exists
-            if ($article->featured_image && ! Str::isUrl($article->featured_image)) {
-                $oldDisk = $article->status->isPublic() ? 'public' : 'private';
-                $service->deleteOldImages($article->featured_image, $oldDisk);
-            }
-            // Store new file on appropriate disk based on status
-            // The model's boot method will process and convert to WebP with multiple sizes
-            $disk = Status::tryFrom($data['status'])?->isPublic() ? 'public' : 'private';
-            $path = $request->file('featured_image_file')->store('articles/featured', $disk);
-            $article->featured_image = $path;
-        } elseif (! empty($data['featured_image'])) {
-            // Delete old images if switching to URL
-            if ($article->featured_image && ! Str::isUrl($article->featured_image)) {
-                $oldDisk = $article->status->isPublic() ? 'public' : 'private';
-                $service->deleteOldImages($article->featured_image, $oldDisk);
-            }
-            $article->featured_image = $data['featured_image'];
-        }
-
         if (empty($data['summary'])) {
             $article->summary = Str::limit(strip_tags((string) $data['content']), 255);
         } else {
@@ -162,6 +133,23 @@ class ArticleController extends Controller
         }
 
         $article->save();
+
+        // Handle featured image removal
+        if ($request->boolean('remove_featured_image')) {
+            $article->clearMediaCollection('featured_image');
+        }
+
+        // Handle featured image upload
+        if ($request->hasFile('featured_image_file')) {
+            $article->addMediaFromRequest('featured_image_file')
+                ->toMediaCollection('featured_image');
+        }
+
+        // Handle external URL
+        if ($request->filled('featured_image') && filter_var($request->featured_image, FILTER_VALIDATE_URL)) {
+            $article->addMediaFromUrl($request->featured_image)
+                ->toMediaCollection('featured_image');
+        }
 
         $article->categories()->sync($data['categories'] ?? []);
 
