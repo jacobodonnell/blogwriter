@@ -24,7 +24,6 @@ class DashboardController extends Controller
             'total_articles' => Article::count(),
             'published_articles' => Article::where('status', Status::Published)->count(),
             'draft_articles' => Article::where('status', Status::Draft)->count(),
-            'hidden_articles' => Article::where('status', Status::Hidden)->count(),
             'total_categories' => Category::count(),
         ];
 

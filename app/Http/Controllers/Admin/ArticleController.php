@@ -113,7 +113,7 @@ class ArticleController extends Controller
             $article->categories()->attach($data['categories']);
         }
 
-        return redirect()->route('admin.articles.index')
+        return redirect()->route('admin.articles.edit', $article)
             ->with('success', 'Article created successfully.');
     }
 
@@ -190,7 +190,7 @@ class ArticleController extends Controller
         }
 
         // Handle external URL (store as-is, don't download)
-        if ($request->filled('featured_image') && filter_var($request->filled_image, FILTER_VALIDATE_URL)) {
+        if ($request->filled('featured_image') && filter_var($request->featured_image, FILTER_VALIDATE_URL)) {
             // Clear uploaded media if setting an external URL
             $article->clearMediaCollection('featured_image');
             // External URLs are stored in the featured_image column
@@ -199,7 +199,7 @@ class ArticleController extends Controller
 
         $article->categories()->sync($data['categories'] ?? []);
 
-        return redirect()->route('admin.articles.index')
+        return redirect()->route('admin.articles.edit', $article)
             ->with('success', 'Article updated successfully.');
     }
 
