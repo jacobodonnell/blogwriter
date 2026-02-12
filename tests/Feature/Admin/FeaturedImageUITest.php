@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Article;
+use App\Models\Photo;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -248,10 +249,9 @@ describe('delete and undo functionality', function (): void {
         $response->assertSee('type="checkbox"', false);
     });
 
-    it('removes featured image when delete submitted', function (): void {
-        $article = Article::factory()->create([
-            'featured_image' => 'https://example.com/image.jpg',
-        ]);
+    it('removes featured photo when delete submitted', function (): void {
+        $photo = Photo::factory()->published()->create();
+        $article = Article::factory()->create(['photo_id' => $photo->id]);
 
         $this->actingAs($this->user)
             ->put(route('admin.articles.update', $article), [
@@ -265,7 +265,7 @@ describe('delete and undo functionality', function (): void {
 
         $article->refresh();
 
-        expect($article->featured_image)->toBeNull();
+        expect($article->photo_id)->toBeNull();
     });
 
     it('has undo button that appears after delete', function (): void {
@@ -286,12 +286,11 @@ describe('delete and undo functionality', function (): void {
         $response->assertSee('aria-label="Restore featured image"', false);
     });
 
-    it('restores image when undo is clicked', function (): void {
+    it('restores photo when undo is clicked', function (): void {
         // This would be a browser test for Alpine.js interaction
         // For now, verify the server-side state management works
-        $article = Article::factory()->create([
-            'featured_image' => 'https://example.com/image.jpg',
-        ]);
+        $photo = Photo::factory()->published()->create();
+        $article = Article::factory()->create(['photo_id' => $photo->id]);
 
         // Submit with remove checked, then submit again without it
         // The UI would handle this via Alpine state
@@ -306,22 +305,22 @@ describe('delete and undo functionality', function (): void {
             ->assertRedirect();
 
         $article->refresh();
-        expect($article->featured_image)->toBeNull();
+        expect($article->photo_id)->toBeNull();
 
         // Now simulate undo by submitting without remove flag
-        // and re-adding the URL
+        // and re-adding the photo_id
         $this->actingAs($this->user)
             ->put(route('admin.articles.update', $article), [
                 'title' => $article->title,
                 'slug' => $article->slug,
                 'content' => $article->content,
                 'status' => $article->status->value,
-                'featured_image' => 'https://example.com/image.jpg',
+                'photo_id' => $photo->id,
             ])
             ->assertRedirect();
 
         $article->refresh();
-        expect($article->featured_image)->toBe('https://example.com/image.jpg');
+        expect($article->photo_id)->toBe($photo->id);
     });
 });
 
@@ -516,16 +515,17 @@ describe('accessibility', function (): void {
 
 describe('alpine.js integration', function (): void {
     it('initializes featured image component with correct state', function (): void {
-        $article = Article::factory()->create([
-            'featured_image' => 'https://example.com/saved.jpg',
+        $photo = Photo::factory()->published()->create([
+            'meta' => ['external_url' => 'https://example.com/saved.jpg'],
         ]);
+        $article = Article::factory()->create(['photo_id' => $photo->id]);
 
         $response = $this->actingAs($this->user)
             ->get(route('admin.articles.edit', $article))
             ->assertSuccessful();
 
-        // Check that saved image URL is in Alpine data
-        $response->assertSee('https://example.com/saved.jpg', false);
+        // Check that saved image URL is in Alpine data (photo_id should be selected)
+        $response->assertSee((string) $photo->id, false);
     });
 
     it('syncs file input state with Alpine', function (): void {
@@ -584,16 +584,16 @@ describe('form submission with modern UI', function (): void {
 
         $article = Article::first();
 
-        // When file is uploaded, it goes to Media Library, not featured_image column
-        expect($article->featured_image)->toBeNull();
-        expect($article->getFirstMedia('featured_image'))->not->toBeNull();
+        // When file is uploaded, it creates Photo and goes to Photo's MediaLibrary
+        expect($article->photo_id)->not->toBeNull();
+        expect($article->featuredPhoto)->toBeInstanceOf(Photo::class);
+        expect($article->featuredPhoto->getFirstMedia('image'))->not->toBeNull();
         // Note: File existence check skipped - Intervention Image doesn't work with Storage::fake()
     });
 
-    it('submits with remove flag to delete existing image', function (): void {
-        $article = Article::factory()->create([
-            'featured_image' => 'https://example.com/image.jpg',
-        ]);
+    it('submits with remove flag to delete existing photo link', function (): void {
+        $photo = Photo::factory()->published()->create();
+        $article = Article::factory()->create(['photo_id' => $photo->id]);
 
         $this->actingAs($this->user)
             ->put(route('admin.articles.update', $article), [
@@ -607,7 +607,7 @@ describe('form submission with modern UI', function (): void {
 
         $article->refresh();
 
-        expect($article->featured_image)->toBeNull();
+        expect($article->photo_id)->toBeNull();
     });
 
     it('rejects both URL and file submitted together', function (): void {
@@ -715,19 +715,19 @@ describe('edge cases', function (): void {
 
         $article = Article::first();
 
-        // When file is uploaded, it goes to Media Library, not featured_image column
-        expect($article->featured_image)->toBeNull();
-        expect($article->getFirstMedia('featured_image'))->not->toBeNull();
+        // When file is uploaded, it creates Photo with MediaLibrary
+        expect($article->photo_id)->not->toBeNull();
+        expect($article->featuredPhoto->getFirstMedia('image'))->not->toBeNull();
     });
 
-    it('preserves featured image when updating other fields', function (): void {
+    it('preserves featured photo when updating other fields', function (): void {
         $file = UploadedFile::fake()->image('featured.jpg');
 
         $article = Article::factory()->create([
             'status' => 'draft',
         ]);
 
-        // First upload image
+        // First upload image (creates photo)
         $this->actingAs($this->user)
             ->put(route('admin.articles.update', $article), [
                 'title' => $article->title,
@@ -739,7 +739,7 @@ describe('edge cases', function (): void {
             ->assertRedirect();
 
         $article->refresh();
-        $savedImage = $article->featured_image;
+        $savedPhotoId = $article->photo_id;
 
         // Now update only title
         $this->actingAs($this->user)
@@ -753,6 +753,6 @@ describe('edge cases', function (): void {
 
         $article->refresh();
 
-        expect($article->featured_image)->toBe($savedImage);
+        expect($article->photo_id)->toBe($savedPhotoId);
     });
 });

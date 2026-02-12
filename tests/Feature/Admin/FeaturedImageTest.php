@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Article;
+use App\Models\Photo;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -19,7 +20,7 @@ beforeEach(function (): void {
 // ============================================================================
 
 describe('happy paths', function (): void {
-    it('persists external URL to database', function (): void {
+    it('creates photo from external URL and links to article', function (): void {
         $this->actingAs($this->user)
             ->post(route('admin.articles.store'), [
                 'title' => 'Test Article',
@@ -32,13 +33,55 @@ describe('happy paths', function (): void {
 
         $article = Article::first();
 
-        expect($article->featured_image)->toBe('https://example.com/image.jpg');
+        expect($article->photo_id)->not->toBeNull();
+        expect($article->featuredPhoto)->toBeInstanceOf(Photo::class);
+        expect($article->featuredPhoto->meta['external_url'])->toBe('https://example.com/image.jpg');
+        expect($article->featuredPhoto->isExternalUrl())->toBeTrue();
     });
 
-    it('removes featured image when checkbox is checked', function (): void {
-        $article = Article::factory()->create([
-            'featured_image' => 'https://example.com/image.jpg',
-        ]);
+    it('creates photo from file upload and links to article', function (): void {
+        $file = UploadedFile::fake()->image('test.jpg');
+
+        $this->actingAs($this->user)
+            ->post(route('admin.articles.store'), [
+                'title' => 'Test Article',
+                'slug' => 'test-article',
+                'content' => 'Test content',
+                'status' => 'draft',
+                'featured_image_file' => $file,
+            ])
+            ->assertRedirect();
+
+        $article = Article::first();
+
+        expect($article->photo_id)->not->toBeNull();
+        expect($article->featuredPhoto)->toBeInstanceOf(Photo::class);
+        expect($article->featuredPhoto->getFirstMedia('image'))->not->toBeNull();
+        expect($article->featuredPhoto->isExternalUrl())->toBeFalse();
+    });
+
+    it('links existing photo to article', function (): void {
+        $photo = Photo::factory()->published()->create();
+
+        $this->actingAs($this->user)
+            ->post(route('admin.articles.store'), [
+                'title' => 'Test Article',
+                'slug' => 'test-article',
+                'content' => 'Test content',
+                'status' => 'draft',
+                'photo_id' => $photo->id,
+            ])
+            ->assertRedirect();
+
+        $article = Article::first();
+
+        expect($article->photo_id)->toBe($photo->id);
+        expect($article->featuredPhoto->id)->toBe($photo->id);
+    });
+
+    it('removes featured photo link when checkbox is checked', function (): void {
+        $photo = Photo::factory()->published()->create();
+        $article = Article::factory()->create(['photo_id' => $photo->id]);
 
         $this->actingAs($this->user)
             ->put(route('admin.articles.update', $article), [
@@ -52,7 +95,8 @@ describe('happy paths', function (): void {
 
         $article->refresh();
 
-        expect($article->featured_image)->toBeNull();
+        expect($article->photo_id)->toBeNull();
+        expect($article->featuredPhoto)->toBeNull();
     });
 });
 
@@ -116,6 +160,49 @@ describe('validation', function (): void {
             ->assertSessionHasErrors(['featured_image', 'featured_image_file']);
     });
 
+    it('rejects invalid photo_id', function (): void {
+        $this->actingAs($this->user)
+            ->post(route('admin.articles.store'), [
+                'title' => 'Test Article',
+                'slug' => 'test-article',
+                'content' => 'Test content',
+                'status' => 'draft',
+                'photo_id' => 99999, // Non-existent photo ID
+            ])
+            ->assertSessionHasErrors('photo_id');
+    });
+
+    it('rejects when photo_id and URL are both provided', function (): void {
+        $photo = Photo::factory()->published()->create();
+
+        $this->actingAs($this->user)
+            ->post(route('admin.articles.store'), [
+                'title' => 'Test Article',
+                'slug' => 'test-article',
+                'content' => 'Test content',
+                'status' => 'draft',
+                'photo_id' => $photo->id,
+                'featured_image' => 'https://example.com/image.jpg',
+            ])
+            ->assertSessionHasErrors(['photo_id', 'featured_image']);
+    });
+
+    it('rejects when photo_id and file are both provided', function (): void {
+        $photo = Photo::factory()->published()->create();
+        $file = UploadedFile::fake()->image('test.jpg');
+
+        $this->actingAs($this->user)
+            ->post(route('admin.articles.store'), [
+                'title' => 'Test Article',
+                'slug' => 'test-article',
+                'content' => 'Test content',
+                'status' => 'draft',
+                'photo_id' => $photo->id,
+                'featured_image_file' => $file,
+            ])
+            ->assertSessionHasErrors(['photo_id', 'featured_image_file']);
+    });
+
     it('enforces maximum URL length', function (): void {
         $longUrl = 'https://example.com/'.str_repeat('a', 500);
 
@@ -136,7 +223,7 @@ describe('validation', function (): void {
 // ============================================================================
 
 describe('edge cases', function (): void {
-    it('allows creating article without featured image', function (): void {
+    it('allows creating article without featured photo', function (): void {
         $this->actingAs($this->user)
             ->post(route('admin.articles.store'), [
                 'title' => 'Test Article',
@@ -148,13 +235,14 @@ describe('edge cases', function (): void {
 
         $article = Article::first();
 
-        expect($article->featured_image)->toBeNull();
+        expect($article->photo_id)->toBeNull();
+        expect($article->featuredPhoto)->toBeNull();
     });
 
-    it('handles featured image update on existing article', function (): void {
-        $article = Article::factory()->create([
-            'featured_image' => 'https://example.com/old-image.jpg',
-        ]);
+    it('handles featured photo update on existing article', function (): void {
+        $oldPhoto = Photo::factory()->published()->create();
+        $newPhoto = Photo::factory()->published()->create();
+        $article = Article::factory()->create(['photo_id' => $oldPhoto->id]);
 
         $this->actingAs($this->user)
             ->put(route('admin.articles.update', $article), [
@@ -162,12 +250,30 @@ describe('edge cases', function (): void {
                 'slug' => $article->slug,
                 'content' => $article->content,
                 'status' => $article->status->value,
-                'featured_image' => 'https://example.com/new-image.jpg',
+                'photo_id' => $newPhoto->id,
             ])
             ->assertRedirect();
 
         $article->refresh();
 
-        expect($article->featured_image)->toBe('https://example.com/new-image.jpg');
+        expect($article->photo_id)->toBe($newPhoto->id);
+        expect($article->featuredPhoto->id)->toBe($newPhoto->id);
+    });
+
+    it('creates photo with article status', function (): void {
+        $this->actingAs($this->user)
+            ->post(route('admin.articles.store'), [
+                'title' => 'Published Article',
+                'slug' => 'published-article',
+                'content' => 'Test content',
+                'status' => 'published',
+                'featured_image' => 'https://example.com/image.jpg',
+            ])
+            ->assertRedirect();
+
+        $article = Article::first();
+
+        expect($article->status->value)->toBe('published');
+        expect($article->featuredPhoto->status->value)->toBe('published');
     });
 });
