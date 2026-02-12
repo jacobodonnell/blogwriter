@@ -29,6 +29,15 @@ class Photo extends Model implements HasMedia
         'meta',
     ];
 
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'articles',
+    ];
+
     protected function casts(): array
     {
         return [
