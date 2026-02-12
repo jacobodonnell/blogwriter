@@ -5,18 +5,14 @@ namespace App\Models;
 use App\Enums\Status;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class Article extends Model implements HasMedia
+class Article extends Model
 {
     /** @use HasFactory<\Database\Factories\ArticleFactory> */
     use HasFactory;
-
-    use InteractsWithMedia;
 
     protected $fillable = [
         'title',
@@ -27,7 +23,7 @@ class Article extends Model implements HasMedia
         'published_at',
         'last_edited_at',
         'meta',
-        'featured_image',
+        'photo_id',
     ];
 
     protected function casts(): array
@@ -90,29 +86,14 @@ class Article extends Model implements HasMedia
         });
     }
 
-    public function registerMediaCollections(): void
+    /**
+     * Get the featured photo for this article.
+     *
+     * @return BelongsTo<Photo, $this>
+     */
+    public function featuredPhoto(): BelongsTo
     {
-        $this->addMediaCollection('featured_image')
-            ->singleFile()
-            ->acceptsMimeTypes(['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']);
-    }
-
-    public function registerMediaConversions(?Media $media = null): void
-    {
-        $this->addMediaConversion('thumbnail')
-            ->width(300)->height(300)
-            ->format('webp')->quality(80)
-            ->nonQueued();
-
-        $this->addMediaConversion('medium')
-            ->width(768)->height(768)
-            ->format('webp')->quality(85)
-            ->nonQueued();
-
-        $this->addMediaConversion('large')
-            ->width(1536)->height(1536)
-            ->format('webp')->quality(85)
-            ->nonQueued();
+        return $this->belongsTo(Photo::class, 'photo_id');
     }
 
     /**
@@ -124,11 +105,11 @@ class Article extends Model implements HasMedia
     }
 
     /**
-     * Get the correct URL for the featured image based on article status.
+     * Get the featured image URL from the associated Photo.
      */
     public function getFeaturedImageUrlAttribute(): ?string
     {
-        return $this->getFirstMedia('featured_image')?->getUrl('large');
+        return $this->featuredPhoto?->image_url;
     }
 
     /**
@@ -234,7 +215,7 @@ class Article extends Model implements HasMedia
      */
     public function getOgImageAttribute(): ?string
     {
-        return $this->meta['og_image'] ?? $this->featured_image;
+        return $this->meta['og_image'] ?? $this->featured_image_url;
     }
 
     /**
