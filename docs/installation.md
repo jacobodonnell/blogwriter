@@ -265,8 +265,8 @@ After installation completes, BlogWriter creates a lock file that prevents anyon
 overwriting your configuration. This protects your site from accidental reinstallation.
 
 <x-callout type="info" title="For Developers" collapsible>
-  The lock file is `storage/installed.lock`. If you need to reinstall during development, delete
-  this file first with `rm storage/installed.lock`.
+  The lock file is `storage/installed.lock`. If you need to reinstall during development, run
+  the installer again and choose "Yes" when prompted to reset.
 </x-callout>
 
 ## After Installation
@@ -293,7 +293,7 @@ chmod -R 775 storage bootstrap/cache
 **"Install page shows 404"** — Make sure your web server points to BlogWriter's `public/` directory, not the project
 root.
 
-**Accidentally locked out** — Delete `storage/installed.lock` and re-run the installer. Your existing database won't be
-overwritten unless you choose to reset it.
+**Accidentally locked out** — Re-run the installer (`php artisan blogwriter:install`). When prompted, choose "Yes" to
+reset if you want a fresh start, or "No" to cancel if your data is still accessible.
 
 #### [Up Next: *Writing Content*](/docs/content/writing-content)

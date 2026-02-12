@@ -1,38 +1,20 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Services;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
-use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\warning;
 
-class BlogWriterReset extends Command
+class ResetService
 {
-    protected $signature = 'blogwriter:reset {--force : Skip confirmation}';
-
-    protected $description = 'Reset BlogWriter to fresh state (wipes all data and media)';
-
-    public function handle(): int
+    public function reset(Command $command): int
     {
-        if (! $this->option('force')) {
-            $confirmed = confirm(
-                label: '⚠️  This will DELETE all content and media. Continue?',
-                default: false
-            );
-
-            if (! $confirmed) {
-                info('Reset cancelled.');
-
-                return self::SUCCESS;
-            }
-        }
-
         warning('Resetting BlogWriter...');
-        $this->newLine();
+        $command->newLine();
 
         // Disable destructive command prohibition
         DB::prohibitDestructiveCommands(false);
@@ -115,15 +97,19 @@ class BlogWriterReset extends Command
             exec('php artisan cache:clear 2>&1');
             info('  ✓ Caches cleared');
 
-            $this->newLine();
+            $command->newLine();
             info('✅ BlogWriter reset complete!');
             info('   Database: Fresh (empty)');
             info('   Storage: Empty');
             info('   Status: Ready for installation');
-            $this->newLine();
-            info('Run php artisan blogwriter:install to set up BlogWriter again.');
 
-            return self::SUCCESS;
+            return Command::SUCCESS;
+
+        } catch (\Exception $exception) {
+            $command->newLine();
+            warning('❌ Reset failed: '.$exception->getMessage());
+
+            return Command::FAILURE;
 
         } finally {
             DB::prohibitDestructiveCommands(true);

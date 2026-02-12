@@ -702,7 +702,8 @@ The CLI installer is fully implemented and uses Laravel Prompts for interactive 
 **Current State:** Web route exists but redirects to CLI installer instructions.
 
 **Lock file:**
-After installation, `storage/installed.lock` prevents re-running installer. Delete to reinstall (dev only).
+After installation, `storage/installed.lock` prevents re-running installer. To reinstall (dev only), re-run the installer
+and choose "Yes" when prompted to reset.
 
 ---
 

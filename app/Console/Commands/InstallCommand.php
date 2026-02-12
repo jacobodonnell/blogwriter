@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\User;
 use App\Services\PasswordGenerator;
+use App\Services\ResetService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Hash;
@@ -78,8 +79,9 @@ class InstallCommand extends Command
             );
 
             if ($runReset) {
-                // Run the reset command
-                $resetExitCode = Artisan::call('blogwriter:reset', ['--force' => true]);
+                // Run reset using service
+                $resetService = app(ResetService::class);
+                $resetExitCode = $resetService->reset($this);
 
                 if ($resetExitCode !== 0) {
                     error('Reset failed. Installation cancelled.');
@@ -95,7 +97,6 @@ class InstallCommand extends Command
                 $didFreshInstall = true;
             } else {
                 info('Installation cancelled.');
-                info('Tip: Run php artisan blogwriter:reset to reset BlogWriter first.');
 
                 return self::SUCCESS;
             }
@@ -465,14 +466,23 @@ class InstallCommand extends Command
     protected function generateAppKey(): void
     {
         info('Generating application key...');
-        $exitCode = Artisan::call('key:generate', ['--force' => true, '--no-interaction' => true]);
 
-        if ($exitCode !== 0) {
-            warning('Could not generate application key automatically.');
-            info('You may need to run: php artisan key:generate');
-        } else {
-            info('✓ Application key generated');
+        $envPath = base_path('.env');
+        if (! file_exists($envPath)) {
+            warning('Cannot generate key: .env file missing');
+
+            return;
         }
+
+        // Generate AES-256-CBC key (32 bytes base64 encoded)
+        $key = 'base64:'.base64_encode(random_bytes(32));
+
+        // Update .env file
+        $content = file_get_contents($envPath);
+        $content = preg_replace('/^APP_KEY=.*$/m', 'APP_KEY='.$key, $content);
+        file_put_contents($envPath, $content);
+
+        info('✓ Application key generated');
     }
 
     protected function updateEnvironmentFile(array $config): void
