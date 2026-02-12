@@ -241,21 +241,12 @@
 
                     {{-- Featured Image --}}
                     @php
-                        $initialImageUrl = old('featured_image', $article->featured_image ?? '');
-                        $initialOriginalUrl = $article->featured_image ?? '';
+                        $media = $article->exists ? $article->getFirstMedia('featured_image') : null;
+                        $initialImageUrl = $media?->getUrl('large') ?? '';
                         $initialIsRemoved = old('remove_featured_image') ? true : false;
-                        $initialActiveTab = $initialImageUrl && !str_starts_with($initialImageUrl, 'http') ? 'upload_file' : 'external_url';
-
-                        // Determine correct disk based on article status
-                        $imageDisk = ($article->exists && in_array($article->status->value, ['draft', 'hidden']))
-                            ? 'private'
-                            : 'public';
-                        $storageUrl = $imageDisk === 'private'
-                            ? url('/storage/private/')
-                            : Storage::disk('public')->url('');
                     @endphp
                     <div class="card bg-base-100 shadow-sm"
-                         x-data="featuredImage({{ json_encode($initialImageUrl, JSON_UNESCAPED_SLASHES) }}, {{ json_encode($initialOriginalUrl, JSON_UNESCAPED_SLASHES) }}, {{ json_encode($initialIsRemoved) }}, {{ json_encode($initialActiveTab) }}, {{ json_encode($storageUrl, JSON_UNESCAPED_SLASHES) }})">
+                         x-data="featuredImage({{ json_encode($initialImageUrl, JSON_UNESCAPED_SLASHES) }})">
                         <div class="card-body">
                             <h3 class="card-title text-lg flex items-center gap-2">
                                 <i class="ph ph-image"></i>
@@ -380,17 +371,15 @@
                         </div>
 
                         <script>
-                            function featuredImage(initialImageUrl, initialOriginalUrl, initialIsRemoved, initialActiveTab, storageUrl) {
+                            function featuredImage(initialImageUrl) {
                                 return {
-                                    activeTab: initialActiveTab || 'external_url',
+                                    activeTab: 'external_url',
                                     imageUrl: initialImageUrl || '',
-                                    originalUrl: initialOriginalUrl || '',
                                     filePreview: null,
                                     fileName: null,
                                     fileSize: null,
-                                    isRemoved: initialIsRemoved || false,
+                                    isRemoved: false,
                                     errorMessage: null,
-                                    storageUrl: storageUrl || '',
                                     maxSize: 2097152, // 2MB in bytes
                                     
                                     get hasImage() {
@@ -402,11 +391,7 @@
                                             return this.filePreview;
                                         }
                                         if (this.imageUrl) {
-                                            if (this.imageUrl.startsWith('http')) {
-                                                return this.imageUrl;
-                                            } else {
-                                                return this.storageUrl + this.imageUrl;
-                                            }
+                                            return this.imageUrl;
                                         }
                                         return '';
                                     },
@@ -450,18 +435,6 @@
                                         this.fileName = null;
                                         this.fileSize = null;
                                         this.errorMessage = null;
-                                        // Clear file input
-                                        if (this.$refs.fileInput) {
-                                            this.$refs.fileInput.value = '';
-                                        }
-                                    },
-                                    
-                                    undoDelete() {
-                                        this.isRemoved = false;
-                                        this.imageUrl = this.originalUrl;
-                                        this.filePreview = null;
-                                        this.fileName = null;
-                                        this.fileSize = null;
                                         // Clear file input
                                         if (this.$refs.fileInput) {
                                             this.$refs.fileInput.value = '';
