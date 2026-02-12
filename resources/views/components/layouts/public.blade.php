@@ -18,6 +18,7 @@
             <div class="flex-none gap-2">
                 <a href="{{ route('home') }}" class="btn btn-ghost">Home</a>
                 <a href="{{ route('home') }}" class="btn btn-ghost">Articles</a>
+                <a href="{{ route('photos.index') }}" class="btn btn-ghost">Photos</a>
                 <a href="{{ route('about') }}" class="btn btn-ghost">About</a>
                 
                 {{-- Dark Mode Toggle --}}

@@ -93,7 +93,6 @@ class InstallCommand extends Command
                 info('Reset complete. Continuing with installation...');
                 $this->newLine();
 
-                $this->freshInstall();
                 $didFreshInstall = true;
             } else {
                 info('Installation cancelled.');
@@ -107,6 +106,14 @@ class InstallCommand extends Command
         if (! $didFreshInstall) {
             $this->install($config);
         } else {
+            // After reset: run .env setup (normally done in install())
+            $this->ensureStorageDirectories();
+            $this->createStorageLink();
+            $this->setupEnvironmentFile();
+            $this->generateAppKey();
+            $this->updateEnvironmentFile($config);
+
+            // Then run post-migration setup (user creation, seeding, lock file)
             $this->postMigrationSetup($config);
         }
 
@@ -400,7 +407,10 @@ class InstallCommand extends Command
             }
 
             info('Seeding demo content...');
-            Artisan::call('blogwriter:seed', ['--state' => 'demo', '--no-interaction' => true]);
+            info('Processing demo images and content (this may take 30-60 seconds)...');
+            $this->newLine();
+            Artisan::call('blogwriter:seed', ['--state' => 'demo', '--no-interaction' => true], $this->output);
+            $this->newLine();
             info('✓ Demo content added');
         }
 
@@ -596,7 +606,8 @@ class InstallCommand extends Command
         if (! $this->option('no-interaction')) {
             return confirm(
                 label: 'Would you like to seed your blog with demo articles?',
-                default: true
+                default: false,
+                hint: 'Demo content includes sample articles, photos, and categories'
             );
         }
 

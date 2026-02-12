@@ -73,22 +73,29 @@
         @enderror
     </fieldset>
 
-    {{-- Status Toggle --}}
+    {{-- Status --}}
     <fieldset class="fieldset">
         <legend class="fieldset-legend">Status</legend>
-        <label class="label cursor-pointer justify-start gap-4">
-            <input type="checkbox"
+        <div role="tablist" class="tabs tabs-box">
+            <input type="radio"
+                   name="status"
+                   value="draft"
+                   class="tab"
+                   aria-label="📝 Draft"
+                   {{ old('status', $photo->status?->value ?? 'draft') === 'draft' ? 'checked' : '' }}>
+            <input type="radio"
                    name="status"
                    value="published"
-                   class="toggle toggle-primary"
-                   {{ old('status', $photo->status?->value) == 'published' ? 'checked' : '' }}>
-            <span class="label-text">
-                Published
-                <span class="text-xs text-base-content/50 block">
-                    {{ old('status', $photo->status?->value) == 'published' ? 'Photo is visible on your site' : 'Photo is hidden (draft)' }}
-                </span>
-            </span>
-        </label>
+                   class="tab"
+                   aria-label="✅ Published"
+                   {{ old('status', $photo->status?->value) === 'published' ? 'checked' : '' }}>
+        </div>
+        @error('status')
+            <span class="text-error text-sm mt-1">{{ $message }}</span>
+        @enderror
+        <p class="text-sm text-base-content/60 mt-2">
+            Draft photos are stored privately and not visible on your site.
+        </p>
     </fieldset>
 
     {{-- Taken At Date --}}

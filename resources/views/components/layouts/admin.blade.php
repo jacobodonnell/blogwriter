@@ -145,6 +145,13 @@
                         </li>
 
                         <li>
+                            <a href="{{ route('admin.photos.index') }}" class="{{ request()->is('admin/photos*') ? 'active' : '' }}">
+                                <i class="ph ph-image text-lg"></i>
+                                Photos
+                            </a>
+                        </li>
+
+                        <li>
                             <a href="{{ route('admin.categories.index') }}" class="{{ request()->is('admin/categories*') ? 'active' : '' }}">
                                 <i class="ph ph-folder text-lg"></i>
                                 Categories
