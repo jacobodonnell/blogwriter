@@ -59,6 +59,7 @@ it('updates draft to published and auto-sets published_at', function (): void {
         'title' => 'Draft Article',
         'slug' => 'draft-to-published',
         'content' => 'Original content.',
+        'published_at' => null, // Explicitly set to null for this test
     ]);
 
     expect($article->published_at)->toBeNull();

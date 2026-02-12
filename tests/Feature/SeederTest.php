@@ -143,16 +143,16 @@ it('full state seeds 15 articles from JSON', function (): void {
     expect(Article::count())->toBe(15);
 });
 
-it('full state creates 80% published and 20% draft distribution', function (): void {
+it('full state creates correct published and draft distribution from JSON', function (): void {
     $seeder = new DatabaseSeeder;
     $seeder->withState('full')->seed();
 
     $publishedCount = Article::where('status', Status::Published)->count();
     $draftCount = Article::where('status', Status::Draft)->count();
 
-    // 15 articles: 80% = 12 published, 20% = 3 draft
-    expect($publishedCount)->toBe(12);
-    expect($draftCount)->toBe(3);
+    // 15 articles from JSON: 8 published, 7 draft (after hidden→draft conversion)
+    expect($publishedCount)->toBe(8);
+    expect($draftCount)->toBe(7);
 });
 
 // ==========================================
@@ -218,8 +218,7 @@ it('seeding is idempotent for all states', function (string $state): void {
     // Counts should not increase (firstOrCreate prevents duplicates)
     expect(Category::count())->toBe($categoryCount);
     expect(User::count())->toBe($userCount);
-
-    // Articles may duplicate on second run - this is expected behavior
+    expect(Article::count())->toBe($articleCount); // Articles use firstOrCreate now
 })->with(['empty', 'minimal', 'demo', 'full']);
 
 // ==========================================

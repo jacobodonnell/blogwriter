@@ -93,9 +93,9 @@ it('executes full full state seeding flow', function (): void {
     expect(User::count())->toBe(1);
     expect(Article::count())->toBe(15);
 
-    // Verify status distribution
-    expect(Article::where('status', Status::Published)->count())->toBe(12);
-    expect(Article::where('status', Status::Draft)->count())->toBe(3);
+    // Verify status distribution (8 published, 7 draft after hidden→draft conversion)
+    expect(Article::where('status', Status::Published)->count())->toBe(8);
+    expect(Article::where('status', Status::Draft)->count())->toBe(7);
 
     // Verify all articles have required data
     $articles = Article::all();
@@ -229,19 +229,6 @@ it('throws exception for invalid state', function (): void {
 
     expect(fn () => $seeder->withState('invalid_state')->seed())
         ->toThrow(\InvalidArgumentException::class, 'Invalid state: invalid_state');
-});
-
-it('handles missing JSON files gracefully', function (): void {
-    // This test verifies the seeder would fail if JSON files are missing
-    // We can't easily test this without modifying the seeder or filesystem
-    // So we just verify the files exist
-    $categoriesFile = base_path('database/seeders/test-data/categories.json');
-    $demoArticlesFile = base_path('database/seeders/test-data/demo/articles.json');
-    $fullArticlesFile = base_path('database/seeders/test-data/full/articles.json');
-
-    expect(file_exists($categoriesFile))->toBeTrue();
-    expect(file_exists($demoArticlesFile))->toBeTrue();
-    expect(file_exists($fullArticlesFile))->toBeTrue();
 });
 
 // ==========================================

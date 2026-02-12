@@ -15,6 +15,11 @@ class ArticleFactory extends Factory
     use AttachesFeaturedImages;
 
     /**
+     * Sequence counter for unique slugs.
+     */
+    protected static int $sequence = 0;
+
+    /**
      * Blog post title templates for realistic data.
      *
      * @var array<string>
@@ -44,9 +49,16 @@ class ArticleFactory extends Factory
      */
     public function definition(): array
     {
+        self::$sequence++;
+
         $status = $this->getWeightedStatus();
 
         $title = $this->generateTitle();
+
+        // Append sequence to title to ensure unique slugs
+        if (self::$sequence > 1) {
+            $title .= ' '.self::$sequence;
+        }
 
         return [
             'title' => $title,
@@ -65,6 +77,14 @@ class ArticleFactory extends Factory
     {
         // No automatic image attachment - use explicit states instead
         return $this;
+    }
+
+    /**
+     * Reset the sequence counter (useful for tests).
+     */
+    public static function resetSequence(): void
+    {
+        self::$sequence = 0;
     }
 
     /**
@@ -243,7 +263,7 @@ class ArticleFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'status' => 'draft',
-            'published_at' => null,
+            'published_at' => fake()->optional(0.3)->dateTimeBetween('-6 months', '+6 months'),
         ]);
     }
 

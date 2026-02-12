@@ -2,10 +2,15 @@
 
 use App\Enums\Status;
 use App\Models\Article;
+use Database\Factories\ArticleFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
+
+beforeEach(function (): void {
+    ArticleFactory::resetSequence();
+});
 
 // ==========================================
 // Factory State Tests
@@ -56,7 +61,7 @@ it('draft state overrides default weighted status', function (): void {
     $allDrafts = $articles->every(fn ($article): bool => $article->status === Status::Draft);
 
     expect($allDrafts)->toBeTrue();
-    expect($articles->every(fn ($article): bool => $article->published_at === null))->toBeTrue();
+    // Note: Draft articles may have scheduled published_at dates (30% probability)
 });
 
 // ==========================================
@@ -167,13 +172,13 @@ it('published articles have published_at in the past', function (): void {
 });
 
 it('draft articles with published_at have future dates 30% of the time', function (): void {
-    $articles = Article::factory()->draft()->count(50)->create();
+    $articles = Article::factory()->draft()->count(100)->create();
 
     $draftsWithPublishedAt = $articles->filter(fn ($article): bool => $article->published_at !== null);
 
-    // Expect roughly 10-25 drafts to have scheduled dates (30% probability, allowing variance)
-    expect($draftsWithPublishedAt->count())->toBeGreaterThan(5);
-    expect($draftsWithPublishedAt->count())->toBeLessThan(30);
+    // Expect roughly 20-40 drafts to have scheduled dates (30% probability with 100 samples)
+    expect($draftsWithPublishedAt->count())->toBeGreaterThan(15);
+    expect($draftsWithPublishedAt->count())->toBeLessThan(45);
 });
 
 it('stores status as string in database', function (): void {

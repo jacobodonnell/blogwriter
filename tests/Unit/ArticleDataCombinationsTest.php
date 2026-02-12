@@ -3,10 +3,15 @@
 use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Category;
+use Database\Factories\ArticleFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
+
+beforeEach(function (): void {
+    ArticleFactory::resetSequence();
+});
 
 // ==========================================
 // Summary Field Tests
@@ -183,11 +188,13 @@ it('published article has published_at set', function (): void {
     $article = Article::factory()->published()->create();
 
     expect($article->published_at)->not->toBeNull();
-    expect($article->published_at)->toBeInstanceOf(\Carbon\Carbon::class);
+    expect($article->published_at)->toBeInstanceOf(\Carbon\CarbonImmutable::class);
 });
 
-it('draft article has null published_at by default', function (): void {
-    $article = Article::factory()->draft()->create();
+it('draft article can have null published_at', function (): void {
+    $article = Article::factory()->draft()->create([
+        'published_at' => null,
+    ]);
 
     expect($article->published_at)->toBeNull();
 });
@@ -235,6 +242,7 @@ it('creates draft article with minimal data', function (): void {
         'content' => 'Minimal content',
         'summary' => null,
         'meta' => null,
+        'published_at' => null, // Explicitly set to null for minimal data test
     ]);
 
     expect($article->status)->toBe(Status::Draft);

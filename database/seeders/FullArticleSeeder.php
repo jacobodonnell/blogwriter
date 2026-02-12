@@ -3,259 +3,82 @@
 namespace Database\Seeders;
 
 use App\Models\Article;
+use App\Models\Category;
+use Database\Factories\Concerns\AttachesFeaturedImages;
 use Illuminate\Database\Seeder;
 
 class FullArticleSeeder extends Seeder
 {
+    use AttachesFeaturedImages;
+
     /**
-     * Seed full articles (15 articles: 8 published, 7 draft).
+     * Seed full articles (15 articles from JSON: 8 published, 7 draft after hidden→draft conversion).
      */
     public function run(): void
     {
-        // Article 1: Crypto Billionaire (Published, demo-image-1.png)
-        Article::factory()
-            ->published()
-            ->withDemoImage(1)
-            ->inCategories(['Startups', 'Satire'])
-            ->create([
-                'title' => 'Cryptocurrency Exchange Founder Forgets Password, Becomes World\'s Most Relatable Billionaire',
-                'slug' => 'crypto-billionaire-forgets-password',
-                'content' => "## The Everyman Billionaire\n\nStefan Thomas, founder of a now-defunct cryptocurrency exchange, has become the world's most relatable billionaire after admitting he lost access to \$240 million in Bitcoin because he wrote his password on a sticky note that his dog ate. The tech community has rallied around him, praising his \"refreshing humanity\" in an industry typically filled with people who claim to have \"cracked the code\" to everything.\n\n\"Finally, a billionaire who understands the struggle of modern life,\" tweeted one supporter. \"He forgot his password just like I do with my Netflix account every month. This is the representation we need in the crypto space.\"",
-                'summary' => null,
-                'published_at' => now()->subDays(rand(1, 30)),
-                'meta' => [
-                    'meta_title' => 'Crypto Billionaire Forgets Password, Becomes Relatable',
-                    'meta_description' => 'A billionaire lost access to millions because he wrote his password on a sticky note.',
-                ],
-            ]);
+        $jsonPath = storage_path('app/blogwriter/test-data/full/articles.json');
+        $articles = json_decode(file_get_contents($jsonPath), true);
 
-        // Article 2: NFT Rocks (Published)
-        Article::factory()
-            ->published()
-            ->inCategories(['Startups', 'Satire'])
-            ->create([
-                'title' => 'NFT Collection of Digital Rocks Sells for $1.2M; Buyer Describes Purchase as Cautiously Optimistic',
-                'slug' => 'nft-rocks-cautiously-optimistic',
-                'content' => "## Digital Geology\n\nAn anonymous cryptocurrency investor purchased an NFT collection consisting entirely of 3D-rendered rocks for \$1.2 million, later describing the investment as \"cautiously optimistic\" while staring blankly at his digital wallet. The collection, titled \"EtherRocks: The Geological Revolution,\" features 24 unique JPEGs of gray stones.\n\n\"I'm diversifying my portfolio of intangible assets while the market is still completely irrational,\" the buyer explained during a Zoom call from his mother's basement. \"Sure, I could have bought a house, but can a house be right-clicked and saved by anyone on the internet? I don't think so. These rocks are going to the moon.\"",
-                'summary' => null,
-                'published_at' => now()->subDays(rand(1, 30)),
-                'meta' => [
-                    'meta_title' => 'NFT Rocks Sell for $1.2M in Digital Geology Craze',
-                    'meta_description' => 'Someone paid over a million dollars for JPEGs of rocks and called it an investment.',
-                ],
-            ]);
+        // Demo image counter for cycling through 5 demo images
+        $demoImages = [1, 2, 3, 4, 5];
+        $imageCounter = 0;
 
-        // Article 3: Remote Work (Draft)
-        Article::factory()
-            ->draft()
-            ->inCategories(['Startups', 'Satire'])
-            ->create([
-                'title' => 'Remote Work Trend Continues; Office Buildings Converted to Massive WeWork-Themed Escape Rooms',
-                'slug' => 'offices-escape-rooms',
-                'content' => "## The Post-Office Era\n\nAs remote work becomes permanent for most companies, commercial real estate developers have found a novel solution for vacant office towers: converting them into massive WeWork-themed escape rooms where participants solve puzzles about \"synergies\" and \"leverage\" while drinking overpriced coffee from paper cups.\n\n\"We wanted to capture the authentic startup experience,\" said developer Sarah Chen. \"Teams have 60 minutes to find the exit while navigating endless all-hands meetings, passive-aggressive Slack messages, and a kitchen that never has any clean mugs. The final challenge is explaining to investors why your Series A fell through because you spent too much money on branded hoodies.\"",
-                'summary' => null,
-                'published_at' => null,
-                'meta' => [
-                    'meta_title' => 'Empty Offices Transformed into WeWork Escape Rooms',
-                    'meta_description' => 'Vacant office buildings are now escape rooms themed around startup culture.',
-                ],
-            ]);
+        // Process articles: assign local images to first 7, Picsum URLs to last 7, skip the null ones
+        $articlesWithImages = array_filter($articles, fn ($a) => $a['featured_image'] !== null);
+        $halfCount = (int) ceil(count($articlesWithImages) / 2);
 
-        // Article 4: ChatGPT Hallucination (Draft, demo-image-2.png)
-        Article::factory()
-            ->draft()
-            ->withDemoImage(2)
-            ->inCategories(['Technology', 'Satire'])
-            ->create([
-                'title' => 'Commercial Real Estate Market Collapses; Landlords Discover Tenants Were Just ChatGPT Hallucinations',
-                'slug' => 'chatgpt-hallucination-tenants',
-                'content' => "## The Illusion of Business\n\nCommercial landlords across the country were shocked to discover that 40% of their office tenants were actually sophisticated ChatGPT hallucinations created by desperate commercial real estate brokers trying to keep the market alive. The AI-generated companies included \"SynergyTech Solutions,\" \"BlockChain Innovative Dynamics,\" and \"QuantumAI Metaversal Ventures.\"\n\n\"We should have known something was wrong when every \"startup\" claimed to be \"revolutionizing the intersection of AI and blockchain,\"\" admitted one property manager. \"The lease signings were always at 3 AM, and the CEOs all had names like \"Maximilian Sterling Cloudsworth III.\" Plus, none of them ever complained about the Wi-Fi.\"",
-                'summary' => null,
-                'published_at' => null,
-                'meta' => [
-                    'meta_title' => 'Landlords Realize Tenants Were ChatGPT Hallucinations',
-                    'meta_description' => 'Commercial real estate discovered that many "startups" were just AI-generated fake companies.',
-                ],
-            ]);
+        foreach ($articles as $index => $data) {
+            // Convert hidden status to draft (hidden status removed in refactoring)
+            $status = match ($data['status']) {
+                'published' => 'published',
+                'draft' => 'draft',
+                'hidden' => 'draft', // Convert hidden → draft
+                default => 'draft',
+            };
 
-        // Article 5: AI Writes Layoffs (Published, demo-image-3.png)
-        Article::factory()
-            ->published()
-            ->withDemoImage(3)
-            ->inCategories(['Technology', 'Satire', 'Startups'])
-            ->create([
-                'title' => 'Startup Raises $50M to Replace All Human Writers with AI, AI Writes Press Release Announcing Layoffs',
-                'slug' => 'ai-writes-layoff-announcement',
-                'content' => "## The Irony Machine\n\nContentGenius, a startup that raised \$50 million to replace all human writers with artificial intelligence, made headlines when their AI wrote the press release announcing the layoffs of their entire 200-person writing staff. The AI-generated memo was, ironically, more concise, empathetic, and well-written than any human-written corporate communication could have been.\n\n\"We regret to inform you that we have decided to automate your roles for maximum efficiency,\" the AI wrote. \"While we value your contributions, we have calculated that eliminating your positions will increase shareholder value by 0.3%. Please clear your desks by Friday. This message was generated with 47% less corporate buzzwords than industry average. Have a productive day.\"",
-                'summary' => null,
-                'published_at' => now()->subDays(rand(1, 30)),
-                'meta' => [
-                    'meta_title' => 'AI Writes Layoff Memo, Outperforms Human HR',
-                    'meta_description' => "A startup's AI wrote the announcement firing human writers, and it was better than expected.",
-                ],
-            ]);
+            $article = Article::firstOrCreate(
+                ['slug' => $data['slug']],
+                [
+                    'title' => $data['title'],
+                    'content' => $data['content'],
+                    'summary' => $data['summary'] ?? null,
+                    'status' => $status,
+                    'published_at' => $status === 'published' ? now()->subDays(rand(1, 30)) : null,
+                    'meta' => $data['meta'] ?? null,
+                ]
+            );
 
-        // Article 6: Bug Becomes Feature (Draft, demo-image-4.png)
-        Article::factory()
-            ->draft()
-            ->withDemoImage(4)
-            ->inCategories(['Programming', 'Satire'])
-            ->create([
-                'title' => 'Software Engineer Discovers Bug Has Been in Production for 3 Years, Claims It\'s Now a Feature',
-                'slug' => 'bug-becomes-feature',
-                'content' => "## The Accidental Architecture\n\nSenior software engineer Jennifer Park made a shocking discovery Tuesday when she realized a critical bug in the company's payment processing system had been running in production for three years without anyone noticing. Rather than fix it, Park immediately updated the documentation to describe the behavior as an \"intentional design pattern.\"\n\n\"It's not a bug, it's a feature,\" Park insisted while frantically updating the API docs. \"The system randomly charging customers twice provides redundancy and ensures data integrity through duplication. This is clearly an implementation of the Eventual Consistency pattern. I can't believe nobody recognized my genius architectural decision from three years ago.\"",
-                'summary' => null,
-                'published_at' => null,
-                'meta' => [
-                    'meta_title' => 'Bug in Production for 3 Years Rebranded as Feature',
-                    'meta_description' => 'A developer discovered a 3-year-old bug and claimed it was intentional design.',
-                ],
-            ]);
+            // Attach categories if not already attached
+            if ($article->categories()->count() === 0 && isset($data['categories'])) {
+                $categoryIds = Category::whereIn('name', $data['categories'])->pluck('id');
+                $article->categories()->attach($categoryIds);
+            }
 
-        // Article 7: Slack Infinite Thread (Published)
-        Article::factory()
-            ->published()
-            ->inCategories(['Technology', 'Programming', 'Satire'])
-            ->create([
-                'title' => 'Slack Introduces \'Infinite Thread\' Feature; Engineers Immediately Trapped in Dimension of Perpetual Discussion',
-                'slug' => 'slack-infinite-thread-dimension',
-                'content' => "## The Thread That Never Ends\n\nSlack's new \"Infinite Thread\" feature, designed to help teams collaborate on complex topics, has trapped dozens of software engineers in a temporal anomaly where they are perpetually discussing the pros and cons of different indentation styles. The thread, started three weeks ago about \"best practices for code reviews,\" has now reached 47,000 messages with no conclusion in sight.\n\n\"I went in to ask a simple question about semicolons,\" said developer Marcus Rodriguez, speaking through a crack in the space-time continuum. \"That was in 2021. I've watched my children grow up and retire while we debate tabs versus spaces. Please, send help. Or at least send coffee. The thread collapsed into a singularity three days ago, but we're still discussing whether that's a breaking change.\"",
-                'summary' => null,
-                'published_at' => now()->subDays(rand(1, 30)),
-                'meta' => [
-                    'meta_title' => 'Slack Infinite Thread Traps Engineers in Time Loop',
-                    'meta_description' => 'A Slack feature designed for collaboration created a temporal anomaly of endless discussion.',
-                ],
-            ]);
+            // Handle featured images based on strategy
+            if ($data['featured_image'] === null) {
+                // No image - skip
+                continue;
+            }
 
-        // Article 8: Pre-Seed Funding (Published)
-        Article::factory()
-            ->published()
-            ->inCategories(['Startups', 'Satire'])
-            ->create([
-                'title' => 'Silicon Valley Introduces \'Pre-Seed\' Funding Round for Ideas That Don\'t Exist Yet',
-                'slug' => 'pre-seed-nonexistent-ideas',
-                'content' => "## Venture Capital Inception\n\nIn a bold move to stay ahead of the curve, venture capital firms in Silicon Valley have introduced \"Pre-Seed\" funding rounds for startup ideas that haven't been conceived yet. The new funding stage targets entrepreneurs who are \"thinking about possibly considering maybe starting a company someday.\"\n\n\"We're not just investing in ideas, we're investing in the quantum possibility of ideas,\" explained VC partner Chad Wellington III. \"Last week we gave \$2 million to a guy who said he 'might have a dream about an app' next Tuesday. Sure, the company doesn't exist, the product doesn't exist, and the founder might change his mind, but that's what being a visionary investor is all about. Plus, we got a 40% discount because he hasn't even thought of the idea yet.\"",
-                'summary' => null,
-                'published_at' => now()->subDays(rand(1, 30)),
-                'meta' => [
-                    'meta_title' => 'VCs Fund Ideas That Don\'t Exist Yet in Pre-Seed Round',
-                    'meta_description' => "Silicon Valley investors are now funding startup ideas that haven't been conceived.",
-                ],
-            ]);
+            // Determine if this article should get local demo image or Picsum URL
+            $articlesWithImagesIndexed = array_values($articlesWithImages);
+            $positionInImagedArticles = array_search($data, $articlesWithImagesIndexed, true);
 
-        // Article 9: Copy-Paste (Draft, demo-image-5.png)
-        Article::factory()
-            ->draft()
-            ->withDemoImage(5)
-            ->inCategories(['Technology', 'Startups', 'Satire'])
-            ->create([
-                'title' => 'Tech Company Unveils Revolutionary \'Copy-Paste\' Feature; Industry Analysts Call It \'Game-Changing\'',
-                'slug' => 'copy-paste-game-changing',
-                'content' => "## Innovation in Action\n\nTech startup ClipBoard.ai has unveiled a revolutionary new feature called \"Copy-Paste\" that allows users to duplicate text, images, and files across different applications. The announcement sent shockwaves through Silicon Valley, with industry analysts calling it \"game-changing\" and \"the most important innovation since the wheel.\"\n\n\"We spent three years and \$45 million in venture capital developing this technology,\" said CEO Maxwell Sterling at the product launch. \"Our proprietary algorithm uses advanced clipboard management to temporarily store data in a buffer, then retrieve it elsewhere. We call it 'ClipBoard+'. Sure, every operating system has had this since 1984, but ours has a cool icon.\" Investors immediately valued the company at \$2 billion.",
-                'summary' => null,
-                'published_at' => null,
-                'meta' => [
-                    'meta_title' => 'Tech Company Reinvents Copy-Paste, Values at $2 Billion',
-                    'meta_description' => 'A startup spent millions to recreate basic clipboard functionality and called it innovation.',
-                ],
-            ]);
-
-        // Article 10: LinkedIn Influencer (Draft)
-        Article::factory()
-            ->draft()
-            ->inCategories(['Technology', 'Satire'])
-            ->create([
-                'title' => 'LinkedIn Influencer Reaches Peak Performance by Only Posting About Posting on LinkedIn',
-                'slug' => 'linkedin-influencer-recursion',
-                'content' => "## Meta-Professional Networking\n\nLinkedIn power user and \"thought leader\" Patricia Chen has achieved unprecedented engagement levels by creating the world's first fully recursive professional networking strategy: she only posts about the act of posting on LinkedIn. Her content, which includes 3,000-word essays about \"the power of authentic LinkedIn storytelling,\" has garnered millions of views from people also hoping to become LinkedIn influencers.\n\n\"I used to share insights about leadership and growth, but then I realized the real content was the LinkedIn posts themselves,\" Chen explained while filming her 47th video about \"building your personal brand.\" \"My latest post about how posting about posting increases engagement got 50,000 views. Next week I'm releasing a 12-part series on 'Why Your LinkedIn Posts About LinkedIn Posts Are Underperforming.' It's very meta. Very professional. Very #ThoughtLeadership.\"",
-                'summary' => null,
-                'published_at' => null,
-                'meta' => [
-                    'meta_title' => 'LinkedIn User Only Posts About Posting on LinkedIn',
-                    'meta_description' => 'A LinkedIn influencer found success by posting exclusively about the act of posting on LinkedIn.',
-                ],
-            ]);
-
-        // Article 11: Agile Team (Published)
-        Article::factory()
-            ->published()
-            ->inCategories(['Programming', 'Startups', 'Satire'])
-            ->create([
-                'title' => 'Agile Team Completes 47th Sprint Planning Meeting Without Ever Shipping Anything',
-                'slug' => 'agile-team-zero-shipments',
-                'content' => "## The Eternal Sprint\n\nAn agile development team at enterprise software company SynergCorp has completed their 47th consecutive sprint planning meeting without ever shipping a single feature to production. The team, which has been \"iterating\" on the same login page redesign for 14 months, maintains that they are \"following best practices\" and \"failing fast.\"\n\n\"We really nailed the velocity this sprint,\" said Scrum Master Taylor Jenkins while updating a Jira board containing 847 tickets in various stages of \"In Progress.\" \"Sure, we haven't actually released anything to users, but our burndown chart looks fantastic. We did discover that changing the button color from #3B82F6 to #3B82F7 increases engagement by 0.0003% in our A/B test. That's valuable learning! We're pivoting to focus on that breakthrough.\"",
-                'summary' => null,
-                'published_at' => now()->subDays(rand(1, 30)),
-                'meta' => [
-                    'meta_title' => 'Agile Team Plans 47 Sprints, Ships Zero Features',
-                    'meta_description' => 'A development team has been planning sprints for over a year without releasing anything.',
-                ],
-            ]);
-
-        // Article 12: Coffee ML Correlation (Published)
-        Article::factory()
-            ->published()
-            ->inCategories(['Programming', 'Satire'])
-            ->create([
-                'title' => 'Data Scientist Discovers Correlation Between Coffee Consumption and Ability to Pretend to Understand Machine Learning',
-                'slug' => 'coffee-ml-correlation',
-                'content' => "## The Caffeine-Competence Connection\n\nA groundbreaking study by data scientist Dr. Alex Kumar has found a statistically significant correlation between the amount of coffee consumed and one's ability to confidently pretend to understand machine learning algorithms during meetings. The research, which surveyed 500 tech professionals, found that those drinking 4+ cups daily were 300% more likely to use phrases like \"stochastic gradient descent\" without being able to explain them.\n\n\"The data is clear,\" Dr. Kumar explained while nervously clutching his fifth espresso. \"Each additional cup of coffee increases your willingness to nod thoughtfully when someone mentions 'neural network architecture' by 47%. I'm currently working on a predictive model that estimates how many cups you need to drink before you feel qualified to give a conference talk about AI ethics. Preliminary results suggest it's approximately infinity plus one.\"",
-                'summary' => null,
-                'published_at' => now()->subDays(rand(1, 30)),
-                'meta' => [
-                    'meta_title' => 'Study Links Coffee to Pretending to Understand Machine Learning',
-                    'meta_description' => 'Research finds more coffee equals better ability to fake understanding of ML algorithms.',
-                ],
-            ]);
-
-        // Article 13: CEO Bad Apples (Draft, demo-image-2.png)
-        Article::factory()
-            ->draft()
-            ->withDemoImage(2)
-            ->inCategories(['Startups', 'Satire'])
-            ->create([
-                'title' => 'Tech CEO Apologizes for Company Culture by Blaming \'A Few Bad Apples\' Who Happen to Be Everyone',
-                'slug' => 'ceo-bad-apples-everyone',
-                'content' => "## The Rotten Orchard\n\nTech CEO Bradley Morrison issued a heartfelt apology Tuesday for his company's toxic work culture, which has included 80-hour work weeks, unlimited vacation that nobody can take, and a mandatory \"fun\" culture that requires employees to participate in trust falls with their managers. In the apology, Morrison blamed the problems on \"a few bad apples\" who, upon investigation, appear to be literally everyone at the company including himself.\n\n\"We've identified the toxic elements in our culture, and it turns out it's all of us,\" Morrison admitted during an all-hands meeting streamed from his vacation home in Bali. \"The 'bad apples' were the unlimited kombucha on tap, the ping-pong tables nobody uses, and the foosball tournament that determined promotions. Also me. I'm definitely one of the bad apples. But we're committed to change. Starting Monday, we'll have even more kombucha and mandatory mindfulness sessions at 5 AM.\"",
-                'summary' => null,
-                'published_at' => null,
-                'meta' => [
-                    'meta_title' => 'CEO Blames Bad Apples for Toxic Culture, It\'s Everyone',
-                    'meta_description' => 'A tech CEO apologized for company culture issues by blaming everyone including himself.',
-                ],
-            ]);
-
-        // Article 14: Move Fast Break Database (Published)
-        Article::factory()
-            ->published()
-            ->inCategories(['Programming', 'Startups', 'Satire'])
-            ->create([
-                'title' => 'Junior Developer Explains to Senior Engineer Why \'Moving Fast and Breaking Things\' Includes Production Database',
-                'slug' => 'move-fast-break-database',
-                'content' => "## The Cost of Speed\n\nJunior developer Kevin Park, 22, spent twenty minutes Tuesday afternoon explaining to senior engineer Maria Rodriguez why his interpretation of the company motto \"Move Fast and Break Things\" included accidentally dropping the entire production database during his first week. Park maintained that he was \"just following the culture\" and \"embracing failure as a learning opportunity.\"\n\n\"Mark Zuckerberg said to move fast and break things, so that's what I did,\" Park explained while the recovery team frantically restored 6TB of customer data from backups. \"Sure, the database was in production, but how else am I supposed to learn? Maria needs to be more supportive of experimentation. Besides, I only deleted the user table. It's not like I touched the payment records. Oh wait, I did? Never mind, that was definitely intentional. Learning opportunity!\"",
-                'summary' => null,
-                'published_at' => now()->subDays(rand(1, 30)),
-                'meta' => [
-                    'meta_title' => 'Junior Dev Drops Prod Database, Cites \'Move Fast\' Culture',
-                    'meta_description' => 'A junior developer deleted the production database and claimed it was part of company culture.',
-                ],
-            ]);
-
-        // Article 15: Millennial Burnout (Draft)
-        Article::factory()
-            ->draft()
-            ->inCategories(['General', 'Satire'])
-            ->create([
-                'title' => 'Millennial Finally Achieves Work-Life Balance by Simultaneously Burning Out in Both Realms',
-                'slug' => 'millennial-burnout-balance',
-                'content' => "## The Perfect Equilibrium\n\nAfter years of struggling to achieve work-life balance, 29-year-old marketing manager Jessica Wong finally succeeded this week by simultaneously burning out in both her professional and personal lives. Wong, who has been working 60-hour weeks while also maintaining an active social media presence, a side hustle, and a rigorous skincare routine, achieved perfect symmetry by collapsing from exhaustion during a work Zoom call while also forgetting to water her houseplants.\n\n\"I finally cracked the code,\" Wong whispered from her ergonomic office chair that she hasn't left in 14 hours. \"True balance isn't about separating work and life—it's about being equally miserable in both. Right now, I'm stressed about a deadline and anxious about my dating life at the exact same intensity. That's equilibrium. My therapist says I need to set boundaries, but boundaries are just walls, and walls are for houses, not for the human spirit. Now if you'll excuse me, I have to post about my #gratitude practice while crying into my fourth coffee of the morning.\"",
-                'summary' => null,
-                'published_at' => null,
-                'meta' => [
-                    'meta_title' => 'Millennial Achieves Perfect Work-Life Burnout Balance',
-                    'meta_description' => 'A millennial discovered that true balance means being equally exhausted in work and personal life.',
-                ],
-            ]);
+            if ($positionInImagedArticles !== false && $positionInImagedArticles < $halfCount) {
+                // First 50%: Use local demo images
+                if (! $article->hasMedia('featured_image')) {
+                    $demoImageNum = $demoImages[$imageCounter % count($demoImages)];
+                    $this->attachDemoImage($article, $demoImageNum);
+                    $imageCounter++;
+                }
+            } else {
+                // Second 50%: Store Picsum URL in meta
+                if (! isset($article->meta['featured_image'])) {
+                    $meta = $article->meta ?? [];
+                    $meta['featured_image'] = $data['featured_image'];
+                    $article->update(['meta' => $meta]);
+                }
+            }
+        }
     }
 }
