@@ -240,95 +240,65 @@
 
                     {{-- Featured Image --}}
                     @php
-                        $media = $article->exists ? $article->getFirstMedia('featured_image') : null;
-                        // Prioritize external URL from database column, fall back to Media Library URL
-                        $initialImageUrl = $article->featured_image ?? $media?->getUrl('large') ?? '';
-                        $initialIsRemoved = old('remove_featured_image') ? true : false;
-                        $isUploadedFile = $media && !$article->featured_image; // Has media but no external URL = uploaded file
+                        $featuredPhoto = $article->exists ? $article->featuredPhoto : null;
+                        $initialPhotoId = old('photo_id', $article->photo_id ?? '');
                     @endphp
                     <div class="card bg-base-100 shadow-sm"
-                         x-data="featuredImage({{ json_encode($initialImageUrl, JSON_UNESCAPED_SLASHES) }}, {{ json_encode($isUploadedFile) }})">
+                         x-data="featuredImage()">
                         <div class="card-body">
                             <h3 class="card-title text-lg flex items-center gap-2">
                                 <i class="ph ph-image"></i>
                                 Featured Image
                             </h3>
 
-                            {{-- Hidden checkbox for server state --}}
-                            <input type="hidden" x-ref="originalUrl" :value="originalUrl">
-                            <input type="checkbox" name="remove_featured_image" value="1" x-model="isRemoved" class="hidden">
-
-                            {{-- DaisyUI Radio Tabs --}}
-                            <div class="tabs tabs-lifted mb-4" role="tablist">
-                                <input type="radio"
-                                       name="image_tab"
-                                       value="external_url"
-                                       class="tab"
-                                       aria-label="External URL"
-                                       role="tab"
-                                       tabindex="0"
-                                       :checked="activeTab === 'external_url'"
-                                       @click="setTab('external_url')"
-                                       @keydown="if ($event.key === 'ArrowLeft') setTab('upload_file'); if ($event.key === 'ArrowRight') setTab('upload_file')">
-                                
-                                <input type="radio"
-                                       name="image_tab"
-                                       value="upload_file"
-                                       class="tab"
-                                       aria-label="Upload File"
-                                       role="tab"
-                                       tabindex="0"
-                                       :checked="activeTab === 'upload_file'"
-                                       @click="setTab('upload_file')"
-                                       @keydown="if ($event.key === 'ArrowLeft') setTab('external_url'); if ($event.key === 'ArrowRight') setTab('external_url')">
+                            {{-- Tab Navigation using Alpine.js --}}
+                            <div class="tabs tabs-boxed mb-4">
+                                <button type="button"
+                                        class="tab"
+                                        :class="{'tab-active': activeTab === 'existing_photo'}"
+                                        @click="setTab('existing_photo')">
+                                    Select Photo
+                                </button>
+                                <button type="button"
+                                        class="tab"
+                                        :class="{'tab-active': activeTab === 'external_url'}"
+                                        @click="setTab('external_url')">
+                                    External URL
+                                </button>
+                                <button type="button"
+                                        class="tab"
+                                        :class="{'tab-active': activeTab === 'upload_file'}"
+                                        @click="setTab('upload_file')">
+                                    Upload File
+                                </button>
                             </div>
 
-                             {{-- Image Preview Area --}}
-                             <div x-show="hasImage" x-transition class="relative mb-4" role="tabpanel">
-                                 <figure class="relative">
-                                    {{-- Badge overlay --}}
-                                    <div class="absolute top-2 left-2 z-10">
-                                        <span x-show="imageUrl && isUploadedFile"
-                                              class="badge badge-success">
-                                            📁 Uploaded File
-                                        </span>
-                                        <span x-show="imageUrl && !isUploadedFile && imageUrl.startsWith('http')"
-                                              class="badge badge-primary">
-                                            🔗 External URL
-                                        </span>
-                                    </div>
-                                    
-{{-- Delete button --}}
-                                      <button type="button" 
-                                              @click="removeImage()"
-                                              class="btn btn-circle btn-error btn-sm absolute top-2 right-2 z-10"
-                                              aria-label="Remove featured image">
-                                          <i class="ph ph-x text-lg"></i>
-                                      </button>
-                                    
-                                    {{-- Preview image --}}
-                                    <img :src="previewUrl" 
-                                         alt="Featured image preview"
-                                         class="w-full h-48 object-cover rounded-lg">
-                                    
-                                     {{-- File info --}}
-                                     <div x-show="fileName" class="mt-2 text-sm text-gray-600">
-                                         <span x-text="fileName"></span>
-                                         <span x-show="fileSize" x-text="fileSize" class="text-gray-400"></span>
-                                     </div>
-                                </figure>
+                            {{-- Tab 1: Select Existing Photo --}}
+                            <div x-show="activeTab === 'existing_photo'" x-transition class="mb-4">
+                                <fieldset class="fieldset">
+                                    <legend class="fieldset-legend text-sm">Choose from Photo Library</legend>
+                                    <select name="photo_id"
+                                            class="select select-bordered w-full @error('photo_id') select-error @enderror"
+                                            x-model="selectedPhotoId">
+                                        <option value="">No featured image</option>
+                                        @foreach(\App\Models\Photo::latest()->limit(50)->get() as $photo)
+                                            <option value="{{ $photo->id }}"
+                                                    {{ $initialPhotoId == $photo->id ? 'selected' : '' }}>
+                                                {{ $photo->alt_text }} ({{ $photo->status->value }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <p class="text-xs text-base-content/50 mt-1">
+                                        <a href="{{ route('admin.photos.create') }}" target="_blank" class="link link-primary">
+                                            <i class="ph ph-plus-circle"></i>
+                                            Create new photo
+                                        </a>
+                                    </p>
+                                    @error('photo_id')
+                                        <span class="text-error text-sm mt-1">{{ $message }}</span>
+                                    @enderror
+                                </fieldset>
                             </div>
-
-                             {{-- Undo Button --}}
-                             <div x-show="isRemoved && originalUrl" x-transition class="mb-4">
-<button type="button"
-                                          @click="undoDelete()"
-                                          class="btn btn-ghost btn-sm"
-                                          aria-label="Restore featured image">
-                                     <i class="ph ph-arrow-u-up-left mr-1"></i>
-                                     Undo
-                                 </button>
-                             </div>
 
                             {{-- Error Message --}}
                             <div x-show="errorMessage" x-transition class="alert alert-error mb-4">
@@ -336,15 +306,12 @@
                                 <span x-text="errorMessage"></span>
                             </div>
 
-                            {{-- External URL Tab Content --}}
-                            <div x-show="activeTab === 'external_url'" x-transition role="tabpanel">
+                            {{-- Tab 2: External URL --}}
+                            <div x-show="activeTab === 'external_url'" x-transition>
                                 <fieldset class="fieldset">
                                     <legend class="fieldset-legend text-sm">Image URL</legend>
                                     <input type="url"
                                            name="featured_image"
-                                           x-model="imageUrl"
-                                           @input="clearFilePreview()"
-                                           :disabled="activeTab !== 'external_url'"
                                            class="input input-bordered w-full text-sm @error('featured_image') input-error @enderror"
                                            placeholder="https://example.com/image.jpg">
                                     @error('featured_image')
@@ -353,8 +320,8 @@
                                 </fieldset>
                             </div>
 
-                            {{-- Upload File Tab Content --}}
-                            <div x-show="activeTab === 'upload_file'" x-transition role="tabpanel">
+                            {{-- Tab 3: Upload File --}}
+                            <div x-show="activeTab === 'upload_file'" x-transition>
                                 <fieldset class="fieldset">
                                     <legend class="fieldset-legend text-sm">Upload Image</legend>
 <input type="file"
@@ -369,40 +336,48 @@
                                     @enderror
                                 </fieldset>
                             </div>
+
+                            {{-- Current Featured Photo Preview --}}
+                            @if($featuredPhoto)
+                                <div class="mt-6">
+                                    <p class="text-sm font-medium mb-2">Current Featured Image:</p>
+                                    <figure class="relative max-w-xs">
+                                        <img src="{{ $featuredPhoto->image_url }}"
+                                             alt="{{ $featuredPhoto->alt_text }}"
+                                             class="w-full rounded-lg shadow-md">
+                                        <div class="absolute top-2 left-2">
+                                            <span class="badge badge-primary">
+                                                @if($featuredPhoto->isExternalUrl())
+                                                    🔗 External URL
+                                                @else
+                                                    📁 Uploaded Photo
+                                                @endif
+                                            </span>
+                                        </div>
+                                    </figure>
+                                    <p class="text-xs text-base-content/50 mt-2">
+                                        {{ $featuredPhoto->alt_text }}
+                                    </p>
+                                </div>
+                            @endif
                         </div>
 
                         <script>
-                            function featuredImage(initialImageUrl, isUploadedFile = false) {
+                            function featuredImage() {
                                 return {
-                                    activeTab: isUploadedFile ? 'upload_file' : 'external_url',
-                                    imageUrl: initialImageUrl || '',
-                                    isUploadedFile: isUploadedFile,
+                                    activeTab: '{{ $initialPhotoId ? "existing_photo" : "external_url" }}',
+                                    selectedPhotoId: '{{ $initialPhotoId }}',
+                                    imageUrl: '',
                                     filePreview: null,
                                     fileName: null,
                                     fileSize: null,
-                                    isRemoved: false,
-                                    originalUrl: '',
                                     errorMessage: null,
                                     maxSize: 2097152, // 2MB in bytes
-                                    
-                                    get hasImage() {
-                                        return !this.isRemoved && (this.imageUrl || this.filePreview);
-                                    },
-                                    
-                                    get previewUrl() {
-                                        if (this.filePreview) {
-                                            return this.filePreview;
-                                        }
-                                        if (this.imageUrl) {
-                                            return this.imageUrl;
-                                        }
-                                        return '';
-                                    },
-                                    
+
                                     handleFileSelect(event) {
                                         const file = event.target.files[0];
                                         if (!file) return;
-                                        
+
                                         // Client-side validation
                                         const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
                                         if (!validTypes.includes(file.type)) {
@@ -410,14 +385,14 @@
                                             event.target.value = '';
                                             return;
                                         }
-                                        
+
                                         // File size validation (2MB = 2097152 bytes)
                                         if (file.size > this.maxSize) {
                                             this.errorMessage = 'File is too large. Maximum size is 2MB (2048 KB).';
                                             event.target.value = '';
                                             return;
                                         }
-                                        
+
                                         this.errorMessage = null;
                                         this.filePreview = URL.createObjectURL(file);
                                         this.fileName = file.name;
@@ -428,70 +403,11 @@
                                         } else {
                                             this.fileSize = Math.round(sizeInKB) + ' KB';
                                         }
-                                        this.isRemoved = false;
-                                    },
-                                    
-                                    removeImage() {
-                                        this.isRemoved = true;
-                                        this.filePreview = null;
-                                        this.imageUrl = '';
-                                        this.fileName = null;
-                                        this.fileSize = null;
-                                        this.errorMessage = null;
-                                        // Clear file input
-                                        if (this.$refs.fileInput) {
-                                            this.$refs.fileInput.value = '';
-                                        }
                                     },
 
-                                    undoDelete() {
-                                        this.isRemoved = false;
-                                        if (this.originalUrl) {
-                                            this.imageUrl = this.originalUrl;
-                                        }
-                                    },
-
-                                    clearFilePreview() {
-                                        this.filePreview = null;
-                                        this.fileName = null;
-                                        this.fileSize = null;
-                                        this.isRemoved = false;
-                                        if (this.$refs.fileInput) {
-                                            this.$refs.fileInput.value = '';
-                                        }
-                                    },
-                                    
                                     setTab(tab) {
                                         this.activeTab = tab;
                                         this.errorMessage = null;
-                                        // Clear URL value when switching to upload tab to prevent form validation issues
-                                        if (tab === 'upload_file' && this.imageUrl) {
-                                            // Store the URL temporarily in case user switches back
-                                            if (!this.originalUrl) {
-                                                this.originalUrl = this.imageUrl;
-                                            }
-                                            this.imageUrl = '';
-                                        }
-                                        // Restore URL when switching back to external URL tab
-                                        if (tab === 'external_url' && this.originalUrl && !this.imageUrl) {
-                                            this.imageUrl = this.originalUrl;
-                                        }
-                                    },
-                                    
-                                    // Alias methods for test compatibility
-                                    previewFile(event) {
-                                        // Alias for handleFileSelect - for test compatibility
-                                        this.handleFileSelect(event);
-                                    },
-                                    
-                                    deleteImage() {
-                                        // Alias for removeImage - for test compatibility
-                                        this.removeImage();
-                                    },
-                                    
-                                    restoreImage() {
-                                        // Alias for undoDelete - for test compatibility
-                                        this.undoDelete();
                                     }
                                 }
                             }
