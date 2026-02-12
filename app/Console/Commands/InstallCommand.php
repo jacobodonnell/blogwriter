@@ -187,7 +187,7 @@ class InstallCommand extends Command
         }
 
         // Determine seed option
-        $seed = $this->option('seed') ? true : ($this->option('no-seed') ? false : true);
+        $seed = $this->determineSeedOption();
 
         return [
             'site_name' => $siteName,
@@ -242,14 +242,7 @@ class InstallCommand extends Command
         info('Step 3: Demo Content');
         $this->newLine();
 
-        $seedData = $this->option('seed')
-            ? true
-            : ($this->option('no-seed')
-                ? false
-                : confirm(
-                    label: 'Would you like to seed your blog with demo articles?',
-                    default: true
-                ));
+        $seedData = $this->determineSeedOption();
 
         return [
             'site_name' => $siteName,
@@ -567,7 +560,36 @@ class InstallCommand extends Command
 
     protected function isComposerAvailable(): bool
     {
-        return ! (in_array(shell_exec('which composer'), ['', '0'], true) || shell_exec('which composer') === false || shell_exec('which composer') === null) || ! (in_array(shell_exec('where composer'), ['', '0'], true) || shell_exec('where composer') === false || shell_exec('where composer') === null);
+        return $this->commandExists('which composer')
+            || $this->commandExists('where composer');
+    }
+
+    private function commandExists(string $command): bool
+    {
+        $output = shell_exec($command);
+
+        return ! empty($output) && $output !== '0';
+    }
+
+    protected function determineSeedOption(): bool
+    {
+        if ($this->option('seed')) {
+            return true;
+        }
+
+        if ($this->option('no-seed')) {
+            return false;
+        }
+
+        // Prompt in interactive mode, default to true in non-interactive
+        if (! $this->option('no-interaction')) {
+            return confirm(
+                label: 'Would you like to seed your blog with demo articles?',
+                default: true
+            );
+        }
+
+        return true;
     }
 
     protected function hasVendorDirectory(): bool
