@@ -78,14 +78,20 @@ class ArticleController extends Controller
 
         // Handle featured image upload
         if ($request->hasFile('featured_image_file')) {
+            // Clear external URL if uploading a file
+            $article->featured_image = null;
+            $article->save();
+
             $article->addMediaFromRequest('featured_image_file')
                 ->toMediaCollection('featured_image');
         }
 
-        // Handle external URL
+        // Handle external URL (store as-is, don't download)
         if ($request->filled('featured_image') && filter_var($request->featured_image, FILTER_VALIDATE_URL)) {
-            $article->addMediaFromUrl($request->featured_image)
-                ->toMediaCollection('featured_image');
+            // Clear uploaded media if setting an external URL
+            $article->clearMediaCollection('featured_image');
+            // External URLs are stored in the featured_image column
+            // Already handled by fillable assignment above
         }
 
         if (! empty($data['categories'])) {
@@ -137,18 +143,26 @@ class ArticleController extends Controller
         // Handle featured image removal
         if ($request->boolean('remove_featured_image')) {
             $article->clearMediaCollection('featured_image');
+            $article->featured_image = null;
+            $article->save();
         }
 
         // Handle featured image upload
         if ($request->hasFile('featured_image_file')) {
+            // Clear external URL if uploading a file
+            $article->featured_image = null;
+            $article->save();
+
             $article->addMediaFromRequest('featured_image_file')
                 ->toMediaCollection('featured_image');
         }
 
-        // Handle external URL
+        // Handle external URL (store as-is, don't download)
         if ($request->filled('featured_image') && filter_var($request->featured_image, FILTER_VALIDATE_URL)) {
-            $article->addMediaFromUrl($request->featured_image)
-                ->toMediaCollection('featured_image');
+            // Clear uploaded media if setting an external URL
+            $article->clearMediaCollection('featured_image');
+            // External URLs are stored in the featured_image column
+            // Already handled by fillable assignment above
         }
 
         $article->categories()->sync($data['categories'] ?? []);

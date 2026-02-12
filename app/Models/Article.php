@@ -27,6 +27,7 @@ class Article extends Model implements HasMedia
         'published_at',
         'last_edited_at',
         'meta',
+        'featured_image',
     ];
 
     protected function casts(): array
