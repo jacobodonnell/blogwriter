@@ -51,7 +51,7 @@ it('prevents install from running after fresh install', function (): void {
     $conditionalLine = null;
 
     foreach ($lines as $index => $line) {
-        if (str_contains($line, '$this->freshInstall()')) {
+        if ($freshInstallLine === null && str_contains($line, '$this->freshInstall()')) {
             $freshInstallLine = $index;
         }
         if (str_contains($line, '$didFreshInstall = true')) {

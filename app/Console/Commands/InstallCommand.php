@@ -6,7 +6,6 @@ use App\Models\User;
 use App\Services\PasswordGenerator;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 use function Laravel\Prompts\confirm;
@@ -61,6 +60,7 @@ class InstallCommand extends Command
     protected function runInstallation(): int
     {
         $this->welcome();
+        $didFreshInstall = false;
 
         if ($this->isAlreadyInstalled() && ! $this->option('force')) {
             warning('BlogWriter is already installed.');
@@ -84,6 +84,9 @@ class InstallCommand extends Command
                 $this->newLine();
                 info('Reset complete. Continuing with installation...');
                 $this->newLine();
+
+                $this->freshInstall();
+                $didFreshInstall = true;
             } else {
                 info('Installation cancelled.');
                 info('Tip: Run php artisan blogwriter:reset to reset BlogWriter first.');
@@ -93,7 +96,12 @@ class InstallCommand extends Command
         }
 
         $config = $this->gatherConfiguration();
-        $this->install($config);
+
+        if (! $didFreshInstall) {
+            $this->install($config);
+        } else {
+            $this->postMigrationSetup($config);
+        }
 
         return self::SUCCESS;
     }
@@ -302,10 +310,18 @@ class InstallCommand extends Command
         $this->updateEnvironmentFile($config);
 
         // Run migrations
-        info('Running database migrations...');
-        Artisan::call('migrate', ['--force' => true]);
-        info('✓ Migrations complete');
+        $this->freshInstall();
 
+        // Complete post-migration setup
+        $this->postMigrationSetup($config);
+    }
+
+    /**
+     * Complete setup after migrations: create user, seed data, lock file.
+     * Called either from install() or after reset + freshInstall().
+     */
+    protected function postMigrationSetup(array $config): void
+    {
         // Create admin user
         info('Creating admin user...');
         $user = $this->createUser($config);
@@ -313,6 +329,16 @@ class InstallCommand extends Command
 
         // Seed demo data if requested
         if ($config['seed']) {
+            // Clear any leftover temp files from previous failed attempts
+            \Illuminate\Support\Facades\Storage::disk('local')->deleteDirectory('media-library/temp');
+
+            // Pre-flight check for demo images
+            info('Verifying demo images...');
+            $imagesValid = $this->verifyDemoImages();
+            if (! $imagesValid) {
+                info('⚠️  Proceeding with seeding, but some images may be skipped.');
+            }
+
             info('Seeding demo content...');
             Artisan::call('blogwriter:seed', ['--state' => 'demo', '--no-interaction' => true]);
             info('✓ Demo content added');
@@ -330,6 +356,17 @@ class InstallCommand extends Command
 
         $this->newLine();
         $this->displaySuccess($config, $user);
+    }
+
+    /**
+     * Run database migrations only (no seeding, no user creation).
+     * Called after reset to avoid duplicate migrations.
+     */
+    protected function freshInstall(): void
+    {
+        info('Running database migrations...');
+        Artisan::call('migrate', ['--force' => true]);
+        info('✓ Migrations complete');
     }
 
     protected function setupEnvironmentFile(): void
@@ -550,5 +587,46 @@ class InstallCommand extends Command
             note('You may need to manually run: php artisan storage:link');
             note('Or on Windows, run as administrator: mklink /D public\\storage storage\\app\\public');
         }
+    }
+
+    /**
+     * Verify demo images exist and are valid before seeding.
+     * Prevents installer hang from missing or corrupted image files.
+     */
+    protected function verifyDemoImages(): bool
+    {
+        $demoImagesPath = database_path('seeders/demo-images');
+        $requiredImages = [
+            'demo-image-1.png',
+            'demo-image-2.png',
+            'demo-image-3.png',
+            'demo-image-4.png',
+            'demo-image-5.png',
+        ];
+
+        $missingOrInvalid = [];
+
+        foreach ($requiredImages as $image) {
+            $imagePath = $demoImagesPath.'/'.$image;
+
+            if (! file_exists($imagePath)) {
+                $missingOrInvalid[] = "$image (missing)";
+            } elseif (filesize($imagePath) === 0) {
+                $missingOrInvalid[] = "$image (0 bytes)";
+            }
+        }
+
+        if (! empty($missingOrInvalid)) {
+            warning('⚠️  Demo image issues detected:');
+            foreach ($missingOrInvalid as $issue) {
+                warning("  - $issue");
+            }
+            warning('Seeding will skip featured images for affected articles.');
+            $this->newLine();
+
+            return false;
+        }
+
+        return true;
     }
 }

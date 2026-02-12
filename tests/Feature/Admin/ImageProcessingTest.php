@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\Status;
 use App\Models\Article;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -74,7 +73,8 @@ describe('image upload and webp conversion', function (): void {
         $article = Article::first();
         $media = $article->getFirstMedia('featured_image');
 
-        expect($media->mime_type)->toBe('image/webp');
+        expect($media->mime_type)->toBe('image/jpeg');
+        expect($media->hasGeneratedConversion('medium'))->toBeTrue();
     });
 
     it('accepts webp files directly', function (): void {

@@ -233,7 +233,7 @@ class DatabaseSeeder extends Seeder
             ]);
 
             // Add featured image via Spatie Media Library
-            if (!empty($articleData['featured_image'])) {
+            if (! empty($articleData['featured_image'])) {
                 // Use local demo images instead of external URLs
                 $demoImagesPath = database_path('seeders/demo-images');
                 $demoImages = [
@@ -245,15 +245,24 @@ class DatabaseSeeder extends Seeder
                 ];
 
                 $randomImage = $demoImages[array_rand($demoImages)];
-                $imagePath = $demoImagesPath . '/' . $randomImage;
+                $imagePath = $demoImagesPath.'/'.$randomImage;
 
-                if (file_exists($imagePath)) {
-                    // Determine disk based on status
+                // Validate file exists AND is not empty (prevent 0-byte file issues)
+                if (file_exists($imagePath) && filesize($imagePath) > 0) {
                     $disk = $status === Status::Published ? 'public' : 'private';
 
-                    $article->addMedia($imagePath)
-                        ->preservingOriginal() // Don't delete source file
-                        ->toMediaCollection('featured_image', $disk);
+                    try {
+                        $article->addMedia($imagePath)
+                            ->preservingOriginal()
+                            ->toMediaCollection('featured_image', $disk);
+                    } catch (\Exception $e) {
+                        // Log error but don't stop seeding
+                        \Log::warning('Failed to attach featured image for article', [
+                            'article_id' => $article->id,
+                            'image_path' => $imagePath,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
                 }
             }
 

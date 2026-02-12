@@ -79,15 +79,26 @@ class ArticleController extends Controller
 
         // Handle featured image upload
         if ($request->hasFile('featured_image_file')) {
-            // Clear external URL if uploading a file
-            $article->featured_image = null;
-            $article->save();
+            try {
+                // Clear external URL if uploading a file
+                $article->featured_image = null;
+                $article->save();
 
-            // Determine disk based on article status
-            $disk = $article->status->isPublic() ? 'public' : 'private';
+                // Determine disk based on article status
+                $disk = $article->status->isPublic() ? 'public' : 'private';
 
-            $article->addMediaFromRequest('featured_image_file')
-                ->toMediaCollection('featured_image', $disk);
+                $article->addMediaFromRequest('featured_image_file')
+                    ->toMediaCollection('featured_image', $disk);
+            } catch (\Exception $e) {
+                \Log::error('Failed to attach featured image', [
+                    'article_id' => $article->id,
+                    'error' => $e->getMessage(),
+                ]);
+
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
+            }
         }
 
         // Handle external URL (store as-is, don't download)
@@ -156,19 +167,30 @@ class ArticleController extends Controller
 
         // Handle featured image upload
         if ($request->hasFile('featured_image_file')) {
-            // Clear external URL if uploading a file
-            $article->featured_image = null;
-            $article->save();
+            try {
+                // Clear external URL if uploading a file
+                $article->featured_image = null;
+                $article->save();
 
-            // Determine disk based on article status
-            $disk = $article->status->isPublic() ? 'public' : 'private';
+                // Determine disk based on article status
+                $disk = $article->status->isPublic() ? 'public' : 'private';
 
-            $article->addMediaFromRequest('featured_image_file')
-                ->toMediaCollection('featured_image', $disk);
+                $article->addMediaFromRequest('featured_image_file')
+                    ->toMediaCollection('featured_image', $disk);
+            } catch (\Exception $e) {
+                \Log::error('Failed to attach featured image', [
+                    'article_id' => $article->id,
+                    'error' => $e->getMessage(),
+                ]);
+
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
+            }
         }
 
         // Handle external URL (store as-is, don't download)
-        if ($request->filled('featured_image') && filter_var($request->featured_image, FILTER_VALIDATE_URL)) {
+        if ($request->filled('featured_image') && filter_var($request->filled_image, FILTER_VALIDATE_URL)) {
             // Clear uploaded media if setting an external URL
             $article->clearMediaCollection('featured_image');
             // External URLs are stored in the featured_image column
