@@ -12,16 +12,12 @@ class ArticleObserver
      */
     public function updated(Article $article): void
     {
-        if ($article->wasChanged('status')) {
-            $media = $article->getFirstMedia('featured_image');
-
-            if ($media instanceof \Spatie\MediaLibrary\MediaCollections\Models\Media) {
-                $expectedDisk = $article->status === Status::Published ? 'public' : 'private';
-
-                if ($media->disk !== $expectedDisk) {
-                    $media->move($article, 'featured_image', $expectedDisk);
-                }
-            }
+        // Auto-set published_at when publishing
+        if ($article->wasChanged('status') && $article->status === Status::Published && $article->published_at === null) {
+            $article->published_at = now();
+            $article->saveQuietly();
         }
+
+        // Media migration now handled by PhotoObserver
     }
 }

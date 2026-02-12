@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\Photo;
 use Database\Factories\Concerns\AttachesFeaturedImages;
 use Illuminate\Database\Seeder;
 
@@ -31,6 +32,38 @@ class DemoArticleSeeder extends Seeder
             // Convert status (no hidden status exists in demo)
             $status = $data['status'] === 'published' ? 'published' : 'draft';
 
+            // Handle photo creation
+            $photoId = null;
+            if ($data['featured_image'] !== null) {
+                // Determine if this article should get local demo image or Picsum URL
+                $articlesWithImagesIndexed = array_values($articlesWithImages);
+                $positionInImagedArticles = array_search($data, $articlesWithImagesIndexed, true);
+
+                if ($positionInImagedArticles !== false && $positionInImagedArticles < $halfCount) {
+                    // First 50%: Use local demo images
+                    $demoImageNum = $demoImages[$imageCounter % count($demoImages)];
+                    $photo = Photo::factory()
+                        ->state(['status' => $status, 'published_at' => $status === 'published' ? now()->subDays(rand(1, 30)) : null])
+                        ->withDemoImage($demoImageNum)
+                        ->create([
+                            'alt_text' => $data['title'].' featured image',
+                        ]);
+                    $photoId = $photo->id;
+                    $imageCounter++;
+                } else {
+                    // Second 50%: Store Picsum URL as external photo
+                    $photo = Photo::create([
+                        'filename' => basename($data['featured_image']),
+                        'slug' => \Illuminate\Support\Str::slug($data['title']).'-featured',
+                        'alt_text' => $data['title'].' featured image',
+                        'status' => $status,
+                        'published_at' => $status === 'published' ? now()->subDays(rand(1, 30)) : null,
+                        'meta' => ['external_url' => $data['featured_image']],
+                    ]);
+                    $photoId = $photo->id;
+                }
+            }
+
             $article = Article::firstOrCreate(
                 ['slug' => $data['slug']],
                 [
@@ -39,6 +72,7 @@ class DemoArticleSeeder extends Seeder
                     'summary' => $data['summary'] ?? null,
                     'status' => $status,
                     'published_at' => $status === 'published' ? now()->subDays(rand(1, 30)) : null,
+                    'photo_id' => $photoId,
                     'meta' => $data['meta'] ?? null,
                 ]
             );
@@ -47,32 +81,6 @@ class DemoArticleSeeder extends Seeder
             if ($article->categories()->count() === 0 && isset($data['categories'])) {
                 $categoryIds = Category::whereIn('name', $data['categories'])->pluck('id');
                 $article->categories()->attach($categoryIds);
-            }
-
-            // Handle featured images based on strategy
-            if ($data['featured_image'] === null) {
-                // No image - skip
-                continue;
-            }
-
-            // Determine if this article should get local demo image or Picsum URL
-            $articlesWithImagesIndexed = array_values($articlesWithImages);
-            $positionInImagedArticles = array_search($data, $articlesWithImagesIndexed, true);
-
-            if ($positionInImagedArticles !== false && $positionInImagedArticles < $halfCount) {
-                // First 50%: Use local demo images
-                if (! $article->hasMedia('featured_image')) {
-                    $demoImageNum = $demoImages[$imageCounter % count($demoImages)];
-                    $this->attachDemoImage($article, $demoImageNum);
-                    $imageCounter++;
-                }
-            } else {
-                // Second 50%: Store Picsum URL in meta
-                if (! isset($article->meta['featured_image'])) {
-                    $meta = $article->meta ?? [];
-                    $meta['featured_image'] = $data['featured_image'];
-                    $article->update(['meta' => $meta]);
-                }
             }
         }
     }

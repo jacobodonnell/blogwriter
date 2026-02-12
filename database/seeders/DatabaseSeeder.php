@@ -125,6 +125,7 @@ class DatabaseSeeder extends Seeder
 
             case 'demo':
                 $this->seedUser();
+                $this->call(PhotoSeeder::class);
                 $this->call(DemoArticleSeeder::class);
                 break;
 

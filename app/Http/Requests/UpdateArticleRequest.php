@@ -36,6 +36,7 @@ class UpdateArticleRequest extends FormRequest
             'summary' => ['nullable', 'string', 'max:500'],
             'content' => ['required', 'string'],
             'status' => ['required', 'in:draft,published'],
+            'photo_id' => ['nullable', 'exists:photos,id'],
             'featured_image' => ['nullable', 'string', 'url', 'max:500'],
             'featured_image_file' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'remove_featured_image' => ['nullable', 'boolean'],
@@ -68,7 +69,16 @@ class UpdateArticleRequest extends FormRequest
     {
         return [
             function (\Illuminate\Validation\Validator $validator): void {
-                // Check for both URL and file upload
+                // Ensure only ONE method is used for featured image
+                $methods = collect(['photo_id', 'featured_image', 'featured_image_file'])
+                    ->filter(fn ($field) => $field === 'featured_image_file' ? $this->hasFile($field) : $this->filled($field))
+                    ->count();
+
+                if ($methods > 1) {
+                    $validator->errors()->add('featured_image', 'Please use only one method to add a featured image.');
+                }
+
+                // Check for both URL and file upload (legacy check - now redundant with above)
                 if ($this->has('featured_image') && $this->filled('featured_image') && $this->hasFile('featured_image_file')) {
                     $validator->errors()->add('featured_image', 'Cannot provide both URL and file upload.');
                     $validator->errors()->add('featured_image_file', 'Cannot provide both URL and file upload.');
