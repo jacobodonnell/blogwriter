@@ -229,9 +229,30 @@ class DatabaseSeeder extends Seeder
                 'summary' => $articleData['summary'] ?? substr(strip_tags($articleData['content']), 0, 255),
                 'status' => $status,
                 'published_at' => $status === Status::Published ? now()->subDays(rand(1, 30)) : null,
-                'featured_image' => $articleData['featured_image'] ?? null,
                 'meta' => $articleData['meta'] ?? null,
             ]);
+
+            // Add featured image via Spatie Media Library
+            if (!empty($articleData['featured_image'])) {
+                // Use local demo images instead of external URLs
+                $demoImagesPath = database_path('seeders/demo-images');
+                $demoImages = [
+                    'demo-image-1.png',
+                    'demo-image-2.png',
+                    'demo-image-3.png',
+                    'demo-image-4.png',
+                    'demo-image-5.png',
+                ];
+
+                $randomImage = $demoImages[array_rand($demoImages)];
+                $imagePath = $demoImagesPath . '/' . $randomImage;
+
+                if (file_exists($imagePath)) {
+                    $article->addMedia($imagePath)
+                        ->preservingOriginal() // Don't delete source file
+                        ->toMediaCollection('featured_image');
+                }
+            }
 
             // Attach categories
             if (! empty($articleData['categories'])) {
