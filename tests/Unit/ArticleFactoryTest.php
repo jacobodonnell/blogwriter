@@ -2,6 +2,7 @@
 
 use App\Enums\Status;
 use App\Models\Article;
+use App\Models\Photo;
 use Database\Factories\ArticleFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -70,38 +71,29 @@ it('draft state overrides default weighted status', function (): void {
 // Media Attachment Tests
 // ==========================================
 
-it('attaches featured image with 60% probability', function (): void {
-    // Create 50 articles to test probability
-    $articles = Article::factory()->count(50)->create();
+it('creates articles with photo relationships when photo_id provided', function (): void {
+    $photo = Photo::factory()->withDemoImage(1)->create();
 
-    $articlesWithImages = $articles->filter(fn ($article): bool => $article->hasMedia('featured_image'));
+    $article = Article::factory()->create(['photo_id' => $photo->id]);
 
-    // Expect roughly 50-70% to have images (allowing variance)
-    expect($articlesWithImages->count())->toBeGreaterThan(20);
-    expect($articlesWithImages->count())->toBeLessThan(40);
-})->skip('Skipping due to demo-image dependency - will test in seeder tests');
+    expect($article->photo_id)->toBe($photo->id);
+    expect($article->featuredPhoto)->toBeInstanceOf(Photo::class);
+    expect($article->featuredPhoto->getFirstMedia('image'))->not->toBeNull();
+});
 
-it('published articles use public disk for featured images', function (): void {
-    $article = Article::factory()->published()->create();
+it('published articles use photos with public disk for images', function (): void {
+    $photo = Photo::factory()->published()->withDemoImage(1)->create();
+    $article = Article::factory()->published()->create(['photo_id' => $photo->id]);
 
-    if ($article->hasMedia('featured_image')) {
-        $media = $article->getFirstMedia('featured_image');
-        expect($media->disk)->toBe('public');
-    } else {
-        expect(true)->toBeTrue(); // Skip if no image attached
-    }
-})->skip('Skipping due to demo-image dependency - will test in seeder tests');
+    expect($article->featuredPhoto->getFirstMedia('image')->disk)->toBe('public');
+});
 
-it('draft articles use private disk for featured images', function (): void {
-    $article = Article::factory()->draft()->create();
+it('draft articles can use photos with private disk for images', function (): void {
+    $photo = Photo::factory()->draft()->withDemoImage(1)->create();
+    $article = Article::factory()->draft()->create(['photo_id' => $photo->id]);
 
-    if ($article->hasMedia('featured_image')) {
-        $media = $article->getFirstMedia('featured_image');
-        expect($media->disk)->toBe('private');
-    } else {
-        expect(true)->toBeTrue(); // Skip if no image attached
-    }
-})->skip('Skipping due to demo-image dependency - will test in seeder tests');
+    expect($article->featuredPhoto->getFirstMedia('image')->disk)->toBe('private');
+});
 
 // ==========================================
 // Content Generation Tests
