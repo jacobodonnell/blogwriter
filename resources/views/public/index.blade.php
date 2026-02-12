@@ -20,11 +20,20 @@
                             @if($article->categories->count() > 0)
                                 <div class="flex flex-wrap gap-2 mb-3">
                                     @foreach($article->categories as $category)
-                                        <a href="{{ route('category.show', $category->slug) }}" 
+                                        <a href="{{ route('category.show', $category->slug) }}"
                                            class="badge badge-primary badge-sm">
                                             {{ $category->name }}
                                         </a>
                                     @endforeach
+                                </div>
+                            @endif
+
+                            {{-- Featured Image --}}
+                            @if($article->featured_image_url)
+                                <div class="aspect-video w-full overflow-hidden rounded-lg mb-4">
+                                    <img src="{{ $article->featured_image_url }}"
+                                         alt="{{ $article->title }}"
+                                         class="w-full h-full object-cover">
                                 </div>
                             @endif
 

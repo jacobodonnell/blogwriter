@@ -61,17 +61,11 @@
         </div>
 
         {{-- Featured Image --}}
-        @if($article->featured_image)
+        @if($article->featured_image_url)
             <figure class="mb-8">
-                @if(\Illuminate\Support\Str::isUrl($article->featured_image))
-                    <img src="{{ $article->featured_image }}" 
-                         alt="{{ $article->title }}"
-                         class="u-photo w-full h-auto rounded-lg shadow-md object-cover max-h-96">
-                @else
-                    <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($article->featured_image) }}" 
-                         alt="{{ $article->title }}"
-                         class="u-photo w-full h-auto rounded-lg shadow-md object-cover max-h-96">
-                @endif
+                <img src="{{ $article->featured_image_url }}"
+                     alt="{{ $article->title }}"
+                     class="u-photo w-full h-auto rounded-lg shadow-md object-cover max-h-96">
             </figure>
         @endif
 
