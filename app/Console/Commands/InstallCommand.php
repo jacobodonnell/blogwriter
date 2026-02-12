@@ -419,14 +419,12 @@ class InstallCommand extends Command
     }
 
     /**
-     * Run database migrations only (no seeding, no user creation).
-     * Called after reset to avoid duplicate migrations.
+     * Placeholder method called after reset.
+     * ResetService already handles migrations, so this is a no-op.
      */
     protected function freshInstall(): void
     {
-        info('Running database migrations...');
-        Artisan::call('migrate', ['--force' => true]);
-        info('✓ Migrations complete');
+        // ResetService already ran migrations - nothing to do here
     }
 
     protected function setupEnvironmentFile(): void
