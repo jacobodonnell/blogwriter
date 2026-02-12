@@ -6,17 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class SystemEvent extends Model
 {
-    protected $fillable = [
-        'type',
-        'message',
-        'context',
-        'severity',
-        'is_error_log',
-        'resolved',
-        'admin_notes',
-        'acknowledged_at',
-    ];
-
     protected $casts = [
         'context' => 'array',
         'resolved' => 'boolean',

@@ -14,9 +14,6 @@ class User extends Authenticatable
     use HasFactory;
     use Notifiable;
 
-    /** @var list<string> */
-    protected $guarded = [];
-
     /**
      * The attributes that should be hidden for serialization.
      *

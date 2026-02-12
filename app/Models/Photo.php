@@ -19,18 +19,6 @@ class Photo extends Model implements HasMedia
 
     use InteractsWithMedia;
 
-    protected $fillable = [
-        'user_id',
-        'filename',
-        'slug',
-        'caption',
-        'alt_text',
-        'status',
-        'published_at',
-        'taken_at',
-        'meta',
-    ];
-
     /**
      * The attributes that should be hidden for serialization.
      *

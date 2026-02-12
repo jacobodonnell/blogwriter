@@ -15,19 +15,6 @@ class Article extends Model
     /** @use HasFactory<\Database\Factories\ArticleFactory> */
     use HasFactory;
 
-    protected $fillable = [
-        'user_id',
-        'title',
-        'slug',
-        'summary',
-        'content',
-        'status',
-        'published_at',
-        'last_edited_at',
-        'meta',
-        'photo_id',
-    ];
-
     protected function casts(): array
     {
         return [

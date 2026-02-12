@@ -12,12 +12,6 @@ class Category extends Model
     /** @use HasFactory<\Database\Factories\CategoryFactory> */
     use HasFactory;
 
-    protected $fillable = [
-        'name',
-        'slug',
-        'description',
-    ];
-
     protected static function boot(): void
     {
         parent::boot();
