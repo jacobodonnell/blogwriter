@@ -6,30 +6,22 @@ beforeEach(function (): void {
     $this->user = User::factory()->create();
 });
 
-it('returns successful response for all public navigation links', function (): void {
-    $publicLinks = [
-        route('home'),
-        route('about'),
-    ];
+it('returns successful response for public navigation links', function (string $route): void {
+    $this->get($route)->assertSuccessful();
+})->with([
+    'home' => fn () => route('home'),
+    'about' => fn () => route('about'),
+]);
 
-    foreach ($publicLinks as $link) {
-        $this->get($link)->assertSuccessful();
-    }
-});
-
-it('returns successful response for all admin navigation links when authenticated', function (): void {
-    $adminLinks = [
-        route('admin.dashboard'),
-        route('admin.articles.index'),
-        route('admin.articles.create'),
-        route('admin.categories.index'),
-        route('admin.settings'),
-    ];
-
-    foreach ($adminLinks as $link) {
-        $this->actingAs($this->user)->get($link)->assertSuccessful();
-    }
-});
+it('returns successful response for admin navigation links when authenticated', function (string $route): void {
+    $this->actingAs($this->user)->get($route)->assertSuccessful();
+})->with([
+    'dashboard' => fn () => route('admin.dashboard'),
+    'articles index' => fn () => route('admin.articles.index'),
+    'articles create' => fn () => route('admin.articles.create'),
+    'categories index' => fn () => route('admin.categories.index'),
+    'settings' => fn () => route('admin.settings'),
+]);
 
 it('redirects blog route to home', function (): void {
     $this->get('/blog')

@@ -2,10 +2,12 @@
 
 use App\Models\User;
 
+beforeEach(function (): void {
+    @unlink(storage_path('installed.lock'));
+});
+
 describe('non-interactive installation (arguments/flags)', function (): void {
     it('completes installation with all required arguments', function (): void {
-        // Remove lock file to ensure fresh install state
-        @unlink(storage_path('installed.lock'));
 
         $this->artisan('blogwriter:install', [
             '--site-name' => 'My Test Blog',
@@ -29,9 +31,6 @@ describe('non-interactive installation (arguments/flags)', function (): void {
     });
 
     it('seeds demo content when --seed flag is provided', function (): void {
-        // Remove lock file to ensure fresh install state
-        @unlink(storage_path('installed.lock'));
-
         $this->artisan('blogwriter:install', [
             '--site-name' => 'Test Blog',
             '--site-url' => 'https://test.com',
@@ -47,9 +46,6 @@ describe('non-interactive installation (arguments/flags)', function (): void {
     })->group('slow');
 
     it('skips seeding when --no-seed flag is provided', function (): void {
-        // Remove lock file to ensure fresh install state
-        @unlink(storage_path('installed.lock'));
-
         $this->artisan('blogwriter:install', [
             '--site-name' => 'Test Blog',
             '--site-url' => 'https://test.com',
@@ -65,9 +61,6 @@ describe('non-interactive installation (arguments/flags)', function (): void {
     });
 
     it('validates site URL format', function (): void {
-        // Remove lock file to ensure fresh install state
-        @unlink(storage_path('installed.lock'));
-
         expect(fn () => $this->artisan('blogwriter:install', [
             '--site-name' => 'Test Blog',
             '--site-url' => 'not-a-valid-url',
@@ -78,9 +71,6 @@ describe('non-interactive installation (arguments/flags)', function (): void {
     });
 
     it('validates admin email format', function (): void {
-        // Remove lock file to ensure fresh install state
-        @unlink(storage_path('installed.lock'));
-
         expect(fn () => $this->artisan('blogwriter:install', [
             '--site-name' => 'Test Blog',
             '--site-url' => 'https://test.com',
@@ -91,9 +81,6 @@ describe('non-interactive installation (arguments/flags)', function (): void {
     });
 
     it('validates admin password requirements', function (): void {
-        // Remove lock file to ensure fresh install state
-        @unlink(storage_path('installed.lock'));
-
         expect(fn () => $this->artisan('blogwriter:install', [
             '--site-name' => 'Test Blog',
             '--site-url' => 'https://test.com',
@@ -123,9 +110,6 @@ describe('non-interactive installation (arguments/flags)', function (): void {
     });
 
     it('updates APP_NAME and APP_URL in .env', function (): void {
-        // Remove lock file to ensure fresh install state
-        @unlink(storage_path('installed.lock'));
-
         $this->artisan('blogwriter:install', [
             '--site-name' => 'Custom Blog Name',
             '--site-url' => 'https://custom.example.com',
@@ -143,9 +127,6 @@ describe('non-interactive installation (arguments/flags)', function (): void {
 
 describe('interactive installation (prompts)', function (): void {
     it('completes fresh installation with valid inputs', function (): void {
-        // Remove lock file to ensure fresh install state
-        @unlink(storage_path('installed.lock'));
-
         $this->artisan('blogwriter:install')
             ->expectsOutputToContain('Welcome to BlogWriter Installer')
             ->expectsOutputToContain('Step 1: Site Configuration')
@@ -175,9 +156,6 @@ describe('interactive installation (prompts)', function (): void {
     });
 
     it('accepts suggested passphrase', function (): void {
-        // Remove lock file to ensure fresh install state
-        @unlink(storage_path('installed.lock'));
-
         $this->artisan('blogwriter:install')
             ->expectsQuestion('What is your site name?', 'Test Blog')
             ->expectsQuestion('What is your site URL?', 'https://example.com')
@@ -196,9 +174,6 @@ describe('interactive installation (prompts)', function (): void {
     });
 
     it('retries on password mismatch', function (): void {
-        // Remove lock file to ensure fresh install state
-        @unlink(storage_path('installed.lock'));
-
         $this->artisan('blogwriter:install')
             ->expectsQuestion('What is your site name?', 'Test Blog')
             ->expectsQuestion('What is your site URL?', 'https://example.com')
@@ -218,9 +193,6 @@ describe('interactive installation (prompts)', function (): void {
     });
 
     it('generates secure passphrase after max retry attempts', function (): void {
-        // Remove lock file to ensure fresh install state
-        @unlink(storage_path('installed.lock'));
-
         $this->artisan('blogwriter:install')
             ->expectsQuestion('What is your site name?', 'Test Blog')
             ->expectsQuestion('What is your site URL?', 'https://test.com')
@@ -241,9 +213,6 @@ describe('interactive installation (prompts)', function (): void {
     });
 
     it('displays configuration summary table', function (): void {
-        // Remove lock file to ensure fresh install state
-        @unlink(storage_path('installed.lock'));
-
         $this->artisan('blogwriter:install')
             ->expectsQuestion('What is your site name?', 'My Blog')
             ->expectsQuestion('What is your site URL?', 'https://myblog.com')
@@ -264,9 +233,6 @@ describe('interactive installation (prompts)', function (): void {
     });
 
     it('seeds demo content when requested via prompt', function (): void {
-        // Remove lock file to ensure fresh install state
-        @unlink(storage_path('installed.lock'));
-
         $this->artisan('blogwriter:install')
             ->expectsQuestion('What is your site name?', 'Test Blog')
             ->expectsQuestion('What is your site URL?', 'https://test.com')
@@ -283,9 +249,6 @@ describe('interactive installation (prompts)', function (): void {
     })->group('slow');
 
     it('skips seeding when declined via prompt', function (): void {
-        // Remove lock file to ensure fresh install state
-        @unlink(storage_path('installed.lock'));
-
         $this->artisan('blogwriter:install')
             ->expectsQuestion('What is your site name?', 'Test Blog')
             ->expectsQuestion('What is your site URL?', 'https://test.com')
@@ -303,9 +266,6 @@ describe('interactive installation (prompts)', function (): void {
     });
 
     it('displays helpful next steps after installation', function (): void {
-        // Remove lock file to ensure fresh install state
-        @unlink(storage_path('installed.lock'));
-
         $this->artisan('blogwriter:install')
             ->expectsQuestion('What is your site name?', 'Test Blog')
             ->expectsQuestion('What is your site URL?', 'https://test.com')
@@ -375,9 +335,6 @@ describe('environment configuration', function (): void {
     });
 
     it('generates application key', function (): void {
-        // Remove lock file to ensure fresh install state
-        @unlink(storage_path('installed.lock'));
-
         $this->artisan('blogwriter:install', [
             '--site-name' => 'Test Blog',
             '--site-url' => 'https://test.com',
@@ -395,9 +352,6 @@ describe('environment configuration', function (): void {
     });
 
     it('fails gracefully when .env.example is missing', function (): void {
-        // Remove lock file to ensure fresh install state
-        @unlink(storage_path('installed.lock'));
-
         // Temporarily rename all .env files to simulate missing files
         $envPath = base_path('.env');
         $envExamplePath = base_path('.env.example');
