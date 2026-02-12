@@ -9,29 +9,31 @@ order: 7
 
 # Feeds & IndieWeb
 
+> **🚧 IndieWeb Features Coming Soon**
+>
+> RSS/Atom/JSON feeds, microformats (h-card, h-entry, h-feed), IndieAuth, and Webmention support are planned but not yet implemented. This documentation serves as the design specification. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues) to help prioritize and design these features.
+
+**Current State:** No feeds, no microformats markup, no IndieAuth endpoints, no Webmentions.
+
+**The Vision:**
+
 **The web was supposed to be decentralized.**
 
-Before Facebook, before Twitter, before Substack — we had RSS feeds, blogs that linked to each other, and protocols
-anyone could use. You owned your words. You controlled your distribution. The web was a network of independent voices,
-not a handful of platforms deciding what gets seen.
+Before Facebook, before Twitter, before Substack — we had RSS feeds, blogs that linked to each other, and protocols anyone could use. You owned your words. You controlled your distribution. The web was a network of independent voices, not a handful of platforms deciding what gets seen.
 
-BlogWriter brings that back. Not out of nostalgia, but because it's the right architecture for publishing on the
-internet.
+BlogWriter will bring that back. Not out of nostalgia, but because it's the right architecture for publishing on the internet.
 
-This page explains what BlogWriter does to make you a citizen of the open web — feeds, microformats, IndieAuth. None of
-it requires configuration. It just works.
+This page explains what BlogWriter will do to make you a citizen of the open web — feeds, microformats, IndieAuth. None of it will require configuration. It will just work.
 
 ---
 
-## Feeds: You Publish, They Subscribe
+## Feeds: You Publish, They Subscribe (Planned)
 
-Feeds are how the decentralized web works. You publish to your own site. Readers subscribe with the tool of their
-choice. No algorithm in between deciding what to show. No platform taking a cut. Just a simple protocol that's worked
-since 1999.
+Feeds are how the decentralized web works. You publish to your own site. Readers subscribe with the tool of their choice. No algorithm in between deciding what to show. No platform taking a cut. Just a simple protocol that's worked since 1999.
 
-### What BlogWriter Generates
+### What BlogWriter Will Generate
 
-Your blog automatically produces three feed formats:
+Your blog will automatically produce three feed formats:
 
 | Feed      | URL                                 | Format        |
 |-----------|-------------------------------------|---------------|
@@ -54,9 +56,9 @@ subscribers see it. No one needs permission from a platform. No one can take you
 IndieWeb tools also consume feeds — Microsub readers, Bridgy for syndication, aggregators. The web talks to itself
 through feeds.
 
-### Discovery
+### Discovery (Planned)
 
-BlogWriter tells browsers and feed readers where to find your feeds:
+BlogWriter will tell browsers and feed readers where to find your feeds:
 
 ```html
 
@@ -73,9 +75,9 @@ exact URL.
 
 ---
 
-## Microformats: Structured Data for Humans
+## Microformats: Structured Data for Humans (Planned)
 
-Microformats solve a problem: how do you mark up content so both humans and machines can understand it?
+Microformats will solve a problem: how do you mark up content so both humans and machines can understand it?
 
 The answer: use classes that mean something. Not `.card` or `.post`, but `.h-entry` (this is a blog post) and
 `.p-author` (this is the author). Simple, semantic, human-readable.
@@ -155,11 +157,11 @@ feed file. You support both.
 
 ---
 
-## IndieAuth: Sign In With Your Domain
+## IndieAuth: Sign In With Your Domain (Planned)
 
 Why should Google or Facebook be your identity on the web? You have a domain. That's your identity.
 
-IndieAuth lets you sign in to websites by proving you control your domain. No third-party identity provider needed.
+IndieAuth will let you sign in to websites by proving you control your domain. No third-party identity provider needed.
 
 ### How It Works
 
@@ -180,9 +182,9 @@ domain still works. If Twitter changes its name to X and implodes, you're unaffe
 
 Your identity on the web should be something you control. IndieAuth makes that real.
 
-### Your Endpoints
+### Your Endpoints (Planned)
 
-BlogWriter provides these endpoints automatically:
+BlogWriter will provide these endpoints automatically:
 
 | Endpoint      | URL                                                     | Purpose                              |
 |---------------|---------------------------------------------------------|--------------------------------------|
@@ -190,12 +192,13 @@ BlogWriter provides these endpoints automatically:
 | Token         | `yourdomain.com/indieauth/token`                        | Where apps exchange codes for tokens |
 | Metadata      | `yourdomain.com/.well-known/oauth-authorization-server` | OAuth server info                    |
 
-You don't configure anything. It's just there, working.
+You won't need to configure anything. It will just be there, working.
 
-### Testing It
+**Current State:** No IndieAuth endpoints exist.
 
-Go to [IndieLogin.com](https://indielogin.com) and try signing in with your domain. If it works, congratulations —
-you're using your own website as your identity.
+### Testing It (When Available)
+
+Go to [IndieLogin.com](https://indielogin.com) and try signing in with your domain. If it works, congratulations — you're using your own website as your identity.
 
 ---
 
@@ -224,19 +227,21 @@ distribution, and build on protocols instead of platforms.
 
 ---
 
-## Validation
+## Validation (When Implemented)
 
-Want to check that your site implements everything correctly?
+When IndieWeb features are implemented, you'll be able to check that your site implements everything correctly:
 
 ### IndieWebify.me
 
-Visit [IndieWebify.me](https://indiewebify.me) and enter your domain. It checks:
+Visit [IndieWebify.me](https://indiewebify.me) and enter your domain. It will check:
 
 - h-card (your identity)
 - h-entry (your posts)
 - Feed discovery
 
 If you're using BlogWriter's built-in themes or components, you'll pass.
+
+**Current State:** Validation will fail as these features are not yet implemented.
 
 ### Microformats Parsers
 

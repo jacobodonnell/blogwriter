@@ -9,13 +9,21 @@ order: 6
 
 # Settings
 
-Configure your BlogWriter site from the Settings page in your admin dashboard. All settings can be updated through the web interface, or if you prefer, via configuration files or the command line.
+> **⚠️ Minimal Settings UI Currently**
+>
+> The Settings page currently exists but is **minimal and read-only**, displaying only environment information (site name, site URL from `.env`, user profile from auth, password requirements). The extensive settings UI documented below is planned but not yet implemented. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues) on settings organization and features.
 
-## Site Settings
+**Current State:** Settings page shows read-only environment info. Profile editing displays "Profile editing coming soon" message.
+
+**Planned Implementation:**
+
+You'll be able to configure your BlogWriter site from the Settings page in your admin dashboard. All settings will be updatable through the web interface, or if you prefer, via configuration files or the command line.
+
+## Site Settings (Planned)
 
 ### Site Name
 
-The name of your blog. Appears in:
+The name of your blog will appear in:
 - Header/navigation
 - Page titles (`<title>`)
 - RSS/Atom/JSON feeds
@@ -52,13 +60,11 @@ Your site's full domain including protocol.
 
 ---
 
-## Author Settings
+## Author Settings (Planned)
 
 ### Name
 
-Your display name.
-
-**Where it appears:**
+Your display name will appear in:
 - Article bylines
 - Author bio sections
 - h-card (your IndieWeb identity)
@@ -102,11 +108,11 @@ You can choose to display it publicly in your theme if you want.
 
 ---
 
-## Content Settings
+## Content Settings (Planned)
 
-### Markdown Export
+### Markdown Export (Planned)
 
-Enable or disable `.md` URLs for articles and notes.
+Enable or disable `.md` URLs for articles and notes (when implemented).
 
 **When enabled:**
 - Visitors can append `.md` to any article or note URL
@@ -124,9 +130,9 @@ Enable or disable `.md` URLs for articles and notes.
 - HTML: `yourdomain.com/blog/my-article`
 - Markdown: `yourdomain.com/blog/my-article.md`
 
-### Automatic Backups
+### Automatic Backups (Planned)
 
-BlogWriter automatically backs up all articles as Markdown files with YAML frontmatter. This setting controls where backups are stored.
+BlogWriter will automatically back up all articles as Markdown files with YAML frontmatter. This setting will control where backups are stored.
 
 **Options:**
 - **Local disk** (default) — Saved to `storage/backups/`
@@ -139,11 +145,11 @@ BlogWriter automatically backs up all articles as Markdown files with YAML front
 
 ---
 
-## Theme Settings
+## Theme Settings (Planned)
 
-### Active Theme
+### Active Theme (Planned)
 
-Choose which theme your site uses. Changes take effect immediately.
+Choose which theme your site uses. Changes will take effect immediately.
 
 **Included themes:**
 - **Terminal** — Default theme with retro terminal aesthetic
@@ -167,11 +173,11 @@ Options are theme-specific. Not all themes have customization options.
 
 ---
 
-## Feed Settings
+## Feed Settings (Planned)
 
-### Items Per Feed
+### Items Per Feed (Planned)
 
-Number of posts to include in RSS/Atom/JSON feeds.
+Number of posts to include in RSS/Atom/JSON feeds (when feeds are implemented).
 
 **Default:** 50
 
@@ -183,11 +189,11 @@ Optional custom description for feeds. If blank, uses your site tagline.
 
 ---
 
-## IndieWeb Settings
+## IndieWeb Settings (Planned)
 
-### IndieAuth
+### IndieAuth (Planned)
 
-Enable or disable your built-in IndieAuth server.
+Enable or disable your built-in IndieAuth server (when implemented).
 
 **When enabled:**
 - You can sign in to other IndieWeb services using your domain
@@ -200,9 +206,9 @@ Enable or disable your built-in IndieAuth server.
 
 **Default:** Enabled
 
-### Webmention
+### Webmention (Planned)
 
-Enable or disable webmention support.
+Enable or disable webmention support (when implemented).
 
 **When enabled:**
 - Your site can receive webmentions from other sites
@@ -217,9 +223,9 @@ Enable or disable webmention support.
 
 ---
 
-## Email Settings
+## Email Settings (Planned)
 
-Configure outgoing email for contact forms, password resets, and system notifications.
+Configure outgoing email for contact forms, password resets, and system notifications (UI coming soon).
 
 ### Quick Start (Recommended Path)
 

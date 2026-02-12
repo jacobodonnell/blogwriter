@@ -10,8 +10,7 @@ order: 3
 
 # Writing Content
 
-BlogWriter supports three types of content: articles, notes, and photos. Each has its own editor and its own place on
-your site, but they all share the same draft/publish workflow and appear together in your feeds.
+BlogWriter supports three types of content: **articles** (✅ implemented), **notes** (🚧 coming soon), and **photos** (✅ implemented). Each has its own editor and its own place on your site, sharing the same draft/publish workflow and appearing together in your feeds.
 
 ## The Admin Dashboard
 
@@ -23,48 +22,49 @@ After logging in at `/admin`, you'll see your dashboard:
 
 The sidebar navigation gives you access to:
 
-- Articles
-- Notes
-- Photos
-- Categories
-- Tags
-- Settings
+- **Articles** ✅
+- **Notes** 🚧 (coming soon)
+- **Photos** ✅
+- **Categories** ✅
+- **Tags** 🚧 (coming soon)
+- **Settings** ✅ (minimal UI currently)
 - **View Site** — opens your blog as visitors see it
 
 ---
 
-## Articles
+## Articles ✅
 
 Articles are long-form posts with titles. Think blog posts, essays, tutorials.
 
 ### The Editor
 
-Articles use a rich block editor where you build your post from individual blocks like paragraphs, headings, lists,
-quotes, code blocks, images, and embeds. Click between blocks to add new ones. Drag to reorder. Each block is
-independent — no fighting with formatting.
+**Current:** Articles use a simple **Markdown textarea** editor. Write your content in Markdown and it will be rendered as HTML on your site.
 
-You can use keyboard shortcuts or type inline Markdown that automatically converts to rich text (like Notion). Start a
-line with `#` for a heading, `-` for a list, or `>` for a quote.
+**Why Markdown:**
+- **Portable** — Standard format, works everywhere
+- **Simple** — No complex editor dependencies
+- **CLI-friendly** — Can write posts in any text editor
+- **Version control** — Easy to diff and commit
 
-<x-callout type="info" title="For Developers">
-  BlogWriter uses Editor.js for the article editor, providing a modern block-based editing
-  experience with full keyboard shortcut support.
-</x-callout>
+> **🚧 Editor.js Coming Soon**
+>
+> A rich block-based editor (Editor.js) is planned as an alternative for those who prefer a visual editing experience. Markdown will remain supported even after Editor.js is added — important for CLI workflow. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues) on editor preferences.
+
+**Planned Editor.js Features:**
+- Build posts from individual blocks (paragraphs, headings, lists, quotes, code, images, embeds)
+- Click between blocks to add new ones, drag to reorder
+- Keyboard shortcuts and inline Markdown that converts to rich text (like Notion)
+- Each block independent — no fighting with formatting
 
 ### Fields
 
-- **Title** (required) — Your article's headline. BlogWriter auto-generates a URL slug from the title as you type. You
-  can edit the slug manually.
-- **Summary** — A short description used in article lists, feeds, and SEO meta tags. If you leave it blank, BlogWriter
-  uses the first paragraph.
-- **Content** — The rich block editor described above.
-- **Categories** — Assign one or more categories (e.g., "Tech", "Life", "Travel"). Don't see the category you need? Type
-  a new one and it'll open a popup to create it on the fly.
-- **Tags** — Add tags for finer-grained organization. Tags work across all post types. Like categories, you can create
-  new tags on the fly.
-- **Photos** — Attach photos to your article. They can be displayed inline or in a gallery.
-- **SEO fields** — Meta description and Open Graph image. These control how your article appears when shared on social
-  media or in search results.
+- **Title** (required) — Your article's headline. BlogWriter auto-generates a URL slug from the title as you type. You can edit the slug manually.
+- **Summary** (nullable) — A short description used in article lists and SEO meta tags.
+- **Content** (required) — Markdown textarea for your article content.
+- **Featured Photo** (nullable) — Select a photo to feature with the article.
+- **Categories** ✅ — Assign one or more categories (e.g., "Tech", "Life", "Travel"). Create new categories on the fly.
+- **Tags** 🚧 — Coming soon. Will work across all post types.
+- **SEO fields** 🚧 — Meta description and Open Graph image coming in future updates.
 
 ### Draft and Publish
 
@@ -75,41 +75,40 @@ future date). Published articles appear on your site and in your feeds.
 
 You can unpublish an article at any time by switching it back to draft.
 
-### Auto-Save
+> **🚧 Auto-Save Coming Soon**
+>
+> Automatic background saving is planned but not yet implemented. Currently, use the Save Draft button to manually save your work. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues).
 
-BlogWriter saves your work in the background as you type. You'll see a status indicator:
-
-- "Saving..." — a save is in progress
-- "Saved" — your latest changes are stored
-- "Last saved at 2:34 PM" — shows the timestamp of the last save
-
-Auto-save creates drafts. It won't accidentally publish anything.
+**Planned Auto-Save:**
+- Saves work in background as you type
+- Status indicator: "Saving...", "Saved", "Last saved at 2:34 PM"
+- Creates drafts only — won't accidentally publish
 
 ### Where Articles Live
 
 Your article's URL follows this structure:
 
 ```
-yourdomain.com/blog/your-article-title
+yourdomain.com/articles/your-article-title
 ```
 
-The slug is automatically generated from your title when you first create the article. Once published, the URL never
-changes — permanent links matter.
+The slug is automatically generated from your title when you first create the article. Once published, the URL never changes — permanent links matter.
 
-### Automatic Backups
+> **🚧 Automatic Backups & Markdown Export Coming Soon**
+>
+> Automatic Markdown file backups and `.md` URL endpoints are planned but not yet implemented. Articles already store content as Markdown in the database. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues).
 
-BlogWriter automatically backs up each article as a Markdown file with YAML frontmatter. Your content lives in the
-database for fast retrieval, and as `.md` files for portability and peace of mind.
+**Planned Features:**
 
-### Markdown Export (Optional)
+BlogWriter will automatically back up each article as a Markdown file with YAML frontmatter. Your content will live in the database for fast retrieval, and as `.md` files for portability and peace of mind.
 
-By default, you can append `.md` to any article URL to get the raw Markdown version:
+You'll be able to append `.md` to any article URL to get the raw Markdown version:
 
 ```
-yourdomain.com/blog/your-article-title.md
+yourdomain.com/articles/your-article-title.md
 ```
 
-This returns something like:
+This will return:
 
 ```markdown
 ---
@@ -123,19 +122,17 @@ tags: [php, blogging]
 Your article content in Markdown...
 ```
 
-You can disable this feature in Settings if you prefer.
-
-<x-callout type="info" title="For Developers">
-  The `.md` endpoint sets `Content-Type: text/markdown` and is useful for LLMs and automated tools
-  to fetch content without parsing HTML, reducing server load.
-</x-callout>
+**Current State:** Articles store Markdown in database `content` column. File export to be added.
 
 ---
 
-## Notes
+> **🚧 Coming Soon: Notes**
+>
+> The Note content type is planned but not yet implemented. Model, controller, views, and routes need to be built. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues) on the Note design below.
 
-Notes are short posts without titles. Use them for quick thoughts, links, updates — anything that doesn't need the full
-article treatment. Think tweets, but on your own site.
+## Notes (Planned)
+
+Notes are short posts without titles. Use them for quick thoughts, links, updates — anything that doesn't need the full article treatment. Think tweets, but on your own site.
 
 ### The Editor
 
@@ -173,25 +170,32 @@ yourdomain.com/notes/a1b2c3d4-e5f6-7890-abcd-ef1234567890.md
 
 ---
 
-## Photos
+## Photos ✅
 
-Photos are image posts with captions. For photographers, visual bloggers, or anyone who wants to share images as
-first-class content (not just inline in articles or notes).
+Photos are image posts with captions. For photographers, visual bloggers, or anyone who wants to share images as first-class content (not just inline in articles or notes).
+
+**Implementation:** Uses [Spatie Laravel MediaLibrary](https://spatie.be/docs/laravel-medialibrary) for professional media handling with automatic image conversions.
 
 ### Uploading
 
-Upload an image using drag-and-drop or the file picker. BlogWriter accepts common image formats (JPEG, PNG, WebP, GIF).
+Upload an image using the file picker. BlogWriter accepts common image formats (JPEG, PNG, WebP, GIF).
+
+**MediaLibrary automatically generates multiple conversions:**
+- **thumbnail** (150x150) — For gallery views
+- **medium** (800x600) — For content display
+- **large** (1600x1200) — For full-size viewing
 
 ### Fields
 
-- **Image** (required) — The photo itself.
-- **Caption** — Text that appears with your photo. Uses the same rich editor as notes.
-- **Alt text** — Describes the image for screen readers and when images can't load. Always fill this in.
-- **Tags** — Same tag system as articles and notes. Create new tags on the fly.
+- **Image** (required) — The photo itself. Uploaded via Spatie MediaLibrary.
+- **Title** (nullable) — Optional title for the photo.
+- **Caption** (nullable) — Markdown text that appears with your photo.
+- **Alt text** (nullable) — Describes the image for screen readers and when images can't load. Always fill this in.
+- **External URL** (nullable) — Optional link to original source.
+- **Tags** 🚧 — Coming soon. Will work same as articles.
 
 <x-callout type="info" title="Technical Note">
-  BlogWriter automatically extracts EXIF metadata from your photos when available (camera model,
-  date taken, exposure settings, GPS location). This data is stored and can be displayed in your theme.
+  Spatie MediaLibrary handles EXIF metadata extraction, responsive image conversions, and file storage. Metadata can be accessed and displayed in your theme.
 </x-callout>
 
 ### Draft and Publish
@@ -208,7 +212,7 @@ Photos use a numeric ID.
 
 ---
 
-## Categories
+## Categories ✅
 
 Categories organize your **articles** into broad topics. An article can belong to multiple categories.
 
@@ -229,9 +233,13 @@ Visiting a category page shows all published articles in that category.
 
 ---
 
-## Tags
+> **🚧 Coming Soon: Tags**
+>
+> Polymorphic tagging system is planned but not yet implemented. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues) on tagging design.
 
-Tags provide finer-grained organization and work across **all post types** — articles, notes, and photos.
+## Tags (Planned)
+
+Tags will provide finer-grained organization and work across **all post types** — articles, notes, and photos.
 
 Examples: "php", "laravel", "indieweb", "photography", "weekend"
 
@@ -250,9 +258,11 @@ Tag pages show all published posts (articles, notes, and photos) with that tag.
 
 ---
 
-## Settings
+## Settings ⚠️ (Minimal UI Currently)
 
-The Settings page lets you update your site and author information.
+> **Current State:** Settings page exists but is minimal and read-only, displaying environment information only. Extensive settings UI is coming soon.
+
+The Settings page will let you update your site and author information.
 
 ### Site Settings
 

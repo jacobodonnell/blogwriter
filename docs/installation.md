@@ -49,10 +49,37 @@ This installer will set up FrankenPHP, download BlogWriter, and walk you through
 
 ## Manual Installation
 
-If you don't have a one-click installer, BlogWriter offers two manual installation methods. Both walk you through the
-same steps — pick whichever fits your setup.
+### CLI Installer ✅ (Recommended - Fully Working)
 
-### Web Installer
+If you have SSH access to your server, use the CLI installer:
+
+```bash
+php artisan blogwriter:install
+```
+
+This fully-functional installer uses Laravel Prompts for an interactive terminal experience:
+
+- ✅ Checks all system requirements
+- ✅ Creates `.env` file and generates `APP_KEY`
+- ✅ Sets up SQLite database
+- ✅ Runs all migrations
+- ✅ Creates your admin account
+- ✅ Seeds initial data
+- ✅ Configures site settings
+
+**Non-interactive mode** is also available for automated deployments:
+
+```bash
+php artisan blogwriter:install --non-interactive
+```
+
+### Web Installer 🚧 (Coming Soon)
+
+> **🚧 Web Installer UI Not Yet Available**
+>
+> The fancy terminal-styled web installer shown in the documentation below is planned but not yet implemented. Currently, visiting `/install` will show a message directing you to use the CLI installer above. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues) on web installer design.
+
+**Planned Feature:**
 
 Upload BlogWriter's files to your web server, then visit your domain in a browser:
 
@@ -63,21 +90,15 @@ https://yourdomain.com/install
 You'll see a terminal-styled wizard — dark background, monospace font, box-drawing borders. It looks like a terminal but
 runs in your browser, with buttons and form fields you can click.
 
-### CLI Installer
-
-If you have SSH access to your server, you can run the installer from the command line:
-
-```bash
-php artisan blogwriter:install
-```
-
-This uses Laravel Prompts to give you the same step-by-step flow in your actual terminal.
+**Current State:** Web route exists but shows CLI installer instructions.
 
 ---
 
 ## Installation Steps
 
-Both installers walk through these screens:
+> **Note:** The visual installer screens below represent the **planned web installer UI** (coming soon). The **CLI installer** (currently available) walks through the same steps using Laravel Prompts in your terminal.
+
+The CLI installer (working now) and web installer (coming soon) both cover these steps:
 
 ### Step 1: Welcome
 
@@ -232,10 +253,10 @@ Step 5 of 5
 ---
 
 <x-callout type="info" title="Technical Details" collapsible>
-  Behind the scenes, the installer copies `.env.example` to `.env` (if it doesn't exist),
+  Behind the scenes, the CLI installer copies `.env.example` to `.env` (if it doesn't exist),
   generates an `APP_KEY`, creates the SQLite database file at `database/database.sqlite`, runs all database migrations,
-  creates your admin user, writes your site configuration to `.env`, activates the Terminal theme, and creates
-  `storage/installed.lock` to prevent re-installation.
+  creates your admin user, writes your site configuration to `.env`, seeds initial data, and creates
+  `storage/installed.lock` to prevent re-installation. (Theme activation will be added when the theme system is implemented.)
 </x-callout>
 
 ## Installation Lock

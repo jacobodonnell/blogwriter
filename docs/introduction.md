@@ -31,38 +31,38 @@ You don't need to be technical. If you can upload files to a web host, you can r
 
 **Three ways to publish:**
 
-- **Articles** — Long-form posts with a rich editor, categories, and SEO fields
-- **Notes** — Short posts à la Twitter/Bluesky/Threads
-- **Photos** — Image posts with captions, alt text, and easy to display and tag galleries
+- **Articles** ✅ — Long-form posts with Markdown editor and categories (rich block editor coming soon)
+- **Notes** 🚧 — Short posts à la Twitter/Bluesky/Threads (coming soon)
+- **Photos** ✅ — Image posts with captions, alt text, and professional MediaLibrary handling
 
-**Built for the open web:**
+**Built for the open web** (coming soon):
 
-- Standards-based feeds that work with any reader
-- Semantic HTML markup that plays nice with the whole web
-- Sign in anywhere using your own domain — no Google or Facebook required
-- Optional Markdown export — enable `.md` URLs to share raw posts
+- Standards-based feeds that work with any reader (RSS/Atom/JSON coming soon)
+- Semantic HTML markup with microformats (h-card, h-entry, h-feed coming soon)
+- Sign in anywhere using your own domain with IndieAuth (coming soon)
+- Optional Markdown export — enable `.md` URLs to share raw posts (coming soon)
 
-**Themes you control:**
+**Themes you control** (coming soon):
 
-- Ships with the Terminal theme pre-installed and ready to use
-- Includes a minimalist starter theme for building your own designs
-- Install additional themes with one command
-- Create your own theme — it's just a folder of HTML templates
-- Non-technical? Edit some HTML and Tailwind classes. Developer? Set up your own build pipeline.
+- Will ship with the Terminal theme pre-installed and ready to use
+- Will include a minimalist starter theme for building your own designs
+- Install additional themes with one command (when theme system is built)
+- Create your own theme — it will be just a folder of HTML templates
+- Currently uses standard Laravel views in `resources/views/`
 
 **Simple by design:**
 
-- SQLite database — no MySQL server to manage
-- Single admin user — it's your blog, not a multi-tenant platform
-- One Artisan command or web wizard to install
-- Runs on any PHP 8.4+ host, including cheap shared hosting
+- ✅ SQLite database — no MySQL server to manage
+- ✅ Single admin user — it's your blog, not a multi-tenant platform
+- ✅ One Artisan command to install (web wizard coming soon)
+- ✅ Runs on any PHP 8.4+ host, including cheap shared hosting
 
 ## How It Works
 
-1. **Install** — Upload to your server and run the installer (web or CLI). It checks requirements, creates your database, and sets up your admin account.
-2. **Configure** — Set your site name, tagline, and author info. Pick a theme.
-3. **Write** — Log into your admin dashboard and start publishing. Articles, notes, photos — whatever you want.
-4. **Own it** — Your content lives on your server, at your domain, in formats the open web understands.
+1. **Install** ✅ — Upload to your server and run the CLI installer (`php artisan blogwriter:install`). It checks requirements, creates your database, and sets up your admin account. Web installer UI coming soon.
+2. **Configure** ⚠️ — Settings page currently shows read-only environment info. Full settings UI coming soon.
+3. **Write** ✅ — Log into your admin dashboard and start publishing articles and photos (notes coming soon).
+4. **Own it** ✅ — Your content lives on your server, at your domain. Open web formats (feeds, microformats) coming soon.
 
 ## Documentation
 

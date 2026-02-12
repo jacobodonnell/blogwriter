@@ -40,8 +40,8 @@ decades more.
 | CSS Components    | DaisyUI                 | v5      | Pre-built components, CDN-friendly    |
 | Auth Backend      | Laravel Fortify         | v1      | Headless auth, bring your own UI      |
 | Auth UI           | Alpine AJAX + DaisyUI   | —       | Custom built, not Livewire            |
-| Theme Routing     | Laravel Folio           | —       | File-based routing for themes         |
-| Rich Text         | Editor.js               | v2      | Block-based editor, clean JSON output |
+| Theme Routing     | Laravel Folio           | —       | 🚧 File-based routing (coming soon)  |
+| Rich Text         | Markdown                | —       | Simple, portable (Editor.js coming)   |
 | Testing           | Pest                    | v4      | Expressive, readable tests            |
 
 ---
@@ -87,9 +87,13 @@ Livewire starter kit.
 - **Consistency** — Same Alpine + DaisyUI stack as the rest of the admin.
 - **Simplicity** — Standard forms posting to Fortify routes. No magic.
 
-### Folio for Theme Routing
+> **🚧 Coming Soon: Folio-Based Theme Routing**
+>
+> File-based routing via Laravel Folio is planned but not yet implemented. Currently, BlogWriter uses traditional controller-based routing. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues) to help shape the theme routing design.
 
-Themes use file-based routing via Laravel Folio. File structure = URL structure.
+**Planned Implementation:**
+
+Themes will use file-based routing via Laravel Folio. File structure = URL structure.
 
 **Example:**
 
@@ -105,6 +109,8 @@ pages/photos/[Photo:id].blade.php   → /photos/42
 - **Convention** — Put the file in the right place, it works.
 - **Automatic model binding** — `[Article:slug]` loads the article by slug.
 
+**Current State:** Traditional Laravel controllers in `app/Http/Controllers/`.
+
 ### Single-Author Only
 
 One admin account. One blog. No user roles, no multi-tenancy, no permissions system.
@@ -117,22 +123,36 @@ One admin account. One blog. No user roles, no multi-tenancy, no permissions sys
 
 If you need multi-author, WordPress exists.
 
-### Editor.js for Articles
+> **🚧 Coming Soon: Editor.js for Articles**
+>
+> Editor.js block-based editor is planned but not yet implemented. Currently, articles use a Markdown textarea editor. Markdown will remain supported even after Editor.js is added (important for CLI workflow). [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues).
 
-Articles use Editor.js, a block-based editor that outputs clean JSON.
+**Current Implementation: Markdown Editor**
 
-**Why:**
+Articles currently use a simple Markdown textarea for content editing.
 
-- **Modern UX** — Blocks you can drag, reorder, and nest.
-- **Structured data** — JSON makes it easy to render, transform, export.
-- **Extensible** — Plugin architecture for custom blocks.
+**Why Markdown works:**
+- **Portable** — Standard format, works everywhere
+- **Simple** — No complex editor dependencies
+- **CLI-friendly** — Can write posts in any text editor
+- **Version control** — Easy to diff and commit
 
-Notes use a simpler inline rich text editor (same block system, fewer options). Photos are just caption + image.
+**Planned: Editor.js (Future)**
 
-### Component Override System
+Editor.js will be added as an alternative for those who prefer a visual block-based editor:
 
-BlogWriter ships with built-in Blade components (`resources/views/components/`). Themes can override them by creating a
-component with the same name in `themes/your-theme/components/`.
+- **Modern UX** — Blocks you can drag, reorder, and nest
+- **Structured data** — JSON makes it easy to render, transform, export
+- **Extensible** — Plugin architecture for custom blocks
+- **Coexist with Markdown** — Users can choose their preferred workflow
+
+> **🚧 Coming Soon: Component Override System**
+>
+> Theme-based component overrides are planned but not yet implemented. This will be part of the full theme system. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues).
+
+**Planned Implementation:**
+
+BlogWriter will ship with built-in Blade components (`resources/views/components/`). Themes will be able to override them by creating a component with the same name in `themes/your-theme/components/`.
 
 **Lookup order:**
 
@@ -141,9 +161,11 @@ component with the same name in `themes/your-theme/components/`.
 
 **Why:**
 
-- **Customization** — Override only what you need.
-- **Maintenance** — Most themes use built-in components, get updates for free.
-- **DRY** — Common components shared across themes.
+- **Customization** — Override only what you need
+- **Maintenance** — Most themes use built-in components, get updates for free
+- **DRY** — Common components shared across themes
+
+**Current State:** Standard Blade components in `resources/views/components/`, no theme override system.
 
 ---
 
@@ -252,9 +274,16 @@ blogwriter/
 
 ## Models & Relationships
 
+> **Implementation Status:**
+> - ✅ **Article** - Fully implemented
+> - ✅ **Photo** - Fully implemented with Spatie MediaLibrary
+> - ✅ **Category** - Fully implemented
+> - 🚧 **Note** - Coming soon
+> - 🚧 **Tag** - Coming soon
+
 ### Shared Post Behavior
 
-Article, Note, and Photo share common patterns for publishing workflow:
+Article, Note (coming soon), and Photo share common patterns for publishing workflow:
 
 **Common Fields:**
 
@@ -278,30 +307,37 @@ Article, Note, and Photo share common patterns for publishing workflow:
 
 **Note:** These patterns are implemented directly in each model. Extract to a trait only when you see the same implementation three times.
 
-### Article
+### Article ✅
 
 **Fields:**
 
 - `slug` (unique, immutable after publish)
 - `title`
 - `summary` (nullable)
-- `content_json` (Editor.js blocks)
-- `content_markdown` (auto-generated backup)
+- `content` (Markdown text)
+- `featured_photo_id` (nullable, references Photo)
 - `status` ('draft' or 'published')
 - `published_at` (nullable timestamp)
 
 **Relationships:**
 
 - `belongsToMany(Category)`
-- `morphToMany(Tag)`
+- `belongsTo(Photo, 'featured_photo_id')` — Featured image
+- `morphToMany(Tag)` — 🚧 Coming soon
 
 **Accessors:**
 
-- `content_html` — Renders Editor.js JSON to HTML
+- `content_html` — Renders Markdown to HTML
 
-**Permalink:** `/blog/{slug}`
+**Permalink:** `/articles/{slug}`
 
-### Note
+**Current Editor:** Markdown textarea (Editor.js planned for future)
+
+> **🚧 Coming Soon: Note Model**
+>
+> The Note model is planned but not yet implemented. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues) on the planned design below.
+
+### Note (Planned)
 
 **Fields:**
 
@@ -312,7 +348,7 @@ Article, Note, and Photo share common patterns for publishing workflow:
 
 **Relationships:**
 
-- `morphToMany(Tag)`
+- `morphToMany(Tag)` — When tag system is built
 
 **Accessors:**
 
@@ -320,60 +356,54 @@ Article, Note, and Photo share common patterns for publishing workflow:
 
 **Permalink:** `/notes/{uuid}`
 
-**Notes:**
+**Design Goals:**
 
 - No draft system — published immediately
 - No title field (titleless by design)
 - Automatically backed up as Markdown files
 
-### Photo
+### Photo ✅
+
+**Implementation:** Uses [Spatie Laravel MediaLibrary](https://spatie.be/docs/laravel-medialibrary) for professional media handling.
 
 **Fields:**
 
-- `filename`
-- `path` (storage path)
-- `caption` (rich text, optional)
-- `alt_text`
-- `mime_type`
-- `size` (bytes)
-- `meta` (JSON: EXIF data)
-- `status`
-- `published_at`
+- `title` (nullable)
+- `caption` (Markdown text, nullable)
+- `alt_text` (nullable)
+- `external_url` (nullable, for linking to original source)
+- `status` ('draft' or 'published')
+- `published_at` (nullable timestamp)
 
 **Relationships:**
 
-- `morphToMany(Tag)`
+- `morphToMany(Tag)` — 🚧 Coming soon
+- MediaLibrary relationship for image files and conversions
 
 **Permalink:** `/photos/{id}`
 
-**Storage:**
+**Storage & Image Processing:**
 
-- Images stored as files in `storage/app/public/photos/`
-- Database stores path, filename, and metadata
-- EXIF data extracted and stored in `meta` JSON column
+- **MediaLibrary Integration** — Professional media handling
+- **Multiple Conversions** — Automatically generates: thumbnail (150x150), medium (800x600), large (1600x1200)
+- **Responsive Images** — Conversions enable responsive image loading
+- **Metadata Storage** — EXIF data, dimensions, file info stored by MediaLibrary
+- **Collection:** Images stored in 'photos' collection
 
-**EXIF in meta:**
+**Example MediaLibrary Usage:**
 
-```json
-{
-    "camera": "Canon EOS R5",
-    "lens": "RF 50mm f/1.2",
-    "iso": 400,
-    "aperture": "f/1.8",
-    "shutter": "1/200",
-    "taken_at": "2026-01-31 14:23:00",
-    "gps": {
-        "lat": 45.5231,
-        "lon": -122.6765
-    },
-    "dimensions": {
-        "width": 8192,
-        "height": 5464
-    }
-}
+```php
+// Upload and process photo
+$photo->addMedia($request->file('image'))
+    ->toMediaCollection('photos');
+
+// Access conversions
+$photo->getFirstMediaUrl('photos', 'thumbnail');
+$photo->getFirstMediaUrl('photos', 'medium');
+$photo->getFirstMediaUrl('photos', 'large');
 ```
 
-### Category
+### Category ✅
 
 **Fields:**
 
@@ -387,7 +417,11 @@ Article, Note, and Photo share common patterns for publishing workflow:
 
 **Note:** Categories are article-only. Notes and photos don't have categories.
 
-### Tag
+> **🚧 Coming Soon: Tag Model**
+>
+> Polymorphic tagging system is planned but not yet implemented. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues) on the tagging design.
+
+### Tag (Planned)
 
 **Fields:**
 
@@ -397,25 +431,30 @@ Article, Note, and Photo share common patterns for publishing workflow:
 **Relationships:**
 
 - `morphedByMany(Article)`
-- `morphedByMany(Note)`
+- `morphedByMany(Note)` — When Note model is built
 - `morphedByMany(Photo)`
 
-**Note:** Tags work across all post types.
+**Design Goal:** Tags will work across all post types using Laravel's polymorphic relationships.
 
 ---
 
 ## Content Storage & Rendering
 
-| Type    | Editor           | Storage                 | Rendering               | Export               |
-|---------|------------------|-------------------------|-------------------------|----------------------|
-| Article | Editor.js blocks | `content_json` (JSON)   | JSON → HTML on read     | Markdown backup      |
-|         |                  | `content_markdown` (MD) | Markdown as fallback    | `.md` URL (optional) |
-| Note    | Inline rich text | `content` (JSON)        | JSON → HTML on read     | `.md` URL (optional) |
-| Photo   | Caption field    | `caption` (JSON)        | JSON → HTML for caption | Image file           |
+| Type    | Editor              | Storage             | Rendering              | Status           |
+|---------|---------------------|---------------------|------------------------|------------------|
+| Article | Markdown textarea   | `content` (Markdown)| Markdown → HTML        | ✅ Implemented  |
+|         | (Editor.js planned) | (JSON future)       | (JSON future)          | 🚧 Coming soon  |
+| Note    | Inline rich text    | `content` (JSON)    | JSON → HTML            | 🚧 Coming soon  |
+| Photo   | Caption field       | `caption` (Markdown)| Markdown → HTML        | ✅ Implemented  |
+|         | MediaLibrary files  | Multiple conversions| Responsive images      | ✅ Implemented  |
 
-### Automatic Markdown Backups
+> **🚧 Coming Soon: Automatic Markdown Backups**
+>
+> Automatic Markdown export/backup system is planned but not yet implemented. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues).
 
-Articles and notes are automatically backed up as Markdown files:
+**Planned Implementation:**
+
+Articles and notes will be automatically backed up as Markdown files:
 
 ```
 storage/backups/articles/2026/01/my-article-slug.md
@@ -454,7 +493,9 @@ Note content in Markdown...
 - **Version control** — Can be committed to git
 - **Recovery** — Database corrupted? You have the Markdown
 
-Photos are stored as files (already portable), so no separate backup needed.
+Photos use MediaLibrary (already file-based and portable), so no separate backup needed.
+
+**Current State:** Articles already store content as Markdown in database. Automatic file export to be added.
 
 ---
 
@@ -490,11 +531,15 @@ inline.
 
 ---
 
-## Feeds
+> **🚧 Coming Soon: RSS/Atom/JSON Feeds**
+>
+> Feed generation is planned but not yet implemented. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues) on feed design and formats.
+
+**Planned Implementation:**
 
 **Controller:** `FeedController`
 
-**How it works:**
+**How it will work:**
 
 1. Query last 50 published posts across all types
 2. Order by `published_at DESC`
@@ -508,13 +553,17 @@ inline.
 - `/atom` → Atom 1.0
 - `/feed.json` → JSON Feed 1.1
 
-All three include full content (not excerpts).
+All three will include full content (not excerpts).
 
 ---
 
-## Search
+> **🚧 Coming Soon: Full-Text Search**
+>
+> SQLite FTS5 search is planned but not yet implemented. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues) on search design and features.
 
-BlogWriter uses SQLite FTS5 (Full-Text Search) for content search:
+**Planned Implementation:**
+
+BlogWriter will use SQLite FTS5 (Full-Text Search) for content search:
 
 **Implementation:**
 
@@ -576,13 +625,17 @@ php artisan config:set blogwriter.site.name "New Name"
 
 ---
 
-## Theme System
+> **🚧 Coming Soon: Theme System**
+>
+> The complete theme system is planned but not yet implemented. No `themes/` directory exists, no Folio routing, no Terminal or Starter themes. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues) to help shape the theme architecture.
 
-### How Themes Work
+**Planned Implementation:**
 
-1. Active theme is stored in `config/blogwriter.php`
-2. Routes are registered from `themes/{active}/pages/`
-3. Components are loaded from theme first, fallback to built-in
+### How Themes Will Work
+
+1. Active theme stored in `config/blogwriter.php`
+2. Routes registered from `themes/{active}/pages/` (Folio-based)
+3. Components loaded from theme first, fallback to built-in
 4. CSS/JS can be theme-specific or use global DaisyUI CDN
 
 ### Component Override Priority
@@ -592,7 +645,7 @@ When rendering `<x-article-card>`:
 1. Check `themes/active-theme/components/article-card.blade.php`
 2. If not found, use `resources/views/components/article-card.blade.php`
 
-This lets themes override specific components without copying everything.
+This will let themes override specific components without copying everything.
 
 ### Installing Themes
 
@@ -609,29 +662,44 @@ This lets themes override specific components without copying everything.
 php artisan theme:install theme-name
 ```
 
+**Current State:** No theme system exists. Views are in standard `resources/views/` directories.
+
 ---
 
 ## Installation System
 
-BlogWriter includes both web and CLI installers.
-
-**Web installer:**
-
-- Terminal-styled UI (DaisyUI + Alpine)
-- Checks requirements (PHP, SQLite, permissions)
-- Creates `.env`, generates `APP_KEY`
-- Runs migrations
-- Creates admin user
-- Activates Terminal theme
-- Creates `storage/installed.lock`
-
-**CLI installer:**
+### CLI Installer ✅ (Fully Working)
 
 ```bash
 php artisan blogwriter:install
 ```
 
-Uses Laravel Prompts for interactive setup in terminal.
+The CLI installer is fully implemented and uses Laravel Prompts for interactive setup:
+
+- ✅ Checks requirements (PHP 8.4+, SQLite, permissions)
+- ✅ Creates `.env` file with APP_KEY
+- ✅ Configures database (SQLite)
+- ✅ Runs migrations
+- ✅ Creates admin user account
+- ✅ Seeds initial data
+- ✅ Creates `storage/installed.lock`
+- ✅ Non-interactive mode support (`--non-interactive`)
+
+### Web Installer 🚧 (Coming Soon)
+
+> **🚧 Coming Soon: Web Installer UI**
+>
+> The fancy terminal-styled web installer is planned but not yet implemented. Currently, visiting the web installer shows a message to use the CLI installer. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues) on web installer design.
+
+**Planned Features:**
+
+- Terminal-styled UI (DaisyUI + Alpine)
+- Visual requirement checks
+- Step-by-step wizard (5 steps)
+- Admin account creation form
+- Theme selection (when themes are built)
+
+**Current State:** Web route exists but redirects to CLI installer instructions.
 
 **Lock file:**
 After installation, `storage/installed.lock` prevents re-running installer. Delete to reinstall (dev only).

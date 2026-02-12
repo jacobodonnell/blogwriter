@@ -10,13 +10,21 @@ order: 4
 
 # Themes
 
-A theme is a folder of HTML templates that controls how your blog looks. BlogWriter handles all the data — fetching posts, generating feeds, managing the admin — your theme just decides how to display it.
+> **🚧 Theme System Coming Soon**
+>
+> The complete theme system is planned but not yet implemented. This documentation serves as the design specification for how themes will work. No `themes/` directory exists, no Folio routing, no Terminal or Starter themes. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues) to help shape the theme architecture.
 
-You don't need to be a professional developer to build a theme. If you can edit HTML and add CSS classes, you can customize your blog's appearance.
+**Current State:** Views are in standard `resources/views/` directories using traditional Laravel routing.
 
-## Theme Structure
+**Planned Implementation:**
 
-Every theme lives in the `themes/` directory at the root of your BlogWriter installation:
+A theme will be a folder of HTML templates that controls how your blog looks. BlogWriter will handle all the data — fetching posts, generating feeds, managing the admin — your theme will just decide how to display it.
+
+You won't need to be a professional developer to build a theme. If you can edit HTML and add CSS classes, you'll be able to customize your blog's appearance.
+
+## Theme Structure (Planned)
+
+Every theme will live in the `themes/` directory at the root of your BlogWriter installation:
 
 ```
 themes/
@@ -38,9 +46,9 @@ themes/
         └── article-card.blade.php          # Custom version of a built-in component
 ```
 
-### How Routing Works
+### How Routing Will Work
 
-File names in `pages/` map directly to URLs. Your file structure *is* your URL structure:
+File names in `pages/` will map directly to URLs using Laravel Folio. Your file structure will be your URL structure:
 
 | File                                  | URL                            |
 |---------------------------------------|--------------------------------|
@@ -79,25 +87,27 @@ Every theme needs a `theme.json` file:
 
 ---
 
-## Included Themes
+## Included Themes (Planned)
 
-BlogWriter ships with two themes:
+BlogWriter will ship with two themes:
 
-**Terminal** — The default theme with a retro terminal aesthetic. Active after installation.
+**Terminal** — The default theme with a retro terminal aesthetic. Will be active after installation.
 
-**Starter** — A minimalist theme designed as a foundation for building your own designs. Uses Tailwind CSS + DaisyUI loaded via CDN (no build step, no npm, no Node.js). Includes all required page templates with clean, minimal styling you can build on.
+**Starter** — A minimalist theme designed as a foundation for building your own designs. Will use Tailwind CSS + DaisyUI loaded via CDN (no build step, no npm, no Node.js). Will include all required page templates with clean, minimal styling you can build on.
 
 <x-callout type="info" title="For Developers">
-  The Starter theme is similar to WordPress's _underscores — a barebones starting point rather than a finished design.
+  The Starter theme will be similar to WordPress's _underscores — a barebones starting point rather than a finished design.
 </x-callout>
 
-### Switching Themes
+### Switching Themes (Planned)
 
 1. Go to **Settings > Theme** in the admin dashboard
 2. Select a theme from the list
 3. Visit your site — changes are live immediately
 
-### Installing Additional Themes
+**Current State:** No theme switching UI exists. All views are in `resources/views/`.
+
+### Installing Additional Themes (Planned)
 
 **Upload a theme:**
 1. Go to **Settings > Theme** in the admin
@@ -112,7 +122,9 @@ php artisan theme:install theme-name
 
 ---
 
-## Building Your Own Theme
+## Building Your Own Theme (Planned)
+
+When the theme system is implemented, you'll be able to build themes like this:
 
 To build a theme, you'll need a local installation of BlogWriter where you can test your changes. Once your theme is ready, zip it up and upload it to your live site (or share it with others).
 
@@ -120,9 +132,9 @@ To build a theme, you'll need a local installation of BlogWriter where you can t
   Setting up a local development environment is covered in the Architecture doc. Non-developers can also request a development environment setup guide in the community forums.
 </x-callout>
 
-### 1. Copy the Starter Theme
+### 1. Copy the Starter Theme (Planned)
 
-In your BlogWriter installation's `themes/` folder, duplicate the `starter` theme:
+In your BlogWriter installation's `themes/` folder, duplicate the `starter` theme (when available):
 
 ### 2. Edit theme.json
 
@@ -195,9 +207,9 @@ Go to **Settings > Theme** in the admin and select your theme.
 
 ---
 
-## Getting Started: Developer Path
+## Getting Started: Developer Path (Planned)
 
-Same theme structure, but you can add your own tooling.
+Same theme structure, but you'll be able to add your own tooling.
 
 ### Custom Build Process
 
@@ -223,11 +235,11 @@ Replace the CDN `<link>` tags in your layout with your own compiled stylesheet:
 
 ---
 
-## Data Available in Templates
+## Data Available in Templates (Planned)
 
 ### On Every Page
 
-Your templates always have access to site and author information:
+Your templates will always have access to site and author information:
 
 ```html
 <!-- Site info -->
