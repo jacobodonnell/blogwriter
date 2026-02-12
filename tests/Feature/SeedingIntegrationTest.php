@@ -147,14 +147,17 @@ it('attaches images to published articles on public disk', function (): void {
     $seeder = new DatabaseSeeder;
     $seeder->withState('demo')->seed();
 
-    $publishedArticles = Article::where('status', Status::Published)->get();
+    $publishedArticles = Article::where('status', Status::Published)
+        ->whereNotNull('photo_id')
+        ->with('featuredPhoto')
+        ->get();
 
     foreach ($publishedArticles as $article) {
-        if ($article->hasMedia('featured_image')) {
-            $media = $article->getFirstMedia('featured_image');
+        if ($article->featuredPhoto) {
+            $media = $article->featuredPhoto->getFirstMedia('image');
 
             expect($media->disk)->toBe('public');
-            expect($media->collection_name)->toBe('featured_image');
+            expect($media->collection_name)->toBe('image');
         }
     }
 
@@ -165,14 +168,17 @@ it('attaches images to draft articles on private disk', function (): void {
     $seeder = new DatabaseSeeder;
     $seeder->withState('demo')->seed();
 
-    $draftArticles = Article::where('status', Status::Draft)->get();
+    $draftArticles = Article::where('status', Status::Draft)
+        ->whereNotNull('photo_id')
+        ->with('featuredPhoto')
+        ->get();
 
     foreach ($draftArticles as $article) {
-        if ($article->hasMedia('featured_image')) {
-            $media = $article->getFirstMedia('featured_image');
+        if ($article->featuredPhoto) {
+            $media = $article->featuredPhoto->getFirstMedia('image');
 
             expect($media->disk)->toBe('private');
-            expect($media->collection_name)->toBe('featured_image');
+            expect($media->collection_name)->toBe('image');
         }
     }
 
@@ -283,8 +289,8 @@ it('executes complete seeding integration from start to finish', function (): vo
         expect($article->published_at->isPast())->toBeTrue();
 
         // Images use correct disk
-        if ($article->hasMedia('featured_image')) {
-            expect($article->getFirstMedia('featured_image')->disk)->toBe('public');
+        if ($article->featuredPhoto) {
+            expect($article->featuredPhoto->getFirstMedia('image')->disk)->toBe('public');
         }
     }
 
@@ -297,8 +303,8 @@ it('executes complete seeding integration from start to finish', function (): vo
         expect($article->published_at)->toBeNull();
 
         // Images use correct disk
-        if ($article->hasMedia('featured_image')) {
-            expect($article->getFirstMedia('featured_image')->disk)->toBe('private');
+        if ($article->featuredPhoto) {
+            expect($article->featuredPhoto->getFirstMedia('image')->disk)->toBe('private');
         }
     }
 

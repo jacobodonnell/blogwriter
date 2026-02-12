@@ -94,7 +94,7 @@ it('demo state attaches featured images to articles', function (): void {
     $seeder = new DatabaseSeeder;
     $seeder->withState('demo')->seed();
 
-    $articlesWithImages = Article::all()->filter(fn ($article): bool => $article->hasMedia('featured_image'))->count();
+    $articlesWithImages = Article::whereNotNull('photo_id')->count();
 
     // Not all articles have images in demo data, but some should
     expect($articlesWithImages)->toBeGreaterThan(0);
@@ -104,11 +104,14 @@ it('demo state uses public disk for published article images', function (): void
     $seeder = new DatabaseSeeder;
     $seeder->withState('demo')->seed();
 
-    $publishedArticles = Article::where('status', Status::Published)->get();
+    $publishedArticles = Article::where('status', Status::Published)
+        ->whereNotNull('photo_id')
+        ->with('featuredPhoto')
+        ->get();
 
     foreach ($publishedArticles as $article) {
-        if ($article->hasMedia('featured_image')) {
-            $media = $article->getFirstMedia('featured_image');
+        if ($article->featuredPhoto) {
+            $media = $article->featuredPhoto->getFirstMedia('image');
             expect($media->disk)->toBe('public');
         }
     }
@@ -120,11 +123,14 @@ it('demo state uses private disk for draft article images', function (): void {
     $seeder = new DatabaseSeeder;
     $seeder->withState('demo')->seed();
 
-    $draftArticles = Article::where('status', Status::Draft)->get();
+    $draftArticles = Article::where('status', Status::Draft)
+        ->whereNotNull('photo_id')
+        ->with('featuredPhoto')
+        ->get();
 
     foreach ($draftArticles as $article) {
-        if ($article->hasMedia('featured_image')) {
-            $media = $article->getFirstMedia('featured_image');
+        if ($article->featuredPhoto) {
+            $media = $article->featuredPhoto->getFirstMedia('image');
             expect($media->disk)->toBe('private');
         }
     }

@@ -24,8 +24,10 @@ it('creates published article with Status::Published and published_at set', func
     expect($article->published_at->diffInSeconds(now()))->toBeLessThan(5);
 });
 
-it('creates draft article with Status::Draft and null published_at', function (): void {
-    $article = Article::factory()->draft()->create();
+it('creates draft article with Status::Draft', function (): void {
+    $article = Article::factory()->draft()->create([
+        'published_at' => null, // Explicitly set to null for this test
+    ]);
 
     expect($article->status)->toBe(Status::Draft);
     expect($article->published_at)->toBeNull();

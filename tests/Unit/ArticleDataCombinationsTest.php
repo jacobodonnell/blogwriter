@@ -59,18 +59,19 @@ it('excerpt uses summary when present', function (): void {
 // ==========================================
 
 it('creates article without featured image', function (): void {
-    $article = Article::factory()->create();
+    $article = Article::factory()->create([
+        'photo_id' => null,
+    ]);
 
-    // Factory has 60% chance of adding image, so we test explicit removal
-    $article->clearMediaCollection('featured_image');
-
-    expect($article->hasMedia('featured_image'))->toBeFalse();
+    expect($article->photo_id)->toBeNull();
+    expect($article->featuredPhoto)->toBeNull();
     expect($article->featured_image_url)->toBeNull();
 });
 
 it('featured_image_url accessor returns null when no image attached', function (): void {
-    $article = Article::factory()->create();
-    $article->clearMediaCollection('featured_image');
+    $article = Article::factory()->create([
+        'photo_id' => null,
+    ]);
 
     expect($article->featured_image_url)->toBeNull();
 });
