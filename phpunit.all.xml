@@ -12,12 +12,7 @@
             <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>
-    <!-- Exclude slow tests by default -->
-    <groups>
-        <exclude>
-            <group>slow</group>
-        </exclude>
-    </groups>
+    <!-- No group exclusions - runs all tests including slow ones -->
     <source>
         <include>
             <directory>app</directory>

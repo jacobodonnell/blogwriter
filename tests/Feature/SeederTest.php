@@ -8,51 +8,53 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('seeds categories with correct data', function (): void {
-    $seeder = new DatabaseSeeder;
-    $seeder->withState('empty')->seed();
+describe('seeder tests', function (): void {
+    it('seeds categories with correct data', function (): void {
+        $seeder = new DatabaseSeeder;
+        $seeder->withState('empty')->seed();
 
-    expect(Category::count())->toBe(5);
-    expect(Category::where('name', 'General')->exists())->toBeTrue();
-    expect(Category::where('name', 'Technology')->exists())->toBeTrue();
-});
+        expect(Category::count())->toBe(5);
+        expect(Category::where('name', 'General')->exists())->toBeTrue();
+        expect(Category::where('name', 'Technology')->exists())->toBeTrue();
+    });
 
-it('demo state seeds articles with mixed statuses', function (): void {
-    $seeder = new DatabaseSeeder;
-    $seeder->withState('demo')->seed();
+    it('demo state seeds articles with mixed statuses', function (): void {
+        $seeder = new DatabaseSeeder;
+        $seeder->withState('demo')->seed();
 
-    expect(Article::count())->toBeGreaterThanOrEqual(5);
+        expect(Article::count())->toBeGreaterThanOrEqual(5);
 
-    $publishedCount = Article::where('status', Status::Published)->count();
-    $draftCount = Article::where('status', Status::Draft)->count();
+        $publishedCount = Article::where('status', Status::Published)->count();
+        $draftCount = Article::where('status', Status::Draft)->count();
 
-    expect($publishedCount)->toBeGreaterThan(0);
-    expect($draftCount)->toBeGreaterThan(0);
-});
+        expect($publishedCount)->toBeGreaterThan(0);
+        expect($draftCount)->toBeGreaterThan(0);
+    });
 
-it('empty state seeds only categories', function (): void {
-    $seeder = new DatabaseSeeder;
-    $seeder->withState('empty')->seed();
+    it('empty state seeds only categories', function (): void {
+        $seeder = new DatabaseSeeder;
+        $seeder->withState('empty')->seed();
 
-    expect(Category::count())->toBe(5);
-    expect(Article::count())->toBe(0);
-});
+        expect(Category::count())->toBe(5);
+        expect(Article::count())->toBe(0);
+    });
 
-it('seeding creates expected data', function (): void {
-    $seeder = new DatabaseSeeder;
-    $seeder->withState('demo')->seed();
+    it('seeding creates expected data', function (): void {
+        $seeder = new DatabaseSeeder;
+        $seeder->withState('demo')->seed();
 
-    expect(Category::count())->toBeGreaterThan(0);
-    expect(Article::count())->toBeGreaterThan(0);
-});
+        expect(Category::count())->toBeGreaterThan(0);
+        expect(Article::count())->toBeGreaterThan(0);
+    });
 
-it('seeded published articles have valid published_at dates', function (): void {
-    $seeder = new DatabaseSeeder;
-    $seeder->withState('demo')->seed();
+    it('seeded published articles have valid published_at dates', function (): void {
+        $seeder = new DatabaseSeeder;
+        $seeder->withState('demo')->seed();
 
-    $publishedArticles = Article::where('status', Status::Published)->get();
+        $publishedArticles = Article::where('status', Status::Published)->get();
 
-    foreach ($publishedArticles as $article) {
-        expect($article->published_at)->not->toBeNull();
-    }
-});
+        foreach ($publishedArticles as $article) {
+            expect($article->published_at)->not->toBeNull();
+        }
+    });
+})->group('slow');
