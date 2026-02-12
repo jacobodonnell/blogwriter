@@ -19,10 +19,16 @@ use function Laravel\Prompts\warning;
 class InstallCommand extends Command
 {
     protected $signature = 'blogwriter:install
+                            {--site-name= : Site name}
+                            {--site-url= : Site URL}
+                            {--admin-name= : Admin user name}
+                            {--admin-email= : Admin email address}
+                            {--admin-password= : Admin password}
                             {--force : Force installation even if already installed}
-                            {--seed : Seed with demo data after installation}';
+                            {--seed : Seed with demo data after installation}
+                            {--no-seed : Skip demo data seeding}';
 
-    protected $description = 'Interactive installer for BlogWriter';
+    protected $description = 'Interactive installer for BlogWriter (supports non-interactive mode with flags)';
 
     public function handle(): int
     {
@@ -139,17 +145,73 @@ class InstallCommand extends Command
 
     protected function gatherConfiguration(): array
     {
+        // Check if running in non-interactive mode (all required options provided)
+        if ($this->isNonInteractive()) {
+            return $this->gatherNonInteractiveConfiguration();
+        }
+
+        return $this->gatherInteractiveConfiguration();
+    }
+
+    protected function isNonInteractive(): bool
+    {
+        return $this->option('site-name')
+            && $this->option('site-url')
+            && $this->option('admin-name')
+            && $this->option('admin-email')
+            && $this->option('admin-password');
+    }
+
+    protected function gatherNonInteractiveConfiguration(): array
+    {
+        // Validate all inputs
+        $siteName = $this->option('site-name');
+        $siteUrl = $this->option('site-url');
+        $name = $this->option('admin-name');
+        $email = $this->option('admin-email');
+        $password = $this->option('admin-password');
+
+        // Validate URL
+        if ($error = $this->validateUrl($siteUrl)) {
+            throw new \InvalidArgumentException("Invalid site URL: {$error}");
+        }
+
+        // Validate email
+        if ($error = $this->validateEmail($email)) {
+            throw new \InvalidArgumentException("Invalid admin email: {$error}");
+        }
+
+        // Validate password
+        if ($error = $this->validatePasswordLength($password)) {
+            throw new \InvalidArgumentException("Invalid admin password: {$error}");
+        }
+
+        // Determine seed option
+        $seed = $this->option('seed') ? true : ($this->option('no-seed') ? false : true);
+
+        return [
+            'site_name' => $siteName,
+            'site_url' => $siteUrl,
+            'name' => $name,
+            'email' => $email,
+            'password' => $password,
+            'seed' => $seed,
+        ];
+    }
+
+    protected function gatherInteractiveConfiguration(): array
+    {
         info('Step 1: Site Configuration');
         $this->newLine();
 
-        $siteName = text(
+        $siteName = $this->option('site-name') ?? text(
             label: 'What is your site name?',
             placeholder: 'E.g. My Awesome Blog',
             default: config('app.name', 'BlogWriter'),
             required: true
         );
 
-        $siteUrl = text(
+        $siteUrl = $this->option('site-url') ?? text(
             label: 'What is your site URL?',
             placeholder: 'E.g. https://example.com',
             default: config('app.url', 'http://localhost'),
@@ -161,29 +223,33 @@ class InstallCommand extends Command
         info('Step 2: Admin User Setup');
         $this->newLine();
 
-        $name = text(
+        $name = $this->option('admin-name') ?? text(
             label: 'What is your name?',
             placeholder: 'E.g. Jane Doe',
             required: true
         );
 
-        $email = text(
+        $email = $this->option('admin-email') ?? text(
             label: 'What is your email address?',
             placeholder: 'E.g. you@example.com',
             required: true,
             validate: $this->validateEmail(...)
         );
 
-        $password = $this->promptForPassword();
+        $password = $this->option('admin-password') ?? $this->promptForPassword();
 
         $this->newLine();
         info('Step 3: Demo Content');
         $this->newLine();
 
-        $seedData = confirm(
-            label: 'Would you like to seed your blog with demo articles?',
-            default: true
-        );
+        $seedData = $this->option('seed')
+            ? true
+            : ($this->option('no-seed')
+                ? false
+                : confirm(
+                    label: 'Would you like to seed your blog with demo articles?',
+                    default: true
+                ));
 
         return [
             'site_name' => $siteName,
