@@ -69,10 +69,9 @@ class SeedCommand extends Command
 
         $published = \App\Models\Article::published()->count();
         $draft = \App\Models\Article::draft()->count();
-        $hidden = \App\Models\Article::hidden()->count();
 
-        if ($published + $draft + $hidden > 0) {
-            $this->info("\n📝 Articles: {$published} published, {$draft} draft, {$hidden} hidden");
+        if ($published + $draft > 0) {
+            $this->info("\n📝 Articles: {$published} published, {$draft} draft");
         }
 
         $this->info('🏷️ Categories: '.\App\Models\Category::count());

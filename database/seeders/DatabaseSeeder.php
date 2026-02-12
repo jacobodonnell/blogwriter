@@ -203,10 +203,9 @@ class DatabaseSeeder extends Seeder
         $articles = json_decode(File::get($articlesFile), true);
         $totalCount = count($articles);
 
-        // Status distribution: 70% published, 20% draft, 10% hidden
-        $publishedCount = (int) round($totalCount * 0.7);
-        $draftCount = (int) round($totalCount * 0.2);
-        // Remainder go to hidden
+        // Status distribution: 80% published, 20% draft
+        $publishedCount = (int) round($totalCount * 0.8);
+        $draftCount = $totalCount - $publishedCount;
 
         // Shuffle articles for random status assignment
         shuffle($articles);
@@ -215,10 +214,8 @@ class DatabaseSeeder extends Seeder
             // Determine status based on distribution
             if ($index < $publishedCount) {
                 $status = Status::Published;
-            } elseif ($index < $publishedCount + $draftCount) {
-                $status = Status::Draft;
             } else {
-                $status = Status::Hidden;
+                $status = Status::Draft;
             }
 
             // Create article

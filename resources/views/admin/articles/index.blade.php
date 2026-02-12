@@ -40,7 +40,6 @@
                             <option value="">All Status</option>
                             <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Published</option>
                             <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>
-                            <option value="hidden" {{ request('status') == 'hidden' ? 'selected' : '' }}>Hidden</option>
                         </select>
                     </div>
 
@@ -80,7 +79,6 @@
                                                 'badge',
                                                 'badge-success' => $article->status->value === 'published',
                                                 'badge-warning' => $article->status->value === 'draft',
-                                                'badge-ghost' => $article->status->value === 'hidden',
                                             ])>
                                                 {{ $article->status->label() }}
                                             </span>

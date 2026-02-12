@@ -53,7 +53,6 @@
                                             'badge badge-sm',
                                             'badge-success' => $article->status->value === 'published',
                                             'badge-warning' => $article->status->value === 'draft',
-                                            'badge-ghost' => $article->status->value === 'hidden',
                                         ])>
                                             {{ $article->status->label() }}
                                         </span>

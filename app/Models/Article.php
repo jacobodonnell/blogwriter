@@ -6,7 +6,6 @@ use App\Enums\Status;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -16,6 +15,7 @@ class Article extends Model implements HasMedia
 {
     /** @use HasFactory<\Database\Factories\ArticleFactory> */
     use HasFactory;
+
     use InteractsWithMedia;
 
     protected $fillable = [
@@ -157,18 +157,6 @@ class Article extends Model implements HasMedia
     }
 
     /**
-     * Scope for hidden articles.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function hidden($query)
-    {
-        return $query->where('status', Status::Hidden);
-    }
-
-    /**
      * Scope for articles visible to public.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
@@ -189,7 +177,7 @@ class Article extends Model implements HasMedia
     #[\Illuminate\Database\Eloquent\Attributes\Scope]
     protected function visibleToOwner($query)
     {
-        return $query->whereIn('status', [Status::Published, Status::Hidden]);
+        return $query->where('status', Status::Published);
     }
 
     /**
@@ -295,15 +283,6 @@ class Article extends Model implements HasMedia
     public function unpublish(): void
     {
         $this->status = Status::Draft;
-        $this->save();
-    }
-
-    /**
-     * Hide the article.
-     */
-    public function hide(): void
-    {
-        $this->status = Status::Hidden;
         $this->save();
     }
 

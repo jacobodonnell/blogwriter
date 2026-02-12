@@ -35,7 +35,7 @@ class UpdateArticleRequest extends FormRequest
             ],
             'summary' => ['nullable', 'string', 'max:500'],
             'content' => ['required', 'string'],
-            'status' => ['required', 'in:draft,published,hidden'],
+            'status' => ['required', 'in:draft,published'],
             'featured_image' => ['nullable', 'string', 'url', 'max:500'],
             'featured_image_file' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'remove_featured_image' => ['nullable', 'boolean'],
