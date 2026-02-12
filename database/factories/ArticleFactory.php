@@ -31,7 +31,7 @@ class ArticleFactory extends Factory
         '{number} Things I Wish I Knew About {topic} Before Starting',
         'My Experience with {thing}: A Complete Review',
         'Building {project}: Lessons Learned',
-        'A Beginner\'s Guide to {topic}',
+        "A Beginner's Guide to {topic}",
         'The {adjective} Truth About {thing}',
         'How to {verb} Without {negative}',
         'What {number} Days of {activity} Taught Me',
@@ -180,11 +180,7 @@ class ArticleFactory extends Factory
                 for ($li = 0; $li < $numItems; $li++) {
                     $item = fake()->sentence(6);
 
-                    if ($isOrdered) {
-                        $sections[] = ($li + 1).'. '.$item;
-                    } else {
-                        $sections[] = '- '.$item;
-                    }
+                    $sections[] = $isOrdered ? ($li + 1).'. '.$item : '- '.$item;
                 }
             }
 

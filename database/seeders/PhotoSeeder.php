@@ -18,8 +18,8 @@ class PhotoSeeder extends Seeder
                 ->published()
                 ->withDemoImage($i)
                 ->create([
-                    'caption' => "Demo photo {$i}",
-                    'alt_text' => "Demo image {$i}",
+                    'caption' => 'Demo photo '.$i,
+                    'alt_text' => 'Demo image '.$i,
                 ]);
         }
     }

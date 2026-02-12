@@ -16,7 +16,7 @@ final readonly class CreatePhotoFromUrlAction
         $filename = basename(parse_url($url, PHP_URL_PATH)) ?: 'external-image.jpg';
         $baseSlug = $attributes['slug'] ?? pathinfo($filename, PATHINFO_FILENAME);
 
-        $photo = Photo::create([
+        return Photo::create([
             'filename' => $filename,
             'slug' => $this->generateSlug->handle($baseSlug, Photo::class),
             'alt_text' => $attributes['alt_text'] ?? null,
@@ -25,7 +25,5 @@ final readonly class CreatePhotoFromUrlAction
             'published_at' => ($attributes['status'] ?? 'draft') === 'published' ? now() : null,
             'meta' => ['external_url' => $url],
         ]);
-
-        return $photo;
     }
 }

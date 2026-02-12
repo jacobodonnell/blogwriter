@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('system_events', function (Blueprint $table) {
+        Schema::create('system_events', function (Blueprint $table): void {
             $table->id();
             $table->string('type')->index(); // e.g., 'storage_repair', 'install_error', 'permission_denied'
             $table->text('message');

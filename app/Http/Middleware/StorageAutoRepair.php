@@ -59,6 +59,7 @@ class StorageAutoRepair
 
                         continue;
                     }
+
                     $repaired[] = $dir;
                 } catch (\Exception $e) {
                     $failed[] = ['path' => $dir, 'reason' => $e->getMessage()];
@@ -99,9 +100,9 @@ class StorageAutoRepair
                 'is_error_log' => false,
                 'resolved' => true, // Auto-resolved since we just fixed it
             ]);
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             // If database isn't available yet, just log to file
-            Log::warning('Could not log storage repair to database', ['error' => $e->getMessage()]);
+            Log::warning('Could not log storage repair to database', ['error' => $exception->getMessage()]);
         }
     }
 
@@ -126,9 +127,9 @@ class StorageAutoRepair
                 'is_error_log' => true,
                 'resolved' => false,
             ]);
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             // If database isn't available, log to file
-            Log::error('Could not log storage repair failure to database', ['error' => $e->getMessage()]);
+            Log::error('Could not log storage repair failure to database', ['error' => $exception->getMessage()]);
         }
     }
 }

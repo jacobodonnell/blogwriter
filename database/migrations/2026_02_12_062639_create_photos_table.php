@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('photos', function (Blueprint $table) {
+        Schema::create('photos', function (Blueprint $table): void {
             $table->id();
             $table->string('filename');
             $table->string('slug')->unique();

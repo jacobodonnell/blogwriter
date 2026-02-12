@@ -43,6 +43,7 @@ class BlogWriterReset extends Command
             if (file_exists(storage_path('installed.lock'))) {
                 unlink(storage_path('installed.lock'));
             }
+
             info('  ✓ Lock removed');
 
             // 2. Wipe database
@@ -71,10 +72,12 @@ class BlogWriterReset extends Command
                     if (! file_exists($file)) {
                         continue;
                     }
+
                     if (unlink($file)) {
                         continue;
                     }
-                    throw new \RuntimeException("Failed to delete file: {$file}. File may be locked.");
+
+                    throw new \RuntimeException(sprintf('Failed to delete file: %s. File may be locked.', $file));
                 }
 
                 // Create fresh empty database

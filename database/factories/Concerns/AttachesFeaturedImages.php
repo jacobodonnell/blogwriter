@@ -18,7 +18,7 @@ trait AttachesFeaturedImages
         // Validate file exists and is not empty
         if (! file_exists($imagePath) || filesize($imagePath) === 0) {
             Log::warning('Demo image file not found or empty', [
-                'model_class' => get_class($model),
+                'model_class' => $model::class,
                 'model_id' => $model->id,
                 'image_path' => $imagePath,
             ]);
@@ -33,12 +33,12 @@ trait AttachesFeaturedImages
             $model->addMedia($imagePath)
                 ->preservingOriginal()
                 ->toMediaCollection($collection, $disk);
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::warning('Failed to attach demo image to model', [
-                'model_class' => get_class($model),
+                'model_class' => $model::class,
                 'model_id' => $model->id,
                 'image_path' => $imagePath,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
         }
     }
@@ -52,7 +52,7 @@ trait AttachesFeaturedImages
         // Picsum.photos URLs are not suitable for seeding since they require external network access
         // For now, we'll just log a warning
         Log::info('Picsum image attachment requested but not implemented', [
-            'model_class' => get_class($model),
+            'model_class' => $model::class,
             'model_id' => $model->id,
             'seed' => $seed,
         ]);

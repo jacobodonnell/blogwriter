@@ -17,8 +17,6 @@ class DiagnoseCommand extends Command
         $this->info('🔍 BlogWriter Diagnostic Tool');
         $this->newLine();
 
-        $issues = [];
-
         // Check 1: .env file exists
         $this->check('ENV file exists', fn (): bool => file_exists(base_path('.env')), '.env file is missing - run php artisan blogwriter:install');
 
@@ -90,14 +88,14 @@ class DiagnoseCommand extends Command
         try {
             $result = $test();
             if ($result) {
-                $this->info("✓ {$name}");
+                $this->info('✓ '.$name);
             } else {
-                $this->error("✗ {$name}");
-                $this->warn("  Fix: {$fix}");
+                $this->error('✗ '.$name);
+                $this->warn('  Fix: '.$fix);
             }
-        } catch (\Exception $e) {
-            $this->error("✗ {$name} - Exception: ".$e->getMessage());
-            $this->warn("  Fix: {$fix}");
+        } catch (\Exception $exception) {
+            $this->error(sprintf('✗ %s - Exception: ', $name).$exception->getMessage());
+            $this->warn('  Fix: '.$fix);
         }
     }
 }

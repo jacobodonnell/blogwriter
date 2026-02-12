@@ -37,7 +37,7 @@ class BundleCommand extends Command
 
         // Get version from composer.json or default
         $version = '0.1a';
-        $zipName = "blogwriter-v{$version}.zip";
+        $zipName = sprintf('blogwriter-v%s.zip', $version);
         $zipPath = $distPath.'/'.$zipName;
 
         // Remove existing zip
@@ -79,8 +79,8 @@ class BundleCommand extends Command
         $zip->close();
 
         $size = $this->formatBytes(filesize($zipPath));
-        $this->info("✓ Bundle created: {$zipPath}");
-        $this->info("  Size: {$size}");
+        $this->info('✓ Bundle created: '.$zipPath);
+        $this->info('  Size: '.$size);
         $this->newLine();
         $this->info('To install on a server:');
         $this->info('1. Upload the ZIP file to your server');
@@ -165,7 +165,7 @@ class BundleCommand extends Command
             // Only add if not already present
             if ($zip->locateName($dir.'/.gitkeep') === false && $zip->locateName($dir) === false) {
                 $zip->addEmptyDir($dir);
-                $this->info("  Added directory: {$dir}");
+                $this->info('  Added directory: '.$dir);
             }
         }
     }

@@ -71,7 +71,7 @@ class DatabaseSeeder extends Seeder
     public function withState(string $state): self
     {
         if (! in_array($state, $this->validStates)) {
-            throw new \InvalidArgumentException("Invalid state: {$state}. Valid states: ".implode(', ', $this->validStates));
+            throw new \InvalidArgumentException(sprintf('Invalid state: %s. Valid states: ', $state).implode(', ', $this->validStates));
         }
 
         $this->currentState = $state;
@@ -98,8 +98,8 @@ class DatabaseSeeder extends Seeder
      */
     public function seed(): void
     {
-        $this->command?->info("Seeding state: {$this->currentState}");
-        $this->command?->info("User: {$this->userConfig['name']} ({$this->userConfig['email']})");
+        $this->command?->info('Seeding state: '.$this->currentState);
+        $this->command?->info(sprintf('User: %s (%s)', $this->userConfig['name'], $this->userConfig['email']));
 
         $this->seedState($this->currentState);
 
@@ -153,7 +153,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        $this->command?->info("User created: {$user->name} ({$user->email})");
+        $this->command?->info(sprintf('User created: %s (%s)', $user->name, $user->email));
     }
 
     /**

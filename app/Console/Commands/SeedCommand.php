@@ -21,7 +21,7 @@ class SeedCommand extends Command
         $clear = $this->option('clear');
 
         $this->info('🌱 BlogWriter Database Seeder');
-        $this->info("State: {$state}");
+        $this->info('State: '.$state);
 
         if ($clear) {
             $this->warn('Clearing all data...');
@@ -50,7 +50,7 @@ class SeedCommand extends Command
         try {
             $seeder->withState($state);
         } catch (\InvalidArgumentException) {
-            $this->error("Invalid state: {$state}");
+            $this->error('Invalid state: '.$state);
             $this->error('Valid states: empty, minimal, demo, full');
 
             return 1;
@@ -64,7 +64,8 @@ class SeedCommand extends Command
         // Show stats
         $user = \App\Models\User::first();
         if ($user) {
-            $this->info("\n👤 User: {$user->email}");
+            $this->info('
+👤 User: '.$user->email);
         }
 
         $published = \App\Models\Article::published()->count();

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Actions\GenerateUniqueSlugAction;
 use App\Actions\Photos\CreatePhotoFromUploadAction;
 use App\Actions\Photos\ExtractExifDataAction;
 use App\Actions\UpdatePublishedStatusAction;
@@ -18,7 +17,6 @@ class AdminPhotoController extends Controller
     public function __construct(
         private readonly CreatePhotoFromUploadAction $createPhotoFromUpload,
         private readonly UpdatePublishedStatusAction $updatePublishedStatus,
-        private readonly GenerateUniqueSlugAction $generateSlug,
         private readonly ExtractExifDataAction $extractExif,
     ) {}
 
@@ -67,9 +65,9 @@ class AdminPhotoController extends Controller
 
             return redirect()->route('admin.photos.edit', $photo)
                 ->with('success', 'Photo created successfully.');
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             \Log::error('Failed to create photo', [
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
             return redirect()->back()
@@ -151,7 +149,7 @@ class AdminPhotoController extends Controller
 
             return redirect()->back()
                 ->withErrors([
-                    'photo' => "Cannot delete photo. It is being used by {$articleCount} article(s). Remove it from articles first.",
+                    'photo' => sprintf('Cannot delete photo. It is being used by %d article(s). Remove it from articles first.', $articleCount),
                 ]);
         }
 
@@ -160,10 +158,10 @@ class AdminPhotoController extends Controller
 
             return redirect()->route('admin.photos.index')
                 ->with('success', 'Photo deleted successfully.');
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             \Log::error('Failed to delete photo', [
                 'photo_id' => $photo->id,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
             return redirect()->back()

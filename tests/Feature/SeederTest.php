@@ -13,9 +13,9 @@ describe('seeder tests', function (): void {
         $seeder = new DatabaseSeeder;
         $seeder->withState('empty')->seed();
 
-        expect(Category::count())->toBe(5);
-        expect(Category::where('name', 'General')->exists())->toBeTrue();
-        expect(Category::where('name', 'Technology')->exists())->toBeTrue();
+        expect(Category::count())->toBe(5)
+            ->and(Category::where('name', 'General')->exists())->toBeTrue()
+            ->and(Category::where('name', 'Technology')->exists())->toBeTrue();
     });
 
     it('demo state seeds articles with mixed statuses', function (): void {

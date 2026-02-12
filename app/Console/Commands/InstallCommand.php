@@ -173,17 +173,17 @@ class InstallCommand extends Command
 
         // Validate URL
         if ($error = $this->validateUrl($siteUrl)) {
-            throw new \InvalidArgumentException("Invalid site URL: {$error}");
+            throw new \InvalidArgumentException('Invalid site URL: '.$error);
         }
 
         // Validate email
         if ($error = $this->validateEmail($email)) {
-            throw new \InvalidArgumentException("Invalid admin email: {$error}");
+            throw new \InvalidArgumentException('Invalid admin email: '.$error);
         }
 
         // Validate password
         if ($error = $this->validatePasswordLength($password)) {
-            throw new \InvalidArgumentException("Invalid admin password: {$error}");
+            throw new \InvalidArgumentException('Invalid admin password: '.$error);
         }
 
         // Determine seed option
@@ -341,7 +341,7 @@ class InstallCommand extends Command
         // If max attempts reached, generate a secure passphrase
         warning('Maximum attempts reached. Generating a secure passphrase for you.');
         $generatedPassphrase = PasswordGenerator::generate();
-        info("Your generated passphrase: {$generatedPassphrase}");
+        info('Your generated passphrase: '.$generatedPassphrase);
         info('Please save this in a password manager!');
 
         return $generatedPassphrase;
@@ -499,16 +499,16 @@ class InstallCommand extends Command
         $escapedValue = str_replace('"', '\\"', $value);
 
         // Check if key exists
-        if (preg_match("/^$key=/m", $content)) {
+        if (preg_match(sprintf('/^%s=/m', $key), $content)) {
             // Update existing value
             $content = preg_replace(
-                "/^$key=.*$/m",
-                "$key=\"$escapedValue\"",
+                sprintf('/^%s=.*$/m', $key),
+                sprintf('%s="%s"', $key, $escapedValue),
                 $content
             );
         } else {
             // Add new key
-            $content .= "\n$key=\"$escapedValue\"\n";
+            $content .= "\n{$key}=\"{$escapedValue}\"\n";
         }
 
         return $content;
@@ -560,15 +560,18 @@ class InstallCommand extends Command
 
     protected function isComposerAvailable(): bool
     {
-        return $this->commandExists('which composer')
-            || $this->commandExists('where composer');
+        if ($this->commandExists('which composer')) {
+            return true;
+        }
+
+        return $this->commandExists('where composer');
     }
 
     private function commandExists(string $command): bool
     {
         $output = shell_exec($command);
 
-        return ! empty($output) && $output !== '0';
+        return ! in_array($output, ['', '0', false, null], true) && $output !== '0';
     }
 
     protected function determineSeedOption(): bool
@@ -637,11 +640,12 @@ class InstallCommand extends Command
 
             if (! is_dir($path)) {
                 if (! mkdir($path, 0755, true)) {
-                    throw new \RuntimeException("Failed to create directory: {$dir}. Check file permissions.");
+                    throw new \RuntimeException(sprintf('Failed to create directory: %s. Check file permissions.', $dir));
                 }
-                info("✓ Created directory: {$dir}");
+
+                info('✓ Created directory: '.$dir);
             } elseif (! is_writable($path)) {
-                throw new \RuntimeException("Directory not writable: {$dir}. Check file permissions.");
+                throw new \RuntimeException(sprintf('Directory not writable: %s. Check file permissions.', $dir));
             }
         }
     }
@@ -698,17 +702,18 @@ class InstallCommand extends Command
             $imagePath = $demoImagesPath.'/'.$image;
 
             if (! file_exists($imagePath)) {
-                $missingOrInvalid[] = "$image (missing)";
+                $missingOrInvalid[] = $image.' (missing)';
             } elseif (filesize($imagePath) === 0) {
-                $missingOrInvalid[] = "$image (0 bytes)";
+                $missingOrInvalid[] = $image.' (0 bytes)';
             }
         }
 
         if ($missingOrInvalid !== []) {
             warning('⚠️  Demo image issues detected:');
             foreach ($missingOrInvalid as $issue) {
-                warning("  - $issue");
+                warning('  - '.$issue);
             }
+
             warning('Seeding will skip featured images for affected articles.');
             $this->newLine();
 

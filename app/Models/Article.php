@@ -45,6 +45,7 @@ class Article extends Model
         if ($value !== null) {
             $value = \Carbon\Carbon::parse($value)->startOfSecond();
         }
+
         $this->attributes['published_at'] = $value;
     }
 

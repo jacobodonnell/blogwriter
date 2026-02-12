@@ -172,7 +172,7 @@ class ArticleController extends Controller
     /**
      * Handle photo upload and return photo ID or error response.
      */
-    private function handlePhotoUpload($file, array $data, ?int $articleId = null): int|\Illuminate\Http\RedirectResponse
+    private function handlePhotoUpload(\Illuminate\Http\UploadedFile $file, array $data, ?int $articleId = null): int|\Illuminate\Http\RedirectResponse
     {
         try {
             $photo = $this->createPhotoFromUpload->handle($file, [
@@ -182,10 +182,10 @@ class ArticleController extends Controller
             ]);
 
             return $photo->id;
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             \Log::error('Failed to create photo from upload', [
                 'article_id' => $articleId,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
             return redirect()->back()
@@ -207,10 +207,10 @@ class ArticleController extends Controller
             ]);
 
             return $photo->id;
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             \Log::error('Failed to create photo from URL', [
                 'article_id' => $articleId,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
             return redirect()->back()

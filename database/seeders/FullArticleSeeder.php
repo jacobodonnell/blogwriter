@@ -25,10 +25,10 @@ class FullArticleSeeder extends Seeder
         $imageCounter = 0;
 
         // Process articles: assign local images to first 7, Picsum URLs to last 7, skip the null ones
-        $articlesWithImages = array_filter($articles, fn ($a) => $a['featured_image'] !== null);
+        $articlesWithImages = array_filter($articles, fn (array $a): bool => $a['featured_image'] !== null);
         $halfCount = (int) ceil(count($articlesWithImages) / 2);
 
-        foreach ($articles as $index => $data) {
+        foreach ($articles as $data) {
             // Convert hidden status to draft (hidden status removed in refactoring)
             $status = match ($data['status']) {
                 'published' => 'published',
@@ -48,7 +48,7 @@ class FullArticleSeeder extends Seeder
                     // First 50%: Use local demo images
                     $demoImageNum = $demoImages[$imageCounter % count($demoImages)];
                     $photo = Photo::factory()
-                        ->state(['status' => $status, 'published_at' => $status === 'published' ? now()->subDays(rand(1, 30)) : null])
+                        ->state(['status' => $status, 'published_at' => $status === 'published' ? now()->subDays(random_int(1, 30)) : null])
                         ->withDemoImage($demoImageNum)
                         ->create([
                             'alt_text' => $data['title'].' featured image',
@@ -58,11 +58,11 @@ class FullArticleSeeder extends Seeder
                 } else {
                     // Second 50%: Store Picsum URL as external photo
                     $photo = Photo::create([
-                        'filename' => basename($data['featured_image']),
+                        'filename' => basename((string) $data['featured_image']),
                         'slug' => \Illuminate\Support\Str::slug($data['title']).'-featured',
                         'alt_text' => $data['title'].' featured image',
                         'status' => $status,
-                        'published_at' => $status === 'published' ? now()->subDays(rand(1, 30)) : null,
+                        'published_at' => $status === 'published' ? now()->subDays(random_int(1, 30)) : null,
                         'meta' => ['external_url' => $data['featured_image']],
                     ]);
                     $photoId = $photo->id;
@@ -76,7 +76,7 @@ class FullArticleSeeder extends Seeder
                     'content' => $data['content'],
                     'summary' => $data['summary'] ?? null,
                     'status' => $status,
-                    'published_at' => $status === 'published' ? now()->subDays(rand(1, 30)) : null,
+                    'published_at' => $status === 'published' ? now()->subDays(random_int(1, 30)) : null,
                     'photo_id' => $photoId,
                     'meta' => $data['meta'] ?? null,
                 ]

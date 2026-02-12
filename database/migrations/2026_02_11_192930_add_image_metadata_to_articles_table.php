@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('articles', function (Blueprint $table) {
+        Schema::table('articles', function (Blueprint $table): void {
             $table->integer('featured_image_width')->nullable()->after('featured_image');
             $table->integer('featured_image_height')->nullable()->after('featured_image_width');
             $table->integer('featured_image_file_size')->nullable()->after('featured_image_height');
@@ -24,7 +24,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('articles', function (Blueprint $table) {
+        Schema::table('articles', function (Blueprint $table): void {
             $table->dropColumn('featured_image_width');
             $table->dropColumn('featured_image_height');
             $table->dropColumn('featured_image_file_size');

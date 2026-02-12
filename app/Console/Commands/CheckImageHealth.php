@@ -34,7 +34,7 @@ class CheckImageHealth extends Command
         foreach ($media as $mediaItem) {
             if (! Storage::disk($mediaItem->disk)->exists($mediaItem->getPath())) {
                 $issues['missing_files']++;
-                $this->warn("  ⚠ Media #{$mediaItem->id}: File missing on {$mediaItem->disk} disk");
+                $this->warn(sprintf('  ⚠ Media #%s: File missing on %s disk', $mediaItem->id, $mediaItem->disk));
 
                 if ($fix) {
                     $mediaItem->delete();
@@ -51,7 +51,7 @@ class CheckImageHealth extends Command
 
         foreach ($orphanedMedia as $mediaItem) {
             $issues['orphaned_media']++;
-            $this->warn("  ⚠ Media #{$mediaItem->id}: Article deleted but media remains");
+            $this->warn(sprintf('  ⚠ Media #%s: Article deleted but media remains', $mediaItem->id));
 
             if ($fix) {
                 $mediaItem->delete(); // Spatie automatically deletes files
@@ -69,12 +69,12 @@ class CheckImageHealth extends Command
 
             if ($media && $media->disk !== $expectedDisk) {
                 $issues['wrong_disk']++;
-                $this->warn("  ⚠ Article #{$article->id}: Image on {$media->disk} disk, should be on {$expectedDisk}");
+                $this->warn(sprintf('  ⚠ Article #%s: Image on %s disk, should be on %s', $article->id, $media->disk, $expectedDisk));
 
                 if ($fix) {
                     // Move to correct disk
                     $media->move($article, 'featured_image', $expectedDisk);
-                    $this->info("    ✓ Moved to {$expectedDisk} disk");
+                    $this->info(sprintf('    ✓ Moved to %s disk', $expectedDisk));
                 }
             }
         }
@@ -88,7 +88,7 @@ class CheckImageHealth extends Command
 
             if ($mediaCount > 1) {
                 $issues['duplicates']++;
-                $this->warn("  ⚠ Article #{$article->id}: Has {$mediaCount} featured images (should have 1)");
+                $this->warn(sprintf('  ⚠ Article #%s: Has %s featured images (should have 1)', $article->id, $mediaCount));
 
                 if ($fix) {
                     // Keep the newest, delete others
@@ -118,7 +118,7 @@ class CheckImageHealth extends Command
             foreach ($expectedConversions as $conversion) {
                 if (! $mediaItem->hasGeneratedConversion($conversion)) {
                     $issues['missing_conversions']++;
-                    $this->warn("  ⚠ Media #{$mediaItem->id}: Missing '{$conversion}' conversion");
+                    $this->warn(sprintf("  ⚠ Media #%s: Missing '%s' conversion", $mediaItem->id, $conversion));
 
                     if ($fix) {
                         // Regenerate all conversions
@@ -143,7 +143,7 @@ class CheckImageHealth extends Command
             foreach ($issues as $type => $count) {
                 if ($count > 0) {
                     $label = str_replace('_', ' ', ucfirst($type));
-                    $this->warn("  {$label}: {$count}");
+                    $this->warn(sprintf('  %s: %d', $label, $count));
                 }
             }
 

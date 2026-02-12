@@ -22,7 +22,7 @@ class CreateUserCommand extends Command
         $email = $this->argument('email');
 
         if (User::where('email', $email)->exists()) {
-            $this->error("A user with email '{$email}' already exists.");
+            $this->error(sprintf("A user with email '%s' already exists.", $email));
 
             return self::FAILURE;
         }
