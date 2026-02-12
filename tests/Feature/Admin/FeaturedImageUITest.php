@@ -584,7 +584,9 @@ describe('form submission with modern UI', function (): void {
 
         $article = Article::first();
 
-        expect($article->featured_image)->not->toBeNull();
+        // When file is uploaded, it goes to Media Library, not featured_image column
+        expect($article->featured_image)->toBeNull();
+        expect($article->getFirstMedia('featured_image'))->not->toBeNull();
         // Note: File existence check skipped - Intervention Image doesn't work with Storage::fake()
     });
 
@@ -713,7 +715,9 @@ describe('edge cases', function (): void {
 
         $article = Article::first();
 
-        expect($article->featured_image)->not->toBeNull();
+        // When file is uploaded, it goes to Media Library, not featured_image column
+        expect($article->featured_image)->toBeNull();
+        expect($article->getFirstMedia('featured_image'))->not->toBeNull();
     });
 
     it('preserves featured image when updating other fields', function (): void {

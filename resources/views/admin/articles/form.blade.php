@@ -242,7 +242,8 @@
                     {{-- Featured Image --}}
                     @php
                         $media = $article->exists ? $article->getFirstMedia('featured_image') : null;
-                        $initialImageUrl = $media?->getUrl('large') ?? '';
+                        // Prioritize external URL from database column, fall back to Media Library URL
+                        $initialImageUrl = $article->featured_image ?? $media?->getUrl('large') ?? '';
                         $initialIsRemoved = old('remove_featured_image') ? true : false;
                     @endphp
                     <div class="card bg-base-100 shadow-sm"
@@ -379,6 +380,7 @@
                                     fileName: null,
                                     fileSize: null,
                                     isRemoved: false,
+                                    originalUrl: '',
                                     errorMessage: null,
                                     maxSize: 2097152, // 2MB in bytes
                                     
@@ -440,7 +442,14 @@
                                             this.$refs.fileInput.value = '';
                                         }
                                     },
-                                    
+
+                                    undoDelete() {
+                                        this.isRemoved = false;
+                                        if (this.originalUrl) {
+                                            this.imageUrl = this.originalUrl;
+                                        }
+                                    },
+
                                     clearFilePreview() {
                                         this.filePreview = null;
                                         this.fileName = null;
@@ -461,6 +470,10 @@
                                                 this.originalUrl = this.imageUrl;
                                             }
                                             this.imageUrl = '';
+                                        }
+                                        // Restore URL when switching back to external URL tab
+                                        if (tab === 'external_url' && this.originalUrl && !this.imageUrl) {
+                                            this.imageUrl = this.originalUrl;
                                         }
                                     },
                                     
