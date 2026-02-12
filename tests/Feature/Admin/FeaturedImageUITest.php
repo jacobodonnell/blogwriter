@@ -420,8 +420,8 @@ describe('visual indicators', function (): void {
 
         // Check for uploaded file badge
         $response->assertSee('Uploaded File', false);
-        $response->assertSee('📤', false);
-        $response->assertSee('badge badge-secondary', false);
+        $response->assertSee('📁', false);
+        $response->assertSee('badge badge-success', false);
     });
 
     it('positions badge as overlay on preview image', function (): void {

@@ -170,9 +170,9 @@ describe('form ui interactions', function (): void {
         $page->assertSee('Edit Article')
             ->select('status', 'published')
             ->wait(0.5)
-            ->select('status', 'hidden')
-            ->wait(0.5)
             ->select('status', 'draft')
+            ->wait(0.5)
+            ->select('status', 'published')
             ->assertNoConsoleLogs()
             ->assertNoJavaScriptErrors();
     });

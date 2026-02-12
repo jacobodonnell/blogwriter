@@ -87,14 +87,3 @@ it('does not show draft articles on homepage', function (): void {
     $response->assertSuccessful()
         ->assertDontSee($article->title);
 });
-
-it('does not show hidden articles on homepage', function (): void {
-    $article = Article::factory()->hidden()->create([
-        'title' => 'Hidden Article Title',
-    ]);
-
-    $response = $this->get('/');
-
-    $response->assertSuccessful()
-        ->assertDontSee($article->title);
-});

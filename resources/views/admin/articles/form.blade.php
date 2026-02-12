@@ -202,7 +202,6 @@
                                 <select name="status" class="select select-bordered w-full @error('status') select-error @enderror">
                                     <option value="draft" {{ old('status', $article?->status?->value) === 'draft' ? 'selected' : '' }}>📝 Draft</option>
                                     <option value="published" {{ old('status', $article?->status?->value) === 'published' ? 'selected' : '' }}>✅ Published</option>
-                                    <option value="hidden" {{ old('status', $article?->status?->value) === 'hidden' ? 'selected' : '' }}>👁️ Hidden</option>
                                 </select>
                                 @error('status')
                                     <span class="text-error text-sm mt-1">{{ $message }}</span>
@@ -245,9 +244,10 @@
                         // Prioritize external URL from database column, fall back to Media Library URL
                         $initialImageUrl = $article->featured_image ?? $media?->getUrl('large') ?? '';
                         $initialIsRemoved = old('remove_featured_image') ? true : false;
+                        $isUploadedFile = $media && !$article->featured_image; // Has media but no external URL = uploaded file
                     @endphp
                     <div class="card bg-base-100 shadow-sm"
-                         x-data="featuredImage({{ json_encode($initialImageUrl, JSON_UNESCAPED_SLASHES) }})">
+                         x-data="featuredImage({{ json_encode($initialImageUrl, JSON_UNESCAPED_SLASHES) }}, {{ json_encode($isUploadedFile) }})">
                         <div class="card-body">
                             <h3 class="card-title text-lg flex items-center gap-2">
                                 <i class="ph ph-image"></i>
@@ -288,13 +288,13 @@
                                  <figure class="relative">
                                     {{-- Badge overlay --}}
                                     <div class="absolute top-2 left-2 z-10">
-                                        <span x-show="imageUrl && imageUrl.startsWith('http')" 
+                                        <span x-show="imageUrl && isUploadedFile"
+                                              class="badge badge-success">
+                                            📁 Uploaded File
+                                        </span>
+                                        <span x-show="imageUrl && !isUploadedFile && imageUrl.startsWith('http')"
                                               class="badge badge-primary">
                                             🔗 External URL
-                                        </span>
-                                        <span x-show="filePreview || (imageUrl && !imageUrl.startsWith('http'))" 
-                                              class="badge badge-secondary">
-                                            📤 Uploaded File
                                         </span>
                                     </div>
                                     
@@ -372,10 +372,11 @@
                         </div>
 
                         <script>
-                            function featuredImage(initialImageUrl) {
+                            function featuredImage(initialImageUrl, isUploadedFile = false) {
                                 return {
-                                    activeTab: 'external_url',
+                                    activeTab: isUploadedFile ? 'upload_file' : 'external_url',
                                     imageUrl: initialImageUrl || '',
+                                    isUploadedFile: isUploadedFile,
                                     filePreview: null,
                                     fileName: null,
                                     fileSize: null,

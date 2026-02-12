@@ -194,22 +194,6 @@ it('creates draft article with null timestamps', function (): void {
     expect($article->last_edited_at)->toBeNull();
 });
 
-it('creates hidden article with null timestamps', function (): void {
-    $response = post(route('admin.articles.store'), [
-        'title' => 'Hidden Article',
-        'slug' => 'hidden-article',
-        'content' => 'Hidden content.',
-        'status' => 'hidden',
-    ]);
-
-    $response->assertRedirect();
-
-    $article = Article::where('slug', 'hidden-article')->first();
-    expect($article->status->value)->toBe('hidden');
-    expect($article->published_at)->toBeNull();
-    expect($article->last_edited_at)->toBeNull();
-});
-
 // ==========================================
 // Unhappy Path Tests
 // ==========================================

@@ -6,7 +6,6 @@ enum Status: string
 {
     case Draft = 'draft';
     case Published = 'published';
-    case Hidden = 'hidden';
 
     /**
      * Returns true only for Published status.
@@ -17,11 +16,11 @@ enum Status: string
     }
 
     /**
-     * Returns true for Draft and Hidden statuses.
+     * Returns true for Draft status.
      */
     public function isPrivate(): bool
     {
-        return $this === self::Draft || $this === self::Hidden;
+        return $this === self::Draft;
     }
 
     /**
@@ -32,7 +31,6 @@ enum Status: string
         return match ($this) {
             self::Draft => 'Draft',
             self::Published => 'Published',
-            self::Hidden => 'Hidden',
         };
     }
 
@@ -44,7 +42,6 @@ enum Status: string
         return match ($this) {
             self::Draft => 'ph-pencil',
             self::Published => 'ph-check',
-            self::Hidden => 'ph-eye-slash',
         };
     }
 
@@ -56,7 +53,6 @@ enum Status: string
         return match ($this) {
             self::Draft => 'warning',
             self::Published => 'success',
-            self::Hidden => 'neutral',
         };
     }
 
@@ -77,7 +73,7 @@ enum Status: string
      */
     public static function privateStatuses(): array
     {
-        return [self::Draft, self::Hidden];
+        return [self::Draft];
     }
 
     /**
@@ -90,7 +86,6 @@ enum Status: string
         return [
             'draft' => 'Draft',
             'published' => 'Published',
-            'hidden' => 'Hidden',
         ];
     }
 }

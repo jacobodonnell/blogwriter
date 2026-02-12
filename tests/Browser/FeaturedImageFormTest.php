@@ -95,7 +95,7 @@ describe('console and javascript errors', function (): void {
             ->wait(0.5)
             ->assertNoJavaScriptErrors()
             // Change status
-            ->select('status', 'hidden')
+            ->select('status', 'draft')
             ->assertNoJavaScriptErrors()
             // Change back
             ->select('status', 'published')

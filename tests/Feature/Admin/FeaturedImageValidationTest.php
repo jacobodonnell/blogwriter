@@ -25,9 +25,8 @@ describe('url validation accepts modern cdn urls', function (): void {
             'featured_image' => 'https://i.imgur.com/abc123',
         ]);
 
-        $response->assertRedirect(route('admin.articles.index'));
-
         $article = Article::where('slug', 'test-article')->first();
+        $response->assertRedirect(route('admin.articles.edit', $article));
         expect($article)->not->toBeNull();
         expect($article->featured_image)->toBe('https://i.imgur.com/abc123');
     });
@@ -44,9 +43,8 @@ describe('url validation accepts modern cdn urls', function (): void {
             'featured_image' => 'https://images.unsplash.com/photo-123456',
         ]);
 
-        $response->assertRedirect(route('admin.articles.index'));
-
         $article = Article::where('slug', 'test-article-unsplash')->first();
+        $response->assertRedirect(route('admin.articles.edit', $article));
         expect($article)->not->toBeNull();
         expect($article->featured_image)->toBe('https://images.unsplash.com/photo-123456');
     });
@@ -63,9 +61,8 @@ describe('url validation accepts modern cdn urls', function (): void {
             'featured_image' => 'https://cdn.example.com/image?w=800&h=600&fit=crop',
         ]);
 
-        $response->assertRedirect(route('admin.articles.index'));
-
         $article = Article::where('slug', 'test-article-query')->first();
+        $response->assertRedirect(route('admin.articles.edit', $article));
         expect($article)->not->toBeNull();
         expect($article->featured_image)->toBe('https://cdn.example.com/image?w=800&h=600&fit=crop');
     });
@@ -82,9 +79,8 @@ describe('url validation accepts modern cdn urls', function (): void {
             'featured_image' => 'https://imagedelivery.net/abc123/def456/public',
         ]);
 
-        $response->assertRedirect(route('admin.articles.index'));
-
         $article = Article::where('slug', 'test-article-cf')->first();
+        $response->assertRedirect(route('admin.articles.edit', $article));
         expect($article)->not->toBeNull();
         expect($article->featured_image)->toBe('https://imagedelivery.net/abc123/def456/public');
     });
@@ -101,9 +97,8 @@ describe('url validation accepts modern cdn urls', function (): void {
             'featured_image' => 'https://example.com/image#featured',
         ]);
 
-        $response->assertRedirect(route('admin.articles.index'));
-
         $article = Article::where('slug', 'test-article-hash')->first();
+        $response->assertRedirect(route('admin.articles.edit', $article));
         expect($article)->not->toBeNull();
         expect($article->featured_image)->toBe('https://example.com/image#featured');
     });
@@ -120,9 +115,8 @@ describe('url validation accepts modern cdn urls', function (): void {
             'featured_image' => 'https://example.com/images/photo.jpg',
         ]);
 
-        $response->assertRedirect(route('admin.articles.index'));
-
         $article = Article::where('slug', 'test-article-ext')->first();
+        $response->assertRedirect(route('admin.articles.edit', $article));
         expect($article)->not->toBeNull();
         expect($article->featured_image)->toBe('https://example.com/images/photo.jpg');
     });
@@ -158,7 +152,8 @@ describe('url validation rejects invalid urls', function (): void {
         ]);
 
         // Should not have errors because featured_image is nullable
-        $response->assertRedirect(route('admin.articles.index'));
+        $article = Article::where('slug', 'test-article-empty')->first();
+        $response->assertRedirect(route('admin.articles.edit', $article));
     });
 });
 
@@ -177,9 +172,8 @@ describe('update request url validation', function (): void {
             'featured_image' => 'https://i.imgur.com/xyz789',
         ]);
 
-        $response->assertRedirect(route('admin.articles.index'));
-
         $article->refresh();
+        $response->assertRedirect(route('admin.articles.edit', $article));
         expect($article->featured_image)->toBe('https://i.imgur.com/xyz789');
     });
 
@@ -199,9 +193,8 @@ describe('update request url validation', function (): void {
             'featured_image' => 'https://cdn.example.com/new?format=webp&quality=90',
         ]);
 
-        $response->assertRedirect(route('admin.articles.index'));
-
         $article->refresh();
+        $response->assertRedirect(route('admin.articles.edit', $article));
         expect($article->featured_image)->toBe('https://cdn.example.com/new?format=webp&quality=90');
     });
 });

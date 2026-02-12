@@ -72,7 +72,7 @@ class ArticleFactory extends Factory
                 ];
 
                 $randomImage = $this->faker->randomElement($demoImages);
-                $imagePath = $demoImagesPath . '/' . $randomImage;
+                $imagePath = $demoImagesPath.'/'.$randomImage;
 
                 if (file_exists($imagePath)) {
                     // Determine disk based on status
@@ -113,16 +113,15 @@ class ArticleFactory extends Factory
     }
 
     /**
-     * Get status with weighted probability (60% published, 30% draft, 10% hidden).
+     * Get status with weighted probability (70% published, 30% draft).
      */
     protected function getWeightedStatus(): string
     {
         $rand = $this->faker->randomFloat(2, 0, 1);
 
         return match (true) {
-            $rand <= 0.6 => 'published',
-            $rand <= 0.9 => 'draft',
-            default => 'hidden',
+            $rand <= 0.7 => 'published',
+            default => 'draft',
         };
     }
 
@@ -222,7 +221,7 @@ class ArticleFactory extends Factory
     {
         return match ($status) {
             'published' => $this->faker->dateTimeBetween('-1 year', 'now'),
-            'draft', 'hidden' => $this->faker->optional(0.3)->dateTimeBetween('-6 months', '+6 months'),
+            'draft' => $this->faker->optional(0.3)->dateTimeBetween('-6 months', '+6 months'),
             default => null,
         };
     }
@@ -263,17 +262,6 @@ class ArticleFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'status' => 'draft',
-            'published_at' => null,
-        ]);
-    }
-
-    /**
-     * State for hidden articles.
-     */
-    public function hidden(): static
-    {
-        return $this->state(fn (array $attributes): array => [
-            'status' => 'hidden',
             'published_at' => null,
         ]);
     }
