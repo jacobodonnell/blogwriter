@@ -16,13 +16,13 @@
 ## 🚧 In Progress - Need to Complete
 
 ### Controllers
-- [ ] AdminPhotoController (CRUD for photos)
-- [ ] PhotoController (public routes)
-- [ ] ArticleController needs refactoring for Photo creation
+- [x] AdminPhotoController (CRUD for photos)
+- [x] PhotoController (public routes)
+- [x] ArticleController refactored for Photo creation
 
 ### Routes
-- [ ] Add admin photo routes
-- [ ] Add public photo routes
+- [x] Add admin photo routes
+- [x] Add public photo routes
 
 ### Views
 - [ ] Admin photo views (index, create, edit, form)
@@ -31,10 +31,10 @@
 - [ ] Update article show view to check Photo status
 
 ### Seeders
-- [ ] PhotoSeeder
-- [ ] Update DemoArticleSeeder to use Photos
-- [ ] Update FullArticleSeeder to use Photos
-- [ ] Update DatabaseSeeder to include PhotoSeeder
+- [x] PhotoSeeder
+- [x] Update DemoArticleSeeder to use Photos
+- [x] Update FullArticleSeeder to use Photos
+- [x] Update DatabaseSeeder to include PhotoSeeder
 
 ### Tests
 - [ ] Refactor all 6 featured image tests to use Photo model

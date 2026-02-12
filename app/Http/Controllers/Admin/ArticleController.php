@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\Status;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreArticleRequest;
 use App\Http\Requests\UpdateArticleRequest;
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\Photo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -60,6 +60,37 @@ class ArticleController extends Controller
     {
         $data = $request->validated();
 
+        // Handle photo creation first
+        if ($request->hasFile('featured_image_file')) {
+            try {
+                $photo = $this->createPhotoFromUpload($request->file('featured_image_file'), $data);
+                $data['photo_id'] = $photo->id;
+            } catch (\Exception $e) {
+                \Log::error('Failed to create photo from upload', [
+                    'error' => $e->getMessage(),
+                ]);
+
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
+            }
+        } elseif ($request->filled('featured_image') && filter_var($request->featured_image, FILTER_VALIDATE_URL)) {
+            try {
+                $photo = $this->createPhotoFromUrl($request->featured_image, $data);
+                $data['photo_id'] = $photo->id;
+            } catch (\Exception $e) {
+                \Log::error('Failed to create photo from URL', [
+                    'error' => $e->getMessage(),
+                ]);
+
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['featured_image' => 'Failed to process external image URL. Please try again.']);
+            }
+        } elseif ($request->filled('photo_id')) {
+            $data['photo_id'] = $request->photo_id;
+        }
+
         $article = new Article;
         $article->title = $data['title'];
         $article->slug = $data['slug'];
@@ -67,7 +98,7 @@ class ArticleController extends Controller
         $article->status = $data['status'];
         $article->published_at = $data['published_at'] ?? null;
         $article->meta = $data['meta'] ?? [];
-        $article->featured_image = $data['featured_image'] ?? null;
+        $article->photo_id = $data['photo_id'] ?? null;
 
         if (empty($data['summary'])) {
             $article->summary = Str::limit(strip_tags((string) $data['content']), 255);
@@ -76,38 +107,6 @@ class ArticleController extends Controller
         }
 
         $article->save();
-
-        // Handle featured image upload
-        if ($request->hasFile('featured_image_file')) {
-            try {
-                // Clear external URL if uploading a file
-                $article->featured_image = null;
-                $article->save();
-
-                // Determine disk based on article status
-                $disk = $article->status->isPublic() ? 'public' : 'private';
-
-                $article->addMediaFromRequest('featured_image_file')
-                    ->toMediaCollection('featured_image', $disk);
-            } catch (\Exception $e) {
-                \Log::error('Failed to attach featured image', [
-                    'article_id' => $article->id,
-                    'error' => $e->getMessage(),
-                ]);
-
-                return redirect()->back()
-                    ->withInput()
-                    ->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
-            }
-        }
-
-        // Handle external URL (store as-is, don't download)
-        if ($request->filled('featured_image') && filter_var($request->featured_image, FILTER_VALIDATE_URL)) {
-            // Clear uploaded media if setting an external URL
-            $article->clearMediaCollection('featured_image');
-            // External URLs are stored in the featured_image column
-            // Already handled by fillable assignment above
-        }
 
         if (! empty($data['categories'])) {
             $article->categories()->attach($data['categories']);
@@ -138,6 +137,44 @@ class ArticleController extends Controller
     {
         $data = $request->validated();
 
+        // Handle featured image removal
+        if ($request->boolean('remove_featured_image')) {
+            $article->photo_id = null;
+        }
+
+        // Handle photo creation/update
+        if ($request->hasFile('featured_image_file')) {
+            try {
+                $photo = $this->createPhotoFromUpload($request->file('featured_image_file'), $data);
+                $data['photo_id'] = $photo->id;
+            } catch (\Exception $e) {
+                \Log::error('Failed to create photo from upload', [
+                    'article_id' => $article->id,
+                    'error' => $e->getMessage(),
+                ]);
+
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
+            }
+        } elseif ($request->filled('featured_image') && filter_var($request->featured_image, FILTER_VALIDATE_URL)) {
+            try {
+                $photo = $this->createPhotoFromUrl($request->featured_image, $data);
+                $data['photo_id'] = $photo->id;
+            } catch (\Exception $e) {
+                \Log::error('Failed to create photo from URL', [
+                    'article_id' => $article->id,
+                    'error' => $e->getMessage(),
+                ]);
+
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['featured_image' => 'Failed to process external image URL. Please try again.']);
+            }
+        } elseif ($request->filled('photo_id')) {
+            $data['photo_id'] = $request->photo_id;
+        }
+
         $article->title = $data['title'];
         $article->slug = $data['slug'];
         $article->content = $data['content'];
@@ -146,8 +183,8 @@ class ArticleController extends Controller
             $article->published_at = $data['published_at'];
         }
         $article->meta = $data['meta'] ?? [];
-        if (array_key_exists('featured_image', $data)) {
-            $article->featured_image = $data['featured_image'];
+        if (array_key_exists('photo_id', $data)) {
+            $article->photo_id = $data['photo_id'];
         }
 
         if (empty($data['summary'])) {
@@ -157,45 +194,6 @@ class ArticleController extends Controller
         }
 
         $article->save();
-
-        // Handle featured image removal
-        if ($request->boolean('remove_featured_image')) {
-            $article->clearMediaCollection('featured_image');
-            $article->featured_image = null;
-            $article->save();
-        }
-
-        // Handle featured image upload
-        if ($request->hasFile('featured_image_file')) {
-            try {
-                // Clear external URL if uploading a file
-                $article->featured_image = null;
-                $article->save();
-
-                // Determine disk based on article status
-                $disk = $article->status->isPublic() ? 'public' : 'private';
-
-                $article->addMediaFromRequest('featured_image_file')
-                    ->toMediaCollection('featured_image', $disk);
-            } catch (\Exception $e) {
-                \Log::error('Failed to attach featured image', [
-                    'article_id' => $article->id,
-                    'error' => $e->getMessage(),
-                ]);
-
-                return redirect()->back()
-                    ->withInput()
-                    ->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
-            }
-        }
-
-        // Handle external URL (store as-is, don't download)
-        if ($request->filled('featured_image') && filter_var($request->featured_image, FILTER_VALIDATE_URL)) {
-            // Clear uploaded media if setting an external URL
-            $article->clearMediaCollection('featured_image');
-            // External URLs are stored in the featured_image column
-            // Already handled by fillable assignment above
-        }
 
         $article->categories()->sync($data['categories'] ?? []);
 
@@ -213,5 +211,91 @@ class ArticleController extends Controller
 
         return redirect()->route('admin.articles.index')
             ->with('success', 'Article deleted successfully.');
+    }
+
+    /**
+     * Create a Photo from an external URL.
+     */
+    private function createPhotoFromUrl(string $url, array $articleData): Photo
+    {
+        $filename = basename(parse_url($url, PHP_URL_PATH)) ?: 'external-image.jpg';
+        $slug = Str::slug(pathinfo($filename, PATHINFO_FILENAME));
+
+        // Ensure unique slug
+        $originalSlug = $slug;
+        $counter = 1;
+        while (Photo::where('slug', $slug)->exists()) {
+            $slug = $originalSlug.'-'.$counter++;
+        }
+
+        return Photo::create([
+            'filename' => $filename,
+            'slug' => $slug,
+            'alt_text' => $articleData['title'] ?? 'Featured image',
+            'status' => $articleData['status'] ?? 'draft',
+            'published_at' => ($articleData['status'] ?? 'draft') === 'published' ? now() : null,
+            'meta' => ['external_url' => $url],
+        ]);
+    }
+
+    /**
+     * Create a Photo from an uploaded file.
+     */
+    private function createPhotoFromUpload($file, array $articleData): Photo
+    {
+        $filename = $file->getClientOriginalName();
+        $slug = Str::slug(pathinfo($filename, PATHINFO_FILENAME));
+
+        // Ensure unique slug
+        $originalSlug = $slug;
+        $counter = 1;
+        while (Photo::where('slug', $slug)->exists()) {
+            $slug = $originalSlug.'-'.$counter++;
+        }
+
+        // Extract EXIF if available
+        $exif = $this->extractExif($file);
+
+        $photo = Photo::create([
+            'filename' => $filename,
+            'slug' => $slug,
+            'alt_text' => $articleData['title'] ?? 'Featured image',
+            'status' => $articleData['status'] ?? 'draft',
+            'published_at' => ($articleData['status'] ?? 'draft') === 'published' ? now() : null,
+            'meta' => $exif,
+        ]);
+
+        // Add file to Photo's media collection
+        $disk = $photo->status->isPublic() ? 'public' : 'private';
+        $photo->addMedia($file)
+            ->toMediaCollection('image', $disk);
+
+        return $photo;
+    }
+
+    /**
+     * Extract EXIF metadata from uploaded file.
+     */
+    private function extractExif($file): array
+    {
+        if (! function_exists('exif_read_data')) {
+            return [];
+        }
+
+        $exif = @exif_read_data($file->getPathname());
+
+        if (! $exif) {
+            return [];
+        }
+
+        return array_filter([
+            'camera_model' => $exif['Model'] ?? null,
+            'lens' => $exif['LensModel'] ?? null,
+            'iso' => $exif['ISOSpeedRatings'] ?? null,
+            'aperture' => $exif['FNumber'] ?? null,
+            'shutter_speed' => $exif['ExposureTime'] ?? null,
+            'width' => $exif['COMPUTED']['Width'] ?? null,
+            'height' => $exif['COMPUTED']['Height'] ?? null,
+        ]);
     }
 }

@@ -1,11 +1,13 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminPhotoController;
 use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\InstallController;
+use App\Http\Controllers\PhotoController;
 use Illuminate\Support\Facades\Route;
 
 // Public Routes
@@ -14,6 +16,10 @@ Route::redirect('/blog', '/');
 Route::get('/blog/{slug}', [ArticleController::class, 'show'])->name('article.show');
 Route::get('/category/{slug}', [ArticleController::class, 'category'])->name('category.show');
 Route::view('/about', 'public.about')->name('about');
+
+// Public photo routes
+Route::get('/photos', [PhotoController::class, 'index'])->name('photos.index');
+Route::get('/photos/{photo:slug}', [PhotoController::class, 'show'])->name('photos.show');
 
 // Admin Routes
 // Auth required in production, optional in local/development
@@ -25,6 +31,9 @@ Route::middleware($adminMiddleware)->prefix('admin')->name('admin.')->group(func
 
     // Articles
     Route::resource('articles', AdminArticleController::class);
+
+    // Photos
+    Route::resource('photos', AdminPhotoController::class);
 
     // Categories
     Route::resource('categories', CategoryController::class)->except(['show', 'create']);
