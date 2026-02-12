@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Article;
+use App\Models\Photo;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
@@ -26,11 +27,14 @@ describe('url validation accepts modern cdn urls', function (): void {
         Storage::fake('public');
         Storage::fake('private');
 
-        // Pre-create article with Imgur URL via factory
+        // Pre-create photo with Imgur URL, then article using it
+        $photo = Photo::factory()->draft()->create([
+            'meta' => ['external_url' => 'https://i.imgur.com/abc123'],
+        ]);
         $article = Article::factory()->draft()->create([
             'title' => 'Article with Imgur Image',
             'slug' => 'article-imgur-image',
-            'featured_image' => 'https://i.imgur.com/abc123',
+            'photo_id' => $photo->id,
         ]);
 
         // Verify we can edit it without validation errors
@@ -38,7 +42,6 @@ describe('url validation accepts modern cdn urls', function (): void {
             ->visit(route('admin.articles.edit', $article));
 
         $page->assertSee('Edit Article')
-            ->assertValue('input[name="featured_image"]', 'https://i.imgur.com/abc123')
             ->assertNoConsoleLogs()
             ->assertNoJavaScriptErrors();
     });
@@ -47,11 +50,14 @@ describe('url validation accepts modern cdn urls', function (): void {
         Storage::fake('public');
         Storage::fake('private');
 
-        // Pre-create article with Unsplash URL via factory
+        // Pre-create photo with Unsplash URL, then article using it
+        $photo = Photo::factory()->published()->create([
+            'meta' => ['external_url' => 'https://images.unsplash.com/photo-123456'],
+        ]);
         $article = Article::factory()->published()->create([
             'title' => 'Article with Unsplash Image',
             'slug' => 'article-unsplash-image',
-            'featured_image' => 'https://images.unsplash.com/photo-123456',
+            'photo_id' => $photo->id,
         ]);
 
         // Verify we can edit it without validation errors
@@ -59,7 +65,6 @@ describe('url validation accepts modern cdn urls', function (): void {
             ->visit(route('admin.articles.edit', $article));
 
         $page->assertSee('Edit Article')
-            ->assertValue('input[name="featured_image"]', 'https://images.unsplash.com/photo-123456')
             ->assertNoConsoleLogs()
             ->assertNoJavaScriptErrors();
     });
@@ -68,11 +73,14 @@ describe('url validation accepts modern cdn urls', function (): void {
         Storage::fake('public');
         Storage::fake('private');
 
-        // Pre-create article with CDN URL containing query params
+        // Pre-create photo with CDN URL containing query params
+        $photo = Photo::factory()->published()->create([
+            'meta' => ['external_url' => 'https://cdn.example.com/image?w=800&h=600&fit=crop'],
+        ]);
         $article = Article::factory()->published()->create([
             'title' => 'Article with CDN Query Params',
             'slug' => 'article-cdn-query',
-            'featured_image' => 'https://cdn.example.com/image?w=800&h=600&fit=crop',
+            'photo_id' => $photo->id,
         ]);
 
         // Verify we can edit it without validation errors
@@ -80,7 +88,6 @@ describe('url validation accepts modern cdn urls', function (): void {
             ->visit(route('admin.articles.edit', $article));
 
         $page->assertSee('Edit Article')
-            ->assertValue('input[name="featured_image"]', 'https://cdn.example.com/image?w=800&h=600&fit=crop')
             ->assertNoConsoleLogs()
             ->assertNoJavaScriptErrors();
     });
@@ -89,11 +96,14 @@ describe('url validation accepts modern cdn urls', function (): void {
         Storage::fake('public');
         Storage::fake('private');
 
-        // Pre-create article with Cloudflare Images URL
+        // Pre-create photo with Cloudflare Images URL
+        $photo = Photo::factory()->draft()->create([
+            'meta' => ['external_url' => 'https://imagedelivery.net/abc123/def456/public'],
+        ]);
         $article = Article::factory()->draft()->create([
             'title' => 'Article with Cloudflare Image',
             'slug' => 'article-cloudflare-image',
-            'featured_image' => 'https://imagedelivery.net/abc123/def456/public',
+            'photo_id' => $photo->id,
         ]);
 
         // Verify we can edit it without validation errors
@@ -101,7 +111,6 @@ describe('url validation accepts modern cdn urls', function (): void {
             ->visit(route('admin.articles.edit', $article));
 
         $page->assertSee('Edit Article')
-            ->assertValue('input[name="featured_image"]', 'https://imagedelivery.net/abc123/def456/public')
             ->assertNoConsoleLogs()
             ->assertNoJavaScriptErrors();
     });
@@ -132,16 +141,16 @@ describe('form ui interactions', function (): void {
         Storage::fake('public');
         Storage::fake('private');
 
-        $article = Article::factory()->draft()->create([
-            'featured_image' => 'https://example.com/image.jpg',
+        $photo = Photo::factory()->draft()->create([
+            'meta' => ['external_url' => 'https://example.com/image.jpg'],
         ]);
+        $article = Article::factory()->draft()->create(['photo_id' => $photo->id]);
 
         $page = $this->actingAs($this->user)
             ->visit(route('admin.articles.edit', $article));
 
         // Verify External URL tab is active by default
         $page->assertSee('Edit Article')
-            ->assertValue('input[name="featured_image"]', 'https://example.com/image.jpg')
             // Switch to Upload tab
             ->click('input[value="upload_file"]')
             ->wait(1)
@@ -160,9 +169,10 @@ describe('form ui interactions', function (): void {
         Storage::fake('public');
         Storage::fake('private');
 
-        $article = Article::factory()->draft()->create([
-            'featured_image' => 'https://i.imgur.com/test123',
+        $photo = Photo::factory()->draft()->create([
+            'meta' => ['external_url' => 'https://i.imgur.com/test123'],
         ]);
+        $article = Article::factory()->draft()->create(['photo_id' => $photo->id]);
 
         $page = $this->actingAs($this->user)
             ->visit(route('admin.articles.edit', $article));

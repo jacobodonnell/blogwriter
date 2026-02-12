@@ -2,6 +2,7 @@
 
 use App\Enums\Status;
 use App\Models\Article;
+use App\Models\Photo;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -16,8 +17,8 @@ beforeEach(function (): void {
     Storage::fake('private');
 });
 
-describe('uploaded images stored on correct disk based on status', function (): void {
-    it('stores draft article image on private disk initially', function (): void {
+describe('uploaded images stored on correct disk based on photo status', function (): void {
+    it('stores draft photo image on private disk initially', function (): void {
         $image = UploadedFile::fake()->image('test.jpg', 800, 600);
 
         $response = $this->post(route('admin.articles.store'), [
@@ -34,12 +35,17 @@ describe('uploaded images stored on correct disk based on status', function (): 
         expect($article)->not->toBeNull();
         expect($article->status)->toBe(Status::Draft);
 
-        $media = $article->getFirstMedia('featured_image');
+        // Photo owns the MediaLibrary, not Article
+        $photo = $article->featuredPhoto;
+        expect($photo)->not->toBeNull();
+        expect($photo->status)->toBe(Status::Draft);
+
+        $media = $photo->getFirstMedia('image');
         expect($media)->not->toBeNull();
         expect($media->disk)->toBe('private');
     });
 
-    it('stores published article image on public disk initially', function (): void {
+    it('stores published photo image on public disk initially', function (): void {
         $image = UploadedFile::fake()->image('test.jpg', 800, 600);
 
         $response = $this->post(route('admin.articles.store'), [
@@ -56,67 +62,80 @@ describe('uploaded images stored on correct disk based on status', function (): 
         expect($article)->not->toBeNull();
         expect($article->status)->toBe(Status::Published);
 
-        $media = $article->getFirstMedia('featured_image');
+        // Photo owns the MediaLibrary, not Article
+        $photo = $article->featuredPhoto;
+        expect($photo)->not->toBeNull();
+        expect($photo->status)->toBe(Status::Published);
+
+        $media = $photo->getFirstMedia('image');
         expect($media)->not->toBeNull();
         expect($media->disk)->toBe('public');
     });
 });
 
-describe('status changes move images between disks', function (): void {
-    it('moves image from private to public when draft becomes published', function (): void {
-        // Create draft article with image
+describe('photo status changes move images between disks', function (): void {
+    it('moves image from private to public when photo status changes to published', function (): void {
+        // Create draft photo with image
         $image = UploadedFile::fake()->image('test.jpg', 800, 600);
-        $article = Article::factory()->draft()->create();
+        $photo = Photo::factory()->draft()->create();
 
-        // Upload image to draft article (goes to private disk)
-        $article->addMedia($image->getRealPath())
-            ->toMediaCollection('featured_image', 'private');
+        // Upload image to draft photo (goes to private disk)
+        $photo->addMedia($image->getRealPath())
+            ->toMediaCollection('image', 'private');
 
-        expect($article->getFirstMedia('featured_image')->disk)->toBe('private');
+        expect($photo->getFirstMedia('image')->disk)->toBe('private');
 
-        // Update to published
-        $response = $this->put(route('admin.articles.update', $article), [
-            'title' => $article->title,
-            'slug' => $article->slug,
-            'content' => $article->content,
-            'status' => 'published',
-        ]);
+        // Update photo status to published (PhotoObserver moves media)
+        $photo->update(['status' => Status::Published, 'published_at' => now()]);
 
-        $article->refresh();
-        $response->assertRedirect(route('admin.articles.edit', $article));
+        $photo->refresh();
 
         // Verify image moved to public disk
-        $media = $article->getFirstMedia('featured_image');
+        $media = $photo->getFirstMedia('image');
         expect($media->disk)->toBe('public');
     });
 
-    it('moves image from public to private when published becomes draft', function (): void {
-        // Create published article with image
+    it('moves image from public to private when photo status changes to draft', function (): void {
+        // Create published photo with image
         $image = UploadedFile::fake()->image('test.jpg', 800, 600);
-        $article = Article::factory()->published()->create();
+        $photo = Photo::factory()->published()->create();
 
-        // Upload image to published article (goes to public disk)
-        $article->addMedia($image->getRealPath())
-            ->toMediaCollection('featured_image', 'public');
+        // Upload image to published photo (goes to public disk)
+        $photo->addMedia($image->getRealPath())
+            ->toMediaCollection('image', 'public');
 
-        expect($article->getFirstMedia('featured_image')->disk)->toBe('public');
+        expect($photo->getFirstMedia('image')->disk)->toBe('public');
 
-        // Update to draft
-        $response = $this->put(route('admin.articles.update', $article), [
-            'title' => $article->title,
-            'slug' => $article->slug,
-            'content' => $article->content,
-            'status' => 'draft',
-        ]);
+        // Update photo status to draft (PhotoObserver moves media)
+        $photo->update(['status' => Status::Draft, 'published_at' => null]);
 
-        $article->refresh();
-        $response->assertRedirect(route('admin.articles.edit', $article));
+        $photo->refresh();
 
         // Verify image moved to private disk
-        $media = $article->getFirstMedia('featured_image');
+        $media = $photo->getFirstMedia('image');
         expect($media->disk)->toBe('private');
     });
 
+    it('article status change does not affect photo disk when using existing photo', function (): void {
+        // Create published photo (on public disk)
+        $image = UploadedFile::fake()->image('test.jpg', 800, 600);
+        $photo = Photo::factory()->published()->create();
+        $photo->addMedia($image->getRealPath())
+            ->toMediaCollection('image', 'public');
+
+        // Create draft article using this published photo
+        $article = Article::factory()->draft()->create(['photo_id' => $photo->id]);
+
+        expect($article->status)->toBe(Status::Draft);
+        expect($photo->status)->toBe(Status::Published);
+        expect($photo->getFirstMedia('image')->disk)->toBe('public'); // Photo stays on public disk
+
+        // Publishing the article does not move the photo
+        $article->update(['status' => Status::Published, 'published_at' => now()]);
+
+        $photo->refresh();
+        expect($photo->getFirstMedia('image')->disk)->toBe('public'); // Photo still on public disk
+    });
 });
 
 describe('enum comparison works correctly', function (): void {
