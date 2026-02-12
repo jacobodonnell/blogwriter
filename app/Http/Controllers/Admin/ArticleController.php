@@ -244,7 +244,7 @@ class ArticleController extends Controller
     private function createPhotoFromUpload($file, array $articleData): Photo
     {
         $filename = $file->getClientOriginalName();
-        $slug = Str::slug(pathinfo($filename, PATHINFO_FILENAME));
+        $slug = Str::slug(pathinfo((string) $filename, PATHINFO_FILENAME));
 
         // Ensure unique slug
         $originalSlug = $slug;
