@@ -3,17 +3,20 @@
 namespace App\Models;
 
 use App\Enums\Status;
-use App\Services\ImageProcessingService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class Article extends Model
+class Article extends Model implements HasMedia
 {
     /** @use HasFactory<\Database\Factories\ArticleFactory> */
     use HasFactory;
+    use InteractsWithMedia;
 
     protected $fillable = [
         'title',
@@ -23,11 +26,6 @@ class Article extends Model
         'status',
         'published_at',
         'last_edited_at',
-        'featured_image',
-        'featured_image_width',
-        'featured_image_height',
-        'featured_image_file_size',
-        'featured_image_mime_type',
         'meta',
     ];
 
@@ -39,9 +37,6 @@ class Article extends Model
             'published_at' => 'datetime',
             'last_edited_at' => 'datetime',
             'status' => Status::class,
-            'featured_image_width' => 'integer',
-            'featured_image_height' => 'integer',
-            'featured_image_file_size' => 'integer',
         ];
     }
 
@@ -91,70 +86,35 @@ class Article extends Model
                 && is_null($article->last_edited_at)) {
                 $article->last_edited_at = now()->startOfSecond();
             }
-
-            // Clear metadata when removing image
-            if ($article->isDirty('featured_image') && is_null($article->featured_image)) {
-                $article->featured_image_width = null;
-                $article->featured_image_height = null;
-                $article->featured_image_file_size = null;
-                $article->featured_image_mime_type = null;
-            }
         });
+    }
 
-        // Process images AFTER save so article ID is available
-        static::saved(function ($article): void {
-            if (! $article->featured_image || Str::isUrl($article->featured_image)) {
-                return;
-            }
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('featured_image')
+            ->useDisk(fn (Article $article) =>
+                $article->status === Status::Published ? 'public' : 'private'
+            )
+            ->singleFile()
+            ->acceptsMimeTypes(['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']);
+    }
 
-            $targetDisk = $article->status === Status::Published ? 'public' : 'private';
-            $service = app(ImageProcessingService::class);
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion('thumbnail')
+            ->width(300)->height(300)
+            ->format('webp')->quality(80)
+            ->nonQueued();
 
-            // Process featured image if it's a new file upload (not already processed)
-            // Check by seeing if it follows the old storage pattern (articles/featured/*.ext)
-            // Check if this is a newly uploaded file (not already processed)
-            if (str_starts_with((string) $article->featured_image, 'articles/featured/') && ! str_starts_with((string) $article->featured_image, "articles/featured/{$article->id}/") && Storage::disk($targetDisk)->exists($article->featured_image)) {
-                $sourcePath = $article->featured_image;
+        $this->addMediaConversion('medium')
+            ->width(768)->height(768)
+            ->format('webp')->quality(85)
+            ->nonQueued();
 
-                try {
-                    // Only process if the image is valid (not corrupted)
-                    if ($service->isValidImage($sourcePath, $targetDisk)) {
-                        $metadata = $service->processUpload($article, $sourcePath, $targetDisk);
-
-                        if ($metadata) {
-                            // Update the article with processed image info (without triggering events again)
-                            $article->featured_image = $metadata['path'];
-                            $article->featured_image_width = $metadata['width'];
-                            $article->featured_image_height = $metadata['height'];
-                            $article->featured_image_file_size = $metadata['file_size'];
-                            $article->featured_image_mime_type = $metadata['mime_type'];
-                            $article->saveQuietly();
-                        }
-                    }
-                } catch (\Exception $e) {
-                    \Log::error('Image processing failed', [
-                        'article_id' => $article->id,
-                        'source_path' => $sourcePath,
-                        'disk' => $targetDisk,
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString(),
-                    ]);
-
-                    // Clean up failed upload
-                    if (Storage::disk($targetDisk)->exists($sourcePath)) {
-                        Storage::disk($targetDisk)->delete($sourcePath);
-                    }
-                }
-            }
-
-            // Handle status change - move images between disks
-            if ($article->wasChanged('status')) {
-                // Status changed - move all image sizes to appropriate disk
-                $oldStatus = $article->getOriginal('status');
-                $oldDisk = $oldStatus === Status::Published ? 'public' : 'private';
-                $service->moveImages($article, $oldDisk, $targetDisk);
-            }
-        });
+        $this->addMediaConversion('large')
+            ->width(1536)->height(1536)
+            ->format('webp')->quality(85)
+            ->nonQueued();
     }
 
     /**
@@ -170,26 +130,7 @@ class Article extends Model
      */
     public function getFeaturedImageUrlAttribute(): ?string
     {
-        if (! $this->featured_image) {
-            return null;
-        }
-
-        // External URL
-        if (Str::isUrl($this->featured_image)) {
-            return $this->featured_image;
-        }
-
-        // Local file - use correct disk based on status
-        $disk = $this->status === Status::Published ? 'public' : 'private';
-
-        if ($disk === 'private') {
-            // Extract path after 'articles/featured/'
-            $path = str_replace('articles/featured/', '', $this->featured_image);
-
-            return url('/storage/private/'.$path);
-        }
-
-        return Storage::disk('public')->url($this->featured_image);
+        return $this->getFirstMedia('featured_image')?->getUrl('large');
     }
 
     /**
