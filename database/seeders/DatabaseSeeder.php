@@ -2,13 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -33,11 +31,6 @@ class DatabaseSeeder extends Seeder
      * Available states
      */
     protected array $validStates = ['empty', 'minimal', 'demo', 'full'];
-
-    /**
-     * Path to test data files
-     */
-    protected string $testDataPath = 'database/seeders/test-data/';
 
     /**
      * Main entry point - called by artisan db:seed
@@ -119,7 +112,7 @@ class DatabaseSeeder extends Seeder
     protected function seedState(string $state): void
     {
         // Always seed categories first (shared across all states)
-        $this->seedCategories();
+        $this->call(CategorySeeder::class);
 
         switch ($state) {
             case 'empty':
@@ -132,39 +125,14 @@ class DatabaseSeeder extends Seeder
 
             case 'demo':
                 $this->seedUser();
-                $this->seedArticles('demo');
+                $this->call(DemoArticleSeeder::class);
                 break;
 
             case 'full':
                 $this->seedUser();
-                $this->seedArticles('full');
+                $this->call(FullArticleSeeder::class);
                 break;
         }
-    }
-
-    /**
-     * Seed categories from JSON
-     */
-    protected function seedCategories(): void
-    {
-        $this->command?->info('Seeding categories...');
-
-        $categoriesFile = base_path($this->testDataPath.'categories.json');
-
-        if (! File::exists($categoriesFile)) {
-            throw new \RuntimeException("Categories file not found: {$categoriesFile}");
-        }
-
-        $categories = json_decode(File::get($categoriesFile), true);
-
-        foreach ($categories as $categoryData) {
-            Category::firstOrCreate(
-                ['slug' => $categoryData['slug']],
-                $categoryData
-            );
-        }
-
-        $this->command?->info('Categories seeded: '.count($categories));
     }
 
     /**
@@ -185,95 +153,6 @@ class DatabaseSeeder extends Seeder
         );
 
         $this->command?->info("User created: {$user->name} ({$user->email})");
-    }
-
-    /**
-     * Seed articles from JSON with status distribution
-     */
-    protected function seedArticles(string $state): void
-    {
-        $this->command?->info("Seeding articles from {$state} state...");
-
-        $articlesFile = base_path($this->testDataPath.$state.'/articles.json');
-
-        if (! File::exists($articlesFile)) {
-            throw new \RuntimeException("Articles file not found: {$articlesFile}");
-        }
-
-        $articles = json_decode(File::get($articlesFile), true);
-        $totalCount = count($articles);
-
-        // Status distribution: 80% published, 20% draft
-        $publishedCount = (int) round($totalCount * 0.8);
-        $draftCount = $totalCount - $publishedCount;
-
-        // Shuffle articles for random status assignment
-        shuffle($articles);
-
-        foreach ($articles as $index => $articleData) {
-            // Determine status based on distribution
-            if ($index < $publishedCount) {
-                $status = Status::Published;
-            } else {
-                $status = Status::Draft;
-            }
-
-            // Create article
-            $article = Article::create([
-                'title' => $articleData['title'],
-                'slug' => $articleData['slug'],
-                'content' => $articleData['content'],
-                'summary' => $articleData['summary'] ?? substr(strip_tags($articleData['content']), 0, 255),
-                'status' => $status,
-                'published_at' => $status === Status::Published ? now()->subDays(rand(1, 30)) : null,
-                'meta' => $articleData['meta'] ?? null,
-            ]);
-
-            // Add featured image via Spatie Media Library
-            if (! empty($articleData['featured_image'])) {
-                // Use local demo images instead of external URLs
-                $demoImagesPath = database_path('seeders/demo-images');
-                $demoImages = [
-                    'demo-image-1.png',
-                    'demo-image-2.png',
-                    'demo-image-3.png',
-                    'demo-image-4.png',
-                    'demo-image-5.png',
-                ];
-
-                $randomImage = $demoImages[array_rand($demoImages)];
-                $imagePath = $demoImagesPath.'/'.$randomImage;
-
-                // Validate file exists AND is not empty (prevent 0-byte file issues)
-                if (file_exists($imagePath) && filesize($imagePath) > 0) {
-                    $disk = $status === Status::Published ? 'public' : 'private';
-
-                    try {
-                        $article->addMedia($imagePath)
-                            ->preservingOriginal()
-                            ->toMediaCollection('featured_image', $disk);
-                    } catch (\Exception $e) {
-                        // Log error but don't stop seeding
-                        \Log::warning('Failed to attach featured image for article', [
-                            'article_id' => $article->id,
-                            'image_path' => $imagePath,
-                            'error' => $e->getMessage(),
-                        ]);
-                    }
-                }
-            }
-
-            // Attach categories
-            if (! empty($articleData['categories'])) {
-                $categoryIds = Category::whereIn('name', $articleData['categories'])->pluck('id');
-                $article->categories()->attach($categoryIds);
-            }
-        }
-
-        $this->command?->info("Articles seeded: {$totalCount}");
-        $this->command?->info("- Published: {$publishedCount}");
-        $this->command?->info("- Draft: {$draftCount}");
-        $this->command?->info('- Hidden: '.($totalCount - $publishedCount - $draftCount));
     }
 
     /**

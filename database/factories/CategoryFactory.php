@@ -44,11 +44,11 @@ class CategoryFactory extends Factory
      */
     public function definition(): array
     {
-        $name = $this->faker->randomElement($this->categoryNames);
+        $name = \Illuminate\Support\Arr::random($this->categoryNames);
 
         return [
             'name' => $name,
-            'description' => $this->faker->optional(0.7)->sentence(10),
+            'description' => fake()->optional(0.7)->sentence(10),
         ];
     }
 }
