@@ -2,17 +2,24 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\GenerateArticleSummaryAction;
+use App\Actions\Photos\CreatePhotoFromUploadAction;
+use App\Actions\Photos\CreatePhotoFromUrlAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreArticleRequest;
 use App\Http\Requests\UpdateArticleRequest;
 use App\Models\Article;
 use App\Models\Category;
-use App\Models\Photo;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class ArticleController extends Controller
 {
+    public function __construct(
+        private readonly CreatePhotoFromUrlAction $createPhotoFromUrl,
+        private readonly CreatePhotoFromUploadAction $createPhotoFromUpload,
+        private readonly GenerateArticleSummaryAction $generateSummary,
+    ) {}
+
     /**
      * Display a listing of articles.
      */
@@ -60,53 +67,28 @@ class ArticleController extends Controller
     {
         $data = $request->validated();
 
-        // Handle photo creation first
-        if ($request->hasFile('featured_image_file')) {
-            try {
-                $photo = $this->createPhotoFromUpload($request->file('featured_image_file'), $data);
-                $data['photo_id'] = $photo->id;
-            } catch (\Exception $e) {
-                \Log::error('Failed to create photo from upload', [
-                    'error' => $e->getMessage(),
-                ]);
+        // Handle featured image
+        $photoId = match (true) {
+            $request->hasFile('featured_image_file') => $this->handlePhotoUpload($request->file('featured_image_file'), $data),
+            $request->filled('featured_image') && filter_var($request->featured_image, FILTER_VALIDATE_URL) => $this->handlePhotoUrl($request->featured_image, $data),
+            $request->filled('photo_id') => $data['photo_id'],
+            default => null,
+        };
 
-                return redirect()->back()
-                    ->withInput()
-                    ->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
-            }
-        } elseif ($request->filled('featured_image') && filter_var($request->featured_image, FILTER_VALIDATE_URL)) {
-            try {
-                $photo = $this->createPhotoFromUrl($request->featured_image, $data);
-                $data['photo_id'] = $photo->id;
-            } catch (\Exception $e) {
-                \Log::error('Failed to create photo from URL', [
-                    'error' => $e->getMessage(),
-                ]);
-
-                return redirect()->back()
-                    ->withInput()
-                    ->withErrors(['featured_image' => 'Failed to process external image URL. Please try again.']);
-            }
-        } elseif ($request->filled('photo_id')) {
-            $data['photo_id'] = $request->photo_id;
+        if ($photoId instanceof \Illuminate\Http\RedirectResponse) {
+            return $photoId;
         }
 
-        $article = new Article;
-        $article->title = $data['title'];
-        $article->slug = $data['slug'];
-        $article->content = $data['content'];
-        $article->status = $data['status'];
-        $article->published_at = $data['published_at'] ?? null;
-        $article->meta = $data['meta'] ?? [];
-        $article->photo_id = $data['photo_id'] ?? null;
-
-        if (empty($data['summary'])) {
-            $article->summary = Str::limit(strip_tags((string) $data['content']), 255);
-        } else {
-            $article->summary = $data['summary'];
-        }
-
-        $article->save();
+        $article = Article::create([
+            'title' => $data['title'],
+            'slug' => $data['slug'],
+            'content' => $data['content'],
+            'summary' => $this->generateSummary->handle($data['summary'] ?? null, $data['content']),
+            'status' => $data['status'],
+            'published_at' => $data['published_at'] ?? null,
+            'meta' => $data['meta'] ?? [],
+            'photo_id' => $photoId,
+        ]);
 
         if (! empty($data['categories'])) {
             $article->categories()->attach($data['categories']);
@@ -139,61 +121,35 @@ class ArticleController extends Controller
 
         // Handle featured image removal
         if ($request->boolean('remove_featured_image')) {
-            $article->photo_id = null;
+            $data['photo_id'] = null;
         }
 
-        // Handle photo creation/update
-        if ($request->hasFile('featured_image_file')) {
-            try {
-                $photo = $this->createPhotoFromUpload($request->file('featured_image_file'), $data);
-                $data['photo_id'] = $photo->id;
-            } catch (\Exception $e) {
-                \Log::error('Failed to create photo from upload', [
-                    'article_id' => $article->id,
-                    'error' => $e->getMessage(),
-                ]);
+        // Handle featured image
+        if (! array_key_exists('photo_id', $data)) {
+            $photoId = match (true) {
+                $request->hasFile('featured_image_file') => $this->handlePhotoUpload($request->file('featured_image_file'), $data, $article->id),
+                $request->filled('featured_image') && filter_var($request->featured_image, FILTER_VALIDATE_URL) => $this->handlePhotoUrl($request->featured_image, $data, $article->id),
+                $request->filled('photo_id') => $data['photo_id'],
+                default => $article->photo_id,
+            };
 
-                return redirect()->back()
-                    ->withInput()
-                    ->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
+            if ($photoId instanceof \Illuminate\Http\RedirectResponse) {
+                return $photoId;
             }
-        } elseif ($request->filled('featured_image') && filter_var($request->featured_image, FILTER_VALIDATE_URL)) {
-            try {
-                $photo = $this->createPhotoFromUrl($request->featured_image, $data);
-                $data['photo_id'] = $photo->id;
-            } catch (\Exception $e) {
-                \Log::error('Failed to create photo from URL', [
-                    'article_id' => $article->id,
-                    'error' => $e->getMessage(),
-                ]);
 
-                return redirect()->back()
-                    ->withInput()
-                    ->withErrors(['featured_image' => 'Failed to process external image URL. Please try again.']);
-            }
-        } elseif ($request->filled('photo_id')) {
-            $data['photo_id'] = $request->photo_id;
+            $data['photo_id'] = $photoId;
         }
 
-        $article->title = $data['title'];
-        $article->slug = $data['slug'];
-        $article->content = $data['content'];
-        $article->status = $data['status'];
-        if (array_key_exists('published_at', $data)) {
-            $article->published_at = $data['published_at'];
-        }
-        $article->meta = $data['meta'] ?? [];
-        if (array_key_exists('photo_id', $data)) {
-            $article->photo_id = $data['photo_id'];
-        }
-
-        if (empty($data['summary'])) {
-            $article->summary = Str::limit(strip_tags((string) $data['content']), 255);
-        } else {
-            $article->summary = $data['summary'];
-        }
-
-        $article->save();
+        $article->update([
+            'title' => $data['title'],
+            'slug' => $data['slug'],
+            'content' => $data['content'],
+            'summary' => $this->generateSummary->handle($data['summary'] ?? null, $data['content']),
+            'status' => $data['status'],
+            'published_at' => $data['published_at'] ?? $article->published_at,
+            'meta' => $data['meta'] ?? [],
+            'photo_id' => $data['photo_id'],
+        ]);
 
         $article->categories()->sync($data['categories'] ?? []);
 
@@ -214,88 +170,52 @@ class ArticleController extends Controller
     }
 
     /**
-     * Create a Photo from an external URL.
+     * Handle photo upload and return photo ID or error response.
      */
-    private function createPhotoFromUrl(string $url, array $articleData): Photo
+    private function handlePhotoUpload($file, array $data, ?int $articleId = null): int|\Illuminate\Http\RedirectResponse
     {
-        $filename = basename(parse_url($url, PHP_URL_PATH)) ?: 'external-image.jpg';
-        $slug = Str::slug(pathinfo($filename, PATHINFO_FILENAME));
+        try {
+            $photo = $this->createPhotoFromUpload->handle($file, [
+                'slug' => $data['slug'] ?? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
+                'alt_text' => $data['title'] ?? 'Featured image',
+                'status' => $data['status'] ?? 'draft',
+            ]);
 
-        // Ensure unique slug
-        $originalSlug = $slug;
-        $counter = 1;
-        while (Photo::where('slug', $slug)->exists()) {
-            $slug = $originalSlug.'-'.$counter++;
+            return $photo->id;
+        } catch (\Exception $e) {
+            \Log::error('Failed to create photo from upload', [
+                'article_id' => $articleId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
         }
-
-        return Photo::create([
-            'filename' => $filename,
-            'slug' => $slug,
-            'alt_text' => $articleData['title'] ?? 'Featured image',
-            'status' => $articleData['status'] ?? 'draft',
-            'published_at' => ($articleData['status'] ?? 'draft') === 'published' ? now() : null,
-            'meta' => ['external_url' => $url],
-        ]);
     }
 
     /**
-     * Create a Photo from an uploaded file.
+     * Handle photo from URL and return photo ID or error response.
      */
-    private function createPhotoFromUpload($file, array $articleData): Photo
+    private function handlePhotoUrl(string $url, array $data, ?int $articleId = null): int|\Illuminate\Http\RedirectResponse
     {
-        $filename = $file->getClientOriginalName();
-        $slug = Str::slug(pathinfo((string) $filename, PATHINFO_FILENAME));
+        try {
+            $photo = $this->createPhotoFromUrl->handle($url, [
+                'slug' => $data['slug'] ?? basename(parse_url($url, PHP_URL_PATH)),
+                'alt_text' => $data['title'] ?? 'Featured image',
+                'status' => $data['status'] ?? 'draft',
+            ]);
 
-        // Ensure unique slug
-        $originalSlug = $slug;
-        $counter = 1;
-        while (Photo::where('slug', $slug)->exists()) {
-            $slug = $originalSlug.'-'.$counter++;
+            return $photo->id;
+        } catch (\Exception $e) {
+            \Log::error('Failed to create photo from URL', [
+                'article_id' => $articleId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['featured_image' => 'Failed to process external image URL. Please try again.']);
         }
-
-        // Extract EXIF if available
-        $exif = $this->extractExif($file);
-
-        $photo = Photo::create([
-            'filename' => $filename,
-            'slug' => $slug,
-            'alt_text' => $articleData['title'] ?? 'Featured image',
-            'status' => $articleData['status'] ?? 'draft',
-            'published_at' => ($articleData['status'] ?? 'draft') === 'published' ? now() : null,
-            'meta' => $exif,
-        ]);
-
-        // Add file to Photo's media collection
-        $disk = $photo->status->isPublic() ? 'public' : 'private';
-        $photo->addMedia($file)
-            ->toMediaCollection('image', $disk);
-
-        return $photo;
-    }
-
-    /**
-     * Extract EXIF metadata from uploaded file.
-     */
-    private function extractExif($file): array
-    {
-        if (! function_exists('exif_read_data')) {
-            return [];
-        }
-
-        $exif = @exif_read_data($file->getPathname());
-
-        if (! $exif) {
-            return [];
-        }
-
-        return array_filter([
-            'camera_model' => $exif['Model'] ?? null,
-            'lens' => $exif['LensModel'] ?? null,
-            'iso' => $exif['ISOSpeedRatings'] ?? null,
-            'aperture' => $exif['FNumber'] ?? null,
-            'shutter_speed' => $exif['ExposureTime'] ?? null,
-            'width' => $exif['COMPUTED']['Width'] ?? null,
-            'height' => $exif['COMPUTED']['Height'] ?? null,
-        ]);
     }
 }
