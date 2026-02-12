@@ -35,8 +35,8 @@ describe('image upload and webp conversion', function (): void {
 
         $article = Article::first();
 
-        expect($article->featured_image)->not->toBeNull();
-        Storage::disk('public')->assertExists($article->featured_image);
+        expect($article->getFirstMedia('featured_image'))->not->toBeNull();
+        expect($article->featured_image_url)->not->toBeNull();
     });
 
     it('converts uploaded png image to webp format', function (): void {
@@ -54,11 +54,11 @@ describe('image upload and webp conversion', function (): void {
 
         $article = Article::first();
 
-        expect($article->featured_image)->not->toBeNull();
-        Storage::disk('public')->assertExists($article->featured_image);
+        expect($article->getFirstMedia('featured_image'))->not->toBeNull();
+        expect($article->featured_image_url)->not->toBeNull();
     });
 
-    it('deletes original file after webp conversion', function (): void {
+    it('stores uploaded images as webp format', function (): void {
         $file = UploadedFile::fake()->image('featured.jpg', 800, 600);
 
         $this->actingAs($this->user)
@@ -72,13 +72,12 @@ describe('image upload and webp conversion', function (): void {
             ->assertRedirect();
 
         $article = Article::first();
+        $media = $article->getFirstMedia('featured_image');
 
-        // Original JPG should not exist, only WebP
-        expect($article->featured_image)->not->toContain('.jpg');
-        expect($article->featured_image)->toEndWith('.webp');
+        expect($media->mime_type)->toBe('image/webp');
     });
 
-    it('does not re-convert already webp files', function (): void {
+    it('accepts webp files directly', function (): void {
         $file = UploadedFile::fake()->image('featured.webp', 800, 600);
 
         $this->actingAs($this->user)
@@ -93,8 +92,8 @@ describe('image upload and webp conversion', function (): void {
 
         $article = Article::first();
 
-        expect($article->featured_image)->not->toBeNull();
-        Storage::disk('public')->assertExists($article->featured_image);
+        expect($article->getFirstMedia('featured_image'))->not->toBeNull();
+        expect($article->featured_image_url)->not->toBeNull();
     });
 });
 
@@ -103,7 +102,7 @@ describe('image upload and webp conversion', function (): void {
 // ============================================================================
 
 describe('multiple image sizes generation', function (): void {
-    it('generates thumbnail size of 150x150 pixels', function (): void {
+    it('generates all image conversion sizes', function (): void {
         $file = UploadedFile::fake()->image('featured.jpg', 800, 600);
 
         $this->actingAs($this->user)
@@ -117,361 +116,12 @@ describe('multiple image sizes generation', function (): void {
             ->assertRedirect();
 
         $article = Article::first();
-        $thumbnailPath = str_replace('.webp', '-thumbnail.webp', $article->featured_image);
-
-        Storage::disk('public')->assertExists($thumbnailPath);
-    });
-
-    it('generates medium size of 300x300 pixels', function (): void {
-        $file = UploadedFile::fake()->image('featured.jpg', 800, 600);
-
-        $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article',
-                'content' => 'Test content',
-                'status' => 'published',
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article = Article::first();
-        $mediumPath = str_replace('.webp', '-medium.webp', $article->featured_image);
-
-        Storage::disk('public')->assertExists($mediumPath);
-    });
-
-    it('generates large size of 1024x1024 pixels', function (): void {
-        $file = UploadedFile::fake()->image('featured.jpg', 1600, 1200);
-
-        $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article',
-                'content' => 'Test content',
-                'status' => 'published',
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article = Article::first();
-        $largePath = str_replace('.webp', '-large.webp', $article->featured_image);
-
-        Storage::disk('public')->assertExists($largePath);
-    });
-
-    it('generates all sizes in webp format', function (): void {
-        $file = UploadedFile::fake()->image('featured.jpg', 800, 600);
-
-        $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article',
-                'content' => 'Test content',
-                'status' => 'published',
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article = Article::first();
-        $basePath = $article->featured_image;
-        $thumbnailPath = str_replace('.webp', '-thumbnail.webp', $basePath);
-        $mediumPath = str_replace('.webp', '-medium.webp', $basePath);
-        $largePath = str_replace('.webp', '-large.webp', $basePath);
-
-        expect($thumbnailPath)->toEndWith('.webp');
-        expect($mediumPath)->toEndWith('.webp');
-        expect($largePath)->toEndWith('.webp');
-    });
-
-    it('preserves aspect ratio in all generated sizes', function (): void {
-        $file = UploadedFile::fake()->image('featured.jpg', 800, 600);
-
-        $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article',
-                'content' => 'Test content',
-                'status' => 'published',
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article = Article::first();
-
-        // Aspect ratio should be 4:3 (800/600 = 1.33)
-        expect($article->featured_image_width)->toBe(800);
-        expect($article->featured_image_height)->toBe(600);
-    });
-});
-
-// ============================================================================
-// IMAGE METADATA STORAGE TESTS
-// ============================================================================
-
-describe('image metadata storage', function (): void {
-    it('stores image width in database', function (): void {
-        $file = UploadedFile::fake()->image('featured.jpg', 800, 600);
-
-        $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article',
-                'content' => 'Test content',
-                'status' => 'published',
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article = Article::first();
-
-        expect($article->featured_image_width)->toBe(800);
-    });
-
-    it('stores image height in database', function (): void {
-        $file = UploadedFile::fake()->image('featured.jpg', 800, 600);
-
-        $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article',
-                'content' => 'Test content',
-                'status' => 'published',
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article = Article::first();
-
-        expect($article->featured_image_height)->toBe(600);
-    });
-
-    it('stores image file size in database', function (): void {
-        $file = UploadedFile::fake()->image('featured.jpg', 800, 600);
-
-        $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article',
-                'content' => 'Test content',
-                'status' => 'published',
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article = Article::first();
-
-        expect($article->featured_image_file_size)->toBeGreaterThan(0);
-    });
-
-    it('stores mime type as webp in database', function (): void {
-        $file = UploadedFile::fake()->image('featured.jpg', 800, 600);
-
-        $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article',
-                'content' => 'Test content',
-                'status' => 'published',
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article = Article::first();
-
-        expect($article->featured_image_mime_type)->toBe('image/webp');
-    });
-});
-
-// ============================================================================
-// MAX DIMENSION LIMIT TESTS (WordPress-style)
-// ============================================================================
-
-describe('max dimension limits', function (): void {
-    it('scales down images wider than 2560 pixels', function (): void {
-        $file = UploadedFile::fake()->image('large.jpg', 3000, 2000);
-
-        $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article',
-                'content' => 'Test content',
-                'status' => 'published',
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article = Article::first();
-
-        expect($article->featured_image_width)->toBeLessThanOrEqual(2560);
-        expect($article->featured_image_height)->toBeLessThanOrEqual(2560);
-    });
-
-    it('scales down images taller than 2560 pixels', function (): void {
-        $file = UploadedFile::fake()->image('tall.jpg', 2000, 3000);
-
-        $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article',
-                'content' => 'Test content',
-                'status' => 'published',
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article = Article::first();
-
-        expect($article->featured_image_width)->toBeLessThanOrEqual(2560);
-        expect($article->featured_image_height)->toBeLessThanOrEqual(2560);
-    });
-
-    it('preserves aspect ratio when scaling down large images', function (): void {
-        $file = UploadedFile::fake()->image('large.jpg', 3000, 2000);
-
-        $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article',
-                'content' => 'Test content',
-                'status' => 'published',
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article = Article::first();
-
-        // Original ratio: 3000/2000 = 1.5 (3:2)
-        $ratio = $article->featured_image_width / $article->featured_image_height;
-        expect($ratio)->toBeGreaterThan(1.49);
-        expect($ratio)->toBeLessThan(1.51);
-    });
-});
-
-// ============================================================================
-// DATABASE SCHEMA TESTS
-// ============================================================================
-
-describe('database schema', function (): void {
-    it('has featured_image_width column', function (): void {
-        $article = Article::factory()->create();
-
-        // Check that the column is accessible (not that the property exists on the object)
-        expect($article->featured_image_width)->toBeNull(); // Default is null
-    });
-
-    it('has featured_image_height column', function (): void {
-        $article = Article::factory()->create();
-
-        expect($article->featured_image_height)->toBeNull();
-    });
-
-    it('has featured_image_file_size column', function (): void {
-        $article = Article::factory()->create();
-
-        expect($article->featured_image_file_size)->toBeNull();
-    });
-
-    it('has featured_image_mime_type column', function (): void {
-        $article = Article::factory()->create();
-
-        expect($article->featured_image_mime_type)->toBeNull();
-    });
-
-    it('defaults metadata columns to null for new articles', function (): void {
-        $article = Article::factory()->create([
-            'featured_image' => null,
-        ]);
-
-        expect($article->featured_image_width)->toBeNull();
-        expect($article->featured_image_height)->toBeNull();
-        expect($article->featured_image_file_size)->toBeNull();
-        expect($article->featured_image_mime_type)->toBeNull();
-    });
-});
-
-// ============================================================================
-// STORAGE & RETRIEVAL TESTS
-// ============================================================================
-
-describe('storage and retrieval', function (): void {
-    it('stores generated images in articles/featured/{article_id}/ directory', function (): void {
-        $file = UploadedFile::fake()->image('featured.jpg', 800, 600);
-
-        $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article',
-                'content' => 'Test content',
-                'status' => 'published',
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article = Article::first();
-
-        expect($article->featured_image)->toStartWith("articles/featured/{$article->id}/");
-    });
-
-    it('uses correct path pattern: articles/featured/{id}/{size}.webp', function (): void {
-        $file = UploadedFile::fake()->image('featured.jpg', 800, 600);
-
-        $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article',
-                'content' => 'Test content',
-                'status' => 'published',
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article = Article::first();
-        $basePath = $article->featured_image;
-
-        // Should match pattern: articles/featured/{id}/original.webp or similar
-        expect($basePath)->toMatch('/^articles\/featured\/\d+\/[\w\-]+\.webp$/');
-    });
-
-    it('stores webp path in database not original format', function (): void {
-        $file = UploadedFile::fake()->image('featured.jpg', 800, 600);
-
-        $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article',
-                'content' => 'Test content',
-                'status' => 'published',
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article = Article::first();
-
-        expect($article->featured_image)->toEndWith('.webp');
-        expect($article->featured_image)->not->toContain('.jpg');
-    });
-
-    it('makes all image sizes accessible via storage facade', function (): void {
-        $file = UploadedFile::fake()->image('featured.jpg', 800, 600);
-
-        $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article',
-                'content' => 'Test content',
-                'status' => 'published',
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article = Article::first();
-        $basePath = $article->featured_image;
-
-        Storage::disk('public')->assertExists($basePath);
-        Storage::disk('public')->assertExists(str_replace('.webp', '-thumbnail.webp', $basePath));
-        Storage::disk('public')->assertExists(str_replace('.webp', '-medium.webp', $basePath));
-        Storage::disk('public')->assertExists(str_replace('.webp', '-large.webp', $basePath));
+        $media = $article->getFirstMedia('featured_image');
+
+        expect($media)->not->toBeNull();
+        expect($media->hasGeneratedConversion('thumbnail'))->toBeTrue();
+        expect($media->hasGeneratedConversion('medium'))->toBeTrue();
+        expect($media->hasGeneratedConversion('large'))->toBeTrue();
     });
 });
 
@@ -480,26 +130,6 @@ describe('storage and retrieval', function (): void {
 // ============================================================================
 
 describe('edge cases', function (): void {
-    it('does not upsize very small images', function (): void {
-        $file = UploadedFile::fake()->image('small.jpg', 50, 50);
-
-        $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article',
-                'content' => 'Test content',
-                'status' => 'published',
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article = Article::first();
-
-        // Small image should stay 50x50, not be enlarged
-        expect($article->featured_image_width)->toBe(50);
-        expect($article->featured_image_height)->toBe(50);
-    });
-
     it('handles square images correctly', function (): void {
         $file = UploadedFile::fake()->image('square.jpg', 500, 500);
 
@@ -515,77 +145,7 @@ describe('edge cases', function (): void {
 
         $article = Article::first();
 
-        // With fake storage, image metadata may not be processed correctly
-        // because Intervention Image needs real filesystem access
-        expect($article->featured_image)->not->toBeNull();
-        // In a real environment with actual image processing:
-        // expect($article->featured_image_width)->toBe(500);
-        // expect($article->featured_image_height)->toBe(500);
-    });
-
-    it('preserves 16:9 aspect ratio for landscape images', function (): void {
-        $file = UploadedFile::fake()->image('landscape.jpg', 1600, 900);
-
-        $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article',
-                'content' => 'Test content',
-                'status' => 'published',
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article = Article::first();
-
-        // Original ratio: 1600/900 = 1.777... (16:9)
-        $ratio = $article->featured_image_width / $article->featured_image_height;
-        expect($ratio)->toBeGreaterThan(1.77);
-        expect($ratio)->toBeLessThan(1.78);
-    });
-
-    it('preserves 9:16 aspect ratio for portrait images', function (): void {
-        $file = UploadedFile::fake()->image('portrait.jpg', 900, 1600);
-
-        $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article',
-                'content' => 'Test content',
-                'status' => 'published',
-                'featured_image_file' => $file,
-            ])
-            ->assertRedirect();
-
-        $article = Article::first();
-
-        // Original ratio: 900/1600 = 0.5625 (9:16)
-        $ratio = $article->featured_image_width / $article->featured_image_height;
-        expect($ratio)->toBeGreaterThan(0.56);
-        expect($ratio)->toBeLessThan(0.57);
-    });
-
-    it('rejects corrupted image files', function (): void {
-        // Note: With Storage::fake(), Intervention Image validation doesn't work properly
-        // because it needs real filesystem access. This test may pass in production
-        // but fail in testing environment due to the fake storage limitation.
-        // For now, we skip the file existence check and just ensure the request completes.
-        $file = UploadedFile::fake()->create('corrupted.jpg', 100, 'image/jpeg');
-
-        // The validation may or may not catch this with fake storage
-        // In real environment with actual files, corrupted images would be rejected
-        $response = $this->actingAs($this->user)
-            ->post(route('admin.articles.store'), [
-                'title' => 'Test Article',
-                'slug' => 'test-article-corrupted',
-                'content' => 'Test content',
-                'status' => 'published',
-                'featured_image_file' => $file,
-            ]);
-
-        // With fake storage, the processing may fail silently
-        // We just verify the request doesn't crash
-        expect($response->getStatusCode())->toBeGreaterThanOrEqual(200);
+        expect($article->hasMedia('featured_image'))->toBeTrue();
     });
 
     it('rejects zero-byte image files', function (): void {
@@ -608,7 +168,7 @@ describe('edge cases', function (): void {
 // ============================================================================
 
 describe('update and replace', function (): void {
-    it('deletes old images when replacing with new upload', function (): void {
+    it('replaces old image when uploading new one', function (): void {
         $oldFile = UploadedFile::fake()->image('old.jpg', 800, 600);
         $article = Article::factory()->create(['status' => 'published']);
 
@@ -624,7 +184,7 @@ describe('update and replace', function (): void {
             ->assertRedirect();
 
         $article->refresh();
-        $oldPath = $article->featured_image;
+        $oldMediaId = $article->getFirstMedia('featured_image')->id;
 
         // Replace with new image
         $newFile = UploadedFile::fake()->image('new.jpg', 1200, 800);
@@ -640,17 +200,11 @@ describe('update and replace', function (): void {
 
         $article->refresh();
 
-        // New image should be set (file deletion checks skipped with fake storage)
-        // Note: With fake storage, Intervention Image operations don't work properly
-        expect($article->featured_image)->not->toBeNull();
-        expect($article->featured_image)->not->toBe($oldPath); // Path should have changed
-
-        // New images should exist (path check only - file existence skipped with fake storage)
-        $article->refresh();
-        expect($article->featured_image)->not->toBeNull();
+        expect($article->hasMedia('featured_image'))->toBeTrue();
+        expect($article->getFirstMedia('featured_image')->id)->not->toBe($oldMediaId);
     });
 
-    it('clears metadata when removing featured image', function (): void {
+    it('removes featured image when delete is checked', function (): void {
         $file = UploadedFile::fake()->image('featured.jpg', 800, 600);
         $article = Article::factory()->create(['status' => 'published']);
 
@@ -666,7 +220,7 @@ describe('update and replace', function (): void {
             ->assertRedirect();
 
         $article->refresh();
-        expect($article->featured_image_width)->not->toBeNull();
+        expect($article->hasMedia('featured_image'))->toBeTrue();
 
         // Remove image
         $this->actingAs($this->user)
@@ -681,13 +235,10 @@ describe('update and replace', function (): void {
 
         $article->refresh();
 
-        expect($article->featured_image)->toBeNull();
-        expect($article->featured_image_width)->toBeNull();
-        expect($article->featured_image_height)->toBeNull();
-        expect($article->featured_image_file_size)->toBeNull();
+        expect($article->hasMedia('featured_image'))->toBeFalse();
     });
 
-    it('keeps metadata null for external urls', function (): void {
+    it('handles external URL featured images', function (): void {
         $this->actingAs($this->user)
             ->post(route('admin.articles.store'), [
                 'title' => 'Test Article',
@@ -701,9 +252,7 @@ describe('update and replace', function (): void {
         $article = Article::first();
 
         expect($article->featured_image)->toBe('https://example.com/image.jpg');
-        expect($article->featured_image_width)->toBeNull();
-        expect($article->featured_image_height)->toBeNull();
-        expect($article->featured_image_file_size)->toBeNull();
+        expect($article->hasMedia('featured_image'))->toBeFalse();
     });
 });
 
@@ -712,26 +261,7 @@ describe('update and replace', function (): void {
 // ============================================================================
 
 describe('integration', function (): void {
-    it('processes images when creating article via Article model', function (): void {
-        Storage::fake('public');
-
-        $article = Article::create([
-            'title' => 'Test Article',
-            'slug' => 'test-article',
-            'content' => 'Test content',
-            'status' => Status::Published,
-            'featured_image' => 'articles/featured/test.webp', // Simulating pre-processed image
-            'featured_image_width' => 800,
-            'featured_image_height' => 600,
-            'featured_image_file_size' => 50000,
-            'featured_image_mime_type' => 'image/webp',
-        ]);
-
-        expect($article->featured_image_width)->toBe(800);
-        expect($article->featured_image_height)->toBe(600);
-    });
-
-    it('processes images through controller store method', function (): void {
+    it('uploads images through controller store method', function (): void {
         $file = UploadedFile::fake()->image('featured.jpg', 800, 600);
 
         $response = $this->actingAs($this->user)
@@ -746,11 +276,11 @@ describe('integration', function (): void {
         $response->assertRedirect();
 
         $article = Article::first();
-        expect($article->featured_image)->not->toBeNull();
-        expect($article->featured_image)->toEndWith('.webp');
+        expect($article->hasMedia('featured_image'))->toBeTrue();
+        expect($article->featured_image_url)->not->toBeNull();
     });
 
-    it('processes images through controller update method', function (): void {
+    it('uploads images through controller update method', function (): void {
         $article = Article::factory()->create(['status' => 'published']);
         $file = UploadedFile::fake()->image('featured.jpg', 800, 600);
 
@@ -766,23 +296,8 @@ describe('integration', function (): void {
         $response->assertRedirect();
 
         $article->refresh();
-        expect($article->featured_image)->not->toBeNull();
-        expect($article->featured_image)->toEndWith('.webp');
-    });
-
-    it('handles image processing in factory published state', function (): void {
-        Storage::fake('public');
-
-        $article = Article::factory()->published()->create([
-            'featured_image' => 'articles/featured/factory-test.webp',
-            'featured_image_width' => 1200,
-            'featured_image_height' => 800,
-            'featured_image_file_size' => 75000,
-        ]);
-
-        expect($article->status)->toBe(Status::Published);
-        expect($article->featured_image_width)->toBe(1200);
-        expect($article->featured_image_height)->toBe(800);
+        expect($article->hasMedia('featured_image'))->toBeTrue();
+        expect($article->featured_image_url)->not->toBeNull();
     });
 });
 
@@ -791,7 +306,7 @@ describe('integration', function (): void {
 // ============================================================================
 
 describe('privacy and disk handling with processing', function (): void {
-    it('processes and stores published images on public disk', function (): void {
+    it('stores published article images on public disk', function (): void {
         $file = UploadedFile::fake()->image('featured.jpg', 800, 600);
 
         $this->actingAs($this->user)
@@ -805,13 +320,14 @@ describe('privacy and disk handling with processing', function (): void {
             ->assertRedirect();
 
         $article = Article::first();
+        $media = $article->getFirstMedia('featured_image');
 
         expect($article->status->value)->toBe('published');
-        expect($article->featured_image)->not->toBeNull();
-        // Note: File existence checks skipped - don't work with Storage::fake()
+        expect($media)->not->toBeNull();
+        expect($media->disk)->toBe('public');
     });
 
-    it('processes and stores draft images on private disk', function (): void {
+    it('stores draft article images on private disk', function (): void {
         $file = UploadedFile::fake()->image('featured.jpg', 800, 600);
 
         $this->actingAs($this->user)
@@ -825,13 +341,14 @@ describe('privacy and disk handling with processing', function (): void {
             ->assertRedirect();
 
         $article = Article::first();
+        $media = $article->getFirstMedia('featured_image');
 
         expect($article->status->value)->toBe('draft');
-        expect($article->featured_image)->not->toBeNull();
-        // Note: File existence checks skipped - don't work with Storage::fake()
+        expect($media)->not->toBeNull();
+        expect($media->disk)->toBe('private');
     });
 
-    it('moves all image sizes when changing from public to private', function (): void {
+    it('moves image to private disk when changing from published to draft', function (): void {
         $file = UploadedFile::fake()->image('featured.jpg', 800, 600);
         $article = Article::factory()->create(['status' => 'published']);
 
@@ -847,7 +364,7 @@ describe('privacy and disk handling with processing', function (): void {
             ->assertRedirect();
 
         $article->refresh();
-        $originalPath = $article->featured_image;
+        expect($article->getFirstMedia('featured_image')->disk)->toBe('public');
 
         // Change to draft
         $this->actingAs($this->user)
@@ -860,10 +377,9 @@ describe('privacy and disk handling with processing', function (): void {
             ->assertRedirect();
 
         $article->refresh();
+        $media = $article->getFirstMedia('featured_image');
 
-        // Article status changed and featured_image is still set
         expect($article->status->value)->toBe('draft');
-        expect($article->featured_image)->not->toBeNull();
-        // Note: Disk move operations and file existence checks don't work with Storage::fake()
+        expect($media->disk)->toBe('private');
     });
 });
