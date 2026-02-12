@@ -5,37 +5,98 @@ description: Reference BlogWriter documentation and specifications when building
 
 # BlogWriter Documentation Reference
 
-Fetch documentation from https://blogwriter-docs.jacobodonnell.me/ to understand BlogWriter specifications while actively building the platform.
+Access BlogWriter documentation from the local `docs/` directory to understand specifications and implementation status while actively building the platform.
 
-## Important Note on Components
-**The components documented on the website are SPECIFICATIONS TO BE BUILT, not existing implementations.** The components page shows the planned component library with intended functionality. The actual components must be implemented in this Laravel project.
+## Critical Implementation Note
 
-## Project Overview
-Fetch for high-level understanding and philosophy:
-- https://blogwriter-docs.jacobodonnell.me/docs/getting-started/introduction - Product vision, target audience, three content types (Articles, Notes, Photos)
+**Many features documented are specifications for future implementation, not current state.** Documentation includes both:
+- ✅ **Implemented features** - Articles, Photos, Categories, Admin, Authentication, CLI Installer
+- 🚧 **Coming Soon features** - Notes, Tags, Themes, Feeds, IndieWeb, Web Installer UI
 
-## Building Models & Content System
-Fetch when implementing Article, Note, Photo models and their relationships:
-- https://blogwriter-docs.jacobodonnell.me/docs/content/writing-content - Content type specifications and requirements
-- https://blogwriter-docs.jacobodonnell.me/docs/advanced/architecture - Models, relationships, database structure, and content storage approach
+**Always verify actual codebase implementation status before claiming a feature exists.**
 
-## Building the Theme System
-Fetch when implementing theme discovery, activation, and Folio routing:
-- https://blogwriter-docs.jacobodonnell.me/docs/customization/themes - Theme folder structure, theme.json format, Laravel Folio routing patterns, available template variables ($article, $note, $photo, $category, $tag)
+## Documentation Files
 
-## Building Components
-Fetch when implementing the planned component library:
-- https://blogwriter-docs.jacobodonnell.me/docs/customization/components - **Planned component specifications.** Includes intended functionality for 17 components (Navbar, Article Card, Note Card, Photo Card, h-card, h-entry, h-feed, Dark Mode Toggle, etc.). Use this as a specification for what needs to be built.
+All files use YAML frontmatter (HydePHP-compatible format for future static site generation):
 
-## Building Admin & Settings
-Fetch when implementing the admin dashboard and configuration:
-- https://blogwriter-docs.jacobodonnell.me/docs/configuration/settings - Site settings, author settings, theme selection, feed configuration, email setup (Resend/Postmark), IndieAuth toggle
-- https://blogwriter-docs.jacobodonnell.me/docs/configuration/feeds-and-indieweb - RSS/Atom/JSON feeds, microformats (h-card, h-entry, h-feed), IndieAuth server endpoints
+### Getting Started
+- **`introduction.md`** - Product vision, target audience, content types (Articles, Photos, Notes*)
+- **`installation.md`** - CLI installer (✅ working), Web installer UI (🚧 coming soon)
+- **`roadmap.md`** - Feature status, V0.1 progress, and future milestones
 
-## Building Installation System
-Fetch when implementing the web and CLI installers:
-- https://blogwriter-docs.jacobodonnell.me/docs/getting-started/installation - PHP 8.4+ requirements, SQLite, 5-step terminal-styled web installer, CLI installer with Laravel Prompts
+### Content & Writing
+- **`writing-content.md`** - Markdown editor (✅ current), Editor.js (🚧 coming soon), Notes (🚧 coming soon), Photos, Tags (🚧 coming soon)
 
-## Technical Architecture Reference
-Fetch for comprehensive technical decisions and stack information:
-- https://blogwriter-docs.jacobodonnell.me/docs/advanced/architecture - Complete tech stack (Laravel 12, PHP 8.4+, SQLite, Alpine.js v3, Tailwind v4, DaisyUI v5, Pest 4), architectural philosophy (SQLite only, no Livewire, single-author), directory structure, authentication flow, security considerations
+### Customization (Planned)
+- **`themes.md`** - Theme system specification (🚧 coming soon - entire system not yet built)
+- **`components.md`** - Component library (stub, needs content or specification)
+
+### Configuration
+- **`settings.md`** - Settings UI (minimal/read-only currently, extensive UI 🚧 coming soon)
+- **`feeds-and-indieweb.md`** - RSS/Atom/JSON feeds, microformats, IndieAuth, Webmentions (🚧 all coming soon)
+
+### Architecture & Technical
+- **`architecture.md`** - Tech stack, models (Article ✅, Photo ✅, Note 🚧, Tag 🚧), database structure, design decisions
+
+## Activation Triggers
+
+Activate this skill when:
+- User asks about BlogWriter architecture, models, or design specifications
+- User asks about themes, components, or customization features
+- User asks about the installation system or requirements
+- User asks about configuration, settings, or IndieWeb integration
+- User references "docs", "documentation", or "specifications"
+- User mentions building or implementing Articles, Notes, or Photos
+- User is working on theme system or component library
+- User needs to understand content types or data models
+- User asks about feeds, IndieAuth, or IndieWeb features
+
+## Using the Documentation
+
+Read files directly from the `docs/` directory using the Read tool:
+- Full path: `/Users/jacobodonnell/Dev-Projects/php/laravel/blogwriter/docs/[filename].md`
+- Or relative from project root: `docs/[filename].md`
+
+Example:
+```
+Read tool: docs/architecture.md
+```
+
+## Implementation Status Key
+
+- ✅ **Implemented** - Feature is built and working
+- 🚧 **Coming Soon** - Feature is documented but not yet implemented (specification only)
+- Documentation with "Coming Soon" callouts includes GitHub issue links for feedback
+
+## Important Reminders
+
+1. **Verify before implementing** - Check actual codebase to confirm if documented feature exists
+2. **YAML frontmatter preserved** - Will be used by HydePHP for static site generation
+3. **Specifications vs Reality** - Documentation serves dual purpose: current features + planned roadmap
+4. **GitHub feedback welcome** - "Coming Soon" sections invite community input on design
+
+## Current Implementation vs Documentation
+
+**What's Actually Built (✅):**
+- Articles: Full CRUD, Markdown editor, categories, featured photos, draft/publish workflow
+- Photos: Full CRUD, Spatie MediaLibrary integration, image conversions, captions
+- Categories: Full CRUD, article relationships
+- Admin Panel: Dashboard, article/photo/category management
+- Authentication: Laravel Fortify with custom UI, email verification, 2FA columns
+- CLI Installer: Fully working with interactive/non-interactive modes
+
+**What's Documented But Missing (🚧):**
+- Notes: Model, controller, views, routes - completely missing
+- Tags: Model missing, no polymorphic tagging system
+- Theme System: No themes/ directory, no Folio routing, no Terminal/Starter themes
+- Feeds: No RSS/Atom/JSON feed generation
+- Microformats: No h-card/h-entry/h-feed markup
+- IndieAuth: No authentication endpoints
+- Webmentions: Not implemented
+- Web Installer UI: Documented terminal UI doesn't exist (only CLI works)
+- Component Override System: Documented but not built
+
+**Technical Corrections Needed:**
+- Article Editor: Docs may say Editor.js blocks (`content_json`), actually stores Markdown in `content` column
+- Photo Storage: Uses Spatie MediaLibrary (not simple file storage)
+- Routing: Traditional controller routes (not Folio-based theme routing)
