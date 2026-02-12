@@ -20,7 +20,6 @@ return new class extends Migration
             $table->longText('content');
             $table->enum('status', ['draft', 'published', 'hidden'])->default('draft');
             $table->timestamp('published_at')->nullable();
-            $table->string('featured_image')->nullable();
             $table->json('meta')->nullable();
             $table->timestamps();
 
