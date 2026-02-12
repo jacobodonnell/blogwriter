@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -64,16 +63,18 @@ class BlogWriterReset extends Command
                 // Delete database file and WAL files (for WAL mode)
                 $filesToDelete = [
                     $dbPath,
-                    $dbPath . '-wal',
-                    $dbPath . '-shm',
+                    $dbPath.'-wal',
+                    $dbPath.'-shm',
                 ];
 
                 foreach ($filesToDelete as $file) {
-                    if (file_exists($file)) {
-                        if (!unlink($file)) {
-                            throw new \RuntimeException("Failed to delete file: {$file}. File may be locked.");
-                        }
+                    if (! file_exists($file)) {
+                        continue;
                     }
+                    if (unlink($file)) {
+                        continue;
+                    }
+                    throw new \RuntimeException("Failed to delete file: {$file}. File may be locked.");
                 }
 
                 // Create fresh empty database
@@ -85,7 +86,7 @@ class BlogWriterReset extends Command
             exec('php artisan migrate --force --no-interaction 2>&1', $output, $returnCode);
 
             if ($returnCode !== 0) {
-                throw new \RuntimeException("Migration failed: " . implode("\n", $output));
+                throw new \RuntimeException('Migration failed: '.implode("\n", $output));
             }
 
             info('  ✓ Database reset');

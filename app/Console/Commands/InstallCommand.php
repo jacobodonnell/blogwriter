@@ -616,7 +616,7 @@ class InstallCommand extends Command
             }
         }
 
-        if (! empty($missingOrInvalid)) {
+        if ($missingOrInvalid !== []) {
             warning('⚠️  Demo image issues detected:');
             foreach ($missingOrInvalid as $issue) {
                 warning("  - $issue");

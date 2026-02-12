@@ -15,7 +15,7 @@ class ArticleObserver
         if ($article->wasChanged('status')) {
             $media = $article->getFirstMedia('featured_image');
 
-            if ($media) {
+            if ($media instanceof \Spatie\MediaLibrary\MediaCollections\Models\Media) {
                 $expectedDisk = $article->status === Status::Published ? 'public' : 'private';
 
                 if ($media->disk !== $expectedDisk) {
