@@ -248,9 +248,12 @@ class DatabaseSeeder extends Seeder
                 $imagePath = $demoImagesPath . '/' . $randomImage;
 
                 if (file_exists($imagePath)) {
+                    // Determine disk based on status
+                    $disk = $status === Status::Published ? 'public' : 'private';
+
                     $article->addMedia($imagePath)
                         ->preservingOriginal() // Don't delete source file
-                        ->toMediaCollection('featured_image');
+                        ->toMediaCollection('featured_image', $disk);
                 }
             }
 

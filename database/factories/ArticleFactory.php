@@ -75,9 +75,12 @@ class ArticleFactory extends Factory
                 $imagePath = $demoImagesPath . '/' . $randomImage;
 
                 if (file_exists($imagePath)) {
+                    // Determine disk based on status
+                    $disk = $article->status === \App\Enums\Status::Published ? 'public' : 'private';
+
                     $article->addMedia($imagePath)
                         ->preservingOriginal() // Don't delete source file
-                        ->toMediaCollection('featured_image');
+                        ->toMediaCollection('featured_image', $disk);
                 }
             }
         });

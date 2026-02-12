@@ -92,9 +92,6 @@ class Article extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('featured_image')
-            ->useDisk(fn (Article $article) =>
-                $article->status === Status::Published ? 'public' : 'private'
-            )
             ->singleFile()
             ->acceptsMimeTypes(['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']);
     }
