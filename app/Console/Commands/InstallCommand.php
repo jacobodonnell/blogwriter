@@ -62,36 +62,38 @@ class InstallCommand extends Command
     {
         $this->welcome();
 
-        $didFreshInstall = false;
-
         if ($this->isAlreadyInstalled() && ! $this->option('force')) {
-            warning('BlogWriter appears to already be installed.');
+            warning('BlogWriter is already installed.');
+            $this->newLine();
 
-            $override = confirm(
-                label: 'Do you want to override the existing installation? ⚠️ This will DELETE all content and cannot be undone.',
+            $runReset = confirm(
+                label: 'Do you want to reset BlogWriter first? (This will DELETE all content)',
                 default: false
             );
 
-            if (! $override) {
+            if ($runReset) {
+                // Run the reset command
+                $resetExitCode = Artisan::call('blogwriter:reset', ['--force' => true]);
+
+                if ($resetExitCode !== 0) {
+                    error('Reset failed. Installation cancelled.');
+
+                    return self::FAILURE;
+                }
+
+                $this->newLine();
+                info('Reset complete. Continuing with installation...');
+                $this->newLine();
+            } else {
                 info('Installation cancelled.');
+                info('Tip: Run php artisan blogwriter:reset to reset BlogWriter first.');
 
                 return self::SUCCESS;
             }
-
-            // Delete lock file and reset database
-            if (file_exists(storage_path('installed.lock'))) {
-                unlink(storage_path('installed.lock'));
-            }
-            $this->freshInstall();
-            $didFreshInstall = true;
         }
 
-        // Only gather config and run install if we didn't just do a fresh install
-        // freshInstall() already handles the full reset + config flow
-        if (! $didFreshInstall) {
-            $config = $this->gatherConfiguration();
-            $this->install($config);
-        }
+        $config = $this->gatherConfiguration();
+        $this->install($config);
 
         return self::SUCCESS;
     }
@@ -125,47 +127,6 @@ class InstallCommand extends Command
         }
 
         return false;
-    }
-
-    protected function freshInstall(): void
-    {
-        info('Running fresh installation...');
-
-        // Delete lock file to signal "installation in progress"
-        if (file_exists(storage_path('installed.lock'))) {
-            unlink(storage_path('installed.lock'));
-            info('Removed installation lock.');
-        }
-
-        $dbPath = config('database.connections.sqlite.database');
-
-        if (file_exists($dbPath)) {
-            info('Removing existing database...');
-
-            // Properly close all SQLite connections to release file locks
-            DB::purge('sqlite');
-
-            // Delete the database file
-            if (! unlink($dbPath)) {
-                throw new \RuntimeException("Cannot delete database file: {$dbPath}. Check file permissions.");
-            }
-
-            // Create fresh empty database file
-            touch($dbPath);
-            info('Fresh database created.');
-        }
-
-        // Reconnect to the database with the new file
-        DB::reconnect('sqlite');
-
-        info('Running database migrations...');
-        $exitCode = Artisan::call('migrate', ['--force' => true]);
-
-        if ($exitCode !== 0) {
-            throw new \RuntimeException('Database migration failed. Exit code: '.$exitCode);
-        }
-
-        info('Database reset complete.');
     }
 
     protected function gatherConfiguration(): array
