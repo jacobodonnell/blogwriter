@@ -50,16 +50,37 @@ class ArticleFactory extends Factory
             'content' => $this->generateMarkdownContent(),
             'status' => $status,
             'published_at' => $this->getPublishedAtForStatus($status),
-            'featured_image' => $this->faker->optional(0.6)->randomElement([
-                'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1200',
-                'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200',
-                'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200',
-                'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200',
-                'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1200',
-                'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1200',
-            ]),
             'meta' => $this->generateMeta($title),
         ];
+    }
+
+    /**
+     * Configure the model factory.
+     */
+    public function configure(): static
+    {
+        return $this->afterCreating(function (\App\Models\Article $article) {
+            // 60% chance of having a featured image
+            if ($this->faker->boolean(60)) {
+                $demoImagesPath = database_path('seeders/demo-images');
+                $demoImages = [
+                    'demo-image-1.png',
+                    'demo-image-2.png',
+                    'demo-image-3.png',
+                    'demo-image-4.png',
+                    'demo-image-5.png',
+                ];
+
+                $randomImage = $this->faker->randomElement($demoImages);
+                $imagePath = $demoImagesPath . '/' . $randomImage;
+
+                if (file_exists($imagePath)) {
+                    $article->addMedia($imagePath)
+                        ->preservingOriginal() // Don't delete source file
+                        ->toMediaCollection('featured_image');
+                }
+            }
+        });
     }
 
     /**
