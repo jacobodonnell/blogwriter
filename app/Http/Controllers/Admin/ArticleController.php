@@ -67,6 +67,7 @@ class ArticleController extends Controller
         $article->status = $data['status'];
         $article->published_at = $data['published_at'] ?? null;
         $article->meta = $data['meta'] ?? [];
+        $article->featured_image = $data['featured_image'] ?? null;
 
         if (empty($data['summary'])) {
             $article->summary = Str::limit(strip_tags((string) $data['content']), 255);
@@ -82,8 +83,11 @@ class ArticleController extends Controller
             $article->featured_image = null;
             $article->save();
 
+            // Determine disk based on article status
+            $disk = $article->status->isPublic() ? 'public' : 'private';
+
             $article->addMediaFromRequest('featured_image_file')
-                ->toMediaCollection('featured_image');
+                ->toMediaCollection('featured_image', $disk);
         }
 
         // Handle external URL (store as-is, don't download)
@@ -131,6 +135,9 @@ class ArticleController extends Controller
             $article->published_at = $data['published_at'];
         }
         $article->meta = $data['meta'] ?? [];
+        if (array_key_exists('featured_image', $data)) {
+            $article->featured_image = $data['featured_image'];
+        }
 
         if (empty($data['summary'])) {
             $article->summary = Str::limit(strip_tags((string) $data['content']), 255);
@@ -153,8 +160,11 @@ class ArticleController extends Controller
             $article->featured_image = null;
             $article->save();
 
+            // Determine disk based on article status
+            $disk = $article->status->isPublic() ? 'public' : 'private';
+
             $article->addMediaFromRequest('featured_image_file')
-                ->toMediaCollection('featured_image');
+                ->toMediaCollection('featured_image', $disk);
         }
 
         // Handle external URL (store as-is, don't download)
