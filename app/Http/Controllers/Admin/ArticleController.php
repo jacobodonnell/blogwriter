@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Actions\GenerateArticleSummaryAction;
 use App\Actions\Photos\CreatePhotoFromUploadAction;
-use App\Actions\Photos\CreatePhotoFromUrlAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreArticleRequest;
 use App\Http\Requests\UpdateArticleRequest;
@@ -15,7 +14,6 @@ use Illuminate\Http\Request;
 class ArticleController extends Controller
 {
     public function __construct(
-        private readonly CreatePhotoFromUrlAction $createPhotoFromUrl,
         private readonly CreatePhotoFromUploadAction $createPhotoFromUpload,
         private readonly GenerateArticleSummaryAction $generateSummary,
     ) {}
@@ -68,25 +66,29 @@ class ArticleController extends Controller
         $data = $request->validated();
 
         // Handle featured image
-        $photoId = match (true) {
-            $request->hasFile('featured_image_file') => $this->handlePhotoUpload($request->file('featured_image_file'), $data),
-            $request->filled('featured_image') && filter_var($request->featured_image, FILTER_VALIDATE_URL) => $this->handlePhotoUrl($request->featured_image, $data),
-            $request->filled('photo_id') => $data['photo_id'],
-            default => null,
-        };
+        $photoId = null;
+        $meta = $data['meta'] ?? [];
 
-        if ($photoId instanceof \Illuminate\Http\RedirectResponse) {
-            return $photoId;
+        if ($request->hasFile('featured_image_file')) {
+            $photoId = $this->handlePhotoUpload($request->file('featured_image_file'), $data);
+            if ($photoId instanceof \Illuminate\Http\RedirectResponse) {
+                return $photoId;
+            }
+        } elseif ($request->filled('featured_image') && filter_var($request->featured_image, FILTER_VALIDATE_URL)) {
+            $meta['featured_image_url'] = $request->featured_image;
+        } elseif ($request->filled('photo_id')) {
+            $photoId = $data['photo_id'];
         }
 
         $article = Article::create([
+            'user_id' => auth()->id(),
             'title' => $data['title'],
             'slug' => $data['slug'],
             'content' => $data['content'],
             'summary' => $this->generateSummary->handle($data['summary'] ?? null, $data['content']),
             'status' => $data['status'],
             'published_at' => $data['published_at'] ?? null,
-            'meta' => $data['meta'] ?? [],
+            'meta' => $meta,
             'photo_id' => $photoId,
         ]);
 
@@ -118,26 +120,32 @@ class ArticleController extends Controller
     public function update(UpdateArticleRequest $request, Article $article)
     {
         $data = $request->validated();
+        $meta = $data['meta'] ?? [];
 
         // Handle featured image removal
         if ($request->boolean('remove_featured_image')) {
             $data['photo_id'] = null;
-        }
-
-        // Handle featured image
-        if (! array_key_exists('photo_id', $data)) {
-            $photoId = match (true) {
-                $request->hasFile('featured_image_file') => $this->handlePhotoUpload($request->file('featured_image_file'), $data, $article->id),
-                $request->filled('featured_image') && filter_var($request->featured_image, FILTER_VALIDATE_URL) => $this->handlePhotoUrl($request->featured_image, $data, $article->id),
-                $request->filled('photo_id') => $data['photo_id'],
-                default => $article->photo_id,
-            };
-
+            unset($meta['featured_image_url']);
+        } elseif ($request->hasFile('featured_image_file')) {
+            $photoId = $this->handlePhotoUpload($request->file('featured_image_file'), $data, $article->id);
             if ($photoId instanceof \Illuminate\Http\RedirectResponse) {
                 return $photoId;
             }
 
             $data['photo_id'] = $photoId;
+            unset($meta['featured_image_url']);
+        } elseif ($request->filled('featured_image') && filter_var($request->featured_image, FILTER_VALIDATE_URL)) {
+            $meta['featured_image_url'] = $request->featured_image;
+            $data['photo_id'] = null;
+        } elseif ($request->filled('photo_id')) {
+            unset($meta['featured_image_url']);
+        } else {
+            $data['photo_id'] = $article->photo_id;
+            // Preserve existing meta featured_image_url if present
+            $existingMeta = $article->meta ?? [];
+            if (isset($existingMeta['featured_image_url']) && ! isset($meta['featured_image_url'])) {
+                $meta['featured_image_url'] = $existingMeta['featured_image_url'];
+            }
         }
 
         $article->update([
@@ -147,7 +155,7 @@ class ArticleController extends Controller
             'summary' => $this->generateSummary->handle($data['summary'] ?? null, $data['content']),
             'status' => $data['status'],
             'published_at' => $data['published_at'] ?? $article->published_at,
-            'meta' => $data['meta'] ?? [],
+            'meta' => $meta,
             'photo_id' => $data['photo_id'],
         ]);
 
@@ -191,31 +199,6 @@ class ArticleController extends Controller
             return redirect()->back()
                 ->withInput()
                 ->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
-        }
-    }
-
-    /**
-     * Handle photo from URL and return photo ID or error response.
-     */
-    private function handlePhotoUrl(string $url, array $data, ?int $articleId = null): int|\Illuminate\Http\RedirectResponse
-    {
-        try {
-            $photo = $this->createPhotoFromUrl->handle($url, [
-                'slug' => $data['slug'] ?? basename(parse_url($url, PHP_URL_PATH)),
-                'alt_text' => $data['title'] ?? 'Featured image',
-                'status' => $data['status'] ?? 'draft',
-            ]);
-
-            return $photo->id;
-        } catch (\Exception $exception) {
-            \Log::error('Failed to create photo from URL', [
-                'article_id' => $articleId,
-                'error' => $exception->getMessage(),
-            ]);
-
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['featured_image' => 'Failed to process external image URL. Please try again.']);
         }
     }
 }

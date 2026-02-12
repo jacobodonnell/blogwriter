@@ -7,7 +7,6 @@ use App\Models\Category;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -145,15 +144,12 @@ class DatabaseSeeder extends Seeder
     {
         $this->command?->info('Seeding user...');
 
-        $user = User::firstOrCreate(
-            ['email' => $this->userConfig['email']],
-            [
-                'name' => $this->userConfig['name'],
-                'email' => $this->userConfig['email'],
-                'password' => Hash::make($this->userConfig['password']),
-                'email_verified_at' => now(),
-            ]
-        );
+        $user = User::first() ?? User::create([
+            'name' => $this->userConfig['name'],
+            'email' => $this->userConfig['email'],
+            'password' => $this->userConfig['password'],
+            'email_verified_at' => now(),
+        ]);
 
         $this->command?->info(sprintf('User created: %s (%s)', $user->name, $user->email));
     }

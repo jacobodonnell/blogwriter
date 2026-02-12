@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Enums\Status;
 use App\Models\Category;
+use App\Models\User;
 use Database\Factories\Concerns\AttachesFeaturedImages;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -61,6 +62,7 @@ class ArticleFactory extends Factory
         }
 
         return [
+            'user_id' => User::first()?->id ?? User::factory(),
             'title' => $title,
             'summary' => fake()->optional(0.8)->paragraph(2),
             'content' => $this->generateMarkdownContent(),

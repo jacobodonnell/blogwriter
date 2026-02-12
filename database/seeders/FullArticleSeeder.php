@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\Photo;
+use App\Models\User;
 use Database\Factories\Concerns\AttachesFeaturedImages;
 use Illuminate\Database\Seeder;
 
@@ -13,72 +14,63 @@ class FullArticleSeeder extends Seeder
     use AttachesFeaturedImages;
 
     /**
-     * Seed full articles (15 articles from JSON: 8 published, 7 draft after hidden→draft conversion).
+     * Seed full articles (15 articles from JSON: 8 published, 7 draft after hidden->draft conversion).
      */
     public function run(): void
     {
         $jsonPath = storage_path('app/blogwriter/test-data/full/articles.json');
         $articles = json_decode(file_get_contents($jsonPath), true);
 
+        $user = User::firstOrFail();
+
         // Demo image counter for cycling through 5 demo images
         $demoImages = [1, 2, 3, 4, 5];
         $imageCounter = 0;
-
-        // Process articles: assign local images to first 7, Picsum URLs to last 7, skip the null ones
-        $articlesWithImages = array_filter($articles, fn (array $a): bool => $a['featured_image'] !== null);
-        $halfCount = (int) ceil(count($articlesWithImages) / 2);
 
         foreach ($articles as $data) {
             // Convert hidden status to draft (hidden status removed in refactoring)
             $status = match ($data['status']) {
                 'published' => 'published',
-                'draft' => 'draft',
-                'hidden' => 'draft', // Convert hidden → draft
                 default => 'draft',
             };
 
-            // Handle photo creation
+            // Handle photo creation — only local demo images, external URLs go to meta
             $photoId = null;
-            if ($data['featured_image'] !== null) {
-                // Determine if this article should get local demo image or Picsum URL
-                $articlesWithImagesIndexed = array_values($articlesWithImages);
-                $positionInImagedArticles = array_search($data, $articlesWithImagesIndexed, true);
+            $meta = $data['meta'] ?? [];
 
-                if ($positionInImagedArticles !== false && $positionInImagedArticles < $halfCount) {
-                    // First 50%: Use local demo images
+            if ($data['featured_image'] !== null) {
+                if ($this->isExternalUrl($data['featured_image'])) {
+                    // Store external URL in article meta instead of creating a Photo
+                    $meta['featured_image_url'] = $data['featured_image'];
+                } else {
+                    // Use local demo images
                     $demoImageNum = $demoImages[$imageCounter % count($demoImages)];
                     $photo = Photo::factory()
-                        ->state(['status' => $status, 'published_at' => $status === 'published' ? now()->subDays(random_int(1, 30)) : null])
+                        ->state([
+                            'user_id' => $user->id,
+                            'status' => $status,
+                            'published_at' => $status === 'published' ? now()->subDays(random_int(1, 30)) : null,
+                        ])
                         ->withDemoImage($demoImageNum)
                         ->create([
                             'alt_text' => $data['title'].' featured image',
                         ]);
                     $photoId = $photo->id;
                     $imageCounter++;
-                } else {
-                    // Second 50%: Store Picsum URL as external photo
-                    $photo = Photo::create([
-                        'filename' => basename((string) $data['featured_image']),
-                        'slug' => \Illuminate\Support\Str::slug($data['title']).'-featured',
-                        'alt_text' => $data['title'].' featured image',
-                        'status' => $status,
-                        'published_at' => $status === 'published' ? now()->subDays(random_int(1, 30)) : null,
-                        'meta' => ['external_url' => $data['featured_image']],
-                    ]);
-                    $photoId = $photo->id;
                 }
             }
 
             $article = Article::firstOrCreate(
                 ['slug' => $data['slug']],
                 [
+                    'user_id' => $user->id,
                     'title' => $data['title'],
                     'content' => $data['content'],
                     'summary' => $data['summary'] ?? null,
                     'status' => $status,
                     'published_at' => $status === 'published' ? now()->subDays(random_int(1, 30)) : null,
                     'photo_id' => $photoId,
-                    'meta' => $data['meta'] ?? null,
+                    'meta' => $meta ?: null,
                 ]
             );
 
@@ -88,5 +80,10 @@ class FullArticleSeeder extends Seeder
                 $article->categories()->attach($categoryIds);
             }
         }
+    }
+
+    private function isExternalUrl(?string $url): bool
+    {
+        return $url !== null && str_starts_with($url, 'http');
     }
 }

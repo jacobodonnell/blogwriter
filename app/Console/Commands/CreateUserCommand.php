@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Models\User;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class CreateUserCommand extends Command
@@ -12,19 +11,29 @@ class CreateUserCommand extends Command
     protected $signature = 'blogwriter:user:create
                             {name : User\'s display name}
                             {email : User\'s email address}
-                            {--password= : Password (auto-generated if not provided)}';
+                            {--password= : Password (auto-generated if not provided)}
+                            {--force : Replace existing user without confirmation}';
 
-    protected $description = 'Create a new BlogWriter admin user';
+    protected $description = 'Create the BlogWriter admin user (replaces existing user if one exists)';
 
     public function handle(): int
     {
         $name = $this->argument('name');
         $email = $this->argument('email');
 
-        if (User::where('email', $email)->exists()) {
-            $this->error(sprintf("A user with email '%s' already exists.", $email));
+        $existingUser = User::first();
 
-            return self::FAILURE;
+        if ($existingUser) {
+            $this->warn(sprintf('Existing user: %s (%s)', $existingUser->name, $existingUser->email));
+
+            if (! $this->option('force') && ! $this->confirm('Replace this user?')) {
+                $this->info('Cancelled.');
+
+                return self::SUCCESS;
+            }
+
+            $existingUser->delete();
+            $this->info('Existing user removed.');
         }
 
         $password = $this->option('password');
@@ -38,11 +47,9 @@ class CreateUserCommand extends Command
         $user = User::create([
             'name' => $name,
             'email' => $email,
-            'password' => Hash::make($password),
+            'password' => $password,
+            'email_verified_at' => now(),
         ]);
-
-        $user->email_verified_at = now();
-        $user->save();
 
         $this->info('User created successfully!');
         $this->table(

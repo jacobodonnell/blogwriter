@@ -352,17 +352,13 @@ describe('environment configuration', function (): void {
     });
 
     it('fails gracefully when .env.example is missing', function (): void {
-        // Temporarily rename all .env files to simulate missing files
         $envPath = base_path('.env');
         $envExamplePath = base_path('.env.example');
-        $envFreshPath = base_path('.env.freshinstall');
         $envBackupPath = base_path('.env.backup');
         $envExampleBackupPath = base_path('.env.example.backup');
-        $freshBackupPath = base_path('.env.freshinstall.backup');
 
         $hasEnv = file_exists($envPath);
         $hasExample = file_exists($envExamplePath);
-        $hasFresh = file_exists($envFreshPath);
 
         if ($hasEnv) {
             rename($envPath, $envBackupPath);
@@ -370,12 +366,8 @@ describe('environment configuration', function (): void {
         if ($hasExample) {
             rename($envExamplePath, $envExampleBackupPath);
         }
-        if ($hasFresh) {
-            rename($envFreshPath, $freshBackupPath);
-        }
 
         try {
-            // Expect a RuntimeException with helpful error message
             expect(fn () => $this->artisan('blogwriter:install', [
                 '--site-name' => 'Test Blog',
                 '--site-url' => 'https://test.com',
@@ -386,15 +378,11 @@ describe('environment configuration', function (): void {
             ])->run()
             )->toThrow(\RuntimeException::class, 'Cannot create .env file');
         } finally {
-            // Restore files
             if ($hasEnv && file_exists($envBackupPath)) {
                 rename($envBackupPath, $envPath);
             }
             if ($hasExample && file_exists($envExampleBackupPath)) {
                 rename($envExampleBackupPath, $envExamplePath);
-            }
-            if ($hasFresh && file_exists($freshBackupPath)) {
-                rename($freshBackupPath, $envFreshPath);
             }
         }
     });

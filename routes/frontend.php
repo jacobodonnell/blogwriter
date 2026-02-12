@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\CategoryArticleController;
 use App\Http\Controllers\PhotoController;
 use Illuminate\Support\Facades\Route;
 
@@ -10,7 +11,7 @@ Route::redirect('/blog', '/');
 Route::get('/blog/{slug}', [ArticleController::class, 'show'])->name('article.show');
 
 // Categories
-Route::get('/category/{slug}', [ArticleController::class, 'category'])->name('category.show');
+Route::get('/category/{slug}', [CategoryArticleController::class, 'index'])->name('category.show');
 
 // Photos
 Route::get('/photos', [PhotoController::class, 'index'])->name('photos.index');

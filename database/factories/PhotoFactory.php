@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Database\Factories\Concerns\AttachesFeaturedImages;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -20,6 +21,7 @@ class PhotoFactory extends Factory
     public function definition(): array
     {
         return [
+            'user_id' => User::first()?->id ?? User::factory(),
             'filename' => fake()->word().'.jpg',
             'slug' => fake()->unique()->slug(),
             'caption' => fake()->optional(0.7)->paragraph(),

@@ -20,6 +20,7 @@ final readonly class CreatePhotoFromUploadAction
         $exifData = $this->extractExif->handle($file);
 
         $photo = Photo::create([
+            'user_id' => $attributes['user_id'] ?? auth()->id(),
             'filename' => $filename,
             'slug' => $this->generateSlug->handle($baseSlug, Photo::class),
             'alt_text' => $attributes['alt_text'] ?? null,

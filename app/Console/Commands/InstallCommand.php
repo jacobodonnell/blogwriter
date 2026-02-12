@@ -7,7 +7,6 @@ use App\Services\PasswordGenerator;
 use App\Services\ResetService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Hash;
 
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\error;
@@ -445,17 +444,6 @@ class InstallCommand extends Command
             return;
         }
 
-        // Try .env.freshinstall first (for bundled installations)
-        $envFreshPath = base_path('.env.freshinstall');
-        if (file_exists($envFreshPath)) {
-            info('Creating .env file from .env.freshinstall...');
-            copy($envFreshPath, $envPath);
-            info('✓ .env file created');
-
-            return;
-        }
-
-        // Fall back to .env.example (for development environments)
         $envExamplePath = base_path('.env.example');
         if (file_exists($envExamplePath)) {
             info('Creating .env file from .env.example...');
@@ -466,8 +454,8 @@ class InstallCommand extends Command
         }
 
         throw new \RuntimeException(
-            'Cannot create .env file. Neither .env.freshinstall nor .env.example found. '.
-            'Please ensure the BlogWriter distribution includes one of these template files.'
+            'Cannot create .env file. .env.example not found. '.
+            'Please ensure the BlogWriter distribution includes this template file.'
         );
     }
 
@@ -534,16 +522,15 @@ class InstallCommand extends Command
 
     protected function createUser(array $config): User
     {
-        $user = User::create([
+        // Single-user system: replace existing user if present
+        User::query()->delete();
+
+        return User::create([
             'name' => $config['name'],
             'email' => $config['email'],
-            'password' => Hash::make($config['password']),
+            'password' => $config['password'],
+            'email_verified_at' => now(),
         ]);
-
-        $user->email_verified_at = now();
-        $user->save();
-
-        return $user;
     }
 
     protected function displaySuccess(array $config, User $user): void

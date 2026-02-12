@@ -13,18 +13,25 @@ return new class extends Migration
     {
         Schema::create('articles', function (Blueprint $table): void {
             $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('title');
             $table->string('slug')->unique();
-            $table->json('past_slugs')->default('{}');
+            $table->json('past_slugs')->default('[]');
             $table->text('summary')->nullable();
             $table->longText('content');
             $table->enum('status', ['draft', 'published'])->default('draft');
             $table->timestamp('published_at')->nullable();
+            $table->timestamp('last_edited_at')->nullable();
             $table->json('meta')->nullable();
+            $table->foreignId('photo_id')
+                ->nullable()
+                ->constrained('photos')
+                ->nullOnDelete();
             $table->timestamps();
 
             $table->index('slug');
             $table->index('published_at');
+            $table->index('status');
         });
     }
 

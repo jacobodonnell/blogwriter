@@ -111,7 +111,7 @@ class BundleCommand extends Command
                         break;
                     }
 
-                    continue; // Don't exclude .env.example, .env.freshinstall, etc.
+                    continue; // Don't exclude .env.example
                 }
 
                 if (str_starts_with($relativePath, (string) $pattern) || fnmatch($pattern, basename($relativePath))) {

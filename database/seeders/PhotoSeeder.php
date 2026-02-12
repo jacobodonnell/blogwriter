@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Photo;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class PhotoSeeder extends Seeder
@@ -12,9 +13,12 @@ class PhotoSeeder extends Seeder
      */
     public function run(): void
     {
+        $user = User::firstOrFail();
+
         // Create 5 demo photos
         for ($i = 1; $i <= 5; $i++) {
             Photo::factory()
+                ->state(['user_id' => $user->id])
                 ->published()
                 ->withDemoImage($i)
                 ->create([

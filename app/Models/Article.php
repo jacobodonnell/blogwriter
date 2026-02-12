@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 class Article extends Model
@@ -15,6 +16,7 @@ class Article extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'title',
         'slug',
         'summary',
@@ -71,6 +73,13 @@ class Article extends Model
                 $article->published_at = now()->startOfSecond();
             }
 
+            // Mutual exclusion: photo_id and meta.featured_image_url
+            $meta = $article->meta ?? [];
+            if ($article->photo_id && Arr::has($meta, 'featured_image_url')) {
+                Arr::forget($meta, 'featured_image_url');
+                $article->meta = $meta;
+            }
+
             // When saving an article that was already published before (has original published_at),
             // track the edit time. This handles both:
             // 1. Editing an already-published article (status stays published)
@@ -85,6 +94,14 @@ class Article extends Model
                 $article->last_edited_at = now()->startOfSecond();
             }
         });
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     /**
@@ -106,11 +123,12 @@ class Article extends Model
     }
 
     /**
-     * Get the featured image URL from the associated Photo.
+     * Get the featured image URL — meta URL first, then Photo relationship.
      */
     public function getFeaturedImageUrlAttribute(): ?string
     {
-        return $this->featuredPhoto?->image_url;
+        return Arr::get($this->meta ?? [], 'featured_image_url')
+            ?? $this->featuredPhoto?->image_url;
     }
 
     /**

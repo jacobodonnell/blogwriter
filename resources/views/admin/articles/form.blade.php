@@ -337,27 +337,23 @@
                                 </fieldset>
                             </div>
 
-                            {{-- Current Featured Photo Preview --}}
-                            @if($featuredPhoto)
+                            {{-- Current Featured Image Preview --}}
+                            @php
+                                $currentImageUrl = $article->featured_image_url ?? null;
+                            @endphp
+                            @if($currentImageUrl)
                                 <div class="mt-6">
                                     <p class="text-sm font-medium mb-2">Current Featured Image:</p>
                                     <figure class="relative max-w-xs">
-                                        <img src="{{ $featuredPhoto->image_url }}"
-                                             alt="{{ $featuredPhoto->alt_text }}"
+                                        <img src="{{ $currentImageUrl }}"
+                                             alt="{{ $featuredPhoto?->alt_text ?? 'Featured image' }}"
                                              class="w-full rounded-lg shadow-md">
-                                        <div class="absolute top-2 left-2">
-                                            <span class="badge badge-primary">
-                                                @if($featuredPhoto->isExternalUrl())
-                                                    🔗 External URL
-                                                @else
-                                                    📁 Uploaded Photo
-                                                @endif
-                                            </span>
-                                        </div>
                                     </figure>
-                                    <p class="text-xs text-base-content/50 mt-2">
-                                        {{ $featuredPhoto->alt_text }}
-                                    </p>
+                                    @if($featuredPhoto)
+                                        <p class="text-xs text-base-content/50 mt-2">
+                                            {{ $featuredPhoto->alt_text }}
+                                        </p>
+                                    @endif
                                 </div>
                             @endif
                         </div>

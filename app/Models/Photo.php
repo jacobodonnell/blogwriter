@@ -6,6 +6,7 @@ use App\Enums\Status;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -19,6 +20,7 @@ class Photo extends Model implements HasMedia
     use InteractsWithMedia;
 
     protected $fillable = [
+        'user_id',
         'filename',
         'slug',
         'caption',
@@ -80,6 +82,14 @@ class Photo extends Model implements HasMedia
     }
 
     /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
      * Get all articles using this photo as featured image.
      *
      * @return HasMany<Article, $this>
@@ -90,21 +100,13 @@ class Photo extends Model implements HasMedia
     }
 
     /**
-     * Get the photo's image URL (external or uploaded).
+     * Get the photo's image URL from MediaLibrary.
      */
     protected function imageUrl(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->meta['external_url'] ?? $this->getFirstMedia('image')?->getUrl('large')
+            get: fn (): ?string => $this->getFirstMedia('image')?->getUrl('large')
         );
-    }
-
-    /**
-     * Check if photo uses external URL instead of uploaded file.
-     */
-    public function isExternalUrl(): bool
-    {
-        return isset($this->meta['external_url']);
     }
 
     /**
@@ -119,6 +121,18 @@ class Photo extends Model implements HasMedia
         return $query->where('status', Status::Published)
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now());
+    }
+
+    /**
+     * Scope for draft photos.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function draft($query)
+    {
+        return $query->where('status', Status::Draft);
     }
 
     /**

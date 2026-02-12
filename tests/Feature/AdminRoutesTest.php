@@ -2,12 +2,11 @@
 
 use App\Models\Article;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 
 beforeEach(function (): void {
     $this->user = User::factory()->create([
         'email' => 'admin@example.com',
-        'password' => Hash::make('password123'),
+        'password' => 'password123',
     ]);
 });
 

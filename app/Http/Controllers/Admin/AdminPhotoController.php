@@ -77,6 +77,16 @@ class AdminPhotoController extends Controller
     }
 
     /**
+     * Display the specified photo.
+     */
+    public function show(Photo $photo): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    {
+        return view('admin.photos.show', [
+            'photo' => $photo,
+        ]);
+    }
+
+    /**
      * Show the form for editing the specified photo.
      */
     public function edit(Photo $photo): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View

@@ -2,6 +2,7 @@
 
 use App\Models\Article;
 use App\Models\Photo;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -29,23 +30,19 @@ it('isPublic returns false for published photo with future date', function (): v
     expect($photo->isPublic())->toBeFalse();
 });
 
-it('isExternalUrl detects external URL photos', function (): void {
-    $externalPhoto = Photo::factory()->create([
-        'meta' => ['external_url' => 'https://example.com/image.jpg'],
-    ]);
-    $uploadedPhoto = Photo::factory()->create([
-        'meta' => [],
-    ]);
+it('has user relationship', function (): void {
+    $user = User::factory()->create();
+    $photo = Photo::factory()->create(['user_id' => $user->id]);
 
-    expect($externalPhoto->isExternalUrl())->toBeTrue();
-    expect($uploadedPhoto->isExternalUrl())->toBeFalse();
+    expect($photo->user->id)->toBe($user->id);
 });
 
 it('articles relationship returns correct articles', function (): void {
-    $photo = Photo::factory()->published()->create();
-    $article1 = Article::factory()->published()->create(['photo_id' => $photo->id]);
-    $article2 = Article::factory()->published()->create(['photo_id' => $photo->id]);
-    $otherArticle = Article::factory()->published()->create();
+    $user = User::factory()->create();
+    $photo = Photo::factory()->published()->create(['user_id' => $user->id]);
+    $article1 = Article::factory()->published()->create(['user_id' => $user->id, 'photo_id' => $photo->id]);
+    $article2 = Article::factory()->published()->create(['user_id' => $user->id, 'photo_id' => $photo->id]);
+    $otherArticle = Article::factory()->published()->create(['user_id' => $user->id]);
 
     $articles = $photo->articles()->get();
 
