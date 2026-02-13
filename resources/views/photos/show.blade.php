@@ -3,6 +3,20 @@
     {{-- h-entry for IndieWeb --}}
     <article class="h-entry max-w-4xl mx-auto">
 
+        {{-- Auth Toolbar --}}
+        @auth
+            <div class="flex items-center gap-2 mb-6">
+                <a href="{{ route('admin.photos.index') }}" class="btn btn-ghost btn-sm gap-2">
+                    <i class="ph ph-images"></i>
+                    All Photos
+                </a>
+                <a href="{{ route('admin.photos.edit', $photo) }}" class="btn btn-ghost btn-sm gap-2">
+                    <i class="ph ph-pencil-simple"></i>
+                    Edit
+                </a>
+            </div>
+        @endauth
+
         {{-- Breadcrumbs --}}
         <nav class="text-sm breadcrumbs mb-6">
             <ul>

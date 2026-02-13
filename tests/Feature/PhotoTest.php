@@ -6,14 +6,14 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 it('displays photo gallery with only published photos', function (): void {
-    $publishedPhoto = Photo::factory()->published()->create(['caption' => 'Published Photo Caption']);
-    $draftPhoto = Photo::factory()->draft()->create(['caption' => 'Draft Photo Caption']);
+    $publishedPhoto = Photo::factory()->published()->create(['alt_text' => 'Published Photo Alt']);
+    $draftPhoto = Photo::factory()->draft()->create(['alt_text' => 'Draft Photo Alt']);
 
     $response = $this->get(route('photos.index'));
 
     $response->assertSuccessful();
-    $response->assertSee('Published Photo Caption');
-    $response->assertDontSee('Draft Photo Caption');
+    $response->assertSee('Published Photo Alt');
+    $response->assertDontSee('Draft Photo Alt');
 });
 
 it('displays published photo by slug', function (): void {

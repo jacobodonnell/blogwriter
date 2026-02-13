@@ -1,24 +1,35 @@
 <x-layouts.public title="Home - {{ config('app.name', 'BlogWriter') }}">
 
     {{-- h-feed for IndieWeb --}}
-    <div class="h-feed max-w-4xl mx-auto">
-        
+    <div class="h-feed max-w-5xl mx-auto">
+
         {{-- Feed Header --}}
         <header class="mb-8">
             <h1 class="text-3xl font-bold mb-2">Recent Articles</h1>
             <p class="text-base-content/60">Latest thoughts on technology, life, and the absurdity of modern startup culture.</p>
         </header>
 
-        {{-- Articles List --}}
+        {{-- Articles Bento Grid --}}
         @if($articles->count() > 0)
-            <div class="space-y-8">
-                @foreach($articles as $article)
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach($articles as $index => $article)
                     {{-- h-entry for each article --}}
-                    <article class="h-entry card bg-base-100 shadow-sm border border-base-200">
+                    <article class="h-entry card bg-base-100 shadow-sm border border-base-200 hover:shadow-md transition-shadow {{ $loop->first ? 'md:col-span-2 md:row-span-2' : '' }}">
+                        {{-- Featured Image --}}
+                        @if($article->featured_image_url)
+                            <figure class="{{ $loop->first ? 'aspect-[16/10]' : 'aspect-video' }} overflow-hidden">
+                                <a href="{{ route('article.show', $article->slug) }}">
+                                    <img src="{{ $article->featured_image_url }}"
+                                         alt="{{ $article->title }}"
+                                         class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                                </a>
+                            </figure>
+                        @endif
+
                         <div class="card-body">
                             {{-- Categories --}}
                             @if($article->categories->count() > 0)
-                                <div class="flex flex-wrap gap-2 mb-3">
+                                <div class="flex flex-wrap gap-2">
                                     @foreach($article->categories as $category)
                                         <a href="{{ route('category.show', $category->slug) }}"
                                            class="badge badge-primary badge-sm">
@@ -28,24 +39,15 @@
                                 </div>
                             @endif
 
-                            {{-- Featured Image --}}
-                            @if($article->featured_image_url)
-                                <div class="aspect-video w-full overflow-hidden rounded-lg mb-4">
-                                    <img src="{{ $article->featured_image_url }}"
-                                         alt="{{ $article->title }}"
-                                         class="w-full h-full object-cover">
-                                </div>
-                            @endif
-
                             {{-- Title (p-name) --}}
-                            <h2 class="p-name card-title text-2xl">
+                            <h2 class="p-name card-title {{ $loop->first ? 'text-2xl md:text-3xl' : 'text-lg' }}">
                                 <a href="{{ route('article.show', $article->slug) }}" class="u-url hover:link-primary">
                                     {{ $article->title }}
                                 </a>
                             </h2>
 
                             {{-- Meta --}}
-                            <div class="flex items-center gap-4 text-sm text-base-content/60 mb-4">
+                            <div class="flex items-center gap-4 text-sm text-base-content/60">
                                 <time class="dt-published" datetime="{{ $article->published_at?->toIso8601String() }}">
                                     {{ $article->published_at?->format('F j, Y') }}
                                 </time>
@@ -55,14 +57,23 @@
                                 </span>
                             </div>
 
-                            {{-- Summary (p-summary) --}}
-                            <p class="p-summary text-base-content/80 leading-relaxed">
-                                {{ $article->excerpt }}
-                            </p>
+                            {{-- Summary (p-summary) — hero card gets full excerpt --}}
+                            @if($loop->first || $article->excerpt)
+                                <p class="p-summary text-base-content/80 leading-relaxed {{ $loop->first ? '' : 'line-clamp-2' }}">
+                                    {{ $article->excerpt }}
+                                </p>
+                            @endif
 
-                            {{-- Read More --}}
-                            <div class="card-actions justify-end mt-4">
-                                <a href="{{ route('article.show', $article->slug) }}" 
+                            {{-- Card Actions --}}
+                            <div class="card-actions justify-end mt-4 items-center">
+                                @auth
+                                    <a href="{{ route('admin.articles.edit', $article) }}"
+                                       class="btn btn-ghost btn-xs gap-1">
+                                        <i class="ph ph-pencil-simple"></i>
+                                        Edit
+                                    </a>
+                                @endauth
+                                <a href="{{ route('article.show', $article->slug) }}"
                                    class="btn btn-primary btn-sm">
                                     Read More
                                     <i class="ph ph-arrow-right"></i>

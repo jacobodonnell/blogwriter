@@ -2,7 +2,21 @@
 
     {{-- h-entry for IndieWeb --}}
     <article class="h-entry max-w-3xl mx-auto">
-        
+
+        {{-- Auth Toolbar --}}
+        @auth
+            <div class="flex items-center gap-2 mb-6">
+                <a href="{{ route('admin.articles.index') }}" class="btn btn-ghost btn-sm gap-2">
+                    <i class="ph ph-article"></i>
+                    All Articles
+                </a>
+                <a href="{{ route('admin.articles.edit', $article) }}" class="btn btn-ghost btn-sm gap-2">
+                    <i class="ph ph-pencil-simple"></i>
+                    Edit
+                </a>
+            </div>
+        @endauth
+
         {{-- Breadcrumbs --}}
         <nav class="text-sm breadcrumbs mb-6">
             <ul>
