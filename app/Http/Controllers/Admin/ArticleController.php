@@ -24,7 +24,7 @@ class ArticleController extends Controller
     /**
      * Display a listing of articles.
      */
-    public function index(Request $request): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function index(Request $request): \Illuminate\View\View
     {
         $query = Article::query()
             ->with('categories')
@@ -111,7 +111,7 @@ class ArticleController extends Controller
     /**
      * Display the full-page preview for an article.
      */
-    public function show(Article $article): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function show(Article $article): \Illuminate\View\View
     {
         $article->load('categories');
 
@@ -123,7 +123,7 @@ class ArticleController extends Controller
     /**
      * Show the customizer editor for the specified article.
      */
-    public function edit(Article $article): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function edit(Article $article): \Illuminate\View\View
     {
         $article->load('categories');
         $categories = Category::orderBy('name')->get();

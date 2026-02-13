@@ -23,7 +23,7 @@ class AdminPhotoController extends Controller
     /**
      * Display a listing of photos.
      */
-    public function index(Request $request): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function index(Request $request): \Illuminate\View\View
     {
         $query = Photo::query()
             ->orderBy('created_at', 'desc');
@@ -42,7 +42,7 @@ class AdminPhotoController extends Controller
     /**
      * Show the form for creating a new photo.
      */
-    public function create(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function create(): \Illuminate\View\View
     {
         return view('admin.photos.create');
     }
@@ -93,7 +93,7 @@ class AdminPhotoController extends Controller
     /**
      * Display the specified photo.
      */
-    public function show(Photo $photo): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function show(Photo $photo): \Illuminate\View\View
     {
         return view('admin.photos.show', [
             'photo' => $photo,
@@ -103,7 +103,7 @@ class AdminPhotoController extends Controller
     /**
      * Show the form for editing the specified photo.
      */
-    public function edit(Photo $photo): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function edit(Photo $photo): \Illuminate\View\View
     {
         return view('admin.photos.edit', [
             'photo' => $photo,

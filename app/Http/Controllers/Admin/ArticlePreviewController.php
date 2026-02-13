@@ -17,7 +17,7 @@ class ArticlePreviewController extends Controller
     /**
      * Update article for live preview (AJAX auto-save).
      */
-    public function update(UpdateArticlePreviewRequest $request, Article $article): \Illuminate\Contracts\View\View
+    public function update(UpdateArticlePreviewRequest $request, Article $article): \Illuminate\View\View
     {
         $data = $request->validated();
 
@@ -30,14 +30,10 @@ class ArticlePreviewController extends Controller
         }
 
         if (isset($data['slug']) && $data['slug'] !== '') {
-            $newSlug = null;
-
             // Auto-generate slug from title if slug is a placeholder
-            if (preg_match('/^untitled-[a-z0-9]{8}$/', (string) $data['slug']) && isset($data['title']) && $data['title'] !== '') {
-                $newSlug = Str::slug($data['title']);
-            } else {
-                $newSlug = $data['slug'];
-            }
+            $newSlug = preg_match('/^untitled-[a-z0-9]{8}$/', (string) $data['slug']) && isset($data['title']) && $data['title'] !== ''
+                ? Str::slug($data['title'])
+                : $data['slug'];
 
             // Only update slug if it's unique (excluding this article)
             if ($newSlug && $newSlug !== $article->slug) {

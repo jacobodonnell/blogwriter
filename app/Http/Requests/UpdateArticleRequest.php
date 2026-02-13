@@ -78,12 +78,6 @@ class UpdateArticleRequest extends FormRequest
                     $validator->errors()->add('featured_image', 'Please use only one method to add a featured image.');
                 }
 
-                // Check for both URL and file upload (legacy check - now redundant with above)
-                if ($this->has('featured_image') && $this->filled('featured_image') && $this->hasFile('featured_image_file')) {
-                    $validator->errors()->add('featured_image', 'Cannot provide both URL and file upload.');
-                    $validator->errors()->add('featured_image_file', 'Cannot provide both URL and file upload.');
-                }
-
                 // Validate URL file extension if present
                 // Modern CDN URLs (Imgur, Unsplash, Cloudflare Images) don't have file extensions
                 // So we only validate the extension if one is present in the URL path

@@ -9,7 +9,7 @@ class ArticleController extends Controller
     /**
      * Display the homepage with recent articles.
      */
-    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function index(): \Illuminate\View\View
     {
         $articles = Article::published()
             ->with('categories')
@@ -24,7 +24,7 @@ class ArticleController extends Controller
     /**
      * Display a single article.
      */
-    public function show(string $slug): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+    public function show(string $slug): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
         $article = Article::published()
             ->where('slug', $slug)
