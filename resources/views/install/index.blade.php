@@ -42,7 +42,7 @@
                     <div class="divider"></div>
 
                     <div class="text-sm text-base-content/70">
-                        <p>Need help? Check the <a href="https://blogwriter-docs.jacobodonnell.me/docs/getting-started/installation/" class="link link-primary" target="_blank">installation documentation</a>.</p>
+                        <p>Need help? Check the <a href="https://blogwriter.tech/docs/getting-started/installation" class="link link-primary" target="_blank">installation documentation</a>.</p>
                     </div>
                 </div>
             </div>
