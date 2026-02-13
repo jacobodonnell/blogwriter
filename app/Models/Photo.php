@@ -96,7 +96,7 @@ class Photo extends Model implements HasMedia
             get: function (): ?string {
                 $media = $this->getFirstMedia('image');
 
-                if (! $media) {
+                if (! $media instanceof \Spatie\MediaLibrary\MediaCollections\Models\Media) {
                     return null;
                 }
 
