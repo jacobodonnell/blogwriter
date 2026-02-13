@@ -10,6 +10,7 @@
             content: @js(old('content', $article->content ?? '')),
             summary: @js(old('summary', $article->summary ?? '')),
             hasFileUpload: false,
+            uploadNotice: false,
 
             generateSlug() {
                 if (!this.slug && this.title) {
@@ -26,6 +27,23 @@
             },
 
          }">
+
+        {{-- Upload Notice Toast --}}
+        <div x-show="uploadNotice"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 translate-y-2"
+             class="alert alert-info alert-sm mb-3 text-sm py-2"
+             x-cloak>
+            <i class="ph ph-info text-lg"></i>
+            <span>Image selected — press the button below to upload and save.</span>
+            <button type="button" @click="uploadNotice = false" class="btn btn-ghost btn-xs btn-circle">
+                <i class="ph ph-x"></i>
+            </button>
+        </div>
 
         {{-- Validation Errors --}}
         @if ($errors->any())
@@ -44,7 +62,7 @@
               enctype="multipart/form-data"
               x-target="preview-panel"
               @ajax:success="saved = true; setTimeout(() => saved = false, 2000)"
-              @input.throttle.1000ms="if (!hasFileUpload) $el.requestSubmit()"
+              @input.debounce.600ms="if (!hasFileUpload) $el.requestSubmit()"
               novalidate>
             @csrf
             @method('PUT')
@@ -168,12 +186,25 @@
                     </div>
                 </details>
 
-                {{-- Save Button --}}
-                <button type="submit" class="btn btn-primary w-full gap-2">
-                    <i class="ph ph-floppy-disk"></i>
-                    <span x-show="!hasFileUpload">Save</span>
-                    <span x-show="hasFileUpload" x-cloak>Save with Image</span>
+            </div>
+
+            {{-- Sticky bottom button --}}
+            <div class="sticky bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-base-100 from-60% to-transparent pt-8">
+                {{-- Upload + View: shown when file is selected (native form submit, bypasses AJAX) --}}
+                <button x-show="hasFileUpload" type="button" x-cloak
+                        @click="let form = $el.closest('form'); form.removeAttribute('x-target'); form.submit()"
+                        class="btn btn-primary w-full gap-2">
+                    <i class="ph ph-upload-simple"></i>
+                    Upload Image and View Live
                 </button>
+
+                {{-- View Live: shown normally (navigates to frontend) --}}
+                <a x-show="!hasFileUpload"
+                   href="{{ route('article.show', $article->slug) }}"
+                   class="btn btn-primary w-full gap-2">
+                    <i class="ph ph-arrow-square-out"></i>
+                    View Live
+                </a>
             </div>
         </form>
     </div>

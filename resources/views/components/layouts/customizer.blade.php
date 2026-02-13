@@ -18,46 +18,45 @@
             dragging: false,
             dragTarget: null,
             startX: 0,
-            startWidth: 0,
             saved: false,
             init() {
                 this.$watch('drawerOpen', v => localStorage.setItem('customizerDrawerOpen', JSON.stringify(v)));
                 this.$watch('panelWidth', w => localStorage.setItem('customizerWidth', w));
                 this.$watch('previewWidth', w => localStorage.setItem('customizerPreviewWidth', w));
             },
-            get availableWidth() {
-                const gutter1 = this.drawerOpen ? 8 : 0;
-                const drawer = this.drawerOpen ? this.panelWidth : 0;
-                const gutter2 = 8;
-                return window.innerWidth - drawer - gutter1 - gutter2;
+            get previewAreaWidth() {
+                const drawer = this.drawerOpen ? this.panelWidth + 8 : 0;
+                return window.innerWidth - drawer;
             },
             setPreset(w) {
                 this.previewWidth = w;
+            },
+            startDrag(target, event) {
+                this.dragging = true;
+                this.dragTarget = target;
+                this.startX = event.clientX;
+                document.body.style.userSelect = 'none';
+                document.body.style.cursor = 'col-resize';
             }
          }"
          @pointermove.window="if (dragging) {
             let delta = $event.clientX - startX;
+            startX = $event.clientX;
             if (dragTarget === 'drawer') {
-                panelWidth = Math.min(700, Math.max(320, startWidth + delta));
-            } else if (dragTarget === 'preview') {
-                previewWidth = Math.max(320, Math.min(availableWidth, startWidth + delta));
+                panelWidth = Math.min(700, Math.max(320, panelWidth + delta));
+            } else if (dragTarget === 'preview-left') {
+                previewWidth = Math.max(320, Math.min(previewAreaWidth, previewWidth - delta));
+            } else if (dragTarget === 'preview-right') {
+                previewWidth = Math.max(320, Math.min(previewAreaWidth, previewWidth + delta));
             }
          }"
-         @pointerup.window="dragging = false; dragTarget = null; document.body.style.userSelect = ''; document.body.style.cursor = '';"
+         @pointerup.window="if (dragging) { dragging = false; dragTarget = null; document.body.style.userSelect = ''; document.body.style.cursor = ''; }"
          class="flex flex-col h-screen">
 
         {{-- Top Navbar --}}
         <header class="navbar bg-base-100 border-b border-base-300 px-4 shrink-0 z-30">
             <div class="flex-1 gap-2">
-                <a href="{{ route('admin.articles.index') }}" class="btn btn-ghost btn-sm gap-2">
-                    <i class="ph ph-arrow-left text-lg"></i>
-                    <span class="hidden sm:inline">Articles</span>
-                </a>
-                <div class="divider divider-horizontal mx-0 hidden sm:flex"></div>
-                <span class="text-sm text-base-content/60 truncate max-w-xs hidden sm:inline">{{ $article->title }}</span>
-            </div>
-            <div class="flex-none gap-1">
-                {{-- Drawer Toggle --}}
+                {{-- Drawer Toggle (left side) --}}
                 <button @click="drawerOpen = !drawerOpen" class="btn btn-ghost btn-sm gap-1" :class="{ 'btn-active': drawerOpen }">
                     <i class="ph ph-sidebar-simple text-lg"></i>
                     <span class="hidden sm:inline">Editor</span>
@@ -65,6 +64,13 @@
 
                 <div class="divider divider-horizontal mx-0 hidden sm:flex"></div>
 
+                <a href="{{ route('admin.articles.index') }}" class="btn btn-ghost btn-sm gap-2">
+                    <i class="ph ph-arrow-left text-lg"></i>
+                    <span class="hidden sm:inline">Articles</span>
+                </a>
+                <span class="text-sm text-base-content/60 truncate max-w-xs hidden sm:inline">{{ $article->title }}</span>
+            </div>
+            <div class="flex-none gap-1">
                 {{-- Viewport Presets --}}
                 <div class="join hidden sm:flex">
                     <button @click="setPreset(375)" class="btn btn-ghost btn-xs join-item" :class="{ 'btn-active': previewWidth === 375 }" title="Phone (375px)">
@@ -83,8 +89,9 @@
 
                 <div class="divider divider-horizontal mx-0 hidden sm:flex"></div>
 
-                {{-- Saved Indicator --}}
-                <span x-show="saved" x-transition.opacity.duration.300ms class="text-success text-sm flex items-center gap-1" x-cloak>
+                {{-- Saved Indicator (always reserves space, fade in slow / fade out fast) --}}
+                <span class="text-success text-sm flex items-center gap-1"
+                      :class="saved ? 'opacity-100 transition-opacity duration-500 ease-in' : 'opacity-0 transition-opacity duration-150 ease-out'">
                     <i class="ph ph-check-circle"></i> Saved
                 </span>
 
@@ -137,49 +144,62 @@
                  x-transition:leave="transition ease-in duration-150"
                  x-transition:leave-start="opacity-100 translate-x-0"
                  x-transition:leave-end="opacity-0 -translate-x-4"
-                 class="shrink-0 overflow-y-auto p-4 bg-base-100 sm:max-w-none max-w-full"
+                 class="shrink-0 overflow-y-auto bg-base-100 sm:max-w-none max-w-full relative"
                  :style="{ width: window.innerWidth < 640 ? '100%' : panelWidth + 'px' }"
                  x-cloak>
 
                 {{-- Mobile close button --}}
-                <div class="sm:hidden flex justify-between items-center mb-3">
+                <div class="sm:hidden flex justify-between items-center p-4 pb-0">
                     <span class="font-medium text-sm">Editor</span>
                     <button @click="drawerOpen = false" class="btn btn-ghost btn-xs btn-circle">
                         <i class="ph ph-x text-lg"></i>
                     </button>
                 </div>
 
-                {{ $slot }}
+                {{-- Scrollable form content with bottom padding for sticky save button --}}
+                <div class="p-4 pb-20">
+                    {{ $slot }}
+                </div>
             </div>
 
-            {{-- Gutter 1: Between drawer and preview --}}
+            {{-- Gutter: Right edge of drawer --}}
             <div x-show="drawerOpen"
                  class="shrink-0 w-2 bg-base-300 cursor-col-resize hover:bg-primary/20 transition-colors items-center justify-center hidden sm:flex"
-                 @pointerdown.prevent="dragging = true; dragTarget = 'drawer'; startX = $event.clientX; startWidth = panelWidth; document.body.style.userSelect = 'none'; document.body.style.cursor = 'col-resize';"
+                 @pointerdown.prevent="startDrag('drawer', $event)"
                  x-cloak>
                 <div class="w-0.5 h-8 bg-base-content/20 rounded-full"></div>
             </div>
 
-            {{-- Preview Area (preview + gutter2 + spacer) --}}
-            <div class="flex-1 overflow-hidden bg-base-300 hidden sm:flex"
+            {{-- Preview Area --}}
+            <div class="flex-1 overflow-hidden bg-base-300 hidden sm:flex items-stretch"
                  :class="{ '!flex': !drawerOpen || window.innerWidth >= 640 }">
 
-                {{-- Centered Preview --}}
-                <div class="flex-1 overflow-y-auto flex justify-center">
-                    <div class="bg-base-200 overflow-y-auto min-h-full"
-                         :style="{ width: previewWidth > 0 ? previewWidth + 'px' : '100%', maxWidth: '100%' }">
+                {{-- Preview wrapper: gutter-left + preview + gutter-right --}}
+                <div class="flex mx-auto items-stretch"
+                     :style="{ width: previewWidth > 0 ? (previewWidth + 16) + 'px' : '100%', maxWidth: '100%' }">
+
+                    {{-- Gutter: Left edge of preview --}}
+                    <div x-show="previewWidth > 0"
+                         class="shrink-0 w-2 bg-base-300 cursor-col-resize hover:bg-primary/20 transition-colors flex items-center justify-center"
+                         @pointerdown.prevent="startDrag('preview-left', $event)"
+                         x-cloak>
+                        <div class="w-0.5 h-8 bg-base-content/20 rounded-full"></div>
+                    </div>
+
+                    {{-- Preview Content --}}
+                    <div class="flex-1 overflow-y-auto bg-base-200 min-h-full">
                         <div class="p-6">
                             {{ $preview }}
                         </div>
                     </div>
-                </div>
 
-                {{-- Gutter 2: Right side of preview (resize preview width) --}}
-                <div x-show="previewWidth > 0"
-                     class="shrink-0 w-2 bg-base-300 cursor-col-resize hover:bg-primary/20 transition-colors flex items-center justify-center"
-                     @pointerdown.prevent="dragging = true; dragTarget = 'preview'; startX = $event.clientX; startWidth = previewWidth; document.body.style.userSelect = 'none'; document.body.style.cursor = 'col-resize';"
-                     x-cloak>
-                    <div class="w-0.5 h-8 bg-base-content/20 rounded-full"></div>
+                    {{-- Gutter: Right edge of preview --}}
+                    <div x-show="previewWidth > 0"
+                         class="shrink-0 w-2 bg-base-300 cursor-col-resize hover:bg-primary/20 transition-colors flex items-center justify-center"
+                         @pointerdown.prevent="startDrag('preview-right', $event)"
+                         x-cloak>
+                        <div class="w-0.5 h-8 bg-base-content/20 rounded-full"></div>
+                    </div>
                 </div>
             </div>
         </div>
