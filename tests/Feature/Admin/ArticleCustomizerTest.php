@@ -54,26 +54,26 @@ it('requires auth for preview', function (): void {
     $response->assertRedirect();
 });
 
-it('returns preview partial for alpine ajax update requests', function (): void {
+it('returns preview partial for ajax preview update', function (): void {
     $article = Article::factory()->draft()->create([
         'user_id' => $this->user->id,
         'title' => 'Original Title',
         'content' => 'Original content',
     ]);
 
-    $response = put(route('admin.articles.update', $article), [
+    $response = put(route('admin.articles.preview.update', $article), [
         'title' => 'Updated Title',
         'slug' => $article->slug,
         'content' => 'Updated content here',
         'status' => 'draft',
-    ], ['X-Alpine-Request' => 'true']);
+    ]);
 
     $response->assertOk();
     $response->assertViewIs('admin.articles.preview');
     $response->assertSee('Updated Title');
 });
 
-it('redirects normally for non-ajax update requests', function (): void {
+it('redirects normally for full save update requests', function (): void {
     $article = Article::factory()->draft()->create([
         'user_id' => $this->user->id,
     ]);
@@ -101,7 +101,76 @@ it('creates draft immediately from create route', function (): void {
     $response->assertRedirect(route('admin.articles.edit', $article));
 });
 
-it('autosave preserves existing featured image', function (): void {
+it('creates draft with lowercase placeholder slug', function (): void {
+    get(route('admin.articles.create'));
+
+    $article = Article::latest()->first();
+
+    expect($article->slug)->toMatch('/^untitled-[a-z0-9]{8}$/');
+});
+
+it('preview update accepts relaxed validation', function (): void {
+    $article = Article::factory()->draft()->create([
+        'user_id' => $this->user->id,
+        'title' => 'Original',
+        'slug' => 'untitled-abcd1234',
+    ]);
+
+    $response = put(route('admin.articles.preview.update', $article), [
+        'title' => 'Hi',
+        'slug' => 'untitled-abcd1234',
+        'status' => 'draft',
+    ]);
+
+    $response->assertOk();
+    $response->assertViewIs('admin.articles.preview');
+});
+
+it('preview update auto-generates slug from title when placeholder', function (): void {
+    $article = Article::factory()->draft()->create([
+        'user_id' => $this->user->id,
+        'title' => 'Untitled Article',
+        'slug' => 'untitled-abcd1234',
+    ]);
+
+    $response = put(route('admin.articles.preview.update', $article), [
+        'title' => 'My Great Post',
+        'slug' => 'untitled-abcd1234',
+        'status' => 'draft',
+    ]);
+
+    $response->assertOk();
+    $article->refresh();
+    expect($article->slug)->toBe('my-great-post');
+});
+
+it('preview update skips slug when it conflicts with another article', function (): void {
+    Article::factory()->published()->create([
+        'user_id' => $this->user->id,
+        'slug' => 'there',
+    ]);
+
+    $article = Article::factory()->draft()->create([
+        'user_id' => $this->user->id,
+        'title' => 'Untitled Article',
+        'slug' => 'untitled-abcd1234',
+    ]);
+
+    $response = put(route('admin.articles.preview.update', $article), [
+        'title' => 'There',
+        'slug' => 'untitled-abcd1234',
+        'status' => 'draft',
+    ]);
+
+    $response->assertOk();
+    $article->refresh();
+    // Slug should remain unchanged since "there" is taken
+    expect($article->slug)->toBe('untitled-abcd1234');
+    // But title should still update
+    expect($article->title)->toBe('There');
+});
+
+it('full save preserves existing featured image', function (): void {
     $article = Article::factory()->draft()->create([
         'user_id' => $this->user->id,
         'meta' => ['featured_image_url' => 'https://example.com/image.jpg'],
@@ -112,9 +181,9 @@ it('autosave preserves existing featured image', function (): void {
         'slug' => $article->slug,
         'content' => 'Updated content',
         'status' => 'draft',
-    ], ['X-Alpine-Request' => 'true']);
+    ]);
 
-    $response->assertOk();
+    $response->assertRedirect();
 
     $article->refresh();
     expect($article->meta['featured_image_url'])->toBe('https://example.com/image.jpg');

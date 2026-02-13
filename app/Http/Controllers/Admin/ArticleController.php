@@ -57,7 +57,7 @@ class ArticleController extends Controller
         $article = Article::create([
             'user_id' => auth()->id(),
             'title' => 'Untitled Article',
-            'slug' => 'untitled-'.Str::random(8),
+            'slug' => 'untitled-'.Str::lower(Str::random(8)),
             'content' => '',
             'summary' => '',
             'status' => Status::Draft,
@@ -173,8 +173,8 @@ class ArticleController extends Controller
         $article->update([
             'title' => $data['title'],
             'slug' => $data['slug'],
-            'content' => $data['content'],
-            'summary' => $this->generateSummary->handle($data['summary'] ?? null, $data['content']),
+            'content' => $data['content'] ?? $article->content,
+            'summary' => $this->generateSummary->handle($data['summary'] ?? null, $data['content'] ?? $article->content),
             'status' => $data['status'],
             'published_at' => $data['published_at'] ?? $article->published_at,
             'meta' => $meta,
@@ -182,12 +182,6 @@ class ArticleController extends Controller
         ]);
 
         $article->categories()->sync($data['categories'] ?? []);
-
-        if ($request->header('X-Alpine-Request')) {
-            $article->refresh()->load('categories');
-
-            return view('admin.articles.preview', ['article' => $article]);
-        }
 
         return redirect()->route('admin.articles.edit', $article)
             ->with('success', 'Article updated successfully.');

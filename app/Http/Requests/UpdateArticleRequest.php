@@ -34,7 +34,7 @@ class UpdateArticleRequest extends FormRequest
                 Rule::unique('articles', 'slug')->ignore($articleId),
             ],
             'summary' => ['nullable', 'string', 'max:500'],
-            'content' => ['required', 'string'],
+            'content' => ['nullable', 'string'],
             'status' => ['required', 'in:draft,published'],
             'photo_id' => ['nullable', 'exists:photos,id'],
             'featured_image' => ['nullable', 'string', 'url', 'max:500'],
