@@ -22,11 +22,11 @@ class StoreArticleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['required', 'string', 'min:3', 'max:255'],
-            'slug' => ['required', 'string', 'unique:articles', 'max:255', 'regex:/^[a-z0-9-]+$/'],
+            'title' => ['nullable', 'string', 'min:3', 'max:255'],
+            'slug' => ['nullable', 'string', 'unique:articles', 'max:255', 'regex:/^[a-z0-9-]+$/'],
             'summary' => ['nullable', 'string', 'max:500'],
-            'content' => ['required', 'string'],
-            'status' => ['required', 'in:draft,published'],
+            'content' => ['nullable', 'string'],
+            'status' => ['nullable', 'in:draft,published'],
             'photo_id' => ['nullable', 'exists:photos,id'],
             'featured_image' => ['nullable', 'string', 'url', 'max:500'],
             'featured_image_file' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],

@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Actions\GenerateArticleSummaryAction;
 use App\Actions\Photos\CreatePhotoFromUploadAction;
+use App\Enums\Status;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreArticleRequest;
 use App\Http\Requests\UpdateArticleRequest;
 use App\Models\Article;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ArticleController extends Controller
 {
@@ -47,15 +49,20 @@ class ArticleController extends Controller
     }
 
     /**
-     * Show the form for creating a new article.
+     * Create a blank draft article and redirect to customizer.
      */
-    public function create(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function create(): \Illuminate\Http\RedirectResponse
     {
-        $categories = Category::orderBy('name')->get();
-
-        return view('admin.articles.create', [
-            'categories' => $categories,
+        $article = Article::create([
+            'user_id' => auth()->id(),
+            'title' => 'Untitled Article',
+            'slug' => 'untitled-'.Str::random(8),
+            'content' => '',
+            'summary' => '',
+            'status' => Status::Draft,
         ]);
+
+        return redirect()->route('admin.articles.edit', $article);
     }
 
     /**
@@ -101,14 +108,26 @@ class ArticleController extends Controller
     }
 
     /**
-     * Show the form for editing the specified article.
+     * Display the full-page preview for an article.
+     */
+    public function show(Article $article): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    {
+        $article->load('categories');
+
+        return view('admin.articles.preview-fullscreen', [
+            'article' => $article,
+        ]);
+    }
+
+    /**
+     * Show the customizer editor for the specified article.
      */
     public function edit(Article $article): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $article->load('categories');
         $categories = Category::orderBy('name')->get();
 
-        return view('admin.articles.edit', [
+        return view('admin.articles.customizer', [
             'article' => $article,
             'categories' => $categories,
         ]);
@@ -160,6 +179,12 @@ class ArticleController extends Controller
         ]);
 
         $article->categories()->sync($data['categories'] ?? []);
+
+        if ($request->header('X-Alpine-Request')) {
+            $article->refresh()->load('categories');
+
+            return view('admin.articles.preview', ['article' => $article]);
+        }
 
         return redirect()->route('admin.articles.edit', $article)
             ->with('success', 'Article updated successfully.');
