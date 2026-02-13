@@ -10,6 +10,7 @@ use App\Http\Requests\StoreArticleRequest;
 use App\Http\Requests\UpdateArticleRequest;
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\Photo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -126,10 +127,12 @@ class ArticleController extends Controller
     {
         $article->load('categories');
         $categories = Category::orderBy('name')->get();
+        $photos = Photo::latest()->limit(50)->get();
 
         return view('admin.articles.customizer', [
             'article' => $article,
             'categories' => $categories,
+            'photos' => $photos,
         ]);
     }
 

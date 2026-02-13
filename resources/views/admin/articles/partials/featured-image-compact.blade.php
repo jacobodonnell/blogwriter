@@ -27,7 +27,7 @@
     <div x-show="imgTab === 'photo'" x-transition>
         <select x-ref="photoSelect" name="photo_id" class="select select-bordered select-sm w-full">
             <option value="">No featured image</option>
-            @foreach(\App\Models\Photo::latest()->limit(50)->get() as $photo)
+            @foreach($photos as $photo)
                 <option value="{{ $photo->id }}" {{ $initialPhotoId == $photo->id ? 'selected' : '' }}>
                     {{ $photo->alt_text }}
                 </option>
