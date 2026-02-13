@@ -23,7 +23,8 @@
                 if (!this.summary && this.content) {
                     this.summary = this.content.substring(0, 255);
                 }
-            }
+            },
+
          }">
 
         {{-- Validation Errors --}}
@@ -42,6 +43,7 @@
               action="{{ route('admin.articles.update', $article) }}"
               enctype="multipart/form-data"
               x-target="preview-panel"
+              @ajax:success="saved = true; setTimeout(() => saved = false, 2000)"
               @input.throttle.1000ms="if (!hasFileUpload) $el.requestSubmit()"
               novalidate>
             @csrf
@@ -166,13 +168,12 @@
                     </div>
                 </details>
 
-                {{-- Manual Save Button (for file uploads) --}}
-                <div x-show="hasFileUpload" x-transition x-cloak>
-                    <button type="submit" class="btn btn-primary w-full gap-2">
-                        <i class="ph ph-floppy-disk"></i>
-                        Save with Image
-                    </button>
-                </div>
+                {{-- Save Button --}}
+                <button type="submit" class="btn btn-primary w-full gap-2">
+                    <i class="ph ph-floppy-disk"></i>
+                    <span x-show="!hasFileUpload">Save</span>
+                    <span x-show="hasFileUpload" x-cloak>Save with Image</span>
+                </button>
             </div>
         </form>
     </div>
