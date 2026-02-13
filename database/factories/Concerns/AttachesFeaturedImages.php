@@ -13,7 +13,7 @@ trait AttachesFeaturedImages
     protected function attachDemoImage(Model $model, int $imageNumber, string $collection = 'image'): void
     {
         $demoImagesPath = database_path('seeders/demo-images');
-        $imagePath = $demoImagesPath.'/demo-image-'.$imageNumber.'.png';
+        $imagePath = $demoImagesPath.'/demo-image-'.$imageNumber.'.jpg';
 
         // Validate file exists and is not empty
         if (! file_exists($imagePath) || filesize($imagePath) === 0) {

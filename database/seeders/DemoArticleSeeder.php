@@ -6,12 +6,12 @@ use App\Models\Article;
 use App\Models\Category;
 use App\Models\Photo;
 use App\Models\User;
-use Database\Factories\Concerns\AttachesFeaturedImages;
+use Database\Seeders\Concerns\ChecksExternalUrls;
 use Illuminate\Database\Seeder;
 
 class DemoArticleSeeder extends Seeder
 {
-    use AttachesFeaturedImages;
+    use ChecksExternalUrls;
 
     /**
      * Seed demo articles (5 articles from JSON: 4 published, 1 draft).
@@ -76,10 +76,5 @@ class DemoArticleSeeder extends Seeder
                 $article->categories()->attach($categoryIds);
             }
         }
-    }
-
-    private function isExternalUrl(?string $url): bool
-    {
-        return $url !== null && str_starts_with($url, 'http');
     }
 }

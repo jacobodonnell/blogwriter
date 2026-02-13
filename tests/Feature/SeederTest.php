@@ -57,4 +57,4 @@ describe('seeder tests', function (): void {
             expect($article->published_at)->not->toBeNull();
         }
     });
-})->group('slow');
+});
