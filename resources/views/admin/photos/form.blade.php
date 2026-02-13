@@ -13,11 +13,6 @@
                 <img src="{{ $photo->image_url }}"
                      alt="{{ $photo->alt_text }}"
                      class="w-full rounded-lg shadow-md">
-                @if($photo->isExternalUrl())
-                    <div class="absolute top-2 left-2">
-                        <span class="badge badge-primary">External URL</span>
-                    </div>
-                @endif
             </figure>
         </div>
     @endif
