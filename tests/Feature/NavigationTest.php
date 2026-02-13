@@ -18,10 +18,15 @@ it('returns successful response for admin navigation links when authenticated', 
 })->with([
     'dashboard' => fn () => route('admin.dashboard'),
     'articles index' => fn () => route('admin.articles.index'),
-    'articles create' => fn () => route('admin.articles.create'),
     'categories index' => fn () => route('admin.categories.index'),
     'settings' => fn () => route('admin.settings'),
 ]);
+
+it('redirects articles create to customizer editor', function (): void {
+    $this->actingAs($this->user)
+        ->get(route('admin.articles.create'))
+        ->assertRedirect();
+});
 
 it('redirects blog route to home', function (): void {
     $this->get('/blog')

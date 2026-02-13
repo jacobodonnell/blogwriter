@@ -17,11 +17,15 @@ beforeEach(function (): void {
 
 it('displays featured image form with tabs', function (): void {
     $response = $this->actingAs($this->user)
-        ->get(route('admin.articles.create'))
+        ->get(route('admin.articles.create'));
+
+    $response->assertRedirect();
+
+    $article = Article::latest()->first();
+    $response = $this->actingAs($this->user)
+        ->get(route('admin.articles.edit', $article))
         ->assertSuccessful();
 
-    $response->assertSee('External URL');
-    $response->assertSee('Upload File');
     $response->assertSee('name="featured_image"', false);
     $response->assertSee('name="featured_image_file"', false);
 });
