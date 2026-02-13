@@ -82,7 +82,7 @@
 
                             {{-- Hidden author info for h-entry --}}
                             <span class="p-author h-card hidden">
-                                <span class="p-name">{{ \App\Models\User::first()?->name ?? 'Author' }}</span>
+                                <span class="p-name">{{ $authorName }}</span>
                             </span>
                         </div>
                     </article>

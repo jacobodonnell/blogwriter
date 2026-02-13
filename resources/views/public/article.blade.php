@@ -69,7 +69,7 @@
             @else
                 {{-- Hidden author for h-entry --}}
                 <span class="p-author h-card hidden">
-                    <span class="p-name">{{ \App\Models\User::first()?->name ?? 'Author' }}</span>
+                    <span class="p-name">{{ $authorName }}</span>
                 </span>
             @endif
         </div>
@@ -108,20 +108,9 @@
                     <i class="ph ph-twitter-logo"></i>
                     Share on Twitter
                 </a>
-                <button onclick="navigator.clipboard.writeText('{{ url()->current() }}'); this.textContent = 'Copied!'; setTimeout(() => this.textContent = 'Copy Link', 2000)" 
-                        class="btn btn-sm btn-outline gap-2">
-                    <i class="ph ph-copy"></i>
-                    Copy Link
-                </button>
+                <x-copy-link-button :url="url()->current()" />
             </div>
         </footer>
-
-        {{-- Hidden metadata for microformats --}}
-        <div class="hidden">
-            <span class="dt-published">{{ $article->published_at?->toIso8601String() }}</span>
-            <span class="p-name">{{ $article->title }}</span>
-            <a class="u-url" href="{{ route('article.show', $article->slug) }}">Permalink</a>
-        </div>
     </article>
 
 </x-layouts.public>

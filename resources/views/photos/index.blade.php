@@ -45,7 +45,7 @@
                             <span class="p-name">{{ $photo->alt_text }}</span>
                             <time class="dt-published" datetime="{{ $photo->published_at->toIso8601String() }}">{{ $photo->published_at->format('F j, Y') }}</time>
                             <a class="u-url" href="{{ route('photos.show', $photo->slug) }}">Permalink</a>
-                            <span class="p-author h-card"><span class="p-name">{{ \App\Models\User::first()?->name ?? 'Author' }}</span></span>
+                            <span class="p-author h-card"><span class="p-name">{{ $authorName }}</span></span>
                         </span>
                     </article>
                 @endforeach

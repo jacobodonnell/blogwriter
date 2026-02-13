@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Models\Article;
 use App\Models\Photo;
+use App\Models\User;
 use App\Observers\ArticleObserver;
 use App\Observers\PhotoObserver;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -25,5 +27,9 @@ class AppServiceProvider extends ServiceProvider
     {
         Article::observe(ArticleObserver::class);
         Photo::observe(PhotoObserver::class);
+
+        View::composer(['public.*', 'photos.*'], function ($view): void {
+            $view->with('authorName', User::first()?->name ?? 'Author');
+        });
     }
 }
