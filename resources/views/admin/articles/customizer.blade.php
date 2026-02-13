@@ -12,8 +12,19 @@
             hasFileUpload: false,
             uploadNotice: false,
 
+            get isPlaceholderSlug() {
+                return /^untitled-[a-z0-9]{8}$/.test(this.slug);
+            },
+
+            get displaySlug() {
+                return this.isPlaceholderSlug ? '' : this.slug;
+            },
+            set displaySlug(v) {
+                this.slug = v;
+            },
+
             generateSlug() {
-                if (!this.slug && this.title) {
+                if (this.title && (!this.slug || this.slug.match(/^untitled-[a-z0-9]{8}$/))) {
                     this.slug = this.title.toLowerCase()
                         .replace(/[^a-z0-9]+/g, '-')
                         .replace(/^-+|-+$/g, '');
@@ -39,7 +50,7 @@
              class="alert alert-info alert-sm mb-3 text-sm py-2"
              x-cloak>
             <i class="ph ph-info text-lg"></i>
-            <span>Image selected — press the button below to upload and save.</span>
+            <span>Image selected — saving will publish this as a Photo on your site.</span>
             <button type="button" @click="uploadNotice = false" class="btn btn-ghost btn-xs btn-circle">
                 <i class="ph ph-x"></i>
             </button>
@@ -57,8 +68,9 @@
             </div>
         @endif
 
-        <form method="POST"
-              action="{{ route('admin.articles.update', $article) }}"
+        <form id="customizer-form"
+              method="POST"
+              action="{{ route('admin.articles.preview.update', $article) }}"
               enctype="multipart/form-data"
               x-target="preview-panel"
               @ajax:success="saved = true; setTimeout(() => saved = false, 2000)"
@@ -84,11 +96,12 @@
                 {{-- Slug --}}
                 <fieldset class="fieldset">
                     <legend class="fieldset-legend">Slug</legend>
+                    <input type="hidden" name="slug" :value="slug">
                     <div class="join w-full">
                         <span class="join-item btn btn-sm btn-disabled no-animation">/blog/</span>
-                        <input type="text" name="slug" x-model="slug"
+                        <input type="text" x-model="displaySlug"
                                class="join-item input input-bordered input-sm flex-1 @error('slug') input-error @enderror"
-                               placeholder="auto-generated">
+                               placeholder="auto-generated from title">
                     </div>
                     @error('slug')
                         <span class="text-error text-sm">{{ $message }}</span>
@@ -188,23 +201,43 @@
 
             </div>
 
-            {{-- Sticky bottom button --}}
+            {{-- Sticky bottom buttons --}}
             <div class="sticky bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-base-100 from-60% to-transparent pt-8">
-                {{-- Upload + View: shown when file is selected (native form submit, bypasses AJAX) --}}
-                <button x-show="hasFileUpload" type="button" x-cloak
-                        @click="let form = $el.closest('form'); form.removeAttribute('x-target'); form.submit()"
-                        class="btn btn-primary w-full gap-2">
-                    <i class="ph ph-upload-simple"></i>
-                    Upload Image and View Live
-                </button>
+                <div class="flex gap-2">
+                    {{-- Save / Upload & Save button --}}
+                    <button type="button"
+                            @click="let form = $el.closest('form'); form.removeAttribute('x-target'); form.action = '{{ route('admin.articles.update', $article) }}'; form.submit()"
+                            class="btn btn-primary flex-1 gap-2">
+                        <template x-if="hasFileUpload">
+                            <span class="flex items-center gap-2">
+                                <i class="ph ph-upload-simple"></i>
+                                Upload Photo & Save
+                            </span>
+                        </template>
+                        <template x-if="!hasFileUpload">
+                            <span class="flex items-center gap-2">
+                                <i class="ph ph-floppy-disk"></i>
+                                Save
+                            </span>
+                        </template>
+                    </button>
 
-                {{-- View Live: shown normally (navigates to frontend) --}}
-                <a x-show="!hasFileUpload"
-                   href="{{ route('article.show', $article->slug) }}"
-                   class="btn btn-primary w-full gap-2">
-                    <i class="ph ph-arrow-square-out"></i>
-                    View Live
-                </a>
+                    {{-- View Live button --}}
+                    @if($article->isPublished())
+                        <a href="{{ route('article.show', $article->slug) }}"
+                           target="_blank"
+                           class="btn btn-outline flex-1 gap-2">
+                            <i class="ph ph-arrow-square-out"></i>
+                            View Live
+                        </a>
+                    @else
+                        <span class="btn btn-outline flex-1 gap-2 btn-disabled" tabindex="-1"
+                              title="Publish first to view live">
+                            <i class="ph ph-warning"></i>
+                            View Live
+                        </span>
+                    @endif
+                </div>
             </div>
         </form>
     </div>

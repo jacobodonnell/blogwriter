@@ -87,14 +87,6 @@
                     </button>
                 </div>
 
-                <div class="divider divider-horizontal mx-0 hidden sm:flex"></div>
-
-                {{-- Saved Indicator (always reserves space, fade in slow / fade out fast) --}}
-                <span class="text-success text-sm flex items-center gap-1"
-                      :class="saved ? 'opacity-100 transition-opacity duration-500 ease-in' : 'opacity-0 transition-opacity duration-150 ease-out'">
-                    <i class="ph ph-check-circle"></i> Saved
-                </span>
-
                 <a href="{{ route('admin.articles.show', $article) }}" target="_blank" class="btn btn-ghost btn-sm gap-1">
                     <i class="ph ph-arrow-square-out text-lg"></i>
                     <span class="hidden sm:inline">Preview</span>

@@ -5,6 +5,7 @@
 
 <div x-data="{
         imgTab: '{{ $initialPhotoId ? "photo" : "url" }}',
+        uploadPreview: null,
         switchTab(tab) {
             this.imgTab = tab;
             if (tab !== 'photo') this.$refs.photoSelect.value = '';
@@ -12,6 +13,10 @@
             if (tab !== 'upload') {
                 this.$refs.fileInput.value = '';
                 hasFileUpload = false;
+                if (this.uploadPreview) {
+                    URL.revokeObjectURL(this.uploadPreview);
+                    this.uploadPreview = null;
+                }
             }
         }
      }">
@@ -48,7 +53,15 @@
         <input x-ref="fileInput" type="file" name="featured_image_file"
                class="file-input file-input-bordered file-input-sm w-full"
                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-               @change="hasFileUpload = true; uploadNotice = true; setTimeout(() => uploadNotice = false, 5000)">
+               @change="hasFileUpload = true; uploadNotice = true; setTimeout(() => uploadNotice = false, 5000);
+                        if ($event.target.files[0]) { uploadPreview = URL.createObjectURL($event.target.files[0]); }">
+        <img x-show="uploadPreview" :src="uploadPreview"
+             class="w-full max-h-32 object-cover rounded-lg mt-2"
+             alt="Upload preview"
+             x-cloak>
+        <p x-show="uploadPreview" class="text-xs text-base-content/60 mt-1" x-cloak>
+            Saving will create a <strong>public Photo</strong> on your site.
+        </p>
     </div>
 
     {{-- Current Image Thumbnail --}}
