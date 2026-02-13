@@ -39,7 +39,7 @@ it('creates photo from file upload and links to article', function (): void {
         'title' => 'Test Article',
         'slug' => 'test-article',
         'content' => 'Test content',
-        'status' => 'draft',
+        'status' => 'published',
         'featured_image_file' => $file,
     ])->assertRedirect();
 
@@ -47,7 +47,50 @@ it('creates photo from file upload and links to article', function (): void {
 
     expect($article->photo_id)->not->toBeNull();
     expect($article->featuredPhoto)->toBeInstanceOf(Photo::class);
+    expect($article->featuredPhoto->status->value)->toBe('published');
     expect($article->featuredPhoto->getFirstMedia('image'))->not->toBeNull();
+    expect($article->featuredPhoto->getFirstMedia('image')->disk)->toBe('public');
+});
+
+it('creates a published photo even when article status is draft', function (): void {
+    $file = UploadedFile::fake()->image('draft-article-image.jpg');
+
+    $this->post(route('admin.articles.store'), [
+        'title' => 'Draft Article With Image',
+        'slug' => 'draft-article-with-image',
+        'content' => 'Draft content',
+        'status' => 'draft',
+        'featured_image_file' => $file,
+    ])->assertRedirect();
+
+    $article = Article::first();
+
+    expect($article->status->value)->toBe('draft');
+    expect($article->photo_id)->not->toBeNull();
+    expect($article->featuredPhoto->status->value)->toBe('published');
+    expect($article->featuredPhoto->getFirstMedia('image')->disk)->toBe('public');
+});
+
+it('preserves featured photo when changing published article to draft', function (): void {
+    $photo = Photo::factory()->published()->create(['user_id' => $this->user->id]);
+    $article = Article::factory()->published()->create([
+        'user_id' => $this->user->id,
+        'photo_id' => $photo->id,
+    ]);
+
+    $this->put(route('admin.articles.update', $article), [
+        'title' => $article->title,
+        'slug' => $article->slug,
+        'content' => $article->content,
+        'status' => 'draft',
+    ])->assertRedirect();
+
+    $article->refresh();
+    $photo->refresh();
+
+    expect($article->status->value)->toBe('draft');
+    expect($article->photo_id)->toBe($photo->id);
+    expect($photo->status->value)->toBe('published');
 });
 
 it('links existing photo to article', function (): void {

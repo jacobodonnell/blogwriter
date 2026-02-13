@@ -335,6 +335,21 @@
                                         <span class="text-error text-sm mt-1">{{ $message }}</span>
                                     @enderror
                                 </fieldset>
+
+                                {{-- Blob Preview --}}
+                                <template x-if="filePreview">
+                                    <div class="mt-3">
+                                        <p class="text-sm font-medium mb-2">Preview:</p>
+                                        <img :src="filePreview" alt="Upload preview" class="w-full max-w-xs rounded-lg shadow-md">
+                                        <p class="text-xs text-base-content/50 mt-1" x-text="fileName + ' (' + fileSize + ')'"></p>
+                                    </div>
+                                </template>
+
+                                {{-- Consent Banner --}}
+                                <div x-show="showConsent" x-transition class="alert alert-info mt-3">
+                                    <i class="ph ph-info text-xl"></i>
+                                    <span>This image will be published to your public media library when you submit this article.</span>
+                                </div>
                             </div>
 
                             {{-- Current Featured Image Preview --}}
@@ -368,6 +383,7 @@
                                     fileName: null,
                                     fileSize: null,
                                     errorMessage: null,
+                                    showConsent: false,
                                     maxSize: 2097152, // 2MB in bytes
 
                                     handleFileSelect(event) {
@@ -390,6 +406,7 @@
                                         }
 
                                         this.errorMessage = null;
+                                        this.showConsent = true;
                                         this.filePreview = URL.createObjectURL(file);
                                         this.fileName = file.name;
                                         const sizeInMB = file.size / 1024 / 1024;
@@ -404,6 +421,7 @@
                                     setTab(tab) {
                                         this.activeTab = tab;
                                         this.errorMessage = null;
+                                        this.showConsent = false;
                                     }
                                 }
                             }

@@ -26,7 +26,7 @@ it('displays featured image form with tabs', function (): void {
     $response->assertSee('name="featured_image_file"', false);
 });
 
-it('creates article with uploaded featured image file', function (): void {
+it('creates article with uploaded featured image file as published photo', function (): void {
     $file = UploadedFile::fake()->image('featured.jpg', 1200, 800);
 
     $this->actingAs($this->user)
@@ -44,24 +44,9 @@ it('creates article with uploaded featured image file', function (): void {
 
     $photo = Photo::find($article->photo_id);
     expect($photo)->not->toBeNull();
+    expect($photo->status->value)->toBe('published');
     expect($photo->getFirstMedia('image'))->not->toBeNull();
-});
-
-it('stores external featured image URL in article meta', function (): void {
-    $this->actingAs($this->user)
-        ->post(route('admin.articles.store'), [
-            'title' => 'Article With External Image',
-            'slug' => 'article-with-external-image',
-            'content' => 'Content.',
-            'status' => 'published',
-            'featured_image' => 'https://example.com/image.jpg',
-        ]);
-
-    $article = Article::where('slug', 'article-with-external-image')->first();
-    expect($article)->not->toBeNull();
-    expect($article->photo_id)->toBeNull();
-    expect($article->meta['featured_image_url'])->toBe('https://example.com/image.jpg');
-    expect($article->featured_image_url)->toBe('https://example.com/image.jpg');
+    expect($photo->getFirstMedia('image')->disk)->toBe('public');
 });
 
 it('validates featured image file type', function (): void {

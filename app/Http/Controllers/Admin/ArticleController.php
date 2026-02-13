@@ -186,7 +186,7 @@ class ArticleController extends Controller
             $photo = $this->createPhotoFromUpload->handle($file, [
                 'slug' => $data['slug'] ?? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
                 'alt_text' => $data['title'] ?? 'Featured image',
-                'status' => $data['status'] ?? 'draft',
+                'status' => 'published',
             ]);
 
             return $photo->id;

@@ -4,9 +4,9 @@ use App\Http\Controllers\Admin\AdminPhotoController;
 use App\Http\Controllers\Admin\ArticleController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\SettingsController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Storage;
 
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function (): void {
     // Dashboard
@@ -40,20 +40,6 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function (): v
     // Settings
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
 
-    // Private file serving
-    Route::get('/storage/private/{path}', function (string $path) {
-        $fullPath = 'articles/featured/'.$path;
-
-        if (! Storage::disk('private')->exists($fullPath)) {
-            abort(404);
-        }
-
-        return response()->file(
-            Storage::disk('private')->path($fullPath),
-            [
-                'Content-Type' => Storage::disk('private')->mimeType($fullPath),
-                'Cache-Control' => 'private, max-age=3600',
-            ]
-        );
-    })->where('path', '.*')->name('private.file');
+    // Private media file serving
+    Route::get('/media/{media}/{conversion?}', [MediaController::class, 'show'])->name('media.show');
 });
