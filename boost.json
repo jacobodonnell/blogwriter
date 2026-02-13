@@ -8,13 +8,15 @@
     "herd_mcp": false,
     "mcp": true,
     "packages": [
-        "laravel/fortify"
+        "laravel/fortify",
+        "spatie/laravel-medialibrary"
     ],
     "sail": false,
     "skills": [
         "pest-testing",
         "tailwindcss-development",
         "developing-with-fortify",
+        "medialibrary-development",
         "alpine-development",
         "blogwriter-docs"
     ]
