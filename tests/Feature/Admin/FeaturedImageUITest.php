@@ -15,7 +15,7 @@ beforeEach(function (): void {
     Storage::fake('private');
 });
 
-it('displays featured image form with tabs', function (): void {
+it('displays featured image form with photo select and upload button', function (): void {
     $response = $this->actingAs($this->user)
         ->get(route('admin.articles.create'));
 
@@ -26,8 +26,9 @@ it('displays featured image form with tabs', function (): void {
         ->get(route('admin.articles.edit', $article))
         ->assertSuccessful();
 
+    $response->assertSee('name="photo_id"', false);
+    $response->assertSee('Upload New', false);
     $response->assertSee('name="featured_image"', false);
-    $response->assertSee('name="featured_image_file"', false);
 });
 
 it('creates article with uploaded featured image file as published photo', function (): void {

@@ -1,72 +1,76 @@
 @php
     $featuredPhoto = $article->exists ? $article->featuredPhoto : null;
-    $initialPhotoId = old('photo_id', $article->photo_id ?? '');
+    $photoMap = $photos->mapWithKeys(fn ($p) => [$p->id => $p->image_url])->toArray();
 @endphp
 
 <div x-data="{
-        imgTab: '{{ $initialPhotoId ? "photo" : "url" }}',
-        uploadPreview: null,
-        switchTab(tab) {
-            this.imgTab = tab;
-            if (tab !== 'photo') this.$refs.photoSelect.value = '';
-            if (tab !== 'url') this.$refs.urlInput.value = '';
-            if (tab !== 'upload') {
-                this.$refs.fileInput.value = '';
-                hasFileUpload = false;
-                if (this.uploadPreview) {
-                    URL.revokeObjectURL(this.uploadPreview);
-                    this.uploadPreview = null;
-                }
-            }
+        photoUrls: @js($photoMap),
+        get previewUrl() {
+            if (this.uploadedPhotoUrl) return this.uploadedPhotoUrl;
+            if (this.selectedPhotoId && this.photoUrls[this.selectedPhotoId]) return this.photoUrls[this.selectedPhotoId];
+            return null;
         }
      }">
+    <input type="hidden" name="photo_id" :value="selectedPhotoId">
 
-    {{-- Tab Navigation --}}
-    <div class="tabs tabs-boxed tabs-sm mb-3">
-        <button type="button" class="tab" :class="{ 'tab-active': imgTab === 'photo' }" @click="switchTab('photo')">Photo</button>
-        <button type="button" class="tab" :class="{ 'tab-active': imgTab === 'url' }" @click="switchTab('url')">URL</button>
-        <button type="button" class="tab" :class="{ 'tab-active': imgTab === 'upload' }" @click="switchTab('upload')">Upload</button>
+    {{-- Photo Select --}}
+    <select x-model="selectedPhotoId"
+            @change="if (selectedPhotoId) { featuredImageUrl = ''; uploadedPhotoUrl = null; }"
+            class="select select-bordered select-sm w-full">
+        <option value="">No featured image</option>
+        @foreach($photos as $photo)
+            <option value="{{ $photo->id }}">
+                {{ $photo->alt_text }}
+            </option>
+        @endforeach
+    </select>
+
+    <div class="flex gap-2 mt-2">
+        {{-- Upload New Button --}}
+        <button type="button"
+                @click="document.getElementById('upload-photo-modal').showModal()"
+                class="btn btn-ghost btn-sm flex-1 gap-2">
+            <i class="ph ph-upload-simple"></i>
+            Upload New
+        </button>
+
+        {{-- External URL Toggle --}}
+        <button type="button"
+                @click="showUrlField = !showUrlField; if (showUrlField) $nextTick(() => $refs.urlField.focus())"
+                class="btn btn-ghost btn-sm flex-1 gap-2"
+                :class="{ 'btn-active': featuredImageUrl }">
+            <i class="ph ph-link"></i>
+            URL
+        </button>
     </div>
 
-    {{-- Photo Tab --}}
-    <div x-show="imgTab === 'photo'" x-transition>
-        <select x-ref="photoSelect" name="photo_id" class="select select-bordered select-sm w-full">
-            <option value="">No featured image</option>
-            @foreach($photos as $photo)
-                <option value="{{ $photo->id }}" {{ $initialPhotoId == $photo->id ? 'selected' : '' }}>
-                    {{ $photo->alt_text }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-
-    {{-- URL Tab --}}
-    <div x-show="imgTab === 'url'" x-transition>
-        <input x-ref="urlInput" type="url" name="featured_image"
+    {{-- External URL Input --}}
+    <div x-show="showUrlField"
+         x-transition
+         class="mt-2"
+         x-cloak>
+        <input x-ref="urlField" type="url" name="featured_image"
+               x-model="featuredImageUrl"
                class="input input-bordered input-sm w-full"
                placeholder="https://example.com/image.jpg"
-               value="{{ old('featured_image', $article->meta['featured_image_url'] ?? '') }}">
+               @input="if (featuredImageUrl) { selectedPhotoId = ''; uploadedPhotoUrl = null; }">
+        <p class="text-xs text-base-content/50 mt-1">External URL overrides photo selection.</p>
     </div>
 
-    {{-- Upload Tab --}}
-    <div x-show="imgTab === 'upload'" x-transition>
-        <input x-ref="fileInput" type="file" name="featured_image_file"
-               class="file-input file-input-bordered file-input-sm w-full"
-               accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-               @change="hasFileUpload = true; uploadNotice = true; setTimeout(() => uploadNotice = false, 5000);
-                        if ($event.target.files[0]) { uploadPreview = URL.createObjectURL($event.target.files[0]); }">
-        <img x-show="uploadPreview" :src="uploadPreview"
-             class="w-full max-h-32 object-cover rounded-lg mt-2"
-             alt="Upload preview"
-             x-cloak>
-        <p x-show="uploadPreview" class="text-xs text-base-content/60 mt-1" x-cloak>
-            Saving will create a <strong>public Photo</strong> on your site.
-        </p>
-    </div>
-
-    {{-- Current Image Thumbnail --}}
-    @if($article->featured_image_url)
+    {{-- Image Preview (Alpine-driven) --}}
+    <template x-if="previewUrl || featuredImageUrl">
         <div class="mt-3">
+            <p class="text-xs font-medium mb-1" x-text="uploadedPhotoUrl ? 'New upload:' : 'Preview:'"></p>
+            <img :src="previewUrl || featuredImageUrl"
+                 alt="Featured image preview"
+                 class="w-full max-h-32 object-cover rounded-lg opacity-0 transition-opacity duration-300"
+                 @load="$el.classList.remove('opacity-0')">
+        </div>
+    </template>
+
+    {{-- Fallback: server-rendered current image when no Alpine preview --}}
+    @if($article->featured_image_url)
+        <div class="mt-3" x-show="!previewUrl && !featuredImageUrl">
             <p class="text-xs font-medium mb-1">Current:</p>
             <img src="{{ $article->featured_image_url }}"
                  alt="{{ $featuredPhoto?->alt_text ?? 'Featured image' }}"

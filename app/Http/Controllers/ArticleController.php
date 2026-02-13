@@ -24,15 +24,28 @@ class ArticleController extends Controller
     /**
      * Display a single article.
      */
-    public function show(string $slug): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function show(string $slug): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
     {
         $article = Article::published()
             ->where('slug', $slug)
             ->with('categories')
-            ->firstOrFail();
+            ->first();
 
-        return view('public.article', [
-            'article' => $article,
-        ]);
+        if ($article) {
+            return view('public.article', [
+                'article' => $article,
+            ]);
+        }
+
+        // Check past slugs for 301 redirect
+        $article = Article::published()
+            ->whereJsonContains('past_slugs', $slug)
+            ->first();
+
+        if ($article) {
+            return redirect()->route('article.show', $article->slug, 301);
+        }
+
+        abort(404);
     }
 }

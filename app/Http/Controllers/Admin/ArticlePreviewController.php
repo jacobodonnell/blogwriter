@@ -33,7 +33,7 @@ class ArticlePreviewController extends Controller
             $newSlug = null;
 
             // Auto-generate slug from title if slug is a placeholder
-            if (preg_match('/^untitled-[a-z0-9]{8}$/', $data['slug']) && isset($data['title']) && $data['title'] !== '') {
+            if (preg_match('/^untitled-[a-z0-9]{8}$/', (string) $data['slug']) && isset($data['title']) && $data['title'] !== '') {
                 $newSlug = Str::slug($data['title']);
             } else {
                 $newSlug = $data['slug'];
@@ -67,6 +67,26 @@ class ArticlePreviewController extends Controller
 
         if (isset($data['meta'])) {
             $updateData['meta'] = $data['meta'];
+        }
+
+        // Handle featured image: photo_id takes precedence over URL
+        if (array_key_exists('photo_id', $data)) {
+            if (! empty($data['photo_id'])) {
+                $updateData['photo_id'] = $data['photo_id'];
+                // Clear URL-based featured image when selecting a photo
+                $meta = $updateData['meta'] ?? $article->meta ?? [];
+                unset($meta['featured_image_url']);
+                $updateData['meta'] = $meta;
+            } else {
+                $updateData['photo_id'] = null;
+            }
+        }
+
+        if (! empty($data['featured_image'])) {
+            $meta = $updateData['meta'] ?? $article->meta ?? [];
+            $meta['featured_image_url'] = $data['featured_image'];
+            $updateData['meta'] = $meta;
+            $updateData['photo_id'] = null;
         }
 
         $article->update($updateData);

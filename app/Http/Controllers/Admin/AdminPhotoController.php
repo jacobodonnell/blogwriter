@@ -63,12 +63,26 @@ class AdminPhotoController extends Controller
                 'taken_at' => $data['taken_at'] ?? null,
             ]);
 
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'photo' => [
+                        'id' => $photo->id,
+                        'image_url' => $photo->image_url,
+                        'alt_text' => $photo->alt_text,
+                    ],
+                ]);
+            }
+
             return redirect()->route('admin.photos.edit', $photo)
                 ->with('success', 'Photo created successfully.');
         } catch (\Exception $exception) {
             \Log::error('Failed to create photo', [
                 'error' => $exception->getMessage(),
             ]);
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['error' => 'Failed to upload image.'], 422);
+            }
 
             return redirect()->back()
                 ->withInput()

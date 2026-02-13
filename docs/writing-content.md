@@ -64,7 +64,7 @@ Articles are long-form posts with titles. Think blog posts, essays, tutorials.
 - **Featured Photo** (nullable) — Select a photo to feature with the article.
 - **Categories** ✅ — Assign one or more categories (e.g., "Tech", "Life", "Travel"). Create new categories on the fly.
 - **Tags** 🚧 — Coming soon. Will work across all post types.
-- **SEO fields** 🚧 — Meta description and Open Graph image coming in future updates.
+- **SEO fields** ✅ — Meta title, meta description, and Open Graph image.
 
 ### Draft and Publish
 
@@ -75,15 +75,6 @@ future date). Published articles appear on your site and in your feeds.
 
 You can unpublish an article at any time by switching it back to draft.
 
-> **🚧 Auto-Save Coming Soon**
->
-> Automatic background saving is planned but not yet implemented. Currently, use the Save Draft button to manually save your work. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues).
-
-**Planned Auto-Save:**
-- Saves work in background as you type
-- Status indicator: "Saving...", "Saved", "Last saved at 2:34 PM"
-- Creates drafts only — won't accidentally publish
-
 ### Where Articles Live
 
 Your article's URL follows this structure:
@@ -93,6 +84,35 @@ yourdomain.com/articles/your-article-title
 ```
 
 The slug is automatically generated from your title when you first create the article. Once published, the URL never changes — permanent links matter.
+
+## The Customizer ✅
+
+The Customizer is BlogWriter's article editor — a split-pane view with a live preview on the right and your editing controls on the left. As you type, your changes auto-save in the background and the preview updates instantly. No more guessing what your post looks like.
+
+### Publishing Workflow
+
+The save button adapts to what you're about to do:
+
+- **Save Draft** — You're working on a draft. Save and keep writing.
+- **Publish** — Your draft is ready. A confirmation dialog makes sure you meant it — once you publish, the article is live and visible to everyone.
+- **Save Changes** — Already published? Edit freely. Your changes save without ceremony.
+- **Unpublish** — Need to take something down? Switch the status to draft and confirm. The article disappears from your site (visitors see a 404) until you republish.
+- **Republish** — Bringing back an unpublished article? BlogWriter preserves your original publish date so your content history stays intact.
+
+### Featured Images
+
+You can attach a featured image to any article in two ways:
+
+1. **Select an existing Photo** from the dropdown
+2. **Upload a new Photo** directly from the customizer — a modal handles the upload without leaving the editor, and the photo is automatically associated with your article
+
+### Permalinks Are Forever
+
+> *Cool URIs don't change.* — Tim Berners-Lee
+
+When you change an article's slug, BlogWriter remembers the old one. Anyone visiting the old URL gets a **301 permanent redirect** to the new address. Search engines transfer their ranking, bookmarks keep working, and shared links don't break.
+
+<!-- TODO: Add screenshots and video demos -->
 
 > **🚧 Automatic Backups & Markdown Export Coming Soon**
 >
