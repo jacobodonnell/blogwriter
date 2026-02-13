@@ -50,7 +50,7 @@
                             </div>
                             <div>
                                 <p class="font-semibold text-lg">{{ setting('profile_name', auth()->user()?->name ?? 'User') }}</p>
-                                <p class="text-sm text-gray-500">{{ setting('social_email', auth()->user()?->email ?? '') }}</p>
+                                <p class="text-sm text-gray-500">{{ setting('profile_email', auth()->user()?->email ?? '') }}</p>
                             </div>
                         </div>
 

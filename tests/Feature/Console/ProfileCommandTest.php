@@ -18,17 +18,19 @@ it('sets profile settings non-interactively', function (): void {
         '--name' => 'Jane Doe',
         '--bio' => 'A writer and developer.',
         '--github' => 'https://github.com/janedoe',
-        '--twitter' => 'https://twitter.com/janedoe',
+        '--mastodon' => 'https://mastodon.social/@janedoe',
+        '--bluesky' => 'https://bsky.app/profile/janedoe',
         '--email' => 'jane@example.com',
         '--website' => 'https://janedoe.com',
     ])->assertSuccessful();
 
     expect(Setting::get('profile_name'))->toBe('Jane Doe')
         ->and(Setting::get('profile_bio'))->toBe('A writer and developer.')
-        ->and(Setting::get('social_github'))->toBe('https://github.com/janedoe')
-        ->and(Setting::get('social_twitter'))->toBe('https://twitter.com/janedoe')
-        ->and(Setting::get('social_email'))->toBe('jane@example.com')
-        ->and(Setting::get('social_website'))->toBe('https://janedoe.com');
+        ->and(Setting::get('profile_github'))->toBe('https://github.com/janedoe')
+        ->and(Setting::get('profile_mastodon'))->toBe('https://mastodon.social/@janedoe')
+        ->and(Setting::get('profile_bluesky'))->toBe('https://bsky.app/profile/janedoe')
+        ->and(Setting::get('profile_email'))->toBe('jane@example.com')
+        ->and(Setting::get('profile_url'))->toBe('https://janedoe.com');
 });
 
 it('validates URLs in non-interactive mode', function (): void {
@@ -56,7 +58,7 @@ it('defaults email to current user email', function (): void {
         '--email' => '',
     ])->assertSuccessful();
 
-    expect(Setting::get('social_email'))->toBe('test@example.com');
+    expect(Setting::get('profile_email'))->toBe('test@example.com');
 });
 
 it('displays summary table after saving', function (): void {
@@ -103,5 +105,5 @@ it('skips empty optional fields without saving them', function (): void {
     ])->assertSuccessful();
 
     expect(Setting::get('profile_name'))->toBe('Jane Doe');
-    $this->assertDatabaseMissing('settings', ['key' => 'social_github']);
+    $this->assertDatabaseMissing('settings', ['key' => 'profile_github']);
 });

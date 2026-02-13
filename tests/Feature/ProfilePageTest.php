@@ -16,9 +16,10 @@ beforeEach(function (): void {
 it('displays profile page with settings data', function (): void {
     Setting::set('profile_name', 'Jane Doe');
     Setting::set('profile_bio', 'IndieWeb enthusiast and writer.');
-    Setting::set('social_github', 'https://github.com/janedoe');
-    Setting::set('social_twitter', 'https://twitter.com/janedoe');
-    Setting::set('social_email', 'jane@example.com');
+    Setting::set('profile_github', 'https://github.com/janedoe');
+    Setting::set('profile_mastodon', 'https://mastodon.social/@janedoe');
+    Setting::set('profile_bluesky', 'https://bsky.app/profile/janedoe');
+    Setting::set('profile_email', 'jane@example.com');
 
     $response = $this->get('/profile');
 
@@ -26,7 +27,8 @@ it('displays profile page with settings data', function (): void {
         ->assertSee('Jane Doe')
         ->assertSee('IndieWeb enthusiast and writer.')
         ->assertSee('https://github.com/janedoe')
-        ->assertSee('https://twitter.com/janedoe')
+        ->assertSee('https://mastodon.social/@janedoe')
+        ->assertSee('https://bsky.app/profile/janedoe')
         ->assertSee('jane@example.com');
 });
 
@@ -57,7 +59,7 @@ it('conditionally shows social links', function (): void {
         ->assertDontSee('Connect');
 
     // Set one social link
-    Setting::set('social_github', 'https://github.com/janedoe');
+    Setting::set('profile_github', 'https://github.com/janedoe');
 
     $response = $this->get('/profile');
     $response->assertSuccessful()
@@ -68,7 +70,7 @@ it('conditionally shows social links', function (): void {
 it('layout h-card uses settings data', function (): void {
     Setting::set('profile_name', 'Layout Author');
     Setting::set('profile_bio', 'Layout bio text.');
-    Setting::set('social_github', 'https://github.com/layoutauthor');
+    Setting::set('profile_github', 'https://github.com/layoutauthor');
 
     $response = $this->get('/');
 

@@ -35,26 +35,33 @@
             </header>
 
             {{-- Social Links --}}
-            @if(setting('social_github') || setting('social_twitter') || setting('social_email'))
+            @if(setting('profile_github') || setting('profile_mastodon') || setting('profile_bluesky') || setting('profile_email'))
                 <section class="mb-8">
                     <h2 class="text-2xl font-bold mb-4">Connect</h2>
                     <div class="flex flex-wrap gap-3">
-                        @if(setting('social_github'))
-                            <a href="{{ setting('social_github') }}" rel="me" class="u-url btn btn-outline gap-2">
+                        @if(setting('profile_github'))
+                            <a href="{{ setting('profile_github') }}" rel="me" class="u-url btn btn-outline gap-2">
                                 <i class="ph ph-github-logo text-xl"></i>
                                 GitHub
                             </a>
                         @endif
 
-                        @if(setting('social_twitter'))
-                            <a href="{{ setting('social_twitter') }}" rel="me" class="u-url btn btn-outline gap-2">
-                                <i class="ph ph-twitter-logo text-xl"></i>
-                                Twitter
+                        @if(setting('profile_mastodon'))
+                            <a href="{{ setting('profile_mastodon') }}" rel="me" class="u-url btn btn-outline gap-2">
+                                <i class="ph ph-mastodon-logo text-xl"></i>
+                                Mastodon
                             </a>
                         @endif
 
-                        @if(setting('social_email'))
-                            <a href="mailto:{{ setting('social_email') }}" rel="me" class="u-url btn btn-outline gap-2">
+                        @if(setting('profile_bluesky'))
+                            <a href="{{ setting('profile_bluesky') }}" rel="me" class="u-url btn btn-outline gap-2">
+                                <i class="ph ph-butterfly text-xl"></i>
+                                Bluesky
+                            </a>
+                        @endif
+
+                        @if(setting('profile_email'))
+                            <a href="mailto:{{ setting('profile_email') }}" rel="me" class="u-url btn btn-outline gap-2">
                                 <i class="ph ph-envelope text-xl"></i>
                                 Email
                             </a>
@@ -64,8 +71,8 @@
             @endif
 
             {{-- Hidden h-card properties --}}
-            @if(setting('social_website'))
-                <a href="{{ setting('social_website') }}" class="u-url hidden" rel="me">Website</a>
+            @if(setting('profile_url'))
+                <a href="{{ setting('profile_url') }}" class="u-url hidden" rel="me">Website</a>
             @endif
             <a href="{{ route('home') }}" class="u-url hidden">Homepage</a>
         </div>

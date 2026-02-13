@@ -1,4 +1,4 @@
-<x-layouts.base 
+<x-layouts.base
     :title="$title ?? config('app.name', 'BlogWriter')"
     :dark-mode="false"
     icon-weight="regular">
@@ -20,9 +20,9 @@
                 <a href="{{ route('home') }}" class="btn btn-ghost">Articles</a>
                 <a href="{{ route('photos.index') }}" class="btn btn-ghost">Photos</a>
                 <a href="{{ route('profile') }}" class="btn btn-ghost">Profile</a>
-                
+
                 {{-- Dark Mode Toggle --}}
-                <button x-data="{ darkMode: false }" 
+                <button x-data="{ darkMode: false }"
                         x-init="
                             darkMode = localStorage.getItem('darkMode') === 'true';
                             if (darkMode) document.documentElement.setAttribute('data-theme', 'dark');
@@ -64,22 +64,28 @@
                     @endif
 
                     {{-- Social Links (rel-me for IndieAuth) --}}
-                    @if(setting('social_github') || setting('social_twitter') || setting('social_email'))
+                    @if(setting('profile_github') || setting('profile_mastodon') || setting('profile_bluesky') || setting('profile_email'))
                         <div class="flex gap-3 mt-4 justify-center md:justify-start">
-                            @if(setting('social_github'))
-                                <a href="{{ setting('social_github') }}" rel="me" class="u-url btn btn-sm btn-ghost gap-1">
+                            @if(setting('profile_github'))
+                                <a href="{{ setting('profile_github') }}" rel="me" class="u-url btn btn-sm btn-ghost gap-1">
                                     <i class="ph ph-github-logo text-lg"></i>
                                     GitHub
                                 </a>
                             @endif
-                            @if(setting('social_twitter'))
-                                <a href="{{ setting('social_twitter') }}" rel="me" class="u-url btn btn-sm btn-ghost gap-1">
-                                    <i class="ph ph-twitter-logo text-lg"></i>
-                                    Twitter
+                            @if(setting('profile_mastodon'))
+                                <a href="{{ setting('profile_mastodon') }}" rel="me" class="u-url btn btn-sm btn-ghost gap-1">
+                                    <i class="ph ph-mastodon-logo text-lg"></i>
+                                    Mastodon
                                 </a>
                             @endif
-                            @if(setting('social_email'))
-                                <a href="mailto:{{ setting('social_email') }}" rel="me" class="u-url btn btn-sm btn-ghost gap-1">
+                            @if(setting('profile_bluesky'))
+                                <a href="{{ setting('profile_bluesky') }}" rel="me" class="u-url btn btn-sm btn-ghost gap-1">
+                                    <i class="ph ph-butterfly text-lg"></i>
+                                    Bluesky
+                                </a>
+                            @endif
+                            @if(setting('profile_email'))
+                                <a href="mailto:{{ setting('profile_email') }}" rel="me" class="u-url btn btn-sm btn-ghost gap-1">
                                     <i class="ph ph-envelope text-lg"></i>
                                     Email
                                 </a>
@@ -88,8 +94,8 @@
                     @endif
 
                     {{-- Hidden h-card properties for microformats --}}
-                    @if(setting('social_website'))
-                        <a href="{{ setting('social_website') }}" class="u-url hidden" rel="me">Website</a>
+                    @if(setting('profile_url'))
+                        <a href="{{ setting('profile_url') }}" class="u-url hidden" rel="me">Website</a>
                     @endif
                     <a href="{{ route('home') }}" class="u-url hidden">Homepage</a>
                 </div>
@@ -106,7 +112,7 @@
     <footer class="footer footer-center p-6 bg-base-100 border-t border-base-200">
         <div>
             <p class="text-sm text-base-content/60">
-                © {{ date('Y') }} {{ config('app.name', 'BlogWriter') }} - 
+                © {{ date('Y') }} {{ config('app.name', 'BlogWriter') }} -
                 <a href="{{ route('admin.dashboard') }}" class="link link-primary">Admin</a>
             </p>
             <p class="text-xs text-base-content/40 mt-2">

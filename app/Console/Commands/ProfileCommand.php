@@ -17,7 +17,8 @@ class ProfileCommand extends Command
                             {--name= : Display name}
                             {--bio= : Short bio}
                             {--github= : GitHub profile URL}
-                            {--twitter= : Twitter/X profile URL}
+                            {--mastodon= : Mastodon profile URL}
+                            {--bluesky= : Bluesky profile URL}
                             {--email= : Contact email}
                             {--website= : Website URL}';
 
@@ -58,20 +59,33 @@ class ProfileCommand extends Command
                     return self::FAILURE;
                 }
 
-                $settings['social_github'] = $github;
+                $settings['profile_github'] = $github;
             }
         }
 
-        if ($this->option('twitter') !== null) {
-            $twitter = $this->option('twitter');
-            if ($twitter !== '') {
-                if ($error = $this->validateUrl($twitter)) {
-                    $this->error('Invalid Twitter URL: '.$error);
+        if ($this->option('mastodon') !== null) {
+            $mastodon = $this->option('mastodon');
+            if ($mastodon !== '') {
+                if ($error = $this->validateUrl($mastodon)) {
+                    $this->error('Invalid Mastodon URL: '.$error);
 
                     return self::FAILURE;
                 }
 
-                $settings['social_twitter'] = $twitter;
+                $settings['profile_mastodon'] = $mastodon;
+            }
+        }
+
+        if ($this->option('bluesky') !== null) {
+            $bluesky = $this->option('bluesky');
+            if ($bluesky !== '') {
+                if ($error = $this->validateUrl($bluesky)) {
+                    $this->error('Invalid Bluesky URL: '.$error);
+
+                    return self::FAILURE;
+                }
+
+                $settings['profile_bluesky'] = $bluesky;
             }
         }
 
@@ -83,7 +97,7 @@ class ProfileCommand extends Command
                 return self::FAILURE;
             }
 
-            $settings['social_email'] = $email;
+            $settings['profile_email'] = $email;
         }
 
         if ($this->option('website') !== null) {
@@ -95,7 +109,7 @@ class ProfileCommand extends Command
                     return self::FAILURE;
                 }
 
-                $settings['social_website'] = $website;
+                $settings['profile_url'] = $website;
             }
         }
 
@@ -126,28 +140,35 @@ class ProfileCommand extends Command
         $github = text(
             label: 'GitHub URL',
             placeholder: 'https://github.com/username',
-            default: Setting::get('social_github', ''),
+            default: Setting::get('profile_github', ''),
             validate: fn (string $value): ?string => $value !== '' ? $this->validateUrl($value) : null,
         );
 
-        $twitter = text(
-            label: 'Twitter/X URL',
-            placeholder: 'https://twitter.com/username',
-            default: Setting::get('social_twitter', ''),
+        $mastodon = text(
+            label: 'Mastodon URL',
+            placeholder: 'https://mastodon.social/@username',
+            default: Setting::get('profile_mastodon', ''),
+            validate: fn (string $value): ?string => $value !== '' ? $this->validateUrl($value) : null,
+        );
+
+        $bluesky = text(
+            label: 'Bluesky URL',
+            placeholder: 'https://bsky.app/profile/username',
+            default: Setting::get('profile_bluesky', ''),
             validate: fn (string $value): ?string => $value !== '' ? $this->validateUrl($value) : null,
         );
 
         $email = text(
             label: 'Contact email',
             placeholder: 'you@example.com',
-            default: Setting::get('social_email', $user?->email ?? ''),
+            default: Setting::get('profile_email', $user?->email ?? ''),
             validate: fn (string $value): ?string => $value !== '' ? $this->validateEmail($value) : null,
         );
 
         $website = text(
             label: 'Website URL',
             placeholder: 'https://example.com',
-            default: Setting::get('social_website', config('app.url')),
+            default: Setting::get('profile_url', config('app.url')),
             validate: fn (string $value): ?string => $value !== '' ? $this->validateUrl($value) : null,
         );
 
@@ -158,19 +179,23 @@ class ProfileCommand extends Command
         }
 
         if ($github !== '') {
-            $settings['social_github'] = $github;
+            $settings['profile_github'] = $github;
         }
 
-        if ($twitter !== '') {
-            $settings['social_twitter'] = $twitter;
+        if ($mastodon !== '') {
+            $settings['profile_mastodon'] = $mastodon;
+        }
+
+        if ($bluesky !== '') {
+            $settings['profile_bluesky'] = $bluesky;
         }
 
         if ($email !== '') {
-            $settings['social_email'] = $email;
+            $settings['profile_email'] = $email;
         }
 
         if ($website !== '') {
-            $settings['social_website'] = $website;
+            $settings['profile_url'] = $website;
         }
 
         return $this->saveAndDisplay($settings);
@@ -211,15 +236,23 @@ class ProfileCommand extends Command
         if ($this->option('name') !== null) {
             return true;
         }
+
         if ($this->option('bio') !== null) {
             return true;
         }
+
         if ($this->option('github') !== null) {
             return true;
         }
-        if ($this->option('twitter') !== null) {
+
+        if ($this->option('mastodon') !== null) {
             return true;
         }
+
+        if ($this->option('bluesky') !== null) {
+            return true;
+        }
+
         if ($this->option('email') !== null) {
             return true;
         }
