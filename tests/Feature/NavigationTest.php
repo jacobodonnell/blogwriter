@@ -10,7 +10,7 @@ it('returns successful response for public navigation links', function (string $
     $this->get($route)->assertSuccessful();
 })->with([
     'home' => fn () => route('home'),
-    'about' => fn () => route('about'),
+    'profile' => fn () => route('profile'),
 ]);
 
 it('returns successful response for admin navigation links when authenticated', function (string $route): void {
@@ -91,14 +91,14 @@ it('uses named routes in breadcrumb links', function (): void {
     $response->assertSuccessful();
 
     // Test about page
-    $response = $this->get(route('about'));
+    $response = $this->get(route('profile'));
     $response->assertSuccessful();
 });
 
 it('has no broken links in public pages smoke test', function (): void {
     $pages = [
         '/',
-        '/about',
+        '/profile',
     ];
 
     $article = \App\Models\Article::factory()->published()->create();

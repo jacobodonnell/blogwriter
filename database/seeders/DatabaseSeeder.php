@@ -120,10 +120,12 @@ class DatabaseSeeder extends Seeder
 
             case 'minimal':
                 $this->seedUser();
+                $this->call(SettingSeeder::class);
                 break;
 
             case 'demo':
                 $this->seedUser();
+                $this->call(SettingSeeder::class);
                 $this->command?->info('Creating demo photos (image processing may take a moment)...');
                 $this->call(PhotoSeeder::class);
                 $this->command?->info('Creating demo articles...');
@@ -132,6 +134,7 @@ class DatabaseSeeder extends Seeder
 
             case 'full':
                 $this->seedUser();
+                $this->call(SettingSeeder::class);
                 $this->call(FullArticleSeeder::class);
                 break;
         }

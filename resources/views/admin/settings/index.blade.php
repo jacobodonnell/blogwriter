@@ -46,11 +46,11 @@
                     <div class="space-y-4">
                         <div class="flex items-center gap-4">
                             <div class="w-16 h-16 rounded-full bg-primary text-primary-content flex items-center justify-center text-2xl font-bold">
-                                {{ substr(auth()->user()?->name ?? 'U', 0, 1) }}
+                                {{ substr(setting('profile_name', auth()->user()?->name ?? 'U'), 0, 1) }}
                             </div>
                             <div>
-                                <p class="font-semibold text-lg">{{ auth()->user()?->name ?? 'User' }}</p>
-                                <p class="text-sm text-gray-500">{{ auth()->user()?->email ?? '' }}</p>
+                                <p class="font-semibold text-lg">{{ setting('profile_name', auth()->user()?->name ?? 'User') }}</p>
+                                <p class="text-sm text-gray-500">{{ setting('social_email', auth()->user()?->email ?? '') }}</p>
                             </div>
                         </div>
 
@@ -58,7 +58,7 @@
 
                         <div class="alert alert-info">
                             <i class="ph ph-info text-xl"></i>
-                            <span>Profile editing coming soon. For now, use the CLI command <code>blogwriter:user:create</code> to manage users.</span>
+                            <span>Configure your public profile with the CLI: <code class="bg-base-300 px-2 py-1 rounded">php artisan blogwriter:profile</code></span>
                         </div>
                     </div>
                 </div>
