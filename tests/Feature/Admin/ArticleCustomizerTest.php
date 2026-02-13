@@ -16,32 +16,29 @@ beforeEach(function (): void {
 });
 
 it('displays customizer layout for edit page', function (): void {
-    $article = Article::factory()->draft()->create(['user_id' => $this->user->id]);
+    $article = Article::factory()->draft()->for($this->user)->create();
 
-    $response = get(route('admin.articles.edit', $article));
-
-    $response->assertOk();
-    $response->assertViewIs('admin.articles.customizer');
+    get(route('admin.articles.edit', $article))
+        ->assertOk()
+        ->assertViewIs('admin.articles.customizer');
 });
 
 it('shows full-page preview for draft articles', function (): void {
-    $article = Article::factory()->draft()->create(['user_id' => $this->user->id]);
+    $article = Article::factory()->draft()->for($this->user)->create();
 
-    $response = get(route('admin.articles.show', $article));
-
-    $response->assertOk();
-    $response->assertViewIs('admin.articles.preview-fullscreen');
-    $response->assertSee('Preview Mode');
+    get(route('admin.articles.show', $article))
+        ->assertOk()
+        ->assertViewIs('admin.articles.preview-fullscreen')
+        ->assertSee('Preview Mode');
 });
 
 it('shows full-page preview for published articles', function (): void {
-    $article = Article::factory()->published()->create(['user_id' => $this->user->id]);
+    $article = Article::factory()->published()->for($this->user)->create();
 
-    $response = get(route('admin.articles.show', $article));
-
-    $response->assertOk();
-    $response->assertViewIs('admin.articles.preview-fullscreen');
-    $response->assertSee('Preview Mode');
+    get(route('admin.articles.show', $article))
+        ->assertOk()
+        ->assertViewIs('admin.articles.preview-fullscreen')
+        ->assertSee('Preview Mode');
 });
 
 it('requires auth for preview', function (): void {
@@ -49,56 +46,49 @@ it('requires auth for preview', function (): void {
 
     $article = Article::factory()->draft()->create();
 
-    $response = get(route('admin.articles.show', $article));
-
-    $response->assertRedirect();
+    get(route('admin.articles.show', $article))
+        ->assertRedirect();
 });
 
 it('returns preview partial for ajax preview update', function (): void {
-    $article = Article::factory()->draft()->create([
-        'user_id' => $this->user->id,
+    $article = Article::factory()->draft()->for($this->user)->create([
         'title' => 'Original Title',
         'content' => 'Original content',
     ]);
 
-    $response = put(route('admin.articles.preview.update', $article), [
+    put(route('admin.articles.preview.update', $article), [
         'title' => 'Updated Title',
         'slug' => $article->slug,
         'content' => 'Updated content here',
         'status' => 'draft',
-    ]);
-
-    $response->assertOk();
-    $response->assertViewIs('admin.articles.preview');
-    $response->assertSee('Updated Title');
+    ])
+        ->assertOk()
+        ->assertViewIs('admin.articles.preview')
+        ->assertSee('Updated Title');
 });
 
 it('redirects normally for full save update requests', function (): void {
-    $article = Article::factory()->draft()->create([
-        'user_id' => $this->user->id,
-    ]);
+    $article = Article::factory()->draft()->for($this->user)->create();
 
-    $response = put(route('admin.articles.update', $article), [
+    put(route('admin.articles.update', $article), [
         'title' => 'Updated Title',
         'slug' => $article->slug,
         'content' => 'Updated content',
         'status' => 'draft',
-    ]);
-
-    $response->assertRedirect(route('admin.articles.edit', $article));
-    $response->assertSessionHas('success');
+    ])
+        ->assertRedirect(route('admin.articles.edit', $article))
+        ->assertSessionHas('success');
 });
 
 it('creates draft immediately from create route', function (): void {
-    $response = get(route('admin.articles.create'));
+    get(route('admin.articles.create'))
+        ->assertRedirect();
 
     $article = Article::latest()->first();
 
-    expect($article)->not->toBeNull();
-    expect($article->status->value)->toBe('draft');
-    expect($article->title)->toBe('Untitled Article');
-
-    $response->assertRedirect(route('admin.articles.edit', $article));
+    expect($article)->not->toBeNull()
+        ->and($article->status->value)->toBe('draft')
+        ->and($article->title)->toBe('Untitled Article');
 });
 
 it('creates draft with lowercase placeholder slug', function (): void {
@@ -110,106 +100,88 @@ it('creates draft with lowercase placeholder slug', function (): void {
 });
 
 it('preview update accepts relaxed validation', function (): void {
-    $article = Article::factory()->draft()->create([
-        'user_id' => $this->user->id,
+    $article = Article::factory()->draft()->for($this->user)->create([
         'title' => 'Original',
         'slug' => 'untitled-abcd1234',
     ]);
 
-    $response = put(route('admin.articles.preview.update', $article), [
+    put(route('admin.articles.preview.update', $article), [
         'title' => 'Hi',
         'slug' => 'untitled-abcd1234',
         'status' => 'draft',
-    ]);
-
-    $response->assertOk();
-    $response->assertViewIs('admin.articles.preview');
+    ])
+        ->assertOk()
+        ->assertViewIs('admin.articles.preview');
 });
 
 it('preview update auto-generates slug from title when placeholder', function (): void {
-    $article = Article::factory()->draft()->create([
-        'user_id' => $this->user->id,
+    $article = Article::factory()->draft()->for($this->user)->create([
         'title' => 'Untitled Article',
         'slug' => 'untitled-abcd1234',
     ]);
 
-    $response = put(route('admin.articles.preview.update', $article), [
+    put(route('admin.articles.preview.update', $article), [
         'title' => 'My Great Post',
         'slug' => 'untitled-abcd1234',
         'status' => 'draft',
-    ]);
+    ])->assertOk();
 
-    $response->assertOk();
-    $article->refresh();
-    expect($article->slug)->toBe('my-great-post');
+    expect($article->fresh()->slug)->toBe('my-great-post');
 });
 
 it('preview update skips slug when it conflicts with another article', function (): void {
-    Article::factory()->published()->create([
-        'user_id' => $this->user->id,
+    Article::factory()->published()->for($this->user)->create([
         'slug' => 'there',
     ]);
 
-    $article = Article::factory()->draft()->create([
-        'user_id' => $this->user->id,
+    $article = Article::factory()->draft()->for($this->user)->create([
         'title' => 'Untitled Article',
         'slug' => 'untitled-abcd1234',
     ]);
 
-    $response = put(route('admin.articles.preview.update', $article), [
+    put(route('admin.articles.preview.update', $article), [
         'title' => 'There',
         'slug' => 'untitled-abcd1234',
         'status' => 'draft',
-    ]);
+    ])->assertOk();
 
-    $response->assertOk();
     $article->refresh();
     // Slug should remain unchanged since "there" is taken
-    expect($article->slug)->toBe('untitled-abcd1234');
-    // But title should still update
-    expect($article->title)->toBe('There');
+    expect($article->slug)->toBe('untitled-abcd1234')
+        ->and($article->title)->toBe('There');
 });
 
 it('full save preserves existing featured image', function (): void {
-    $article = Article::factory()->draft()->create([
-        'user_id' => $this->user->id,
+    $article = Article::factory()->draft()->for($this->user)->create([
         'meta' => ['featured_image_url' => 'https://example.com/image.jpg'],
     ]);
 
-    $response = put(route('admin.articles.update', $article), [
+    put(route('admin.articles.update', $article), [
         'title' => 'Updated Title',
         'slug' => $article->slug,
         'content' => 'Updated content',
         'status' => 'draft',
-    ]);
+    ])->assertRedirect();
 
-    $response->assertRedirect();
-
-    $article->refresh();
-    expect($article->meta['featured_image_url'])->toBe('https://example.com/image.jpg');
+    expect($article->fresh()->meta['featured_image_url'])->toBe('https://example.com/image.jpg');
 });
 
 it('index view button links to preview for drafts', function (): void {
-    $article = Article::factory()->draft()->create([
-        'user_id' => $this->user->id,
+    $article = Article::factory()->draft()->for($this->user)->create([
         'published_at' => null,
     ]);
 
-    $response = get(route('admin.articles.index'));
-
-    $response->assertOk();
-    $response->assertSee(route('admin.articles.show', $article));
-    $response->assertSee('Preview Draft');
+    get(route('admin.articles.index'))
+        ->assertOk()
+        ->assertSee(route('admin.articles.show', $article))
+        ->assertSee('Preview Draft');
 });
 
 it('index view button links to permalink for published', function (): void {
-    $article = Article::factory()->published()->create([
-        'user_id' => $this->user->id,
-    ]);
+    $article = Article::factory()->published()->for($this->user)->create();
 
-    $response = get(route('admin.articles.index'));
-
-    $response->assertOk();
-    $response->assertSee($article->permalink());
-    $response->assertSee('View Published');
+    get(route('admin.articles.index'))
+        ->assertOk()
+        ->assertSee($article->permalink())
+        ->assertSee('View Published');
 });

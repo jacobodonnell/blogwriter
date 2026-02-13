@@ -16,19 +16,14 @@ beforeEach(function (): void {
 });
 
 it('displays featured image form with photo select and upload button', function (): void {
-    $response = $this->actingAs($this->user)
-        ->get(route('admin.articles.create'));
+    $article = Article::factory()->draft()->for($this->user)->create();
 
-    $response->assertRedirect();
-
-    $article = Article::latest()->first();
-    $response = $this->actingAs($this->user)
+    $this->actingAs($this->user)
         ->get(route('admin.articles.edit', $article))
-        ->assertSuccessful();
-
-    $response->assertSee('name="photo_id"', false);
-    $response->assertSee('Upload New', false);
-    $response->assertSee('name="featured_image"', false);
+        ->assertOk()
+        ->assertSee('name="photo_id"', false)
+        ->assertSee('Upload New', false)
+        ->assertSee('name="featured_image"', false);
 });
 
 it('creates article with uploaded featured image file as published photo', function (): void {
@@ -44,46 +39,44 @@ it('creates article with uploaded featured image file as published photo', funct
         ]);
 
     $article = Article::where('slug', 'article-with-featured-image')->first();
-    expect($article)->not->toBeNull();
-    expect($article->photo_id)->not->toBeNull();
+    expect($article)->not->toBeNull()
+        ->and($article->photo_id)->not->toBeNull();
 
     $photo = Photo::find($article->photo_id);
-    expect($photo)->not->toBeNull();
-    expect($photo->status->value)->toBe('published');
-    expect($photo->getFirstMedia('image'))->not->toBeNull();
-    expect($photo->getFirstMedia('image')->disk)->toBe('public');
+    expect($photo)->not->toBeNull()
+        ->and($photo->status->value)->toBe('published')
+        ->and($photo->getFirstMedia('image'))->not->toBeNull()
+        ->and($photo->getFirstMedia('image')->disk)->toBe('public');
 });
 
 it('validates featured image file type', function (): void {
     $file = UploadedFile::fake()->create('document.pdf', 1000);
 
-    $response = $this->actingAs($this->user)
+    $this->actingAs($this->user)
         ->post(route('admin.articles.store'), [
             'title' => 'Test Article',
             'slug' => 'test-article',
             'content' => 'Content.',
             'status' => 'published',
             'featured_image_file' => $file,
-        ]);
-
-    $response->assertSessionHasErrors('featured_image_file');
+        ])
+        ->assertSessionHasErrors('featured_image_file');
 });
 
 it('validates external URL format', function (): void {
-    $response = $this->actingAs($this->user)
+    $this->actingAs($this->user)
         ->post(route('admin.articles.store'), [
             'title' => 'Test Article',
             'slug' => 'test-article',
             'content' => 'Content.',
             'status' => 'published',
             'featured_image' => 'not-a-valid-url',
-        ]);
-
-    $response->assertSessionHasErrors('featured_image');
+        ])
+        ->assertSessionHasErrors('featured_image');
 });
 
 it('updates article to add featured image', function (): void {
-    $article = Article::factory()->published()->create(['user_id' => $this->user->id]);
+    $article = Article::factory()->published()->for($this->user)->create();
     $file = UploadedFile::fake()->image('new-featured.jpg');
 
     expect($article->photo_id)->toBeNull();
@@ -97,13 +90,12 @@ it('updates article to add featured image', function (): void {
             'featured_image_file' => $file,
         ]);
 
-    $article->refresh();
-    expect($article->photo_id)->not->toBeNull();
+    expect($article->fresh()->photo_id)->not->toBeNull();
 });
 
 it('updates article to change featured image', function (): void {
-    $oldPhoto = Photo::factory()->published()->create(['user_id' => $this->user->id]);
-    $article = Article::factory()->published()->create(['user_id' => $this->user->id, 'photo_id' => $oldPhoto->id]);
+    $oldPhoto = Photo::factory()->published()->for($this->user)->create();
+    $article = Article::factory()->published()->for($this->user)->create(['photo_id' => $oldPhoto->id]);
 
     $file = UploadedFile::fake()->image('new-featured.jpg');
 
@@ -116,13 +108,12 @@ it('updates article to change featured image', function (): void {
             'featured_image_file' => $file,
         ]);
 
-    $article->refresh();
-    expect($article->photo_id)->not->toBe($oldPhoto->id);
+    expect($article->fresh()->photo_id)->not->toBe($oldPhoto->id);
 });
 
 it('removes featured image when remove checkbox is selected', function (): void {
-    $photo = Photo::factory()->published()->create(['user_id' => $this->user->id]);
-    $article = Article::factory()->published()->create(['user_id' => $this->user->id, 'photo_id' => $photo->id]);
+    $photo = Photo::factory()->published()->for($this->user)->create();
+    $article = Article::factory()->published()->for($this->user)->create(['photo_id' => $photo->id]);
 
     expect($article->photo_id)->not->toBeNull();
 
@@ -135,6 +126,5 @@ it('removes featured image when remove checkbox is selected', function (): void 
             'remove_featured_image' => '1',
         ]);
 
-    $article->refresh();
-    expect($article->photo_id)->toBeNull();
+    expect($article->fresh()->photo_id)->toBeNull();
 });

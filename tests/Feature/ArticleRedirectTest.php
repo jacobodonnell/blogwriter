@@ -1,14 +1,9 @@
 <?php
 
 use App\Models\Article;
-use App\Models\User;
-
-beforeEach(function (): void {
-    $this->user = User::factory()->create();
-});
 
 it('shows a published article at its current slug', function (): void {
-    $article = Article::factory()->published()->create([
+    Article::factory()->published()->create([
         'slug' => 'my-article',
     ]);
 
@@ -17,7 +12,7 @@ it('shows a published article at its current slug', function (): void {
 });
 
 it('301 redirects from an old slug to the current slug', function (): void {
-    $article = Article::factory()->published()->create([
+    Article::factory()->published()->create([
         'slug' => 'new-slug',
         'past_slugs' => ['old-slug'],
     ]);
@@ -33,7 +28,7 @@ it('returns 404 for a nonexistent slug', function (): void {
 });
 
 it('returns 404 for a past slug of a draft article', function (): void {
-    $article = Article::factory()->draft()->create([
+    Article::factory()->draft()->create([
         'slug' => 'new-slug',
         'past_slugs' => ['old-slug'],
         'published_at' => null,
@@ -43,17 +38,13 @@ it('returns 404 for a past slug of a draft article', function (): void {
         ->assertNotFound();
 });
 
-it('redirects to the latest slug when article has multiple past slugs', function (): void {
-    $article = Article::factory()->published()->create([
+it('redirects to the latest slug when article has multiple past slugs', function (string $oldSlug): void {
+    Article::factory()->published()->create([
         'slug' => 'final-slug',
         'past_slugs' => ['first-slug', 'second-slug'],
     ]);
 
-    $this->get('/blog/first-slug')
+    $this->get("/blog/{$oldSlug}")
         ->assertRedirect('/blog/final-slug')
         ->assertStatus(301);
-
-    $this->get('/blog/second-slug')
-        ->assertRedirect('/blog/final-slug')
-        ->assertStatus(301);
-});
+})->with(['first-slug', 'second-slug']);
