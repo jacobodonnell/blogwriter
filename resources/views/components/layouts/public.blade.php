@@ -63,28 +63,24 @@
             @endif
 
             {{-- Social rel-me links (icon-only) --}}
-            @if(setting('profile_github') || setting('profile_mastodon') || setting('profile_bluesky') || setting('profile_email'))
+            @php
+                $socialLinks = collect([
+                    ['key' => 'profile_github', 'icon' => 'github-logo', 'label' => 'GitHub'],
+                    ['key' => 'profile_mastodon', 'icon' => 'mastodon-logo', 'label' => 'Mastodon'],
+                    ['key' => 'profile_bluesky', 'icon' => 'butterfly', 'label' => 'Bluesky'],
+                    ['key' => 'profile_email', 'icon' => 'envelope', 'label' => 'Email'],
+                ])->filter(fn ($link) => setting($link['key']));
+            @endphp
+            @if($socialLinks->isNotEmpty())
                 <div class="flex gap-2">
-                    @if(setting('profile_github'))
-                        <a href="{{ setting('profile_github') }}" rel="me" class="u-url btn btn-ghost btn-xs btn-circle" title="GitHub">
-                            <i class="ph ph-github-logo text-base"></i>
+                    @foreach($socialLinks as $link)
+                        <a href="{{ $link['key'] === 'profile_email' ? 'mailto:' . setting($link['key']) : setting($link['key']) }}"
+                           rel="me"
+                           class="u-url btn btn-ghost btn-xs btn-circle"
+                           title="{{ $link['label'] }}">
+                            <i class="ph ph-{{ $link['icon'] }} text-base"></i>
                         </a>
-                    @endif
-                    @if(setting('profile_mastodon'))
-                        <a href="{{ setting('profile_mastodon') }}" rel="me" class="u-url btn btn-ghost btn-xs btn-circle" title="Mastodon">
-                            <i class="ph ph-mastodon-logo text-base"></i>
-                        </a>
-                    @endif
-                    @if(setting('profile_bluesky'))
-                        <a href="{{ setting('profile_bluesky') }}" rel="me" class="u-url btn btn-ghost btn-xs btn-circle" title="Bluesky">
-                            <i class="ph ph-butterfly text-base"></i>
-                        </a>
-                    @endif
-                    @if(setting('profile_email'))
-                        <a href="mailto:{{ setting('profile_email') }}" rel="me" class="u-url btn btn-ghost btn-xs btn-circle" title="Email">
-                            <i class="ph ph-envelope text-base"></i>
-                        </a>
-                    @endif
+                    @endforeach
                 </div>
             @endif
 
