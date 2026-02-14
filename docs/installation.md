@@ -12,6 +12,11 @@ order: 2
 
 Get BlogWriter running on your server in a few minutes.
 
+<x-callout type="info" title="Local Development?">
+  If you're setting up BlogWriter on your own machine for development or testing, see the
+  [Local Development](/docs/getting-started/local-development) guide instead.
+</x-callout>
+
 ## Requirements
 
 BlogWriter works on most modern web hosting. You need:
@@ -73,32 +78,23 @@ This fully-functional installer uses Laravel Prompts for an interactive terminal
 php artisan blogwriter:install --non-interactive
 ```
 
-### Web Installer 🚧 (Coming Soon)
+### Web Installer ✅ (For Shared Hosting)
 
-> **🚧 Web Installer UI Not Yet Available**
->
-> The fancy terminal-styled web installer shown in the documentation below is planned but not yet implemented. Currently, visiting `/install` will show a message directing you to use the CLI installer above. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues) on web installer design.
-
-**Planned Feature:**
-
-Upload BlogWriter's files to your web server, then visit your domain in a browser:
+If you don't have SSH access, upload BlogWriter's files to your web server and visit your domain in a browser:
 
 ```
 https://yourdomain.com/install
 ```
 
-You'll see a terminal-styled wizard — dark background, monospace font, box-drawing borders. It looks like a terminal but
-runs in your browser, with buttons and form fields you can click.
+You'll see a terminal-styled wizard — dark background, JetBrains Mono font, and progressive terminal output. It looks like a terminal but runs entirely in your browser with real form validation.
 
-**Current State:** Web route exists but shows CLI installer instructions.
+The web installer walks through the same steps as the CLI installer: requirements check, account creation, site configuration, database setup, and optional demo content seeding.
 
 ---
 
 ## Installation Steps
 
-> **Note:** The visual installer screens below represent the **planned web installer UI** (coming soon). The **CLI installer** (currently available) walks through the same steps using Laravel Prompts in your terminal.
-
-The CLI installer (working now) and web installer (coming soon) both cover these steps:
+Both the CLI installer and web installer cover these steps:
 
 ### Step 1: Welcome
 

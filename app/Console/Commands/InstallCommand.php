@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
-use App\Services\PasswordGenerator;
+use App\Services\InstallService;
 use App\Services\ResetService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
@@ -29,6 +29,11 @@ class InstallCommand extends Command
                             {--no-seed : Skip demo data seeding}';
 
     protected $description = 'Interactive installer for BlogWriter (supports non-interactive mode with flags)';
+
+    public function __construct(protected InstallService $installService)
+    {
+        parent::__construct();
+    }
 
     public function handle(): int
     {
@@ -68,7 +73,7 @@ class InstallCommand extends Command
         $this->welcome();
         $didFreshInstall = false;
 
-        if ($this->isAlreadyInstalled() && ! $this->option('force')) {
+        if ($this->installService->isAlreadyInstalled() && ! $this->option('force')) {
             warning('BlogWriter is already installed.');
             $this->newLine();
 
@@ -78,7 +83,6 @@ class InstallCommand extends Command
             );
 
             if ($runReset) {
-                // Run reset using service
                 $resetService = app(ResetService::class);
                 $resetExitCode = $resetService->reset($this);
 
@@ -105,14 +109,12 @@ class InstallCommand extends Command
         if (! $didFreshInstall) {
             $this->install($config);
         } else {
-            // After reset: run .env setup (normally done in install())
-            $this->ensureStorageDirectories();
-            $this->createStorageLink();
-            $this->setupEnvironmentFile();
-            $this->generateAppKey();
-            $this->updateEnvironmentFile($config);
+            $this->installService->ensureStorageDirectories();
+            $this->installService->createStorageLink();
+            $this->installService->setupEnvironmentFile();
+            $this->installService->generateAppKey();
+            $this->installService->updateEnvironmentFile($config);
 
-            // Then run post-migration setup (user creation, seeding, lock file)
             $this->postMigrationSetup($config);
         }
 
@@ -128,31 +130,8 @@ class InstallCommand extends Command
         $this->newLine();
     }
 
-    protected function isAlreadyInstalled(): bool
-    {
-        // Check lock file first (primary check)
-        if (file_exists(storage_path('installed.lock'))) {
-            return true;
-        }
-
-        // Fallback to database check
-        try {
-            if (User::exists()) {
-                // Create lock file for consistency (migration path)
-                file_put_contents(storage_path('installed.lock'), now());
-
-                return true;
-            }
-        } catch (\Exception) {
-            return false;
-        }
-
-        return false;
-    }
-
     protected function gatherConfiguration(): array
     {
-        // Check if running in non-interactive mode (all required options provided)
         if ($this->isNonInteractive()) {
             return $this->gatherNonInteractiveConfiguration();
         }
@@ -171,29 +150,24 @@ class InstallCommand extends Command
 
     protected function gatherNonInteractiveConfiguration(): array
     {
-        // Validate all inputs
         $siteName = $this->option('site-name');
         $siteUrl = $this->option('site-url');
         $name = $this->option('admin-name');
         $email = $this->option('admin-email');
         $password = $this->option('admin-password');
 
-        // Validate URL
         if ($error = $this->validateUrl($siteUrl)) {
             throw new \InvalidArgumentException('Invalid site URL: '.$error);
         }
 
-        // Validate email
         if ($error = $this->validateEmail($email)) {
             throw new \InvalidArgumentException('Invalid admin email: '.$error);
         }
 
-        // Validate password
         if ($error = $this->validatePasswordLength($password)) {
             throw new \InvalidArgumentException('Invalid admin password: '.$error);
         }
 
-        // Determine seed option
         $seed = $this->determineSeedOption();
 
         return [
@@ -273,12 +247,10 @@ class InstallCommand extends Command
 
     protected function validatePasswordLength(string $value): ?string
     {
-        // Check bypass first
         if (env('BYPASS_PASSWORD_RULES', false)) {
             return strlen($value) >= 8 ? null : 'Password must be at least 8 characters.';
         }
 
-        // Manual validation for CLI context (works without container)
         if (strlen($value) < 16) {
             return 'Password must be at least 16 characters.';
         }
@@ -300,7 +272,7 @@ class InstallCommand extends Command
 
     protected function promptForPassword(): string
     {
-        $suggestedPassphrase = PasswordGenerator::generate();
+        $suggestedPassphrase = $this->installService->generatePassphrase();
 
         info('Suggested secure passphrase (memorable & strong):');
         info($suggestedPassphrase);
@@ -312,7 +284,6 @@ class InstallCommand extends Command
         );
 
         if ($useSuggested) {
-            // Show it one more time for the user to copy
             info('Your passphrase: '.$suggestedPassphrase);
             info('Please save this in a password manager!');
             $this->newLine();
@@ -320,7 +291,6 @@ class InstallCommand extends Command
             return $suggestedPassphrase;
         }
 
-        // Continue with existing manual password flow
         $attempts = 0;
         $maxAttempts = 3;
 
@@ -345,9 +315,8 @@ class InstallCommand extends Command
             $attempts++;
         }
 
-        // If max attempts reached, generate a secure passphrase
         warning('Maximum attempts reached. Generating a secure passphrase for you.');
-        $generatedPassphrase = PasswordGenerator::generate();
+        $generatedPassphrase = $this->installService->generatePassphrase();
         info('Your generated passphrase: '.$generatedPassphrase);
         info('Please save this in a password manager!');
 
@@ -360,45 +329,36 @@ class InstallCommand extends Command
         info('Installing BlogWriter...');
         $this->newLine();
 
-        // Ensure storage directories exist before any Laravel operations
-        $this->ensureStorageDirectories();
+        $this->installService->ensureStorageDirectories();
+        info('✓ Storage directories ready');
 
-        // Create storage symlink for image uploads
-        $this->createStorageLink();
+        $this->installService->createStorageLink();
+        info('✓ Storage link ready');
 
-        // 1. Setup .env file
-        $this->setupEnvironmentFile();
+        info('Creating .env file from .env.example...');
+        $this->installService->setupEnvironmentFile();
+        info('✓ Environment file ready');
 
-        // 2. Generate APP_KEY
-        $this->generateAppKey();
+        info('Generating application key...');
+        $this->installService->generateAppKey();
+        info('✓ Application key generated');
 
-        // 3. Update .env with user config
-        $this->updateEnvironmentFile($config);
+        $this->installService->updateEnvironmentFile($config);
+        info('✓ Environment configured');
 
-        // Run migrations
-        $this->freshInstall();
+        $this->installService->runMigrations();
+        info('✓ Database migrated');
 
-        // Complete post-migration setup
         $this->postMigrationSetup($config);
     }
 
-    /**
-     * Complete setup after migrations: create user, seed data, lock file.
-     * Called either from install() or after reset + freshInstall().
-     */
     protected function postMigrationSetup(array $config): void
     {
-        // Create admin user
         info('Creating admin user...');
-        $user = $this->createUser($config);
+        $user = $this->installService->createUser($config);
         info('✓ Admin user created');
 
-        // Seed demo data if requested
         if ($config['seed']) {
-            // Clear any leftover temp files from previous failed attempts
-            \Illuminate\Support\Facades\Storage::disk('local')->deleteDirectory('media-library/temp');
-
-            // Pre-flight check for demo images
             info('Verifying demo images...');
             $imagesValid = $this->verifyDemoImages();
             if (! $imagesValid) {
@@ -413,124 +373,15 @@ class InstallCommand extends Command
             info('✓ Demo content added');
         }
 
-        // Clear caches
         info('Clearing caches...');
-        Artisan::call('config:clear');
-        Artisan::call('cache:clear');
+        $this->installService->clearCaches();
         info('✓ Caches cleared');
 
-        // Create installation lock file
-        file_put_contents(storage_path('installed.lock'), now());
+        $this->installService->createLockFile();
         info('✓ Installation lock file created');
 
         $this->newLine();
         $this->displaySuccess($config, $user);
-    }
-
-    /**
-     * Placeholder method called after reset.
-     * ResetService already handles migrations, so this is a no-op.
-     */
-    protected function freshInstall(): void
-    {
-        // ResetService already ran migrations - nothing to do here
-    }
-
-    protected function setupEnvironmentFile(): void
-    {
-        $envPath = base_path('.env');
-
-        if (file_exists($envPath)) {
-            return;
-        }
-
-        $envExamplePath = base_path('.env.example');
-        if (file_exists($envExamplePath)) {
-            info('Creating .env file from .env.example...');
-            copy($envExamplePath, $envPath);
-            info('✓ .env file created');
-
-            return;
-        }
-
-        throw new \RuntimeException(
-            'Cannot create .env file. .env.example not found. '.
-            'Please ensure the BlogWriter distribution includes this template file.'
-        );
-    }
-
-    protected function generateAppKey(): void
-    {
-        info('Generating application key...');
-
-        $envPath = base_path('.env');
-        if (! file_exists($envPath)) {
-            warning('Cannot generate key: .env file missing');
-
-            return;
-        }
-
-        // Generate AES-256-CBC key (32 bytes base64 encoded)
-        $key = 'base64:'.base64_encode(random_bytes(32));
-
-        // Update .env file
-        $content = file_get_contents($envPath);
-        $content = preg_replace('/^APP_KEY=.*$/m', 'APP_KEY='.$key, $content);
-        file_put_contents($envPath, $content);
-
-        info('✓ Application key generated');
-    }
-
-    protected function updateEnvironmentFile(array $config): void
-    {
-        $envPath = base_path('.env');
-
-        if (! file_exists($envPath)) {
-            return;
-        }
-
-        $content = file_get_contents($envPath);
-
-        // Update APP_NAME
-        $content = $this->updateEnvValue($content, 'APP_NAME', $config['site_name']);
-
-        // Update APP_URL
-        $content = $this->updateEnvValue($content, 'APP_URL', $config['site_url']);
-
-        file_put_contents($envPath, $content);
-    }
-
-    protected function updateEnvValue(string $content, string $key, string $value): string
-    {
-        $escapedValue = str_replace('"', '\\"', $value);
-
-        // Check if key exists
-        if (preg_match(sprintf('/^%s=/m', $key), $content)) {
-            // Update existing value
-            $content = preg_replace(
-                sprintf('/^%s=.*$/m', $key),
-                sprintf('%s="%s"', $key, $escapedValue),
-                $content
-            );
-        } else {
-            // Add new key
-            $content .= "\n{$key}=\"{$escapedValue}\"\n";
-        }
-
-        return $content;
-    }
-
-    protected function createUser(array $config): User
-    {
-        // Single-user system: replace existing user if present
-        User::query()->delete();
-
-        return User::create([
-            'name' => $config['name'],
-            'email' => $config['email'],
-            'password' => $config['password'],
-            'email_verified_at' => now(),
-        ]);
     }
 
     protected function displaySuccess(array $config, User $user): void
@@ -589,7 +440,6 @@ class InstallCommand extends Command
             return false;
         }
 
-        // Prompt in interactive mode, default to true in non-interactive
         if (! $this->option('no-interaction')) {
             return confirm(
                 label: 'Would you like to seed your blog with demo articles?',
@@ -625,72 +475,6 @@ class InstallCommand extends Command
         return false;
     }
 
-    /**
-     * Ensure required storage directories exist before installation proceeds.
-     * This prevents Laravel errors when bundle extraction misses empty directories.
-     */
-    protected function ensureStorageDirectories(): void
-    {
-        $directories = [
-            'storage/framework/cache',
-            'storage/framework/cache/data',
-            'storage/framework/sessions',
-            'storage/framework/testing',
-            'storage/framework/views',
-            'storage/logs',
-            'bootstrap/cache',
-        ];
-
-        foreach ($directories as $dir) {
-            $path = base_path($dir);
-
-            if (! is_dir($path)) {
-                if (! mkdir($path, 0755, true)) {
-                    throw new \RuntimeException(sprintf('Failed to create directory: %s. Check file permissions.', $dir));
-                }
-
-                info('✓ Created directory: '.$dir);
-            } elseif (! is_writable($path)) {
-                throw new \RuntimeException(sprintf('Directory not writable: %s. Check file permissions.', $dir));
-            }
-        }
-    }
-
-    /**
-     * Create the storage symlink for public access to uploaded files.
-     * This is required for featured images and other uploaded assets to be accessible.
-     */
-    protected function createStorageLink(): void
-    {
-        $publicStoragePath = public_path('storage');
-        $targetPath = storage_path('app/public');
-
-        // Check if symlink already exists
-        if (is_link($publicStoragePath) || is_dir($publicStoragePath)) {
-            info('✓ Storage link already exists');
-
-            return;
-        }
-
-        // Ensure target directory exists
-        if (! is_dir($targetPath)) {
-            mkdir($targetPath, 0755, true);
-        }
-
-        // Create symlink
-        if (@symlink($targetPath, $publicStoragePath)) {
-            info('✓ Created storage symlink for public file access');
-        } else {
-            warning('Could not create storage symlink automatically');
-            note('You may need to manually run: php artisan storage:link');
-            note('Or on Windows, run as administrator: mklink /D public\\storage storage\\app\\public');
-        }
-    }
-
-    /**
-     * Verify demo images exist and are valid before seeding.
-     * Prevents installer hang from missing or corrupted image files.
-     */
     protected function verifyDemoImages(): bool
     {
         $demoImagesPath = database_path('seeders/demo-images');
