@@ -265,6 +265,43 @@ overwriting your configuration. This protects your site from accidental reinstal
   the installer again and choose "Yes" when prompted to reset.
 </x-callout>
 
+## Install as a Web App
+
+BlogWriter is a Progressive Web App (PWA). You can install it on your device for a native app-like experience — full-screen
+window, home screen icon, faster loads, and an offline fallback page.
+
+### iOS / iPadOS
+
+1. Open your BlogWriter site in **Safari**
+2. Tap the **Share** button (square with an arrow)
+3. Tap **Add to Home Screen**
+4. Name the app and tap **Add**
+
+<x-callout type="warning" title="Safari Required">
+  On iOS and iPadOS, only Safari supports installing web apps. Chrome, Firefox, and other browsers won't show the option.
+</x-callout>
+
+### Mac
+
+**Safari (macOS Sonoma or later):**
+
+1. Open your BlogWriter site in Safari
+2. Go to **File → Add to Dock**
+3. Name the app and click **Add**
+
+**Chrome and other Chromium browsers:**
+
+1. Open your BlogWriter site
+2. Click the **install icon** in the address bar (or go to the browser menu → "Install BlogWriter…")
+3. Click **Install**
+
+### What You Get
+
+- **Full-screen window** — no browser chrome, feels like a native app
+- **Home screen / Dock icon** — launch BlogWriter like any other app
+- **Offline page** — a friendly fallback when you lose connectivity
+- **Theme-aware chrome** — the title bar matches your site's theme color
+
 ## After Installation
 
 - **Visit your site** at your domain to see the default theme
