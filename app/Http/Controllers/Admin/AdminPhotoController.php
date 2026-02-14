@@ -11,6 +11,7 @@ use App\Http\Requests\Admin\StorePhotoRequest;
 use App\Http\Requests\Admin\UpdatePhotoRequest;
 use App\Models\Photo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AdminPhotoController extends Controller
 {
@@ -76,7 +77,7 @@ class AdminPhotoController extends Controller
             return redirect()->route('admin.photos.edit', $photo)
                 ->with('success', 'Photo created successfully.');
         } catch (\Exception $exception) {
-            \Log::error('Failed to create photo', [
+            Log::error('Failed to create photo', [
                 'error' => $exception->getMessage(),
             ]);
 
@@ -148,7 +149,7 @@ class AdminPhotoController extends Controller
                 $photo->addMedia($request->file('image_file'))
                     ->toMediaCollection('image', $disk);
             } catch (\Exception $e) {
-                \Log::error('Failed to update photo in MediaLibrary', [
+                Log::error('Failed to update photo in MediaLibrary', [
                     'photo_id' => $photo->id,
                     'error' => $e->getMessage(),
                 ]);
@@ -184,7 +185,7 @@ class AdminPhotoController extends Controller
             return redirect()->route('admin.photos.index')
                 ->with('success', 'Photo deleted successfully.');
         } catch (\Exception $exception) {
-            \Log::error('Failed to delete photo', [
+            Log::error('Failed to delete photo', [
                 'photo_id' => $photo->id,
                 'error' => $exception->getMessage(),
             ]);
