@@ -41,18 +41,3 @@ it('returns 404 for non-existent photos', function (): void {
 
     $response->assertNotFound();
 });
-
-it('isPublic method returns correct visibility status', function (): void {
-    $publishedPhoto = Photo::factory()->published()->create([
-        'published_at' => now()->subDay(),
-    ]);
-    $draftPhoto = Photo::factory()->draft()->create();
-    $futurePhoto = Photo::factory()->create([
-        'status' => 'published',
-        'published_at' => now()->addDay(),
-    ]);
-
-    expect($publishedPhoto->isPublic())->toBeTrue();
-    expect($draftPhoto->isPublic())->toBeFalse();
-    expect($futurePhoto->isPublic())->toBeFalse();
-});

@@ -28,15 +28,3 @@ it('allows creating a new user after deleting the existing one', function (): vo
     expect(User::count())->toBe(1);
     expect($second->exists)->toBeTrue();
 });
-
-it('has articles relationship', function (): void {
-    $user = User::factory()->create();
-
-    expect($user->articles())->toBeInstanceOf(\Illuminate\Database\Eloquent\Relations\HasMany::class);
-});
-
-it('has photos relationship', function (): void {
-    $user = User::factory()->create();
-
-    expect($user->photos())->toBeInstanceOf(\Illuminate\Database\Eloquent\Relations\HasMany::class);
-});

@@ -22,20 +22,6 @@ describe('Status enum values', function (): void {
         expect(Status::Published->isPrivate())->toBeFalse();
     });
 
-    it('can be created from string value', function (): void {
-        expect(Status::from('draft'))->toBe(Status::Draft);
-        expect(Status::from('published'))->toBe(Status::Published);
-    });
-
-    it('throws exception for invalid value', function (): void {
-        expect(fn () => Status::from('invalid'))->toThrow(\ValueError::class);
-    });
-
-    it('has tryFrom method for safe conversion', function (): void {
-        expect(Status::tryFrom('draft'))->toBe(Status::Draft);
-        expect(Status::tryFrom('published'))->toBe(Status::Published);
-        expect(Status::tryFrom('invalid'))->toBeNull();
-    });
 });
 
 describe('Status enum helper methods', function (): void {

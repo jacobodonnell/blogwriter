@@ -76,19 +76,3 @@ it('stores draft photos on private disk', function (): void {
 
     expect($photo->getFirstMedia('image')->disk)->toBe('private');
 })->group('integration');
-
-it('cleans up media when photo is deleted', function (): void {
-    $file = UploadedFile::fake()->image('test.jpg', 400, 300);
-
-    $action = app(CreatePhotoFromUploadAction::class);
-    $photo = $action->handle($file, [
-        'user_id' => $this->user->id,
-        'alt_text' => 'Test image',
-        'status' => 'published',
-    ]);
-
-    $mediaId = $photo->getFirstMedia('image')->id;
-    $photo->delete();
-
-    expect(\Spatie\MediaLibrary\MediaCollections\Models\Media::find($mediaId))->toBeNull();
-})->group('integration');

@@ -74,7 +74,7 @@ it('sets last_edited_at when re-publishing already published article', function 
         'last_edited_at' => null,
     ]);
 
-    sleep(1);
+    $this->travel(1)->seconds();
 
     $response = put(route('admin.articles.update', $article), [
         'title' => 'Published Article Updated',
@@ -101,7 +101,7 @@ it('correctly handles published to draft to published flow', function (): void {
     $article = Article::where('slug', 'flow-test-article')->first();
     $firstPublishedAt = $article->published_at;
 
-    sleep(1);
+    $this->travel(1)->seconds();
 
     put(route('admin.articles.update', $article), [
         'title' => 'Flow Test Article',
@@ -113,7 +113,7 @@ it('correctly handles published to draft to published flow', function (): void {
     $article->refresh();
     expect($article->status->value)->toBe('draft');
 
-    sleep(1);
+    $this->travel(1)->seconds();
 
     put(route('admin.articles.update', $article), [
         'title' => 'Flow Test Article Updated',
