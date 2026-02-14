@@ -281,10 +281,10 @@
                                             class="select select-bordered w-full @error('photo_id') select-error @enderror"
                                             x-model="selectedPhotoId">
                                         <option value="">No featured image</option>
-                                        @foreach(\App\Models\Photo::latest()->limit(50)->get() as $photo)
+                                        @foreach(\App\Models\Photo::published()->latest()->limit(50)->get() as $photo)
                                             <option value="{{ $photo->id }}"
                                                     {{ $initialPhotoId == $photo->id ? 'selected' : '' }}>
-                                                {{ $photo->alt_text }} ({{ $photo->status->value }})
+                                                {{ $photo->alt_text }}
                                             </option>
                                         @endforeach
                                     </select>

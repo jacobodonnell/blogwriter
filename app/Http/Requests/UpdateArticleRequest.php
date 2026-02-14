@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\PublishedPhoto;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -36,7 +37,7 @@ class UpdateArticleRequest extends FormRequest
             'summary' => ['nullable', 'string', 'max:500'],
             'content' => ['nullable', 'string'],
             'status' => ['required', 'in:draft,published'],
-            'photo_id' => ['nullable', 'exists:photos,id'],
+            'photo_id' => ['nullable', 'exists:photos,id', new PublishedPhoto],
             'featured_image' => ['nullable', 'string', 'url', 'max:500'],
             'featured_image_file' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'remove_featured_image' => ['nullable', 'boolean'],

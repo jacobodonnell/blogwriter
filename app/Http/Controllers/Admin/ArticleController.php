@@ -127,7 +127,7 @@ class ArticleController extends Controller
     {
         $article->load('categories');
         $categories = Category::orderBy('name')->get();
-        $photos = Photo::latest()->limit(50)->get();
+        $photos = Photo::published()->latest()->limit(50)->get();
 
         return view('admin.articles.customizer', [
             'article' => $article,
