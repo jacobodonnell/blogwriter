@@ -1,7 +1,22 @@
 <x-layouts.admin>
     <x-slot:title>Edit Photo</x-slot:title>
 
-    <div class="space-y-6">
+    <div class="space-y-6"
+         x-data="{
+             originalStatus: '{{ old('status', $photo->status?->value ?? 'draft') }}',
+             currentStatus: '{{ old('status', $photo->status?->value ?? 'draft') }}',
+             articleCount: {{ $articleCount }},
+             handleSubmit(event) {
+                 if (this.originalStatus === 'published' && this.currentStatus === 'draft' && this.articleCount > 0) {
+                     event.preventDefault();
+                     document.getElementById('detach-modal').showModal();
+                 }
+             },
+             confirmDetach() {
+                 document.getElementById('detach-modal').close();
+                 this.$refs.editForm.submit();
+             }
+         }">
         {{-- Header --}}
         <div class="flex justify-between items-center">
             <div>
@@ -30,7 +45,9 @@
         <form method="POST"
               action="{{ route('admin.photos.update', $photo) }}"
               enctype="multipart/form-data"
-              class="space-y-6">
+              class="space-y-6"
+              x-ref="editForm"
+              @submit="handleSubmit($event)">
             @csrf
             @method('PUT')
 
@@ -60,15 +77,37 @@
             </div>
         </form>
 
+        {{-- Detach Warning Modal --}}
+        <dialog id="detach-modal" class="modal">
+            <div class="modal-box">
+                <h3 class="font-bold text-lg">Detach Photo from Articles</h3>
+                <p class="py-4">
+                    Switching this photo to draft will remove it as the featured image from
+                    <span class="font-semibold" x-text="articleCount"></span>
+                    <span x-text="articleCount === 1 ? 'article' : 'articles'"></span>.
+                    Draft photos are not publicly accessible, so the featured image would appear broken.
+                </p>
+                <div class="modal-action">
+                    <button type="button" class="btn btn-warning" @click="confirmDetach()">Switch to Draft</button>
+                    <form method="dialog">
+                        <button class="btn">Cancel</button>
+                    </form>
+                </div>
+            </div>
+            <form method="dialog" class="modal-backdrop">
+                <button>close</button>
+            </form>
+        </dialog>
+
         {{-- Delete Confirmation Modal --}}
         <dialog id="delete-modal" class="modal">
             <div class="modal-box">
                 <h3 class="font-bold text-lg">Delete Photo</h3>
                 <p class="py-4">
                     Are you sure you want to delete this photo?
-                    @if($photo->articles()->count() > 0)
+                    @if($articleCount > 0)
                         <span class="text-error font-semibold">
-                            This photo is currently used in {{ $photo->articles()->count() }} {{ Str::plural('article', $photo->articles()->count()) }}.
+                            This photo is currently used in {{ $articleCount }} {{ Str::plural('article', $articleCount) }}.
                         </span>
                     @endif
                     This action cannot be undone.

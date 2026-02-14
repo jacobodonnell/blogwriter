@@ -77,12 +77,14 @@
                    value="draft"
                    class="tab"
                    aria-label="📝 Draft"
+                   @change="currentStatus = 'draft'"
                    {{ old('status', $photo->status?->value ?? 'draft') === 'draft' ? 'checked' : '' }}>
             <input type="radio"
                    name="status"
                    value="published"
                    class="tab"
                    aria-label="✅ Published"
+                   @change="currentStatus = 'published'"
                    {{ old('status', $photo->status?->value) === 'published' ? 'checked' : '' }}>
         </div>
         @error('status')

@@ -74,3 +74,52 @@ it('requires unique slugs', function (): void {
     $response->assertSessionHasErrors();
     expect(Photo::count())->toBe(1);
 });
+
+it('detaches photo from articles when switching to draft', function (): void {
+    $photo = Photo::factory()->published()->create();
+    $article1 = Article::factory()->published()->create(['photo_id' => $photo->id]);
+    $article2 = Article::factory()->published()->create(['photo_id' => $photo->id]);
+
+    $this->put(route('admin.photos.update', $photo), [
+        'alt_text' => $photo->alt_text,
+        'status' => 'draft',
+    ]);
+
+    expect($article1->fresh()->photo_id)->toBeNull();
+    expect($article2->fresh()->photo_id)->toBeNull();
+});
+
+it('does not detach articles when photo stays published', function (): void {
+    $photo = Photo::factory()->published()->create();
+    $article = Article::factory()->published()->create(['photo_id' => $photo->id]);
+
+    $this->put(route('admin.photos.update', $photo), [
+        'alt_text' => 'Updated alt text',
+        'status' => 'published',
+    ]);
+
+    expect($article->fresh()->photo_id)->toBe($photo->id);
+});
+
+it('does not detach articles when publishing a draft photo', function (): void {
+    $photo = Photo::factory()->draft()->create();
+    $article = Article::factory()->create(['photo_id' => $photo->id]);
+
+    $this->put(route('admin.photos.update', $photo), [
+        'alt_text' => $photo->alt_text,
+        'status' => 'published',
+    ]);
+
+    expect($article->fresh()->photo_id)->toBe($photo->id);
+});
+
+it('passes articleCount to the edit view', function (): void {
+    $photo = Photo::factory()->published()->create();
+    Article::factory()->published()->create(['photo_id' => $photo->id]);
+    Article::factory()->published()->create(['photo_id' => $photo->id]);
+
+    $response = $this->get(route('admin.photos.edit', $photo));
+
+    $response->assertSuccessful();
+    $response->assertViewHas('articleCount', 2);
+});

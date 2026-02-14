@@ -107,6 +107,7 @@ class AdminPhotoController extends Controller
     {
         return view('admin.photos.edit', [
             'photo' => $photo,
+            'articleCount' => $photo->articles()->count(),
         ]);
     }
 

@@ -17,6 +17,11 @@ class PhotoObserver
             $photo->saveQuietly();
         }
 
+        // Detach photo from articles when switching to draft
+        if ($photo->wasChanged('status') && $photo->status->isPrivate()) {
+            $photo->articles()->update(['photo_id' => null]);
+        }
+
         // Move media between disks based on status
         if ($photo->wasChanged('status') && $photo->hasMedia('image')) {
             $media = $photo->getFirstMedia('image');
