@@ -95,7 +95,6 @@
 
                                 @if($photo->isPublic())
                                     <a href="{{ route('photos.show', $photo->slug) }}"
-                                       target="_blank"
                                        class="btn btn-sm btn-ghost"
                                        title="View">
                                         <i class="ph ph-eye text-lg"></i>

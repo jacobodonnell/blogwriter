@@ -262,7 +262,6 @@
                     {{-- View Live button (only when currently published on server) --}}
                     @if($article->isPublished())
                         <a href="{{ route('article.show', $article->slug) }}"
-                           target="_blank"
                            x-show="initialStatus === 'published'"
                            class="btn btn-outline w-full gap-2">
                             <i class="ph ph-arrow-square-out"></i>

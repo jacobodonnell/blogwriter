@@ -97,11 +97,11 @@
                                                     <i class="ph ph-pencil-simple text-lg"></i>
                                                 </a>
                                                 @if($article->isPublished())
-                                                    <a href="{{ $article->permalink() }}" target="_blank" class="btn btn-sm btn-ghost" title="View Published">
+                                                    <a href="{{ $article->permalink() }}" class="btn btn-sm btn-ghost" title="View Published">
                                                         <i class="ph ph-eye text-lg"></i>
                                                     </a>
                                                 @else
-                                                    <a href="{{ route('admin.articles.show', $article) }}" target="_blank" class="btn btn-sm btn-ghost" title="Preview Draft">
+                                                    <a href="{{ route('admin.articles.show', $article) }}" class="btn btn-sm btn-ghost" title="Preview Draft">
                                                         <i class="ph ph-eye text-lg"></i>
                                                     </a>
                                                 @endif

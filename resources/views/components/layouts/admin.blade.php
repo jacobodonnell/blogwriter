@@ -131,23 +131,53 @@
                 <nav class="flex-1">
                     <ul class="menu menu-lg gap-1">
                         <li>
-                            <a href="{{ route('admin.dashboard') }}" class="{{ request()->is('admin') ? 'active' : '' }}">
+                            <a href="{{ route('home') }}" class="{{ request()->is('/') ? 'active' : '' }}">
                                 <i class="ph ph-house text-lg"></i>
-                                Dashboard
+                                Home
                             </a>
                         </li>
 
                         <li>
-                            <a href="{{ route('admin.articles.index') }}" class="{{ request()->is('admin/articles*') ? 'active' : '' }}">
+                            <a href="{{ route('home') }}" class="{{ request()->is('blog/*') && !request()->is('admin*') ? 'active' : '' }}">
                                 <i class="ph ph-article text-lg"></i>
                                 Articles
                             </a>
                         </li>
 
                         <li>
-                            <a href="{{ route('admin.photos.index') }}" class="{{ request()->is('admin/photos*') ? 'active' : '' }}">
+                            <a href="{{ route('photos.index') }}" class="{{ request()->is('photos') && !request()->is('admin*') ? 'active' : '' }}">
                                 <i class="ph ph-image text-lg"></i>
                                 Photos
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('profile') }}" class="{{ request()->is('profile') ? 'active' : '' }}">
+                                <i class="ph ph-user text-lg"></i>
+                                Profile
+                            </a>
+                        </li>
+
+                        <div class="divider my-2"></div>
+
+                        <li>
+                            <a href="{{ route('admin.dashboard') }}" class="{{ request()->is('admin') ? 'active' : '' }}">
+                                <i class="ph ph-gauge text-lg"></i>
+                                Dashboard
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('admin.articles.index') }}" class="{{ request()->is('admin/articles*') ? 'active' : '' }}">
+                                <i class="ph ph-note-pencil text-lg"></i>
+                                Manage Articles
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('admin.photos.index') }}" class="{{ request()->is('admin/photos*') ? 'active' : '' }}">
+                                <i class="ph ph-images text-lg"></i>
+                                Manage Photos
                             </a>
                         </li>
 
@@ -162,15 +192,6 @@
                             <a href="{{ route('admin.settings') }}" class="{{ request()->is('admin/settings*') ? 'active' : '' }}">
                                 <i class="ph ph-gear text-lg"></i>
                                 Settings
-                            </a>
-                        </li>
-
-                        <div class="divider my-2"></div>
-
-                        <li>
-                            <a href="{{ route('home') }}" target="_blank" class="text-primary">
-                                <i class="ph ph-arrow-square-out text-lg"></i>
-                                View Site
                             </a>
                         </li>
                     </ul>

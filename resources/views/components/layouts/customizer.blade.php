@@ -87,7 +87,7 @@
                     </button>
                 </div>
 
-                <a href="{{ route('admin.articles.show', $article) }}" target="_blank" class="btn btn-ghost btn-sm gap-1">
+                <a href="{{ route('admin.articles.show', $article) }}" class="btn btn-ghost btn-sm gap-1">
                     <i class="ph ph-arrow-square-out text-lg"></i>
                     <span class="hidden sm:inline">Preview</span>
                 </a>

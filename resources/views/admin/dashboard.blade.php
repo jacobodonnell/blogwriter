@@ -63,7 +63,7 @@
                                     <a href="{{ route('admin.articles.edit', $article) }}" class="btn btn-sm btn-ghost" title="Edit">
                                         <i class="ph ph-pencil-simple text-lg"></i>
                                     </a>
-                                    <a href="{{ $article->permalink() }}" target="_blank" class="btn btn-sm btn-ghost" title="View on Site">
+                                    <a href="{{ $article->permalink() }}" class="btn btn-sm btn-ghost" title="View on Site">
                                         <i class="ph ph-eye text-lg"></i>
                                     </a>
                                 </div>

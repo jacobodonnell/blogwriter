@@ -289,7 +289,7 @@
                                         @endforeach
                                     </select>
                                     <p class="text-xs text-base-content/50 mt-1">
-                                        <a href="{{ route('admin.photos.create') }}" target="_blank" class="link link-primary">
+                                        <a href="{{ route('admin.photos.create') }}" class="link link-primary">
                                             <i class="ph ph-plus-circle"></i>
                                             Create new photo
                                         </a>
