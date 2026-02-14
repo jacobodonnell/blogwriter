@@ -4,6 +4,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
+beforeEach(function (): void {
+    config()->set('blogwriter.web_installer', true);
+});
+
 afterEach(function (): void {
     @unlink(storage_path('installed.lock'));
     @unlink(storage_path('install_seed_allowed'));

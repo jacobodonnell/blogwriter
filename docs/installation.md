@@ -54,6 +54,11 @@ This installer will set up FrankenPHP, download BlogWriter, and walk you through
 
 ## Manual Installation
 
+<x-callout type="info" title="V0.1 Deployment Target">
+  V0.1 targets **Laravel Forge** and VPS deployments. One-click installers and the web installer for shared hosting
+  are planned for a future release.
+</x-callout>
+
 ### CLI Installer ✅ (Recommended - Fully Working)
 
 If you have SSH access to your server, use the CLI installer:
@@ -78,7 +83,13 @@ This fully-functional installer uses Laravel Prompts for an interactive terminal
 php artisan blogwriter:install --non-interactive
 ```
 
-### Web Installer ✅ (For Shared Hosting)
+<x-callout type="planned" title="Web Installer (Coming Soon)" collapsible>
+A browser-based installer for shared hosting (no SSH required) is planned but needs a setup script before it can work
+reliably across hosting environments. Use the CLI installer for now.
+</x-callout>
+
+<!--
+### Web Installer (For Shared Hosting)
 
 If you don't have SSH access, upload BlogWriter's files to your web server and visit your domain in a browser:
 
@@ -89,12 +100,13 @@ https://yourdomain.com/install
 You'll see a terminal-styled wizard — dark background, JetBrains Mono font, and progressive terminal output. It looks like a terminal but runs entirely in your browser with real form validation.
 
 The web installer walks through the same steps as the CLI installer: requirements check, account creation, site configuration, database setup, and optional demo content seeding.
+-->
 
 ---
 
 ## Installation Steps
 
-Both the CLI installer and web installer cover these steps:
+The CLI installer covers these steps:
 
 ### Step 1: Welcome
 
@@ -267,7 +279,8 @@ overwriting your configuration. This protects your site from accidental reinstal
 
 ## Install as a Web App
 
-BlogWriter is a Progressive Web App (PWA). You can install it on your device for a native app-like experience — full-screen
+BlogWriter is a Progressive Web App (PWA). You can install it on your device for a native app-like experience —
+full-screen
 window, home screen icon, faster loads, and an offline fallback page.
 
 ### iOS / iPadOS
