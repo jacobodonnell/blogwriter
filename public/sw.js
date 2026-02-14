@@ -24,8 +24,10 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
 
-  // Only handle GET requests
+  // Only handle GET requests over HTTP(S)
   if (request.method !== 'GET') return;
+  const url = new URL(request.url);
+  if (!url.protocol.startsWith('http')) return;
 
   // Navigation requests: network-first with offline fallback
   if (request.mode === 'navigate') {
@@ -36,7 +38,6 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Static assets (CSS, JS, fonts, images): cache-first
-  const url = new URL(request.url);
   const isStaticAsset = /\.(css|js|woff2?|ttf|otf|png|jpg|jpeg|webp|gif|svg|ico)$/.test(url.pathname)
     || url.pathname.startsWith('/build/');
 
