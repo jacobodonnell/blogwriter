@@ -14,17 +14,46 @@
 
     @auth
         {{-- Authenticated: Full drawer layout (same pattern as admin) --}}
-        <div class="drawer lg:drawer-open" x-data="{ drawerOpen: false }">
-            <input id="drawer-toggle" type="checkbox" class="drawer-toggle" x-model="drawerOpen" />
+        <div class="drawer"
+             :class="drawerOpen && isDesktop && 'drawer-open'"
+             x-data="{
+                 isDesktop: window.matchMedia('(min-width: 1024px)').matches,
+                 drawerOpen: window.matchMedia('(min-width: 1024px)').matches
+                     ? JSON.parse(localStorage.getItem('publicDrawerOpen') ?? 'true')
+                     : false,
+                 toggle() {
+                     if (this.isDesktop) {
+                         this.drawerOpen = !this.drawerOpen;
+                     } else {
+                         this.$refs.drawerToggle.checked = !this.$refs.drawerToggle.checked;
+                     }
+                 },
+                 init() {
+                     const mql = window.matchMedia('(min-width: 1024px)');
+                     mql.addEventListener('change', (e) => {
+                         this.isDesktop = e.matches;
+                         if (!e.matches) {
+                             this.drawerOpen = false;
+                         } else {
+                             this.drawerOpen = JSON.parse(localStorage.getItem('publicDrawerOpen') ?? 'true');
+                         }
+                     });
+                     this.$watch('drawerOpen', v => {
+                         if (this.isDesktop) localStorage.setItem('publicDrawerOpen', JSON.stringify(v));
+                     });
+                 }
+             }">
+            <input x-ref="drawerToggle" id="drawer-toggle" type="checkbox" class="drawer-toggle" />
 
             {{-- Drawer Content (Main Area) --}}
             <div class="drawer-content flex flex-col min-h-screen">
                 {{-- Header Navbar --}}
                 <header class="navbar bg-base-100 sticky top-0 z-30 shadow-sm">
-                    <div class="flex-none lg:hidden">
-                        <label for="drawer-toggle" class="btn btn-square btn-ghost drawer-button">
-                            <i class="ph ph-list text-xl"></i>
-                        </label>
+                    <div class="flex-none">
+                        <button @click="toggle()" class="btn btn-square btn-ghost">
+                            <i x-show="!drawerOpen || !isDesktop" class="ph ph-list text-xl" x-cloak></i>
+                            <i x-show="drawerOpen && isDesktop" class="ph ph-x text-xl" x-cloak></i>
+                        </button>
                     </div>
 
                     <div class="flex-1">
@@ -93,13 +122,13 @@
             <div class="drawer-side z-40">
                 <label for="drawer-toggle" aria-label="close sidebar" class="drawer-overlay"></label>
 
-                <aside class="menu bg-base-100 min-h-full w-80 p-4 lg:p-0 flex flex-col">
-                    {{-- Sidebar Header (mobile) --}}
-                    <div class="flex items-center justify-between mb-4 lg:mb-6 px-2 lg:hidden">
+                <aside class="menu bg-base-100 min-h-full w-80 p-4 flex flex-col">
+                    {{-- Sidebar Header --}}
+                    <div class="flex items-center justify-between mb-4 lg:mb-6 px-2">
                         <span class="text-xl font-semibold">{{ config('app.name', 'BlogWriter') }}</span>
-                        <label for="drawer-toggle" class="btn btn-ghost btn-sm btn-circle">
+                        <button @click="$refs.drawerToggle.checked = false" class="btn btn-ghost btn-sm btn-circle lg:hidden">
                             <i class="ph ph-x text-lg"></i>
-                        </label>
+                        </button>
                     </div>
 
                     {{-- Navigation Menu --}}
@@ -173,7 +202,7 @@
                     </nav>
 
                     {{-- Sidebar Footer --}}
-                    <div class="mt-auto pt-4 border-t border-base-300 px-2 hidden lg:block">
+                    <div class="mt-auto pt-4 border-t border-base-300 px-2">
                         <p class="text-xs text-base-content/50">v0.1a Alpha</p>
                     </div>
                 </aside>
