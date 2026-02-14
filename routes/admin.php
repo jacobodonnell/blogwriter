@@ -41,6 +41,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function (): v
 
     // Settings
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
+    Route::put('/settings/profile', [SettingsController::class, 'update'])->name('settings.profile.update');
 
     // Private media file serving
     Route::get('/media/{media}/{conversion?}', [MediaController::class, 'show'])->name('media.show');
