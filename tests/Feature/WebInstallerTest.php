@@ -6,6 +6,7 @@ uses(RefreshDatabase::class);
 
 afterEach(function (): void {
     @unlink(storage_path('installed.lock'));
+    @unlink(storage_path('install_seed_allowed'));
 });
 
 it('shows install page when not installed', function (): void {
@@ -145,6 +146,31 @@ it('returns 403 from all post routes when already installed', function (): void 
     $this->postJson('/install/check')->assertForbidden();
     $this->postJson('/install/account')->assertForbidden();
     $this->postJson('/install/passphrase')->assertForbidden();
+});
+
+it('completes full install flow with demo seeding', function (): void {
+    // Step 1: Submit account config with seed_demo enabled
+    $this->postJson('/install/account', [
+        'name' => 'Admin User',
+        'email' => 'admin@example.com',
+        'password' => 'secure-passphrase-here-42!',
+        'password_confirmation' => 'secure-passphrase-here-42!',
+        'site_name' => 'My Blog',
+        'site_url' => 'https://example.com',
+        'seed_demo' => true,
+    ])->assertSuccessful();
+
+    // Step 2: Finalize (clears caches, which invalidates session/CSRF)
+    $this->postJson('/install/finalize')
+        ->assertSuccessful()
+        ->assertJson(['success' => true]);
+
+    // Step 3: Seed demo content — previously failed with CSRF mismatch
+    $this->postJson('/install/seed')
+        ->assertSuccessful()
+        ->assertJson(['success' => true]);
+
+    $this->assertDatabaseHas('users', ['email' => 'admin@example.com']);
 });
 
 it('returns a passphrase string from passphrase endpoint', function (): void {

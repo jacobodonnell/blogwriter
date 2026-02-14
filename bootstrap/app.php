@@ -17,6 +17,13 @@ return Application::configure(basePath: dirname(__DIR__))
         // Auto-repair storage directories for authenticated users
         // This catches missing directories from incomplete bundle extractions
         $middleware->append(\App\Http\Middleware\StorageAutoRepair::class);
+
+        // Exclude install routes from CSRF — finalize clears caches which
+        // invalidates the session, making the token stale for the seed request.
+        // These routes are already guarded by isAlreadyInstalled() checks.
+        $middleware->validateCsrfTokens(except: [
+            'install/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

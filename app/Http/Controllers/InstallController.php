@@ -74,7 +74,7 @@ class InstallController extends Controller
         $request->session()->forget('install_config');
 
         if ($config['seed_demo'] ?? false) {
-            $request->session()->put('install_seed_allowed', true);
+            file_put_contents(storage_path('install_seed_allowed'), now());
         }
 
         $siteUrl = $config['site_url'];
@@ -88,14 +88,16 @@ class InstallController extends Controller
 
     public function seed(Request $request): JsonResponse
     {
-        // Seed is only allowed immediately after finalize, tracked via session flag
-        if (! $request->session()->get('install_seed_allowed')) {
+        // Seed is only allowed immediately after finalize, tracked via file flag
+        // (session is unreliable here because finalize changes the APP_KEY)
+        $flagPath = storage_path('install_seed_allowed');
+        if (! file_exists($flagPath)) {
             abort(403, 'Seeding is not allowed at this time.');
         }
 
         $this->installService->seedDemoContent();
 
-        $request->session()->forget('install_seed_allowed');
+        @unlink($flagPath);
 
         return response()->json(['success' => true]);
     }
