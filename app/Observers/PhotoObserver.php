@@ -11,19 +11,23 @@ class PhotoObserver
      */
     public function updated(Photo $photo): void
     {
+        if (! $photo->wasChanged('status')) {
+            return;
+        }
+
         // Auto-set published_at when publishing
-        if ($photo->wasChanged('status') && $photo->status->isPublic() && ! $photo->published_at) {
+        if ($photo->status->isPublic() && ! $photo->published_at) {
             $photo->published_at = now();
             $photo->saveQuietly();
         }
 
         // Detach photo from articles when switching to draft
-        if ($photo->wasChanged('status') && $photo->status->isPrivate()) {
+        if ($photo->status->isPrivate()) {
             $photo->articles()->update(['photo_id' => null]);
         }
 
         // Move media between disks based on status
-        if ($photo->wasChanged('status') && $photo->hasMedia('image')) {
+        if ($photo->hasMedia('image')) {
             $media = $photo->getFirstMedia('image');
             $expectedDisk = $photo->status->isPublic() ? 'public' : 'private';
 
