@@ -7,7 +7,7 @@ use App\Models\Article;
 class ArticleController extends Controller
 {
     /**
-     * Display the homepage with recent articles.
+     * Display the articles listing page.
      */
     public function index(): \Illuminate\View\View
     {
@@ -16,7 +16,7 @@ class ArticleController extends Controller
             ->orderBy('published_at', 'desc')
             ->paginate(10);
 
-        return view('public.index', [
+        return view('public.articles', [
             'articles' => $articles,
         ]);
     }

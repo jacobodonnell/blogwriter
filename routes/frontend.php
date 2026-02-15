@@ -2,11 +2,15 @@
 
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CategoryArticleController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PhotoController;
 use Illuminate\Support\Facades\Route;
 
-// Home & Blog
-Route::get('/', [ArticleController::class, 'index'])->name('home');
+// Home
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Articles
+Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
 Route::redirect('/blog', '/');
 Route::get('/blog/{slug}', [ArticleController::class, 'show'])->name('article.show');
 
