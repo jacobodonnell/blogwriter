@@ -802,6 +802,7 @@ php artisan test --coverage
 - Micropub support
 - ActivityPub integration (optional)
 - Theme marketplace
+- Plugin architecture (Composer-based, open store spec)
 
 **Planned (future beta releases):**
 

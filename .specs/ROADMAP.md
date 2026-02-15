@@ -11,7 +11,7 @@ fees or platform risk.
 
 - **"Apple easy" self-hosting** - One command install, works out of the box
 - **FOSS forever** (MIT License) - Use however you want
-- **No plugins, ever** - Themes handle customization
+- **Open plugin architecture** - Composer-based plugins with official + third-party stores
 - **Documentation from day 1** - Make onboarding seamless
 - **IndieWeb-native** - Protocols built in, not bolted on
 
@@ -305,6 +305,15 @@ fees or platform risk.
 - [ ] Theme review process
 - [ ] Theme documentation standards
 
+### Plugin Store
+
+- [ ] Plugin submission system
+- [ ] Official store (curated, 15% commission)
+- [ ] Third-party store support (open API spec)
+- [ ] Plugin install/uninstall UI in admin
+- [ ] `blogwriter:plugin:install` command
+- [ ] Plugin developer documentation
+
 ### Import Tools
 
 - [ ] Substack import
@@ -384,13 +393,13 @@ fees or platform risk.
 - Markdown backups = always exportable
 - DaisyUI = fast, accessible components
 
-### No Plugins Policy
+### Plugin Architecture
 
-- Themes handle all customization
-- Themes can add functionality
-- Uninstall theme = clean slate
-- Keeps core simple and maintainable
-- WordPress bloat is the enemy
+- Plugins are standard Composer packages with Laravel auto-discovery
+- Official store (curated, 15% commission) + third-party stores (open spec, 0% commission)
+- Install via UI store, direct Composer, or manual filesystem
+- No lock-in: plugins work regardless of installation source
+- See `.ai/guidelines/plugins.md` for full architecture spec
 
 ---
 
@@ -401,13 +410,14 @@ fees or platform risk.
 1. **BlogWriter Hosted** ($20/month) - Primary revenue
 2. **Premium Themes** ($29-79) - Secondary revenue
 3. **Consulting** (as needed) - Tertiary revenue
+4. **Plugin Store** (15% commission on official store) - Ecosystem revenue
 
 ### What We Don't Do
 
 - ❌ Agency tiers
 - ❌ White-label fees
 - ❌ Per-site pricing
-- ❌ Plugin marketplace
+- ✅ Plugin marketplace (open architecture, 15% official store commission)
 - ❌ Certification programs
 - ❌ Platform fees (10% like Substack)
 
@@ -453,7 +463,7 @@ fees or platform risk.
 - ✅ Modern tech stack
 - ✅ Creator-focused from day one
 - ✅ IndieWeb native
-- ✅ No plugins = simpler
+- ✅ Curated plugin ecosystem (vs WordPress bloat)
 
 **The Pitch:** "Substack + Patreon for people who own their web."
 
@@ -508,7 +518,7 @@ fees or platform risk.
 4. **No artificial deadlines** - Ship when it works
 5. **Your blog validates the product** - Use what you build
 6. **BYOK keeps costs down** - Users provide API keys
-7. **No plugins ever** - Themes handle customization
+7. **Open plugin ecosystem** - Composer packages, open store spec, no lock-in
 8. **Ownership is the point** - Domain = identity, markdown = portability
 9. **Build in public** - Share progress, get feedback
 10. **Ship small, iterate fast** - V0.1 first, everything else follows
