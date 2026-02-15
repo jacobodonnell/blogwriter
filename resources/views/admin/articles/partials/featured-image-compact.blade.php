@@ -15,7 +15,7 @@
 
     {{-- Photo Select --}}
     <select x-model="selectedPhotoId"
-            @change="if (selectedPhotoId) { featuredImageUrl = ''; uploadedPhotoUrl = null; }"
+            @change="if (selectedPhotoId) { featuredImageUrl = ''; uploadedPhotoUrl = null; const fi = document.getElementById('featured-image-file-input'); if (fi) fi.value = ''; }"
             class="select select-bordered select-sm w-full">
         <option value="">No featured image</option>
         @foreach($photos as $photo)
@@ -53,7 +53,7 @@
                x-model="featuredImageUrl"
                class="input input-bordered input-sm w-full"
                placeholder="https://example.com/image.jpg"
-               @input="if (featuredImageUrl) { selectedPhotoId = ''; uploadedPhotoUrl = null; }">
+               @input="if (featuredImageUrl) { selectedPhotoId = ''; uploadedPhotoUrl = null; const fi = document.getElementById('featured-image-file-input'); if (fi) fi.value = ''; }">
         <p class="text-xs text-base-content/50 mt-1">External URL overrides photo selection.</p>
     </div>
 

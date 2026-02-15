@@ -1,4 +1,4 @@
-<x-layouts.customizer :title="'Edit: ' . $article->title" :article="$article">
+<x-layouts.customizer :title="($isNew ?? false) ? 'New Article' : 'Edit: ' . $article->title" :article="$article">
 
     <x-slot:preview>
         @include('admin.articles.preview')
@@ -19,6 +19,7 @@
             currentStatus: @js($article->status->value),
             wasEverPublished: @js($article->published_at !== null),
             originalPublishedAt: @js($article->published_at?->format('F j, Y')),
+            contentError: false,
 
             get isPlaceholderSlug() {
                 return /^untitled-[a-z0-9]{8}$/.test(this.slug);
@@ -46,7 +47,8 @@
             },
 
             get hasNewPhoto() {
-                return !!this.uploadedPhotoUrl;
+                const fileInput = document.getElementById('featured-image-file-input');
+                return (fileInput && fileInput.files && fileInput.files.length > 0);
             },
 
             init() {
@@ -71,6 +73,7 @@
 
                     this.easyMDE.codemirror.on('change', () => {
                         this.content = this.easyMDE.value();
+                        this.contentError = false;
                         document.getElementById('customizer-form').dispatchEvent(
                             new Event('input', { bubbles: true })
                         );
@@ -82,9 +85,20 @@
                 if (this.easyMDE) {
                     this.content = this.easyMDE.value();
                 }
+                if (!this.content || !this.content.trim()) {
+                    this.contentError = true;
+                    if (this.easyMDE) {
+                        this.easyMDE.codemirror.focus();
+                    }
+                    return;
+                }
                 let form = document.getElementById('customizer-form');
                 form.removeAttribute('x-target');
-                form.action = '{{ route('admin.articles.update', $article) }}';
+                @if($isNew ?? false)
+                    form.action = '{{ route("admin.articles.store") }}';
+                @else
+                    form.action = '{{ route("admin.articles.update", $article) }}';
+                @endif
                 form.submit();
             },
 
@@ -92,13 +106,21 @@
 
         <form id="customizer-form"
               method="POST"
-              action="{{ route('admin.articles.preview.update', $article) }}"
+              enctype="multipart/form-data"
+              action="{{ ($isNew ?? false) ? route('admin.articles.preview.store') : route('admin.articles.preview.update', $article) }}"
               x-target="preview-panel"
               @ajax:success="saved = true; setTimeout(() => saved = false, 2000)"
               @input.debounce.600ms="$el.requestSubmit()"
               novalidate>
             @csrf
-            @method('PUT')
+            @unless($isNew ?? false)
+                @method('PUT')
+            @endunless
+
+            {{-- Hidden file inputs for staged photo upload --}}
+            <input type="file" id="featured-image-file-input" name="featured_image_file" class="hidden">
+            <input type="hidden" id="featured-image-alt-input" name="featured_image_alt" value="">
+            <input type="hidden" id="featured-image-caption-input" name="featured_image_caption" value="">
 
             <div class="space-y-4">
 
@@ -137,8 +159,17 @@
                               class="textarea textarea-bordered w-full h-64 font-mono text-sm @error('content') textarea-error @enderror"
                               placeholder="## Write your article here...">{{ old('content', $article->content) }}</textarea>
                     @error('content')
-                        <span class="text-error text-sm">{{ $message }}</span>
+                        <div role="alert" class="alert alert-error mt-2" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 8000)" x-transition>
+                            <i class="ph ph-x-circle text-xl"></i>
+                            <span>{{ $message }}</span>
+                        </div>
                     @enderror
+
+                    {{-- Client-side: content required warning --}}
+                    <div x-show="contentError" x-cloak x-transition role="alert" class="alert alert-error mt-2">
+                        <i class="ph ph-x-circle text-xl"></i>
+                        <span>Please add some content before saving.</span>
+                    </div>
 
                     {{-- H1 Warning (client-side only, hidden when server already shows error) --}}
                     @unless($errors->has('content'))
@@ -239,8 +270,8 @@
                             type="button"
                             @click="submitFullSave()"
                             class="btn btn-primary w-full gap-2">
-                        <i class="ph" :class="hasNewPhoto ? 'ph-upload-simple' : 'ph-floppy-disk'"></i>
-                        <span x-text="hasNewPhoto ? 'Upload Photo & Save Draft' : 'Save Draft'"></span>
+                        <i class="ph" :class="hasNewPhoto ? 'ph-image' : 'ph-floppy-disk'"></i>
+                        <span x-text="hasNewPhoto ? 'Publish Photo & Save Draft' : 'Save Draft'"></span>
                     </button>
 
                     {{-- Save Draft: draft → draft (was published before, staying draft) --}}
@@ -248,8 +279,8 @@
                             type="button"
                             @click="submitFullSave()"
                             class="btn btn-primary w-full gap-2">
-                        <i class="ph" :class="hasNewPhoto ? 'ph-upload-simple' : 'ph-floppy-disk'"></i>
-                        <span x-text="hasNewPhoto ? 'Upload Photo & Save Draft' : 'Save Draft'"></span>
+                        <i class="ph" :class="hasNewPhoto ? 'ph-image' : 'ph-floppy-disk'"></i>
+                        <span x-text="hasNewPhoto ? 'Publish Photo & Save Draft' : 'Save Draft'"></span>
                     </button>
 
                     {{-- Publish: draft (never published) → published --}}
@@ -257,8 +288,8 @@
                             type="button"
                             @click="document.getElementById('publish-modal').showModal()"
                             class="btn btn-success w-full gap-2">
-                        <i class="ph" :class="hasNewPhoto ? 'ph-upload-simple' : 'ph-rocket-launch'"></i>
-                        <span x-text="hasNewPhoto ? 'Upload Photo & Publish' : 'Publish Article'"></span>
+                        <i class="ph" :class="hasNewPhoto ? 'ph-image' : 'ph-rocket-launch'"></i>
+                        <span x-text="hasNewPhoto ? 'Publish Photo & Publish Article' : 'Publish Article'"></span>
                     </button>
 
                     {{-- Republish: draft (was published) → published --}}
@@ -266,8 +297,8 @@
                             type="button"
                             @click="document.getElementById('republish-modal').showModal()"
                             class="btn btn-success w-full gap-2">
-                        <i class="ph" :class="hasNewPhoto ? 'ph-upload-simple' : 'ph-rocket-launch'"></i>
-                        <span x-text="hasNewPhoto ? 'Upload Photo & Republish' : 'Republish Article'"></span>
+                        <i class="ph" :class="hasNewPhoto ? 'ph-image' : 'ph-rocket-launch'"></i>
+                        <span x-text="hasNewPhoto ? 'Publish Photo & Republish' : 'Republish Article'"></span>
                     </button>
 
                     {{-- Save Changes: published → published --}}
@@ -275,8 +306,8 @@
                             type="button"
                             @click="submitFullSave()"
                             class="btn btn-primary w-full gap-2">
-                        <i class="ph" :class="hasNewPhoto ? 'ph-upload-simple' : 'ph-floppy-disk'"></i>
-                        <span x-text="hasNewPhoto ? 'Upload Photo & Save' : 'Save Changes'"></span>
+                        <i class="ph" :class="hasNewPhoto ? 'ph-image' : 'ph-floppy-disk'"></i>
+                        <span x-text="hasNewPhoto ? 'Publish Photo & Save Changes' : 'Save Changes'"></span>
                     </button>
 
                     {{-- Unpublish: published → draft --}}
@@ -289,7 +320,7 @@
                     </button>
 
                     {{-- View Live button (only when currently published on server) --}}
-                    @if($article->isPublished())
+                    @if($article->exists && $article->isPublished())
                         <a href="{{ route('article.show', $article->slug) }}"
                            x-show="initialStatus === 'published'"
                            class="btn btn-outline w-full gap-2">
@@ -352,46 +383,15 @@
             </x-slot:actions>
         </x-editor-modal>
 
-        {{-- Upload Photo Modal --}}
+        {{-- Upload Photo Modal — stages file client-side, submits with main form --}}
         <x-editor-modal id="upload-photo-modal" title="Upload Featured Image" maxWidth="max-w-xl">
-            <form id="photo-upload-form"
-                  method="POST"
-                  action="{{ route('admin.photos.store') }}"
-                  enctype="multipart/form-data"
-                  x-data="{ uploadPreview: null }"
-                  @submit.prevent="
-                      uploading = true;
-                      const form = document.getElementById('photo-upload-form');
-                      const formData = new FormData(form);
-
-                      fetch(form.action, {
-                          method: 'POST',
-                          headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                          body: formData,
-                      })
-                      .then(r => r.json())
-                      .then(data => {
-                          selectedPhotoId = data.photo.id;
-                          uploadedPhotoUrl = data.photo.image_url;
-                          featuredImageUrl = '';
-                          showUrlField = false;
-                          document.getElementById('upload-photo-modal').close();
-                          document.getElementById('customizer-form').requestSubmit();
-                          uploading = false;
-                          form.reset();
-                          uploadPreview = null;
-                      })
-                      .catch(() => { uploading = false; })
-                  ">
-                @csrf
-
+            <div x-data="{ uploadPreview: null }">
                 <div class="space-y-3">
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">Image</legend>
-                        <input type="file" name="image_file"
+                        <input type="file" id="photo-file-picker"
                                class="file-input file-input-bordered w-full"
                                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                               required
                                @change="if ($event.target.files[0]) { uploadPreview = URL.createObjectURL($event.target.files[0]); }">
                         <img x-show="uploadPreview" :src="uploadPreview"
                              class="w-full max-h-40 object-cover rounded-lg mt-2"
@@ -401,32 +401,48 @@
 
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">Alt Text</legend>
-                        <input type="text" name="alt_text"
+                        <input type="text" id="photo-alt-text-input"
                                class="input input-bordered w-full"
-                               placeholder="Describe the image for accessibility"
-                               required>
+                               placeholder="Describe the image for accessibility">
                     </fieldset>
 
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">Caption (optional)</legend>
-                        <textarea name="caption"
+                        <textarea id="photo-caption-input"
                                   class="textarea textarea-bordered w-full h-16 text-sm"
                                   placeholder="Photo caption"></textarea>
                     </fieldset>
 
-                    <input type="hidden" name="status" value="published">
-
                     <div class="alert alert-warning text-sm mt-3">
                         <i class="ph ph-warning"></i>
-                        <span>This photo will be publicly visible on your site.</span>
+                        <span>This photo will be published when you save the article.</span>
                     </div>
                 </div>
-            </form>
+            </div>
 
             <x-slot:actions>
-                <button type="submit" form="photo-upload-form" class="btn btn-primary" :disabled="uploading">
-                    <span x-show="!uploading">Upload Photo</span>
-                    <span x-show="uploading" class="loading loading-spinner loading-sm" x-cloak></span>
+                <button type="button" class="btn btn-primary"
+                        @click="
+                            const picker = document.getElementById('photo-file-picker');
+                            const altInput = document.getElementById('photo-alt-text-input');
+                            if (!picker.files[0] || !altInput.value.trim()) return;
+
+                            // Transfer file to hidden input on main form
+                            const dt = new DataTransfer();
+                            dt.items.add(picker.files[0]);
+                            document.getElementById('featured-image-file-input').files = dt.files;
+                            document.getElementById('featured-image-alt-input').value = altInput.value.trim();
+                            document.getElementById('featured-image-caption-input').value = document.getElementById('photo-caption-input').value;
+
+                            // Update Alpine state for preview + button text
+                            uploadedPhotoUrl = URL.createObjectURL(picker.files[0]);
+                            selectedPhotoId = '';
+                            featuredImageUrl = '';
+                            showUrlField = false;
+
+                            document.getElementById('upload-photo-modal').close();
+                        ">
+                    Attach Photo
                 </button>
             </x-slot:actions>
         </x-editor-modal>

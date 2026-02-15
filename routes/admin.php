@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminPhotoController;
 use App\Http\Controllers\Admin\ArticleController;
 use App\Http\Controllers\Admin\ArticlePreviewController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CreateArticleController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\SettingsController;
@@ -13,10 +14,13 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function (): v
     // Dashboard
     Route::get('/', DashboardController::class)->name('dashboard');
 
-    // Articles
+    // Articles — new article flow (session-based, no DB until first save)
+    Route::get('/articles/create', [CreateArticleController::class, 'create'])->name('articles.create');
+    Route::post('/articles/preview', [CreateArticleController::class, 'preview'])->name('articles.preview.store');
+    Route::post('/articles', [CreateArticleController::class, 'store'])->name('articles.store');
+
+    // Articles — existing articles
     Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
-    Route::get('/articles/create', [ArticleController::class, 'create'])->name('articles.create');
-    Route::post('/articles', [ArticleController::class, 'store'])->name('articles.store');
     Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
     Route::get('/articles/{article}/edit', [ArticleController::class, 'edit'])->name('articles.edit');
     Route::put('/articles/{article}', [ArticleController::class, 'update'])->name('articles.update');

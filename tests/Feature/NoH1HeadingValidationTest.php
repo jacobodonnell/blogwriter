@@ -46,13 +46,13 @@ it('allows hashtag without space (not a heading)', function (): void {
     ])->assertSessionDoesntHaveErrors('content');
 });
 
-it('allows null content', function (): void {
+it('rejects null content as required', function (): void {
     post(route('admin.articles.store'), [
         'title' => 'Test Null',
         'slug' => 'test-null',
         'content' => null,
         'status' => 'draft',
-    ])->assertSessionDoesntHaveErrors('content');
+    ])->assertSessionHasErrors('content');
 });
 
 it('detects multiple H1 lines', function (): void {

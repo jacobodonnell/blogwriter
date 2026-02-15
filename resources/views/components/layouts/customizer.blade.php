@@ -9,7 +9,9 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.20.0/dist/easymde.min.css">
         <script src="https://cdn.jsdelivr.net/npm/easymde@2.20.0/dist/easymde.min.js"></script>
         <style>
-            [x-cloak] { display: none !important; }
+            [x-cloak] {
+                display: none !important;
+            }
 
             .EasyMDEContainer .CodeMirror {
                 border: 1px solid oklch(var(--bc) / 0.2);
@@ -20,10 +22,12 @@
                 font-size: 0.875rem;
                 min-height: 16rem;
             }
+
             .EasyMDEContainer .CodeMirror-focused {
                 border-color: oklch(var(--p));
                 outline: 2px solid oklch(var(--p) / 0.2);
             }
+
             .EasyMDEContainer .editor-toolbar {
                 border: 1px solid oklch(var(--bc) / 0.2);
                 border-bottom: none;
@@ -31,27 +35,34 @@
                 background: oklch(var(--b2));
                 padding: 4px;
             }
+
             .EasyMDEContainer .editor-toolbar button {
                 color: oklch(var(--bc));
                 width: 28px;
                 height: 28px;
             }
+
             .EasyMDEContainer .editor-toolbar button:hover {
                 background: oklch(var(--bc) / 0.1);
                 border-radius: 4px;
             }
+
             .EasyMDEContainer .editor-toolbar button.active {
                 background: oklch(var(--p) / 0.15);
             }
+
             .EasyMDEContainer .editor-toolbar i.separator {
                 border-left-color: oklch(var(--bc) / 0.2);
             }
+
             .EasyMDEContainer .CodeMirror .CodeMirror-cursor {
                 border-left-color: oklch(var(--bc));
             }
+
             .EasyMDEContainer .CodeMirror .cm-header {
                 color: oklch(var(--p));
             }
+
             .EasyMDEContainer .CodeMirror .cm-link,
             .EasyMDEContainer .CodeMirror .cm-url {
                 color: oklch(var(--a));
@@ -105,7 +116,8 @@
         <header class="navbar bg-base-100 border-b border-base-300 px-4 shrink-0 z-30">
             <div class="flex-1 gap-2">
                 {{-- Drawer Toggle (left side) --}}
-                <button @click="drawerOpen = !drawerOpen" class="btn btn-ghost btn-sm gap-1" :class="{ 'btn-active': drawerOpen }">
+                <button @click="drawerOpen = !drawerOpen" class="btn btn-ghost btn-sm gap-1"
+                        :class="{ 'btn-active': drawerOpen }">
                     <i class="ph ph-sidebar-simple text-lg"></i>
                     <span class="hidden sm:inline">Editor</span>
                 </button>
@@ -116,30 +128,38 @@
                     <i class="ph ph-arrow-left text-lg"></i>
                     <span class="hidden sm:inline">Articles</span>
                 </a>
-                <span class="text-sm text-base-content/60 truncate max-w-xs hidden sm:inline">{{ $article->title }}</span>
+                <span
+                    class="text-sm text-base-content/60 truncate max-w-xs hidden sm:inline">{{ $article->title }}</span>
             </div>
             <div class="flex-none gap-1">
                 {{-- Viewport Presets --}}
                 <div class="join hidden sm:flex">
-                    <button @click="setPreset(375)" class="btn btn-ghost btn-xs join-item" :class="{ 'btn-active': previewWidth === 375 }" title="Phone (375px)">
+                    <button @click="setPreset(375)" class="btn btn-ghost btn-xs join-item"
+                            :class="{ 'btn-active': previewWidth === 375 }" title="Phone (375px)">
                         <i class="ph ph-device-mobile text-base"></i>
                     </button>
-                    <button @click="setPreset(768)" class="btn btn-ghost btn-xs join-item" :class="{ 'btn-active': previewWidth === 768 }" title="Tablet (768px)">
+                    <button @click="setPreset(768)" class="btn btn-ghost btn-xs join-item"
+                            :class="{ 'btn-active': previewWidth === 768 }" title="Tablet (768px)">
                         <i class="ph ph-device-tablet text-base"></i>
                     </button>
-                    <button @click="setPreset(1024)" class="btn btn-ghost btn-xs join-item" :class="{ 'btn-active': previewWidth === 1024 }" title="Desktop (1024px)">
+                    <button @click="setPreset(1024)" class="btn btn-ghost btn-xs join-item"
+                            :class="{ 'btn-active': previewWidth === 1024 }" title="Desktop (1024px)">
                         <i class="ph ph-desktop text-base"></i>
                     </button>
-                    <button @click="setPreset(0)" class="btn btn-ghost btn-xs join-item" :class="{ 'btn-active': previewWidth === 0 }" title="Fill available space">
+                    <button @click="setPreset(0)" class="btn btn-ghost btn-xs join-item"
+                            :class="{ 'btn-active': previewWidth === 0 }" title="Fill available space">
                         <i class="ph ph-arrows-out-simple text-base"></i>
                     </button>
                 </div>
 
-                <a href="{{ route('admin.articles.show', $article) }}" class="btn btn-ghost btn-sm gap-1">
-                    <i class="ph ph-arrow-square-out text-lg"></i>
-                    <span class="hidden sm:inline">Preview</span>
-                </a>
-                <button @click="darkMode = !darkMode" class="btn btn-ghost btn-circle btn-sm" aria-label="Toggle dark mode">
+                @if($article->exists)
+                    <a href="{{ route('admin.articles.show', $article) }}" class="btn btn-ghost btn-sm gap-1">
+                        <i class="ph ph-arrow-square-out text-lg"></i>
+                        <span class="hidden sm:inline">Preview</span>
+                    </a>
+                @endif
+                <button @click="darkMode = !darkMode" class="btn btn-ghost btn-circle btn-sm"
+                        aria-label="Toggle dark mode">
                     <i x-show="!darkMode" class="ph ph-moon text-lg" x-cloak></i>
                     <i x-show="darkMode" class="ph ph-sun text-lg" x-cloak></i>
                 </button>
@@ -148,14 +168,16 @@
 
         {{-- Flash Messages --}}
         @if (session('success'))
-            <div class="alert alert-success mx-4 mt-2" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)" x-transition>
+            <div class="alert alert-success mx-4 mt-2" x-data="{ show: true }" x-show="show"
+                 x-init="setTimeout(() => show = false, 3000)" x-transition>
                 <i class="ph ph-check-circle text-xl"></i>
                 <span>{{ session('success') }}</span>
             </div>
         @endif
 
         @if (session('error'))
-            <div class="alert alert-error mx-4 mt-2" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" x-transition>
+            <div class="alert alert-error mx-4 mt-2" x-data="{ show: true }" x-show="show"
+                 x-init="setTimeout(() => show = false, 5000)" x-transition>
                 <i class="ph ph-x-circle text-xl"></i>
                 <span>{{ session('error') }}</span>
             </div>
@@ -195,6 +217,17 @@
                         <i class="ph ph-x text-lg"></i>
                     </button>
                 </div>
+
+                {{-- Validation errors banner (inside drawer) --}}
+                @if ($errors->any())
+                    <div class="px-4 pt-4" x-data="{ show: true }" x-show="show"
+                         x-init="setTimeout(() => show = false, 5000)" x-transition>
+                        <div role="alert" class="alert alert-error">
+                            <i class="ph ph-x-circle text-xl"></i>
+                            <span>Something went wrong. Please fix the errors below and try again.</span>
+                        </div>
+                    </div>
+                @endif
 
                 {{-- Scrollable form content with bottom padding for sticky save button --}}
                 <div class="p-4 pb-20">

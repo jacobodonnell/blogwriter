@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
+use function Pest\Laravel\post;
 use function Pest\Laravel\put;
 
 uses(RefreshDatabase::class);
@@ -80,23 +81,50 @@ it('redirects normally for full save update requests', function (): void {
         ->assertSessionHas('success');
 });
 
-it('creates draft immediately from create route', function (): void {
+it('renders customizer for new article without persisting to database', function (): void {
     get(route('admin.articles.create'))
-        ->assertRedirect();
+        ->assertOk()
+        ->assertViewIs('admin.articles.customizer')
+        ->assertViewHas('isNew', true);
 
-    $article = Article::latest()->first();
-
-    expect($article)->not->toBeNull()
-        ->and($article->status->value)->toBe('draft')
-        ->and($article->title)->toBe('Untitled Article');
+    expect(Article::count())->toBe(0);
 });
 
-it('creates draft with lowercase placeholder slug', function (): void {
-    get(route('admin.articles.create'));
+it('stores new article on first explicit save', function (): void {
+    post(route('admin.articles.store'), [
+        'title' => 'My First Article',
+        'slug' => 'my-first-article',
+        'content' => 'Hello world',
+        'status' => 'draft',
+    ])->assertRedirect();
 
-    $article = Article::latest()->first();
+    $article = Article::first();
 
-    expect($article->slug)->toMatch('/^untitled-[a-z0-9]{8}$/');
+    expect($article)->not->toBeNull()
+        ->and($article->title)->toBe('My First Article')
+        ->and($article->slug)->toBe('my-first-article')
+        ->and($article->status->value)->toBe('draft');
+});
+
+it('rejects update with empty content', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create();
+
+    put(route('admin.articles.update', $article), [
+        'title' => 'Updated Title',
+        'slug' => $article->slug,
+        'content' => '',
+        'status' => 'draft',
+    ])->assertSessionHasErrors('content');
+});
+
+it('rejects update with missing content', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create();
+
+    put(route('admin.articles.update', $article), [
+        'title' => 'Updated Title',
+        'slug' => $article->slug,
+        'status' => 'draft',
+    ])->assertSessionHasErrors('content');
 });
 
 it('preview update accepts relaxed validation', function (): void {

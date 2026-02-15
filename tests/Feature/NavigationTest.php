@@ -22,10 +22,11 @@ it('returns successful response for admin navigation links when authenticated', 
     'settings' => fn () => route('admin.settings'),
 ]);
 
-it('redirects articles create to customizer editor', function (): void {
+it('renders customizer for new article without DB write', function (): void {
     $this->actingAs($this->user)
         ->get(route('admin.articles.create'))
-        ->assertRedirect();
+        ->assertOk()
+        ->assertViewIs('admin.articles.customizer');
 });
 
 it('redirects blog route to home', function (): void {
