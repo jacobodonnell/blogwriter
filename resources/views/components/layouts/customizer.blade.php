@@ -14,58 +14,58 @@
             }
 
             .EasyMDEContainer .CodeMirror {
-                border: 1px solid oklch(var(--bc) / 0.2);
-                border-radius: var(--rounded-btn, 0.5rem);
-                background: oklch(var(--b1));
-                color: oklch(var(--bc));
+                border: 1px solid color-mix(in oklch, var(--color-base-content) 20%, transparent);
+                border-radius: var(--radius-field, 0.5rem);
+                background: var(--color-base-100);
+                color: var(--color-base-content);
                 font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
                 font-size: 0.875rem;
                 min-height: 16rem;
             }
 
             .EasyMDEContainer .CodeMirror-focused {
-                border-color: oklch(var(--p));
-                outline: 2px solid oklch(var(--p) / 0.2);
+                border-color: var(--color-primary);
+                outline: 2px solid color-mix(in oklch, var(--color-primary) 20%, transparent);
             }
 
             .EasyMDEContainer .editor-toolbar {
-                border: 1px solid oklch(var(--bc) / 0.2);
+                border: 1px solid color-mix(in oklch, var(--color-base-content) 20%, transparent);
                 border-bottom: none;
-                border-radius: var(--rounded-btn, 0.5rem) var(--rounded-btn, 0.5rem) 0 0;
-                background: oklch(var(--b2));
+                border-radius: var(--radius-field, 0.5rem) var(--radius-field, 0.5rem) 0 0;
+                background: var(--color-base-200);
                 padding: 4px;
             }
 
             .EasyMDEContainer .editor-toolbar button {
-                color: oklch(var(--bc));
+                color: var(--color-base-content);
                 width: 28px;
                 height: 28px;
             }
 
             .EasyMDEContainer .editor-toolbar button:hover {
-                background: oklch(var(--bc) / 0.1);
+                background: color-mix(in oklch, var(--color-base-content) 10%, transparent);
                 border-radius: 4px;
             }
 
             .EasyMDEContainer .editor-toolbar button.active {
-                background: oklch(var(--p) / 0.15);
+                background: color-mix(in oklch, var(--color-primary) 15%, transparent);
             }
 
             .EasyMDEContainer .editor-toolbar i.separator {
-                border-left-color: oklch(var(--bc) / 0.2);
+                border-left-color: color-mix(in oklch, var(--color-base-content) 20%, transparent);
             }
 
             .EasyMDEContainer .CodeMirror .CodeMirror-cursor {
-                border-left-color: oklch(var(--bc));
+                border-left-color: var(--color-base-content);
             }
 
             .EasyMDEContainer .CodeMirror .cm-header {
-                color: oklch(var(--p));
+                color: var(--color-primary);
             }
 
             .EasyMDEContainer .CodeMirror .cm-link,
             .EasyMDEContainer .CodeMirror .cm-url {
-                color: oklch(var(--a));
+                color: var(--color-accent);
             }
         </style>
     </x-slot:head>
