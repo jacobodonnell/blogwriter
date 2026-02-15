@@ -46,9 +46,34 @@
                 }
             },
 
-            get hasNewPhoto() {
-                const fileInput = document.getElementById('featured-image-file-input');
-                return (fileInput && fileInput.files && fileInput.files.length > 0);
+            hasNewPhoto: false,
+
+            get buttonAction() {
+                if (this.currentStatus === 'published' && this.initialStatus === 'draft' && !this.wasEverPublished) return 'publish';
+                if (this.currentStatus === 'published' && this.initialStatus === 'draft' && this.wasEverPublished) return 'republish';
+                if (this.currentStatus === 'draft' && this.initialStatus === 'published') return 'unpublish';
+                return 'save';
+            },
+            get buttonLabel() {
+                const a = this.buttonAction;
+                const p = this.hasNewPhoto;
+                if (a === 'publish') return p ? 'Upload Photo & Publish' : 'Publish Article';
+                if (a === 'republish') return p ? 'Upload Photo & Republish' : 'Republish Article';
+                if (a === 'unpublish') return 'Unpublish Article';
+                if (this.initialStatus === 'published') return p ? 'Upload Photo & Save Changes' : 'Save Changes';
+                return p ? 'Upload Photo & Save Draft' : 'Save Draft';
+            },
+            get buttonIcon() {
+                if (this.hasNewPhoto) return 'ph-upload-simple';
+                if (this.buttonAction === 'publish' || this.buttonAction === 'republish') return 'ph-rocket-launch';
+                if (this.buttonAction === 'unpublish') return 'ph-arrow-u-up-left';
+                return 'ph-floppy-disk';
+            },
+            get buttonClass() {
+                if (this.hasNewPhoto) return 'btn-success';
+                if (this.buttonAction === 'publish' || this.buttonAction === 'republish') return 'btn-success';
+                if (this.buttonAction === 'unpublish') return 'btn-error btn-outline';
+                return 'btn-primary';
             },
 
             init() {
@@ -194,7 +219,7 @@
                 {{-- Status --}}
                 <fieldset class="fieldset">
                     <legend class="fieldset-legend">Status</legend>
-                    <select name="status" x-model="currentStatus" class="select select-bordered w-full @error('status') select-error @enderror">
+                    <select name="status" x-model="currentStatus" data-test="status-select" class="select select-bordered w-full @error('status') select-error @enderror">
                         <option value="draft">Draft</option>
                         <option value="published">Published</option>
                     </select>
@@ -263,90 +288,7 @@
 
             {{-- Sticky bottom buttons --}}
             <div class="sticky bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-base-100 from-60% to-transparent pt-8">
-                <div class="flex flex-col gap-2">
-
-                    {{-- Save Draft: draft → draft (never published) --}}
-                    <button x-show="currentStatus === 'draft' && initialStatus === 'draft' && !wasEverPublished"
-                            type="button"
-                            @click="submitFullSave()"
-                            class="btn btn-primary w-full gap-2">
-                        <i class="ph" :class="hasNewPhoto ? 'ph-image' : 'ph-floppy-disk'"></i>
-                        <span x-text="hasNewPhoto ? 'Publish Photo & Save Draft' : 'Save Draft'"></span>
-                    </button>
-
-                    {{-- Save Draft: draft → draft (was published before, staying draft) --}}
-                    <button x-show="currentStatus === 'draft' && initialStatus === 'draft' && wasEverPublished"
-                            type="button"
-                            @click="submitFullSave()"
-                            class="btn btn-primary w-full gap-2">
-                        <i class="ph" :class="hasNewPhoto ? 'ph-image' : 'ph-floppy-disk'"></i>
-                        <span x-text="hasNewPhoto ? 'Publish Photo & Save Draft' : 'Save Draft'"></span>
-                    </button>
-
-                    {{-- Publish: draft (never published) → published --}}
-                    <button x-show="currentStatus === 'published' && initialStatus === 'draft' && !wasEverPublished"
-                            type="button"
-                            @click="document.getElementById('publish-modal').showModal()"
-                            class="btn btn-success w-full gap-2">
-                        <i class="ph" :class="hasNewPhoto ? 'ph-image' : 'ph-rocket-launch'"></i>
-                        <span x-text="hasNewPhoto ? 'Publish Photo & Publish Article' : 'Publish Article'"></span>
-                    </button>
-
-                    {{-- Republish: draft (was published) → published --}}
-                    <button x-show="currentStatus === 'published' && initialStatus === 'draft' && wasEverPublished"
-                            type="button"
-                            @click="document.getElementById('republish-modal').showModal()"
-                            class="btn btn-success w-full gap-2">
-                        <i class="ph" :class="hasNewPhoto ? 'ph-image' : 'ph-rocket-launch'"></i>
-                        <span x-text="hasNewPhoto ? 'Publish Photo & Republish' : 'Republish Article'"></span>
-                    </button>
-
-                    {{-- Save Changes: published → published --}}
-                    <button x-show="currentStatus === 'published' && initialStatus === 'published'"
-                            type="button"
-                            @click="submitFullSave()"
-                            class="btn btn-primary w-full gap-2">
-                        <i class="ph" :class="hasNewPhoto ? 'ph-image' : 'ph-floppy-disk'"></i>
-                        <span x-text="hasNewPhoto ? 'Publish Photo & Save Changes' : 'Save Changes'"></span>
-                    </button>
-
-                    {{-- Unpublish: published → draft --}}
-                    <button x-show="currentStatus === 'draft' && initialStatus === 'published'"
-                            type="button"
-                            @click="document.getElementById('unpublish-modal').showModal()"
-                            class="btn btn-error btn-outline w-full gap-2">
-                        <i class="ph ph-arrow-u-up-left"></i>
-                        Unpublish Article
-                    </button>
-
-                    {{-- View Live button (only when currently published on server) --}}
-                    @if($article->exists && $article->isPublished())
-                        <a href="{{ route('article.show', $article->slug) }}"
-                           x-show="initialStatus === 'published'"
-                           class="btn btn-outline w-full gap-2">
-                            <i class="ph ph-arrow-square-out"></i>
-                            View Live
-                        </a>
-                    @endif
-
-                    {{-- Status hint when switching to unpublish --}}
-                    <p x-show="currentStatus === 'draft' && initialStatus === 'published'"
-                       class="text-xs text-center text-base-content/50" x-cloak>
-                        Currently live — unpublishing will return a 404 to visitors.
-                    </p>
-
-                    {{-- Status hint for new publish --}}
-                    <p x-show="currentStatus === 'published' && initialStatus === 'draft' && !wasEverPublished"
-                       class="text-xs text-center text-base-content/50" x-cloak>
-                        This article has never been published.
-                    </p>
-
-                    {{-- Status hint for republish --}}
-                    <p x-show="currentStatus === 'published' && initialStatus === 'draft' && wasEverPublished"
-                       class="text-xs text-center text-base-content/50" x-cloak>
-                        Previously published <span x-text="originalPublishedAt"></span> — original date will be preserved.
-                    </p>
-                </div>
+                <x-article-save-button :article="$article" />
             </div>
         </form>
 
@@ -389,7 +331,7 @@
                 <div class="space-y-3">
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">Image</legend>
-                        <input type="file" id="photo-file-picker"
+                        <input type="file" id="photo-file-picker" data-test="photo-file-picker"
                                class="file-input file-input-bordered w-full"
                                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                                @change="if ($event.target.files[0]) { uploadPreview = URL.createObjectURL($event.target.files[0]); }">
@@ -401,7 +343,7 @@
 
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">Alt Text</legend>
-                        <input type="text" id="photo-alt-text-input"
+                        <input type="text" id="photo-alt-text-input" data-test="photo-alt-text"
                                class="input input-bordered w-full"
                                placeholder="Describe the image for accessibility">
                     </fieldset>
@@ -421,7 +363,7 @@
             </div>
 
             <x-slot:actions>
-                <button type="button" class="btn btn-primary"
+                <button type="button" class="btn btn-primary" data-test="attach-photo"
                         @click="
                             const picker = document.getElementById('photo-file-picker');
                             const altInput = document.getElementById('photo-alt-text-input');
@@ -439,6 +381,7 @@
                             selectedPhotoId = '';
                             featuredImageUrl = '';
                             showUrlField = false;
+                            hasNewPhoto = true;
 
                             document.getElementById('upload-photo-modal').close();
                         ">

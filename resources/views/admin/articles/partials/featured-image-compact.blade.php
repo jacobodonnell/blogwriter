@@ -14,8 +14,8 @@
     <input type="hidden" name="photo_id" :value="selectedPhotoId">
 
     {{-- Photo Select --}}
-    <select x-model="selectedPhotoId"
-            @change="if (selectedPhotoId) { featuredImageUrl = ''; uploadedPhotoUrl = null; const fi = document.getElementById('featured-image-file-input'); if (fi) fi.value = ''; }"
+    <select x-model="selectedPhotoId" data-test="photo-select"
+            @change="if (selectedPhotoId) { featuredImageUrl = ''; uploadedPhotoUrl = null; hasNewPhoto = false; const fi = document.getElementById('featured-image-file-input'); if (fi) fi.value = ''; }"
             class="select select-bordered select-sm w-full">
         <option value="">No featured image</option>
         @foreach($photos as $photo)
@@ -29,6 +29,7 @@
         {{-- Upload New Button --}}
         <button type="button"
                 @click="document.getElementById('upload-photo-modal').showModal()"
+                data-test="upload-new-photo"
                 class="btn btn-ghost btn-sm flex-1 gap-2">
             <i class="ph ph-upload-simple"></i>
             Upload New
@@ -53,7 +54,7 @@
                x-model="featuredImageUrl"
                class="input input-bordered input-sm w-full"
                placeholder="https://example.com/image.jpg"
-               @input="if (featuredImageUrl) { selectedPhotoId = ''; uploadedPhotoUrl = null; const fi = document.getElementById('featured-image-file-input'); if (fi) fi.value = ''; }">
+               @input="if (featuredImageUrl) { selectedPhotoId = ''; uploadedPhotoUrl = null; hasNewPhoto = false; const fi = document.getElementById('featured-image-file-input'); if (fi) fi.value = ''; }">
         <p class="text-xs text-base-content/50 mt-1">External URL overrides photo selection.</p>
     </div>
 
