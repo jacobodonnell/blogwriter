@@ -98,45 +98,107 @@
         </div>
 
     @else
-        {{-- Guest: Simple navbar --}}
-        <nav class="navbar bg-base-100 border-b border-base-200">
-            <div class="container mx-auto px-4">
-                <div class="flex-1">
-                    <a href="{{ route('home') }}" class="btn btn-ghost text-xl font-bold">
-                        {{ config('app.name', 'BlogWriter') }}
-                    </a>
-                </div>
-                <div class="flex-none gap-2">
-                    <a href="{{ route('home') }}" class="btn btn-ghost">Home</a>
-                    <a href="{{ route('home') }}" class="btn btn-ghost">Articles</a>
-                    <a href="{{ route('photos.index') }}" class="btn btn-ghost">Photos</a>
-                    <a href="{{ route('profile') }}" class="btn btn-ghost">Profile</a>
+        {{-- Guest: Responsive navbar with mobile drawer --}}
+        <div x-data="{
+                mobileMenuOpen: false,
+                darkMode: localStorage.getItem('darkMode') === 'true',
+                init() {
+                    if (this.darkMode) {
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                    }
+                    this.$watch('darkMode', (v) => {
+                        localStorage.setItem('darkMode', v);
+                        document.documentElement.setAttribute('data-theme', v ? 'dark' : 'light');
+                    });
+                }
+            }"
+            @keydown.escape.window="mobileMenuOpen = false"
+            class="flex flex-col min-h-screen">
 
-                    {{-- Dark Mode Toggle --}}
-                    <button x-data="{ darkMode: false }"
-                            x-init="
-                                darkMode = localStorage.getItem('darkMode') === 'true';
-                                if (darkMode) document.documentElement.setAttribute('data-theme', 'dark');
-                            "
-                            @click="
-                                darkMode = !darkMode;
-                                localStorage.setItem('darkMode', darkMode);
-                                document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
-                            "
-                            class="btn btn-ghost btn-circle">
-                        <i class="ph ph-moon text-xl"></i>
+            {{-- Header --}}
+            <nav class="navbar bg-base-100 border-b border-base-200 sticky top-0 z-30">
+                <div class="container mx-auto px-4 flex items-center">
+                    {{-- Hamburger (mobile only) --}}
+                    <div class="flex-none lg:hidden">
+                        <button @click="mobileMenuOpen = true" class="btn btn-ghost btn-square" aria-label="Open menu">
+                            <i class="ph ph-list text-xl"></i>
+                        </button>
+                    </div>
+
+                    {{-- Logo --}}
+                    <div class="flex-1">
+                        <a href="{{ route('home') }}" class="btn btn-ghost text-xl font-bold">
+                            {{ config('app.name', 'BlogWriter') }}
+                        </a>
+                    </div>
+
+                    {{-- Desktop nav links --}}
+                    <div class="hidden lg:flex flex-none gap-2">
+                        <a href="{{ route('home') }}" class="btn btn-ghost">Home</a>
+                        <a href="{{ route('home') }}" class="btn btn-ghost">Articles</a>
+                        <a href="{{ route('photos.index') }}" class="btn btn-ghost">Photos</a>
+                        <a href="{{ route('profile') }}" class="btn btn-ghost">Profile</a>
+                    </div>
+
+                    {{-- Dark Mode Toggle (always visible) --}}
+                    <div class="flex-none ml-2">
+                        <button @click="darkMode = !darkMode" class="btn btn-ghost btn-circle" aria-label="Toggle dark mode">
+                            <i x-show="!darkMode" class="ph ph-moon text-xl" x-cloak></i>
+                            <i x-show="darkMode" class="ph ph-sun text-xl" x-cloak></i>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            {{-- Mobile Drawer Backdrop --}}
+            <div x-show="mobileMenuOpen"
+                 x-transition:enter="transition-opacity ease-out duration-200"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition-opacity ease-in duration-150"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 @click="mobileMenuOpen = false"
+                 class="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                 x-cloak>
+            </div>
+
+            {{-- Mobile Drawer Panel --}}
+            <div x-show="mobileMenuOpen"
+                 x-transition:enter="transition-transform ease-out duration-200"
+                 x-transition:enter-start="-translate-x-full"
+                 x-transition:enter-end="translate-x-0"
+                 x-transition:leave="transition-transform ease-in duration-150"
+                 x-transition:leave-start="translate-x-0"
+                 x-transition:leave-end="-translate-x-full"
+                 class="fixed top-0 left-0 h-full w-72 bg-base-100 z-50 shadow-xl lg:hidden"
+                 x-cloak>
+
+                {{-- Drawer Header --}}
+                <div class="flex items-center justify-between p-4 border-b border-base-200">
+                    <span class="text-lg font-bold">{{ config('app.name', 'BlogWriter') }}</span>
+                    <button @click="mobileMenuOpen = false" class="btn btn-ghost btn-sm btn-square" aria-label="Close menu">
+                        <i class="ph ph-x text-xl"></i>
                     </button>
                 </div>
+
+                {{-- Drawer Nav Links --}}
+                <ul class="menu p-4 gap-1">
+                    <li><a href="{{ route('home') }}"><i class="ph ph-house text-lg"></i> Home</a></li>
+                    <li><a href="{{ route('home') }}"><i class="ph ph-article text-lg"></i> Articles</a></li>
+                    <li><a href="{{ route('photos.index') }}"><i class="ph ph-camera text-lg"></i> Photos</a></li>
+                    <li><a href="{{ route('profile') }}"><i class="ph ph-user text-lg"></i> Profile</a></li>
+                </ul>
             </div>
-        </nav>
 
-        {{-- Main Content --}}
-        <main class="container mx-auto px-4 py-8 flex-1">
-            {{ $slot }}
-        </main>
+            {{-- Main Content --}}
+            <main class="container mx-auto px-4 py-8 flex-1">
+                {{ $slot }}
+            </main>
 
-        {{-- Footer --}}
-        @include('components.layouts.partials.public-footer')
+            {{-- Footer --}}
+            @include('components.layouts.partials.public-footer')
+        </div>
     @endauth
 
 </x-layouts.base>
