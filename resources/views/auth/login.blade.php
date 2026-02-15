@@ -37,6 +37,7 @@
                         type="email"
                         id="email"
                         name="email"
+                        data-test="login-email"
                         value="{{ old('email') }}"
                         class="input input-bordered w-full @error('email') input-error @enderror"
                         required
@@ -59,6 +60,7 @@
                         type="password"
                         id="password"
                         name="password"
+                        data-test="login-password"
                         class="input input-bordered w-full @error('password') input-error @enderror"
                         required
                         autocomplete="current-password"
@@ -85,7 +87,7 @@
 
                 {{-- Submit Button --}}
                 <div class="form-control">
-                    <button type="submit" class="btn btn-primary w-full" :class="{ 'loading': processing }" :disabled="processing">
+                    <button type="submit" class="btn btn-primary w-full" data-test="login-submit" :class="{ 'loading': processing }" :disabled="processing">
                         <span x-show="!processing">Log in</span>
                         <span x-show="processing">Logging in...</span>
                     </button>
