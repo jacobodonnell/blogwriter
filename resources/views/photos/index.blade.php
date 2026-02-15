@@ -4,17 +4,23 @@
     <div class="h-feed max-w-6xl mx-auto" x-data="{ uploading: false }">
 
         {{-- Header --}}
-        <header class="flex items-center justify-between mb-6">
-            <div>
+        <header class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div class="min-w-0">
                 <h1 class="text-4xl font-bold mb-1">Photos</h1>
                 <p class="text-base-content/60">A visual collection of moments and memories.</p>
             </div>
             @auth
-                <button class="btn btn-primary btn-sm gap-2"
-                        onclick="document.getElementById('upload-photo-modal').showModal()">
-                    <i class="ph ph-upload-simple"></i>
-                    Upload Photo
-                </button>
+                <div class="flex shrink-0 gap-2">
+                    <a href="{{ route('admin.photos.index') }}" class="btn btn-ghost btn-sm gap-1">
+                        <i class="ph ph-gear text-lg"></i>
+                        Manage
+                    </a>
+                    <button class="btn btn-primary btn-sm gap-2"
+                            onclick="document.getElementById('upload-photo-modal').showModal()">
+                        <i class="ph ph-upload-simple"></i>
+                        Upload
+                    </button>
+                </div>
             @endauth
         </header>
 

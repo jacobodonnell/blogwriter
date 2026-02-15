@@ -15,8 +15,8 @@
     </li>
 
     <li>
-        <a href="{{ route('home') }}"
-           class="{{ request()->is('blog/*') && !request()->is('admin*') ? 'active' : '' }}"
+        <a href="{{ route('articles.index') }}"
+           class="{{ request()->is('articles*') && !request()->is('admin*') ? 'active' : '' }}"
            :class="!expanded && isDesktop && 'justify-center'"
            @mouseenter="showTooltip($event, 'Articles')"
            @mouseleave="hideTooltip()">

@@ -135,7 +135,7 @@
                     {{-- Desktop nav links --}}
                     <div class="hidden lg:flex flex-none gap-2">
                         <a href="{{ route('home') }}" class="btn btn-ghost">Home</a>
-                        <a href="{{ route('home') }}" class="btn btn-ghost">Articles</a>
+                        <a href="{{ route('articles.index') }}" class="btn btn-ghost">Articles</a>
                         <a href="{{ route('photos.index') }}" class="btn btn-ghost">Photos</a>
                         <a href="{{ route('profile') }}" class="btn btn-ghost">Profile</a>
                     </div>
@@ -185,7 +185,7 @@
                 {{-- Drawer Nav Links --}}
                 <ul class="menu p-4 gap-1">
                     <li><a href="{{ route('home') }}"><i class="ph ph-house text-lg"></i> Home</a></li>
-                    <li><a href="{{ route('home') }}"><i class="ph ph-article text-lg"></i> Articles</a></li>
+                    <li><a href="{{ route('articles.index') }}"><i class="ph ph-article text-lg"></i> Articles</a></li>
                     <li><a href="{{ route('photos.index') }}"><i class="ph ph-camera text-lg"></i> Photos</a></li>
                     <li><a href="{{ route('profile') }}"><i class="ph ph-user text-lg"></i> Profile</a></li>
                 </ul>
