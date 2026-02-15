@@ -32,7 +32,7 @@ BlogWriter is the open-source alternative for people who want to own their socia
 - One Artisan command to install
 - Runs on any PHP 8.4+ host, including cheap shared hosting
 
-**Built for the open web** (coming soon):
+### Indieweb Compatible by Design (coming soon):
 
 - RSS, Atom, and JSON feeds
 - Microformats markup (h-card, h-entry, h-feed)
