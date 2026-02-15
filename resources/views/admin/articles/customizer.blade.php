@@ -14,6 +14,7 @@
             uploading: false,
             featuredImageUrl: @js(old('featured_image', $article->meta['featured_image_url'] ?? '')),
             showUrlField: @js(!empty(old('featured_image', $article->meta['featured_image_url'] ?? ''))),
+            easyMDE: null,
             initialStatus: @js($article->status->value),
             currentStatus: @js($article->status->value),
             wasEverPublished: @js($article->published_at !== null),
@@ -48,7 +49,39 @@
                 return !!this.uploadedPhotoUrl;
             },
 
+            init() {
+                this.$nextTick(() => {
+                    const ta = document.getElementById('content-editor');
+                    if (!ta) return;
+
+                    this.easyMDE = new EasyMDE({
+                        element: ta,
+                        forceSync: true,
+                        spellChecker: false,
+                        status: false,
+                        placeholder: '## Write your article here...',
+                        toolbar: [
+                            'bold', 'italic', 'heading-2', 'heading-3', '|',
+                            'quote', 'unordered-list', 'ordered-list', '|',
+                            'link', 'image', 'code', 'horizontal-rule', '|',
+                            'guide'
+                        ],
+                        initialValue: this.content,
+                    });
+
+                    this.easyMDE.codemirror.on('change', () => {
+                        this.content = this.easyMDE.value();
+                        document.getElementById('customizer-form').dispatchEvent(
+                            new Event('input', { bubbles: true })
+                        );
+                    });
+                });
+            },
+
             submitFullSave() {
+                if (this.easyMDE) {
+                    this.content = this.easyMDE.value();
+                }
                 let form = document.getElementById('customizer-form');
                 form.removeAttribute('x-target');
                 form.action = '{{ route('admin.articles.update', $article) }}';
@@ -56,18 +89,6 @@
             },
 
          }">
-
-        {{-- Validation Errors --}}
-        @if ($errors->any())
-            <div class="alert alert-error mb-4">
-                <i class="ph ph-x-circle text-xl"></i>
-                <div class="flex flex-col">
-                    @foreach ($errors->all() as $error)
-                        <span>{{ $error }}</span>
-                    @endforeach
-                </div>
-            </div>
-        @endif
 
         <form id="customizer-form"
               method="POST"
@@ -111,13 +132,21 @@
                 {{-- Content --}}
                 <fieldset class="fieldset">
                     <legend class="fieldset-legend">Content (Markdown)</legend>
-                    <textarea name="content" x-model="content"
+                    <textarea id="content-editor" name="content" x-model="content"
                               @blur="generateSummary()"
                               class="textarea textarea-bordered w-full h-64 font-mono text-sm @error('content') textarea-error @enderror"
-                              placeholder="# Write your article here...">{{ old('content', $article->content) }}</textarea>
+                              placeholder="## Write your article here...">{{ old('content', $article->content) }}</textarea>
                     @error('content')
                         <span class="text-error text-sm">{{ $message }}</span>
                     @enderror
+
+                    {{-- H1 Warning (client-side only, hidden when server already shows error) --}}
+                    @unless($errors->has('content'))
+                        <div x-show="/^# (?!#)/m.test(content)" x-cloak x-transition class="alert alert-warning mt-2">
+                            <i class="ph ph-warning text-xl"></i>
+                            <span>H1 headings (#) are not allowed — the article title is already H1. Use ## or smaller.</span>
+                        </div>
+                    @endunless
                 </fieldset>
 
                 {{-- Summary --}}

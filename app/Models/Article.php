@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Status;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -36,6 +37,60 @@ class Article extends Model
         }
 
         $this->attributes['published_at'] = $value;
+    }
+
+    /**
+     * Accessor/mutator for content: single newline UX <-> CommonMark double newlines.
+     *
+     * Mutator: converts single \n to \n\n for paragraph breaks (outside fenced code blocks).
+     * Accessor: collapses \n\n back to \n for editor display (outside fenced code blocks).
+     */
+    protected function content(): Attribute
+    {
+        return Attribute::make(
+            get: function (?string $value): ?string {
+                if ($value === null) {
+                    return null;
+                }
+
+                return $this->processOutsideCodeBlocks($value, function (string $text): string {
+                    $placeholder = "\x00TRIPLE_NEWLINE\x00";
+                    $text = preg_replace('/\n{3,}/', $placeholder, $text);
+                    $text = str_replace("\n\n", "\n", $text);
+
+                    return str_replace($placeholder, "\n\n", $text);
+                });
+            },
+            set: function (?string $value): ?string {
+                if ($value === null) {
+                    return null;
+                }
+
+                return $this->processOutsideCodeBlocks($value, function (string $text): string {
+                    $placeholder = "\x00DOUBLE_NEWLINE\x00";
+                    $text = str_replace("\n\n", $placeholder, $text);
+                    $text = str_replace("\n", "\n\n", $text);
+
+                    return str_replace($placeholder, "\n\n", $text);
+                });
+            },
+        );
+    }
+
+    /**
+     * Apply a callback to text segments outside of fenced code blocks.
+     */
+    private function processOutsideCodeBlocks(string $text, callable $callback): string
+    {
+        $parts = preg_split('/(```[\s\S]*?```)/m', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+
+        foreach ($parts as $i => &$part) {
+            if ($i % 2 === 0) {
+                $part = $callback($part);
+            }
+        }
+
+        return implode('', $parts);
     }
 
     protected static function boot(): void
@@ -172,7 +227,7 @@ class Article extends Model
      */
     public function getContentHtmlAttribute(): string
     {
-        return Str::markdown($this->content, [
+        return Str::markdown($this->attributes['content'] ?? '', [
             'html_input' => 'strip',
             'allow_unsafe_links' => false,
         ]);
@@ -187,7 +242,7 @@ class Article extends Model
             return $this->summary;
         }
 
-        return Str::limit(strip_tags($this->content), 255);
+        return Str::limit(strip_tags($this->attributes['content'] ?? ''), 255);
     }
 
     /**
@@ -195,7 +250,7 @@ class Article extends Model
      */
     public function getReadingTimeAttribute(): int
     {
-        $wordCount = str_word_count(strip_tags($this->content));
+        $wordCount = str_word_count(strip_tags($this->attributes['content'] ?? ''));
 
         return max(1, (int) ceil($wordCount / 200));
     }

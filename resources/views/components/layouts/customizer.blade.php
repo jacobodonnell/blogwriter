@@ -6,8 +6,56 @@
     icon-weight="regular">
 
     <x-slot:head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.20.0/dist/easymde.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/easymde@2.20.0/dist/easymde.min.js"></script>
         <style>
             [x-cloak] { display: none !important; }
+
+            .EasyMDEContainer .CodeMirror {
+                border: 1px solid oklch(var(--bc) / 0.2);
+                border-radius: var(--rounded-btn, 0.5rem);
+                background: oklch(var(--b1));
+                color: oklch(var(--bc));
+                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+                font-size: 0.875rem;
+                min-height: 16rem;
+            }
+            .EasyMDEContainer .CodeMirror-focused {
+                border-color: oklch(var(--p));
+                outline: 2px solid oklch(var(--p) / 0.2);
+            }
+            .EasyMDEContainer .editor-toolbar {
+                border: 1px solid oklch(var(--bc) / 0.2);
+                border-bottom: none;
+                border-radius: var(--rounded-btn, 0.5rem) var(--rounded-btn, 0.5rem) 0 0;
+                background: oklch(var(--b2));
+                padding: 4px;
+            }
+            .EasyMDEContainer .editor-toolbar button {
+                color: oklch(var(--bc));
+                width: 28px;
+                height: 28px;
+            }
+            .EasyMDEContainer .editor-toolbar button:hover {
+                background: oklch(var(--bc) / 0.1);
+                border-radius: 4px;
+            }
+            .EasyMDEContainer .editor-toolbar button.active {
+                background: oklch(var(--p) / 0.15);
+            }
+            .EasyMDEContainer .editor-toolbar i.separator {
+                border-left-color: oklch(var(--bc) / 0.2);
+            }
+            .EasyMDEContainer .CodeMirror .CodeMirror-cursor {
+                border-left-color: oklch(var(--bc));
+            }
+            .EasyMDEContainer .CodeMirror .cm-header {
+                color: oklch(var(--p));
+            }
+            .EasyMDEContainer .CodeMirror .cm-link,
+            .EasyMDEContainer .CodeMirror .cm-url {
+                color: oklch(var(--a));
+            }
         </style>
     </x-slot:head>
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\NoH1Heading;
 use App\Rules\PublishedPhoto;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -35,7 +36,7 @@ class UpdateArticleRequest extends FormRequest
                 Rule::unique('articles', 'slug')->ignore($articleId),
             ],
             'summary' => ['nullable', 'string', 'max:500'],
-            'content' => ['nullable', 'string'],
+            'content' => ['nullable', 'string', new NoH1Heading],
             'status' => ['required', 'in:draft,published'],
             'photo_id' => ['nullable', 'exists:photos,id', new PublishedPhoto],
             'featured_image' => ['nullable', 'string', 'url', 'max:500'],
