@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\ArticleController;
 use App\Http\Controllers\Admin\ArticlePreviewController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CreateArticleController;
+use App\Http\Controllers\Admin\CreateArticlePreviewController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\SettingsController;
@@ -16,7 +17,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function (): v
 
     // Articles — new article flow (session-based, no DB until first save)
     Route::get('/articles/create', [CreateArticleController::class, 'create'])->name('articles.create');
-    Route::post('/articles/preview', [CreateArticleController::class, 'preview'])->name('articles.preview.store');
+    Route::post('/articles/preview', [CreateArticlePreviewController::class, 'store'])->name('articles.preview.store');
     Route::post('/articles', [CreateArticleController::class, 'store'])->name('articles.store');
 
     // Articles — existing articles
