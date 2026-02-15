@@ -6,6 +6,7 @@ use App\Enums\Status;
 use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\Photo;
 
 class DashboardController extends Controller
 {
@@ -20,15 +21,25 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        $recentPhotos = Photo::query()
+            ->with('media')
+            ->orderBy('updated_at', 'desc')
+            ->limit(5)
+            ->get();
+
         $stats = [
             'total_articles' => Article::count(),
             'published_articles' => Article::where('status', Status::Published)->count(),
             'draft_articles' => Article::where('status', Status::Draft)->count(),
-            'total_categories' => Category::count(),
+            'categories' => Category::count(),
+            'total_photos' => Photo::count(),
+            'published_photos' => Photo::where('status', Status::Published)->count(),
+            'draft_photos' => Photo::where('status', Status::Draft)->count(),
         ];
 
         return view('admin.dashboard', [
             'recentArticles' => $recentArticles,
+            'recentPhotos' => $recentPhotos,
             'stats' => $stats,
         ]);
     }
