@@ -8,6 +8,13 @@ Alpine.plugin(ajax);
 window.Alpine = Alpine;
 Alpine.start();
 
+// Honor Laravel's @method('PUT/PATCH/DELETE') directive in Alpine AJAX requests
+document.addEventListener('ajax:send', (event) => {
+    if (event.detail.body instanceof FormData && event.detail.body.has('_method')) {
+        event.detail.method = event.detail.body.get('_method').toUpperCase();
+    }
+});
+
 // Service worker registration
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js');
