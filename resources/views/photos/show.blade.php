@@ -36,7 +36,7 @@
         {{-- Caption --}}
         @if($photo->caption)
             <div class="e-content prose prose-lg max-w-none mb-8">
-                {!! Str::markdown($photo->caption) !!}
+                {!! \App\Support\Markdown::render($photo->caption) !!}
             </div>
         @endif
 

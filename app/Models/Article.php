@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Status;
+use App\Support\Markdown;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -227,10 +228,7 @@ class Article extends Model
      */
     public function getContentHtmlAttribute(): string
     {
-        return Str::markdown($this->attributes['content'] ?? '', [
-            'html_input' => 'strip',
-            'allow_unsafe_links' => false,
-        ]);
+        return Markdown::render($this->attributes['content'] ?? '');
     }
 
     /**
