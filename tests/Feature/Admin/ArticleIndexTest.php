@@ -135,16 +135,20 @@ it('searches articles by slug', function (): void {
 it('combines search with category and status filters', function (): void {
     $category = Category::factory()->create(['name' => 'Tech', 'slug' => 'tech']);
 
-    $match = Article::factory()->published()->create(['title' => 'Laravel Guide']);
-    $match->categories()->attach($category);
+    $match = Article::factory()->published()->create([
+        'title' => 'Laravel Guide',
+        'category_id' => $category->id,
+    ]);
 
     $noCategory = Article::factory()->published()->create(['title' => 'Laravel Basics']);
-    $wrongStatus = Article::factory()->draft()->create(['title' => 'Laravel Draft']);
-    $wrongStatus->categories()->attach($category);
+    $wrongStatus = Article::factory()->draft()->create([
+        'title' => 'Laravel Draft',
+        'category_id' => $category->id,
+    ]);
 
     $response = $this->get(route('admin.articles.index', [
         'search' => 'Laravel',
-        'category' => 'tech',
+        'category' => $category->id,
         'status' => 'published',
     ]));
 

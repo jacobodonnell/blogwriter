@@ -67,7 +67,7 @@ it('clears session draft after storing', function (): void {
     expect(session()->has('draft_article'))->toBeFalse();
 });
 
-it('attaches categories when storing new article', function (): void {
+it('assigns category when storing new article', function (): void {
     $category = Category::factory()->create();
 
     post(route('admin.articles.store'), [
@@ -75,13 +75,13 @@ it('attaches categories when storing new article', function (): void {
         'slug' => 'categorized-article',
         'content' => 'Content',
         'status' => 'draft',
-        'categories' => [$category->id],
+        'category_id' => $category->id,
     ])->assertRedirect();
 
     $article = Article::first();
 
-    expect($article->categories)->toHaveCount(1)
-        ->and($article->categories->first()->id)->toBe($category->id);
+    expect($article->category_id)->toBe($category->id)
+        ->and($article->category->id)->toBe($category->id);
 });
 
 it('stores article with published status', function (): void {

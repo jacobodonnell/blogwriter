@@ -13,9 +13,11 @@ describe('seeder tests', function (): void {
         $seeder = new DatabaseSeeder;
         $seeder->withState('empty')->seed();
 
-        expect(Category::count())->toBe(5)
+        expect(Category::count())->toBe(8)
             ->and(Category::where('name', 'General')->exists())->toBeTrue()
-            ->and(Category::where('name', 'Technology')->exists())->toBeTrue();
+            ->and(Category::where('name', 'Technology')->exists())->toBeTrue()
+            ->and(Category::where('name', 'PHP')->exists())->toBeTrue()
+            ->and(Category::whereNull('parent_id')->count())->toBe(5);
     });
 
     it('demo state seeds articles with mixed statuses', function (): void {
@@ -35,7 +37,7 @@ describe('seeder tests', function (): void {
         $seeder = new DatabaseSeeder;
         $seeder->withState('empty')->seed();
 
-        expect(Category::count())->toBe(5);
+        expect(Category::count())->toBe(8);
         expect(Article::count())->toBe(0);
     });
 

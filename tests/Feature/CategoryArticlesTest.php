@@ -5,12 +5,11 @@ use App\Models\Category;
 
 it('displays published articles for a valid category slug', function (): void {
     $category = Category::factory()->create(['name' => 'Technology']);
-    $article = Article::factory()->published()->create();
-    $article->categories()->attach($category);
+    Article::factory()->published()->create(['category_id' => $category->id]);
 
     $this->get(route('category.show', $category->slug))
         ->assertSuccessful()
-        ->assertSee($article->title);
+        ->assertSee($category->name);
 });
 
 it('returns 404 for non-existent category slug', function (): void {
@@ -20,8 +19,7 @@ it('returns 404 for non-existent category slug', function (): void {
 
 it('does not show draft articles', function (): void {
     $category = Category::factory()->create(['name' => 'Travel']);
-    $draft = Article::factory()->draft()->create();
-    $draft->categories()->attach($category);
+    $draft = Article::factory()->draft()->create(['category_id' => $category->id]);
 
     $this->get(route('category.show', $category->slug))
         ->assertSuccessful()
@@ -31,8 +29,7 @@ it('does not show draft articles', function (): void {
 it('paginates at 10 per page', function (): void {
     $category = Category::factory()->create(['name' => 'Design']);
 
-    $articles = Article::factory()->published()->count(12)->create();
-    $articles->each(fn ($article) => $article->categories()->attach($category));
+    Article::factory()->published()->count(12)->create(['category_id' => $category->id]);
 
     $response = $this->get(route('category.show', $category->slug));
 
@@ -46,14 +43,13 @@ it('orders articles by published_at descending', function (): void {
     $older = Article::factory()->published()->create([
         'title' => 'Older Article',
         'published_at' => now()->subDays(5),
+        'category_id' => $category->id,
     ]);
     $newer = Article::factory()->published()->create([
         'title' => 'Newer Article',
         'published_at' => now()->subDay(),
+        'category_id' => $category->id,
     ]);
-
-    $older->categories()->attach($category);
-    $newer->categories()->attach($category);
 
     $response = $this->get(route('category.show', $category->slug));
 
@@ -72,15 +68,34 @@ it('handles empty category with no articles', function (): void {
         ->assertViewHas('articles', fn ($articles) => $articles->isEmpty());
 });
 
-it('eager loads categories to prevent N+1', function (): void {
+it('eager loads category to prevent N+1', function (): void {
     $category = Category::factory()->create(['name' => 'Programming']);
-    $article = Article::factory()->published()->create();
-    $article->categories()->attach($category);
+    Article::factory()->published()->create(['category_id' => $category->id]);
 
     $response = $this->get(route('category.show', $category->slug));
 
     $response->assertSuccessful();
     $response->assertViewHas('articles', function ($articles) {
-        return $articles->first()->relationLoaded('categories');
+        return $articles->first()->relationLoaded('category');
     });
+});
+
+it('includes subcategory articles in parent category page', function (): void {
+    $parent = Category::factory()->create(['name' => 'Programming']);
+    $child = Category::factory()->withParent($parent)->create(['name' => 'PHP']);
+
+    $parentArticle = Article::factory()->published()->create([
+        'title' => 'Parent Article',
+        'category_id' => $parent->id,
+    ]);
+    $childArticle = Article::factory()->published()->create([
+        'title' => 'Child Article',
+        'category_id' => $child->id,
+    ]);
+
+    $response = $this->get(route('category.show', $parent->slug));
+
+    $response->assertSuccessful();
+    $response->assertSee('Parent Article');
+    $response->assertSee('Child Article');
 });
