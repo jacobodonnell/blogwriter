@@ -49,19 +49,40 @@
 @import '@fontsource/jetbrains-mono/600.css';
 @import '@fontsource/jetbrains-mono/700.css';
 
+/* --- Serif ------------------------------------------------------------- */
+
+/* Lora */
+@import '@fontsource/lora/400.css';
+@import '@fontsource/lora/500.css';
+@import '@fontsource/lora/600.css';
+@import '@fontsource/lora/700.css';
+
+/* Merriweather */
+@import '@fontsource/merriweather/400.css';
+@import '@fontsource/merriweather/700.css';
+
+/* Playfair Display */
+@import '@fontsource/playfair-display/400.css';
+@import '@fontsource/playfair-display/500.css';
+@import '@fontsource/playfair-display/600.css';
+@import '@fontsource/playfair-display/700.css';
+
+/* Source Serif 4 */
+@import '@fontsource/source-serif-4/400.css';
+@import '@fontsource/source-serif-4/500.css';
+@import '@fontsource/source-serif-4/600.css';
+@import '@fontsource/source-serif-4/700.css';
+
 /* --- Pixel / Retro ------------------------------------------------------ */
 
-/* Press Start 2P */
-@import '@fontsource/press-start-2p/400.css';
+/* Jersey 15 */
+@import '@fontsource/jersey-15/400.css';
 
 /* Pixelify Sans */
 @import '@fontsource/pixelify-sans/400.css';
 @import '@fontsource/pixelify-sans/500.css';
 @import '@fontsource/pixelify-sans/600.css';
 @import '@fontsource/pixelify-sans/700.css';
-
-/* VT323 */
-@import '@fontsource/vt323/400.css';
 
 /* Silkscreen */
 @import '@fontsource/silkscreen/400.css';
@@ -78,8 +99,11 @@
     --font-work-sans: 'Work Sans', ui-sans-serif, system-ui, sans-serif;
     --font-instrument-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
     --font-jetbrains-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
-    --font-press-start-2p: 'Press Start 2P', cursive;
+    --font-lora: 'Lora', Georgia, serif;
+    --font-merriweather: 'Merriweather', Georgia, serif;
+    --font-playfair-display: 'Playfair Display', Georgia, serif;
+    --font-source-serif-4: 'Source Serif 4', Georgia, serif;
+    --font-jersey-15: 'Jersey 15', cursive;
     --font-pixelify-sans: 'Pixelify Sans', cursive;
-    --font-vt323: 'VT323', monospace;
     --font-silkscreen: 'Silkscreen', cursive;
 }

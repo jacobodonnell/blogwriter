@@ -12,6 +12,8 @@ class Base extends Component
 
     public string $themeDark;
 
+    public float $fontSizeScale;
+
     /**
      * Create a new component instance.
      */
@@ -27,6 +29,9 @@ class Base extends Component
         if ($this->themeFont === '') {
             $this->themeFont = setting('theme_font', config('appearance.defaults.theme_font', 'noto-sans'));
         }
+
+        $scales = config('appearance.font_size_scales', []);
+        $this->fontSizeScale = (float) ($scales[$this->themeFont] ?? 1);
     }
 
     /**

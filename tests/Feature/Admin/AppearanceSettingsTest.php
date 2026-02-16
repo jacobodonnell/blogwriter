@@ -125,6 +125,36 @@ it('rejects a dark theme in the light theme field', function (): void {
         ->assertSessionHasErrors('theme_light');
 });
 
+it('accepts every configured font', function (): void {
+    $fonts = array_keys(config('appearance.fonts'));
+
+    foreach ($fonts as $font) {
+        $this->actingAs($this->user)
+            ->put(route('admin.settings.appearance.update'), [
+                'theme_light' => 'lofi',
+                'theme_dark' => 'dracula',
+                'theme_font' => $font,
+            ])
+            ->assertRedirect(route('admin.settings.appearance'))
+            ->assertSessionHas('success');
+
+        expect(Setting::get('theme_font'))->toBe($font);
+    }
+});
+
+it('renders font categories and font size scales on appearance page', function (): void {
+    $response = $this->actingAs($this->user)
+        ->get(route('admin.settings.appearance'))
+        ->assertSuccessful();
+
+    foreach (array_keys(config('appearance.font_categories')) as $category) {
+        $response->assertSee($category);
+    }
+
+    $response->assertSee('fontSizeScales', false);
+    $response->assertSee('--font-size-scale:', false);
+});
+
 it('rejects a light theme in the dark theme field', function (): void {
     $this->actingAs($this->user)
         ->put(route('admin.settings.appearance.update'), [
@@ -173,37 +203,30 @@ it('only shows dark themes in the dark dropdown', function (): void {
     }
 });
 
-it('accepts every valid light theme', function (string $theme): void {
-    $this->actingAs($this->user)
-        ->put(route('admin.settings.appearance.update'), [
-            'theme_light' => $theme,
-            'theme_dark' => 'dracula',
-            'theme_font' => 'noto-sans',
-        ])
-        ->assertRedirect(route('admin.settings.appearance'))
-        ->assertSessionHas('success');
+it('accepts every configured theme', function (): void {
+    foreach (config('appearance.themes_light') as $theme) {
+        $this->actingAs($this->user)
+            ->put(route('admin.settings.appearance.update'), [
+                'theme_light' => $theme,
+                'theme_dark' => 'dracula',
+                'theme_font' => 'noto-sans',
+            ])
+            ->assertRedirect(route('admin.settings.appearance'))
+            ->assertSessionHas('success');
 
-    expect(Setting::get('theme_light'))->toBe($theme);
-})->with([
-    'light', 'cupcake', 'bumblebee', 'emerald', 'corporate', 'retro',
-    'cyberpunk', 'valentine', 'garden', 'lofi', 'pastel', 'fantasy',
-    'wireframe', 'cmyk', 'autumn', 'acid', 'lemonade', 'winter',
-    'nord', 'caramellatte', 'silk',
-]);
+        expect(Setting::get('theme_light'))->toBe($theme);
+    }
 
-it('accepts every valid dark theme', function (string $theme): void {
-    $this->actingAs($this->user)
-        ->put(route('admin.settings.appearance.update'), [
-            'theme_light' => 'lofi',
-            'theme_dark' => $theme,
-            'theme_font' => 'noto-sans',
-        ])
-        ->assertRedirect(route('admin.settings.appearance'))
-        ->assertSessionHas('success');
+    foreach (config('appearance.themes_dark') as $theme) {
+        $this->actingAs($this->user)
+            ->put(route('admin.settings.appearance.update'), [
+                'theme_light' => 'lofi',
+                'theme_dark' => $theme,
+                'theme_font' => 'noto-sans',
+            ])
+            ->assertRedirect(route('admin.settings.appearance'))
+            ->assertSessionHas('success');
 
-    expect(Setting::get('theme_dark'))->toBe($theme);
-})->with([
-    'dark', 'synthwave', 'halloween', 'forest', 'aqua', 'black',
-    'luxury', 'dracula', 'business', 'night', 'coffee', 'dim',
-    'sunset', 'abyss',
-]);
+        expect(Setting::get('theme_dark'))->toBe($theme);
+    }
+});

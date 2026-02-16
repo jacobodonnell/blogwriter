@@ -44,7 +44,7 @@
     <title>{!! $title ?: config('app.name', 'BlogWriter') !!}</title>
 
     <!-- Font override from appearance settings -->
-    <style>:root { --font-sans: var(--font-{{ $themeFont }}); }</style>
+    <style>:root { --font-sans: var(--font-{{ $themeFont }}); --font-size-scale: {{ $fontSizeScale }}; }</style>
 
     <!-- Phosphor Icons -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/{{ $iconWeight }}/style.css" />

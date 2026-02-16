@@ -73,6 +73,12 @@ return [
         'poppins' => 'Poppins',
         'work-sans' => 'Work Sans',
 
+        // Serif
+        'lora' => 'Lora',
+        'merriweather' => 'Merriweather',
+        'playfair-display' => 'Playfair Display',
+        'source-serif-4' => 'Source Serif 4',
+
         // Admin UI
         'instrument-sans' => 'Instrument Sans',
 
@@ -80,22 +86,24 @@ return [
         'jetbrains-mono' => 'JetBrains Mono',
 
         // Pixel / Retro
-        'press-start-2p' => 'Press Start 2P',
+        'jersey-15' => 'Jersey 15',
         'pixelify-sans' => 'Pixelify Sans',
-        'vt323' => 'VT323',
         'silkscreen' => 'Silkscreen',
     ],
 
     'font_categories' => [
         'Sans-Serif' => ['noto-sans', 'nunito', 'inter', 'poppins', 'work-sans'],
+        'Serif' => ['lora', 'merriweather', 'playfair-display', 'source-serif-4'],
         'Admin UI' => ['instrument-sans'],
         'Monospace' => ['jetbrains-mono'],
-        'Pixel / Retro' => ['press-start-2p', 'pixelify-sans', 'vt323', 'silkscreen'],
+        'Pixel / Retro' => ['jersey-15', 'pixelify-sans', 'silkscreen'],
     ],
 
-    'monospace_fonts' => ['jetbrains-mono', 'vt323'],
+    'monospace_fonts' => ['jetbrains-mono'],
 
-    'pixel_fonts' => ['press-start-2p', 'pixelify-sans', 'vt323', 'silkscreen'],
+    'pixel_fonts' => ['jersey-15', 'pixelify-sans', 'silkscreen'],
+
+    'font_size_scales' => [],
 
     /*
     |--------------------------------------------------------------------------

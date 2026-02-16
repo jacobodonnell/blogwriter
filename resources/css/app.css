@@ -57,6 +57,7 @@
 
 body {
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    font-size: calc(1rem * var(--font-size-scale, 1));
 }
 
 /* Admin UI elements stay in Instrument Sans during font preview */

@@ -20,6 +20,7 @@ class AppearanceController extends Controller
             'currentLight' => setting('theme_light', config('appearance.defaults.theme_light')),
             'currentDark' => setting('theme_dark', config('appearance.defaults.theme_dark')),
             'currentFont' => setting('theme_font', config('appearance.defaults.theme_font')),
+            'fontSizeScales' => config('appearance.font_size_scales', []),
         ]);
     }
 
