@@ -70,20 +70,20 @@ it('shows correct category count', function (): void {
     });
 });
 
-it('passes recent articles to the view', function (): void {
-    Article::factory()->count(3)->create();
+it('caps recent articles at 5', function (): void {
+    Article::factory()->count(8)->create();
 
     $response = $this->get(route('admin.dashboard'));
 
     $response->assertSuccessful();
-    $response->assertViewHas('recentArticles');
+    $response->assertViewHas('recentArticles', fn ($articles) => $articles->count() === 5);
 });
 
-it('passes recent photos to the view', function (): void {
-    Photo::factory()->count(3)->create();
+it('caps recent photos at 5', function (): void {
+    Photo::factory()->count(8)->create();
 
     $response = $this->get(route('admin.dashboard'));
 
     $response->assertSuccessful();
-    $response->assertViewHas('recentPhotos');
+    $response->assertViewHas('recentPhotos', fn ($photos) => $photos->count() === 5);
 });

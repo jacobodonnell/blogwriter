@@ -55,3 +55,29 @@ it('shows view all articles link for all users', function (): void {
         ->assertSuccessful()
         ->assertSee('View All');
 });
+
+it('paginates articles at 10 per page', function (): void {
+    Article::factory()->published()->count(12)->create();
+
+    $response = $this->get('/');
+
+    $response->assertSuccessful();
+    $response->assertViewHas('articles', fn ($articles) => $articles->count() === 10);
+});
+
+it('limits sidebar photos to 9', function (): void {
+    Photo::factory()->published()->count(12)->create();
+
+    $response = $this->get('/');
+
+    $response->assertSuccessful();
+    $response->assertViewHas('photos', fn ($photos) => $photos->count() === 9);
+});
+
+it('does not show draft photos in sidebar', function (): void {
+    $draft = Photo::factory()->draft()->create();
+
+    $this->get('/')
+        ->assertSuccessful()
+        ->assertViewHas('photos', fn ($photos) => $photos->isEmpty());
+});
