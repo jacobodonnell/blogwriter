@@ -9,6 +9,20 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {{-- Appearance Settings Link --}}
+            <a href="{{ route('admin.settings.appearance') }}" class="card bg-base-100 shadow hover:shadow-md transition-shadow lg:col-span-2">
+                <div class="card-body flex-row items-center gap-4">
+                    <div class="bg-primary/10 p-3 rounded-lg">
+                        <i class="ph ph-palette text-2xl text-primary"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="card-title text-lg">Appearance</h2>
+                        <p class="text-sm text-base-content/60">Customize your site's theme and font.</p>
+                    </div>
+                    <i class="ph ph-caret-right text-xl text-base-content/40"></i>
+                </div>
+            </a>
+
             {{-- Site Settings --}}
             <div class="card bg-base-100 shadow">
                 <div class="card-body">

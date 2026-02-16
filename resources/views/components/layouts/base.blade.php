@@ -1,13 +1,29 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
     @if($darkMode)
-        x-data="{ darkMode: localStorage.getItem('darkMode') === 'true' || (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches) }"
+        x-data="{
+            themeMode: localStorage.getItem('themeMode') || 'system',
+            systemDark: window.matchMedia('(prefers-color-scheme: dark)').matches,
+            get resolvedTheme() {
+                if (this.themeMode === 'dark') return '{{ $themeDark }}';
+                if (this.themeMode === 'light') return '{{ $themeLight }}';
+                return this.systemDark ? '{{ $themeDark }}' : '{{ $themeLight }}';
+            },
+            cycleTheme() {
+                const modes = ['light', 'dark', 'system'];
+                this.themeMode = modes[(modes.indexOf(this.themeMode) + 1) % 3];
+            }
+        }"
         x-init="
-            $watch('darkMode', value => {
-                localStorage.setItem('darkMode', value);
-                document.documentElement.setAttribute('data-theme', value ? 'dark' : 'light');
+            $watch('themeMode', value => {
+                localStorage.setItem('themeMode', value);
+                document.documentElement.setAttribute('data-theme', resolvedTheme);
             });
-            document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                systemDark = e.matches;
+                document.documentElement.setAttribute('data-theme', resolvedTheme);
+            });
+            document.documentElement.setAttribute('data-theme', resolvedTheme);
         "
     @endif
     >
@@ -27,9 +43,8 @@
 
     <title>{!! $title ?: config('app.name', 'BlogWriter') !!}</title>
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+    <!-- Font override from appearance settings -->
+    <style>:root { --font-sans: var(--font-{{ $themeFont }}); }</style>
 
     <!-- Phosphor Icons -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/{{ $iconWeight }}/style.css" />

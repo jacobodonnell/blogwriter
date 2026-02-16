@@ -8,6 +8,10 @@ use Illuminate\View\Component;
 
 class Base extends Component
 {
+    public string $themeLight;
+
+    public string $themeDark;
+
     /**
      * Create a new component instance.
      */
@@ -15,7 +19,15 @@ class Base extends Component
         public string $title = '',
         public bool $darkMode = false,
         public string $iconWeight = 'regular',
-    ) {}
+        public string $themeFont = '',
+    ) {
+        $this->themeLight = setting('theme_light', config('appearance.defaults.theme_light', 'lofi'));
+        $this->themeDark = setting('theme_dark', config('appearance.defaults.theme_dark', 'dracula'));
+
+        if ($this->themeFont === '') {
+            $this->themeFont = setting('theme_font', config('appearance.defaults.theme_font', 'noto-sans'));
+        }
+    }
 
     /**
      * Get the view / contents that represent the component.

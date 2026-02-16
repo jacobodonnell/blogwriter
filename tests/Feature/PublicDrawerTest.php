@@ -51,7 +51,7 @@ it('renders guest mobile drawer with Alpine state', function (): void {
     $this->get(route('home'))
         ->assertSuccessful()
         ->assertSee('mobileMenuOpen: false', false)
-        ->assertSee('darkMode:', false);
+        ->assertSee('themeMode:', false);
 });
 
 it('renders hamburger button for guest mobile menu', function (): void {

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminPhotoController;
+use App\Http\Controllers\Admin\AppearanceController;
 use App\Http\Controllers\Admin\ArticleController;
 use App\Http\Controllers\Admin\ArticlePreviewController;
 use App\Http\Controllers\Admin\CategoryController;
@@ -47,6 +48,10 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function (): v
     // Settings
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
     Route::put('/settings/profile', [SettingsController::class, 'update'])->name('settings.profile.update');
+
+    // Appearance
+    Route::get('/settings/appearance', [AppearanceController::class, 'index'])->name('settings.appearance');
+    Route::put('/settings/appearance', [AppearanceController::class, 'update'])->name('settings.appearance.update');
 
     // Private media file serving
     Route::get('/media/{media}/{conversion?}', [MediaController::class, 'show'])->name('media.show');

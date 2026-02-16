@@ -1,5 +1,5 @@
 {{-- Shared header for authenticated layouts --}}
-{{-- Expects Alpine.js context with: expanded, mobileDrawerOpen, isDesktop, toggle() --}}
+{{-- Expects Alpine.js context with: expanded, mobileDrawerOpen, isDesktop, toggle(), themeMode, cycleTheme() --}}
 
 <header class="navbar bg-base-100 sticky top-0 z-30 shadow-sm h-16">
     <div class="flex-none">
@@ -16,10 +16,11 @@
     </div>
 
     <div class="flex-none gap-2">
-        {{-- Dark Mode Toggle --}}
-        <button @click="darkMode = !darkMode" class="btn btn-ghost btn-circle" aria-label="Toggle dark mode">
-            <i x-show="!darkMode" class="ph ph-moon text-xl" x-cloak></i>
-            <i x-show="darkMode" class="ph ph-sun text-xl" x-cloak></i>
+        {{-- Theme Mode Cycle: light → dark → system --}}
+        <button @click="cycleTheme()" class="btn btn-ghost btn-circle" aria-label="Cycle theme mode">
+            <i x-show="themeMode === 'light'" class="ph ph-sun text-xl" x-cloak></i>
+            <i x-show="themeMode === 'dark'" class="ph ph-moon text-xl" x-cloak></i>
+            <i x-show="themeMode === 'system'" class="ph ph-monitor text-xl" x-cloak></i>
         </button>
 
         {{-- User Dropdown --}}

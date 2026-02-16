@@ -1,14 +1,12 @@
 <x-layouts.base
     :title="$title ?? config('app.name', 'BlogWriter')"
-    :dark-mode="auth()->check()"
+    :dark-mode="true"
     icon-weight="regular">
 
     <x-slot:head>
-        @auth
-            <style>
-                [x-cloak] { display: none !important; }
-            </style>
-        @endauth
+        <style>
+            [x-cloak] { display: none !important; }
+        </style>
         @yield('head')
     </x-slot:head>
 
@@ -99,19 +97,7 @@
 
     @else
         {{-- Guest: Responsive navbar with mobile drawer --}}
-        <div x-data="{
-                mobileMenuOpen: false,
-                darkMode: localStorage.getItem('darkMode') === 'true',
-                init() {
-                    if (this.darkMode) {
-                        document.documentElement.setAttribute('data-theme', 'dark');
-                    }
-                    this.$watch('darkMode', (v) => {
-                        localStorage.setItem('darkMode', v);
-                        document.documentElement.setAttribute('data-theme', v ? 'dark' : 'light');
-                    });
-                }
-            }"
+        <div x-data="{ mobileMenuOpen: false }"
             @keydown.escape.window="mobileMenuOpen = false"
             class="flex flex-col min-h-screen">
 
@@ -140,11 +126,12 @@
                         <a href="{{ route('profile') }}" class="btn btn-ghost">Profile</a>
                     </div>
 
-                    {{-- Dark Mode Toggle (always visible) --}}
+                    {{-- Theme Mode Cycle (always visible) --}}
                     <div class="flex-none ml-2">
-                        <button @click="darkMode = !darkMode" class="btn btn-ghost btn-circle" aria-label="Toggle dark mode">
-                            <i x-show="!darkMode" class="ph ph-moon text-xl" x-cloak></i>
-                            <i x-show="darkMode" class="ph ph-sun text-xl" x-cloak></i>
+                        <button @click="cycleTheme()" class="btn btn-ghost btn-circle" aria-label="Cycle theme mode">
+                            <i x-show="themeMode === 'light'" class="ph ph-sun text-xl" x-cloak></i>
+                            <i x-show="themeMode === 'dark'" class="ph ph-moon text-xl" x-cloak></i>
+                            <i x-show="themeMode === 'system'" class="ph ph-monitor text-xl" x-cloak></i>
                         </button>
                     </div>
                 </div>
