@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 class Category extends Model
@@ -24,19 +26,89 @@ class Category extends Model
     }
 
     /**
-     * @return BelongsToMany<Article, $this>
+     * @return BelongsTo<Category, $this>
      */
-    public function articles(): BelongsToMany
+    public function parent(): BelongsTo
     {
-        return $this->belongsToMany(Article::class);
+        return $this->belongsTo(Category::class, 'parent_id');
     }
 
     /**
-     * Get the count of published articles.
+     * @return HasMany<Category, $this>
+     */
+    public function children(): HasMany
+    {
+        return $this->hasMany(Category::class, 'parent_id');
+    }
+
+    /**
+     * @return HasMany<Article, $this>
+     */
+    public function articles(): HasMany
+    {
+        return $this->hasMany(Article::class);
+    }
+
+    /**
+     * Walk up the parent chain and return ancestors (nearest first).
+     */
+    public function ancestors(): Collection
+    {
+        $ancestors = collect();
+        $current = $this->parent;
+
+        while ($current) {
+            $ancestors->push($current);
+            $current = $current->parent;
+        }
+
+        return $ancestors->reverse()->values();
+    }
+
+    /**
+     * Recursively collect all descendant category IDs.
+     *
+     * @return array<int>
+     */
+    public function descendantIds(): array
+    {
+        $ids = [];
+
+        foreach ($this->children()->with('children')->get() as $child) {
+            $ids[] = $child->id;
+            $ids = array_merge($ids, $child->descendantIds());
+        }
+
+        return $ids;
+    }
+
+    /**
+     * Get the count of published articles including descendants.
      */
     public function getArticleCountAttribute(): int
     {
-        return $this->articles()->published()->count();
+        $ids = array_merge([$this->id], $this->descendantIds());
+
+        return Article::query()
+            ->published()
+            ->whereIn('category_id', $ids)
+            ->count();
+    }
+
+    /**
+     * Check if this is a root category (no parent).
+     */
+    public function isRoot(): bool
+    {
+        return $this->parent_id === null;
+    }
+
+    /**
+     * Get the depth of this category in the hierarchy (0 = root).
+     */
+    public function depth(): int
+    {
+        return $this->ancestors()->count();
     }
 
     /**
