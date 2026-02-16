@@ -26,7 +26,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function (): v
     Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
     Route::get('/articles/{article}/edit', [ArticleController::class, 'edit'])->name('articles.edit');
     Route::put('/articles/{article}', [ArticleController::class, 'update'])->name('articles.update');
-    Route::put('/articles/{article}/preview', [ArticlePreviewController::class, 'update'])->name('articles.preview.update');
+    Route::match(['post', 'put'], '/articles/{article}/preview', [ArticlePreviewController::class, 'update'])->name('articles.preview.update');
     Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy');
 
     // Photos

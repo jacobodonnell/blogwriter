@@ -205,6 +205,20 @@ it('index view button links to preview for drafts', function (): void {
         ->assertSee('Preview Draft');
 });
 
+it('accepts POST with _method PUT for ajax preview update', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create();
+
+    post(route('admin.articles.preview.update', $article), [
+        '_method' => 'PUT',
+        'title' => 'Updated Title',
+        'slug' => $article->slug,
+        'content' => 'Updated content',
+        'status' => 'draft',
+    ])
+        ->assertOk()
+        ->assertViewIs('admin.articles.preview');
+});
+
 it('index view button links to permalink for published', function (): void {
     $article = Article::factory()->published()->for($this->user)->create();
 
