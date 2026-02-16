@@ -12,7 +12,7 @@ class ArticleController extends Controller
     public function index(): \Illuminate\View\View
     {
         $articles = Article::published()
-            ->with('categories')
+            ->with('category')
             ->orderBy('published_at', 'desc')
             ->paginate(10);
 
@@ -28,7 +28,7 @@ class ArticleController extends Controller
     {
         $article = Article::published()
             ->where('slug', $slug)
-            ->with('categories')
+            ->with('category')
             ->first();
 
         if ($article) {

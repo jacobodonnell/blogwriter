@@ -13,7 +13,7 @@ class HomeController extends Controller
     public function index(): \Illuminate\View\View
     {
         $articles = Article::published()
-            ->with('categories')
+            ->with('category')
             ->orderBy('published_at', 'desc')
             ->paginate(10);
 
