@@ -60,7 +60,13 @@ class FullArticleSeeder extends Seeder
                 }
             }
 
-            $article = Article::firstOrCreate(
+            // Use the first category as the single category
+            $categoryId = null;
+            if (isset($data['categories']) && count($data['categories']) > 0) {
+                $categoryId = Category::where('name', $data['categories'][0])->value('id');
+            }
+
+            Article::firstOrCreate(
                 ['slug' => $data['slug']],
                 [
                     'user_id' => $user->id,
@@ -71,14 +77,9 @@ class FullArticleSeeder extends Seeder
                     'published_at' => $status === 'published' ? now()->subDays(random_int(1, 30)) : null,
                     'photo_id' => $photoId,
                     'meta' => $meta ?: null,
+                    'category_id' => $categoryId,
                 ]
             );
-
-            // Attach categories if not already attached
-            if ($article->categories()->count() === 0 && isset($data['categories'])) {
-                $categoryIds = Category::whereIn('name', $data['categories'])->pluck('id');
-                $article->categories()->attach($categoryIds);
-            }
         }
     }
 }

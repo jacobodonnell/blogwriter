@@ -8,7 +8,7 @@ use Illuminate\Database\Seeder;
 class CategorySeeder extends Seeder
 {
     /**
-     * Seed categories.
+     * Seed categories with hierarchy.
      */
     public function run(): void
     {
@@ -37,14 +37,42 @@ class CategorySeeder extends Seeder
                 'name' => 'Programming',
                 'slug' => 'programming',
                 'description' => 'Code, developers, and software engineering',
+                'children' => [
+                    [
+                        'name' => 'PHP',
+                        'slug' => 'php',
+                        'description' => 'PHP language and ecosystem',
+                    ],
+                    [
+                        'name' => 'JavaScript',
+                        'slug' => 'javascript',
+                        'description' => 'JavaScript, TypeScript, and the frontend world',
+                    ],
+                    [
+                        'name' => 'Laravel',
+                        'slug' => 'laravel',
+                        'description' => 'The Laravel framework',
+                    ],
+                ],
             ],
         ];
 
         foreach ($categories as $categoryData) {
-            Category::firstOrCreate(
+            $children = $categoryData['children'] ?? [];
+            unset($categoryData['children']);
+
+            $category = Category::firstOrCreate(
                 ['slug' => $categoryData['slug']],
                 $categoryData
             );
+
+            foreach ($children as $childData) {
+                $childData['parent_id'] = $category->id;
+                Category::firstOrCreate(
+                    ['slug' => $childData['slug']],
+                    $childData
+                );
+            }
         }
     }
 }

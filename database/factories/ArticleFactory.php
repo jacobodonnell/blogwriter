@@ -286,15 +286,12 @@ class ArticleFactory extends Factory
     }
 
     /**
-     * State to attach article to specific categories by name.
-     *
-     * @param  array<string>  $categoryNames
+     * State to assign article to a specific category by name.
      */
-    public function inCategories(array $categoryNames): static
+    public function inCategory(string $categoryName): static
     {
-        return $this->afterCreating(function (\App\Models\Article $article) use ($categoryNames): void {
-            $categoryIds = Category::whereIn('name', $categoryNames)->pluck('id');
-            $article->categories()->attach($categoryIds);
-        });
+        return $this->state(fn (): array => [
+            'category_id' => Category::where('name', $categoryName)->value('id'),
+        ]);
     }
 }

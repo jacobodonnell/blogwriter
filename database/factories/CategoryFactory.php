@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Category;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -50,5 +51,15 @@ class CategoryFactory extends Factory
             'name' => $name,
             'description' => fake()->optional(0.7)->sentence(10),
         ];
+    }
+
+    /**
+     * Create a child category under the given parent.
+     */
+    public function withParent(Category $parent): static
+    {
+        return $this->state(fn (): array => [
+            'parent_id' => $parent->id,
+        ]);
     }
 }
