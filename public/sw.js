@@ -1,4 +1,4 @@
-const CACHE_NAME = 'blogwriter-v1';
+const CACHE_NAME = 'blogwriter-v2';
 const OFFLINE_URL = '/offline.html';
 
 const PRECACHE_ASSETS = [
@@ -33,6 +33,23 @@ self.addEventListener('fetch', (event) => {
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request).catch(() => caches.match(OFFLINE_URL))
+    );
+    return;
+  }
+
+  // User-uploaded content (/storage/): stale-while-revalidate
+  if (url.pathname.startsWith('/storage/')) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        const fetchPromise = fetch(request).then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        });
+        return cached || fetchPromise;
+      })
     );
     return;
   }
