@@ -1,7 +1,22 @@
 <x-layouts.admin>
     @section('title', 'Articles')
 
-    <div class="space-y-6">
+    <div class="space-y-6"
+         x-data="{
+            columns: {
+                featuredImage: localStorage.getItem('articles_col_featuredImage') === 'true',
+                title: localStorage.getItem('articles_col_title') !== 'false',
+                status: localStorage.getItem('articles_col_status') !== 'false',
+                categories: localStorage.getItem('articles_col_categories') !== 'false',
+                publishedAt: localStorage.getItem('articles_col_publishedAt') === 'true',
+                createdAt: localStorage.getItem('articles_col_createdAt') === 'true',
+                updatedAt: localStorage.getItem('articles_col_updatedAt') !== 'false',
+            },
+            toggle(col) {
+                this.columns[col] = !this.columns[col];
+                localStorage.setItem('articles_col_' + col, this.columns[col]);
+            }
+         }">
         {{-- Header --}}
         <div class="flex justify-between items-center">
             <div>
@@ -9,6 +24,58 @@
                 <p class="text-gray-600 dark:text-gray-400 mt-1">Manage your blog articles.</p>
             </div>
             <div class="flex gap-2">
+                {{-- Columns Toggle --}}
+                <div class="dropdown dropdown-end">
+                    <div tabindex="0" role="button" class="btn btn-ghost">
+                        <i class="ph ph-columns text-xl mr-2"></i>
+                        Columns
+                    </div>
+                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-56">
+                        <li>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" class="checkbox checkbox-sm" :checked="columns.featuredImage" @change="toggle('featuredImage')" />
+                                <span>Featured Image</span>
+                            </label>
+                        </li>
+                        <li>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" class="checkbox checkbox-sm" :checked="columns.title" @change="toggle('title')" />
+                                <span>Title</span>
+                            </label>
+                        </li>
+                        <li>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" class="checkbox checkbox-sm" :checked="columns.status" @change="toggle('status')" />
+                                <span>Status</span>
+                            </label>
+                        </li>
+                        <li>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" class="checkbox checkbox-sm" :checked="columns.categories" @change="toggle('categories')" />
+                                <span>Categories</span>
+                            </label>
+                        </li>
+                        <li>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" class="checkbox checkbox-sm" :checked="columns.publishedAt" @change="toggle('publishedAt')" />
+                                <span>Published At</span>
+                            </label>
+                        </li>
+                        <li>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" class="checkbox checkbox-sm" :checked="columns.createdAt" @change="toggle('createdAt')" />
+                                <span>Created At</span>
+                            </label>
+                        </li>
+                        <li>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" class="checkbox checkbox-sm" :checked="columns.updatedAt" @change="toggle('updatedAt')" />
+                                <span>Updated At</span>
+                            </label>
+                        </li>
+                    </ul>
+                </div>
+
                 <a href="{{ route('articles.index') }}" class="btn btn-ghost">
                     <i class="ph ph-eye text-xl mr-2"></i>
                     View Articles
@@ -23,12 +90,31 @@
         {{-- Filters --}}
         <div class="card bg-base-100 shadow">
             <div class="card-body">
-                <form method="GET" action="{{ route('admin.articles.index') }}" class="flex flex-wrap gap-4 items-end">
+                <form method="GET" action="{{ route('admin.articles.index') }}"
+                      x-target="articles-table"
+                      id="articles-filter-form"
+                      class="flex flex-wrap gap-4 items-end">
+                    {{-- Preserve sort params --}}
+                    <input type="hidden" name="sort" value="{{ $currentSort }}" />
+                    <input type="hidden" name="direction" value="{{ $currentDirection }}" />
+
+                    <div class="form-control w-full md:w-64">
+                        <label class="label">
+                            <span class="label-text">Search</span>
+                        </label>
+                        <input type="text"
+                               name="search"
+                               value="{{ request('search') }}"
+                               placeholder="Search by title or slug..."
+                               class="input input-bordered"
+                               @input.debounce.400ms="$el.form.requestSubmit()" />
+                    </div>
+
                     <div class="form-control w-full md:w-48">
                         <label class="label">
                             <span class="label-text">Category</span>
                         </label>
-                        <select name="category" class="select select-bordered" onchange="this.form.submit()">
+                        <select name="category" class="select select-bordered" onchange="this.form.requestSubmit()">
                             <option value="">All Categories</option>
                             @foreach($categories as $category)
                                 <option value="{{ $category->slug }}" {{ request('category') == $category->slug ? 'selected' : '' }}>
@@ -42,14 +128,14 @@
                         <label class="label">
                             <span class="label-text">Status</span>
                         </label>
-                        <select name="status" class="select select-bordered" onchange="this.form.submit()">
+                        <select name="status" class="select select-bordered" onchange="this.form.requestSubmit()">
                             <option value="">All Status</option>
                             <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Published</option>
                             <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>
                         </select>
                     </div>
 
-                    @if(request('category') || request('status'))
+                    @if(request('category') || request('status') || request('search'))
                         <a href="{{ route('admin.articles.index') }}" class="btn btn-ghost">
                             Clear Filters
                         </a>
@@ -59,88 +145,6 @@
         </div>
 
         {{-- Articles List --}}
-        <div class="card bg-base-100 shadow">
-            <div class="card-body p-0">
-                @if($articles->count() > 0)
-                    <div class="overflow-x-auto">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Article</th>
-                                    <th>Status</th>
-                                    <th>Categories</th>
-                                    <th>Updated</th>
-                                    <th class="text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($articles as $article)
-                                    <tr>
-                                        <td>
-                                            <div class="font-semibold">{{ $article->title }}</div>
-                                            <div class="text-sm text-gray-500">{{ Str::limit($article->slug, 40) }}</div>
-                                        </td>
-                                        <td>
-                                            <span @class([
-                                                'badge',
-                                                'badge-success' => $article->status->value === 'published',
-                                                'badge-warning' => $article->status->value === 'draft',
-                                            ])>
-                                                {{ $article->status->label() }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            @foreach($article->categories as $category)
-                                                <span class="badge badge-sm badge-outline mr-1">{{ $category->name }}</span>
-                                            @endforeach
-                                        </td>
-                                        <td class="text-sm text-gray-500">
-                                            {{ $article->updated_at->diffForHumans() }}
-                                        </td>
-                                        <td class="text-right">
-                                            <div class="flex justify-end gap-2">
-                                                <a href="{{ route('admin.articles.edit', $article) }}" class="btn btn-sm btn-ghost" title="Edit">
-                                                    <i class="ph ph-pencil-simple text-lg"></i>
-                                                </a>
-                                                @if($article->isPublished())
-                                                    <a href="{{ $article->permalink() }}" class="btn btn-sm btn-ghost" title="View Published">
-                                                        <i class="ph ph-eye text-lg"></i>
-                                                    </a>
-                                                @else
-                                                    <a href="{{ route('admin.articles.show', $article) }}" class="btn btn-sm btn-ghost" title="Preview Draft">
-                                                        <i class="ph ph-eye text-lg"></i>
-                                                    </a>
-                                                @endif
-                                                <form method="POST" action="{{ route('admin.articles.destroy', $article) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this article?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-ghost text-error" title="Delete">
-                                                        <i class="ph ph-trash text-lg"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {{-- Pagination --}}
-                    <div class="p-4 border-t">
-                        {{ $articles->links() }}
-                    </div>
-                @else
-                    <div class="text-center py-12">
-                        <p class="text-gray-500 mb-4">No articles found.</p>
-                        @if(request('category') || request('status'))
-                            <a href="{{ route('admin.articles.index') }}" class="btn btn-ghost">Clear Filters</a>
-                        @else
-                            <a href="{{ route('admin.articles.create') }}" class="btn btn-primary">Create First Article</a>
-                        @endif
-                    </div>
-                @endif
-            </div>
-        </div>
+        @include('admin.articles._table')
     </div>
 </x-layouts.admin>

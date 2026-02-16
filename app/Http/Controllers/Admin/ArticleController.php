@@ -21,13 +21,35 @@ class ArticleController extends Controller
     ) {}
 
     /**
+     * Allowed sort columns for the articles index.
+     *
+     * @var array<string>
+     */
+    private const ALLOWED_SORTS = ['title', 'status', 'published_at', 'created_at', 'updated_at'];
+
+    /**
      * Display a listing of articles.
      */
     public function index(Request $request): View
     {
+        $currentSort = in_array($request->input('sort'), self::ALLOWED_SORTS)
+            ? $request->input('sort')
+            : 'updated_at';
+        $currentDirection = in_array($request->input('direction'), ['asc', 'desc'])
+            ? $request->input('direction')
+            : 'desc';
+
         $query = Article::query()
-            ->with('categories')
-            ->orderBy('updated_at', 'desc');
+            ->with(['categories', 'featuredPhoto.media'])
+            ->orderBy($currentSort, $currentDirection);
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search): void {
+                $q->where('title', 'like', sprintf('%%%s%%', $search))
+                    ->orWhere('slug', 'like', sprintf('%%%s%%', $search));
+            });
+        }
 
         if ($request->filled('category')) {
             $query->whereHas('categories', function ($q) use ($request): void {
@@ -42,10 +64,18 @@ class ArticleController extends Controller
         $articles = $query->paginate(20)->withQueryString();
         $categories = Category::orderBy('name')->get();
 
-        return view('admin.articles.index', [
+        $viewData = [
             'articles' => $articles,
             'categories' => $categories,
-        ]);
+            'currentSort' => $currentSort,
+            'currentDirection' => $currentDirection,
+        ];
+
+        if ($request->header('X-Alpine-Target')) {
+            return view('admin.articles._table', $viewData);
+        }
+
+        return view('admin.articles.index', $viewData);
     }
 
     /**
