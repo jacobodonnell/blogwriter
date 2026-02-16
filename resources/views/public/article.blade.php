@@ -21,24 +21,22 @@
         <nav class="text-sm breadcrumbs mb-6">
             <ul>
                 <li><a href="{{ route('home') }}" class="link link-hover">Home</a></li>
-                @if($article->categories->count() > 0)
-                    <li><a href="{{ route('category.show', $article->categories->first()->slug) }}" class="link link-hover">
-                        {{ $article->categories->first()->name }}
+                @if($article->category)
+                    <li><a href="{{ route('category.show', $article->category->slug) }}" class="link link-hover">
+                        {{ $article->category->name }}
                     </a></li>
                 @endif
                 <li class="text-base-content/60 truncate max-w-xs">{{ $article->title }}</li>
             </ul>
         </nav>
 
-        {{-- Categories --}}
-        @if($article->categories->count() > 0)
+        {{-- Category --}}
+        @if($article->category)
             <div class="flex flex-wrap gap-2 mb-4">
-                @foreach($article->categories as $category)
-                    <a href="{{ route('category.show', $category->slug) }}" 
-                       class="badge badge-primary badge-outline">
-                        {{ $category->name }}
-                    </a>
-                @endforeach
+                <a href="{{ route('category.show', $article->category->slug) }}"
+                   class="badge badge-primary badge-outline">
+                    {{ $article->category->name }}
+                </a>
             </div>
         @endif
 

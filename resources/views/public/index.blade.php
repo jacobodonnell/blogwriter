@@ -43,15 +43,13 @@
                             @endif
 
                             <div class="card-body">
-                                {{-- Categories --}}
-                                @if($article->categories->count() > 0)
+                                {{-- Category --}}
+                                @if($article->category)
                                     <div class="flex flex-wrap gap-2">
-                                        @foreach($article->categories as $category)
-                                            <a href="{{ route('category.show', $category->slug) }}"
-                                               class="badge badge-primary badge-sm">
-                                                {{ $category->name }}
-                                            </a>
-                                        @endforeach
+                                        <a href="{{ route('category.show', $article->category->slug) }}"
+                                           class="badge badge-primary badge-sm">
+                                            {{ $article->category->name }}
+                                        </a>
                                     </div>
                                 @endif
 
