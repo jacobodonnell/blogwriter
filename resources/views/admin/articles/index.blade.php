@@ -135,6 +135,17 @@
                         </select>
                     </div>
 
+                    <div class="form-control w-full md:w-32">
+                        <label class="label">
+                            <span class="label-text">Per Page</span>
+                        </label>
+                        <select name="perPage" class="select select-bordered" onchange="this.form.requestSubmit()">
+                            @foreach([10, 20, 50, 100] as $option)
+                                <option value="{{ $option }}" {{ $perPage == $option ? 'selected' : '' }}>{{ $option }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     @if(request('category') || request('status') || request('search'))
                         <a href="{{ route('admin.articles.index') }}" class="btn btn-ghost">
                             Clear Filters

@@ -28,6 +28,13 @@ class ArticleController extends Controller
     private const ALLOWED_SORTS = ['title', 'status', 'published_at', 'created_at', 'updated_at'];
 
     /**
+     * Allowed per-page options for the articles index.
+     *
+     * @var array<int>
+     */
+    private const ALLOWED_PER_PAGE = [10, 20, 50, 100];
+
+    /**
      * Display a listing of articles.
      */
     public function index(Request $request): View
@@ -61,7 +68,11 @@ class ArticleController extends Controller
             $query->where('status', $request->status);
         }
 
-        $articles = $query->paginate(20)->withQueryString();
+        $perPage = in_array((int) $request->input('perPage'), self::ALLOWED_PER_PAGE)
+            ? (int) $request->input('perPage')
+            : 20;
+
+        $articles = $query->paginate($perPage)->withQueryString();
         $categories = Category::orderBy('name')->get();
 
         $viewData = [
@@ -69,6 +80,7 @@ class ArticleController extends Controller
             'categories' => $categories,
             'currentSort' => $currentSort,
             'currentDirection' => $currentDirection,
+            'perPage' => $perPage,
         ];
 
         if ($request->header('X-Alpine-Target')) {

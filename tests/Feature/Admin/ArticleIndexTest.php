@@ -244,3 +244,41 @@ it('preserves query string in pagination', function (): void {
     $response->assertSee('direction=asc');
     $response->assertSee('status=published');
 });
+
+it('paginates with custom per page value', function (): void {
+    Article::factory()->count(15)->create();
+
+    $response = $this->get(route('admin.articles.index', ['perPage' => 10]));
+
+    $response->assertSuccessful();
+    $response->assertViewHas('perPage', 10);
+    $response->assertViewHas('articles', fn ($articles) => $articles->count() === 10);
+});
+
+it('defaults to 20 per page', function (): void {
+    Article::factory()->count(25)->create();
+
+    $response = $this->get(route('admin.articles.index'));
+
+    $response->assertSuccessful();
+    $response->assertViewHas('perPage', 20);
+    $response->assertViewHas('articles', fn ($articles) => $articles->count() === 20);
+});
+
+it('falls back to 20 for invalid per page value', function (): void {
+    Article::factory()->count(5)->create();
+
+    $response = $this->get(route('admin.articles.index', ['perPage' => 999]));
+
+    $response->assertSuccessful();
+    $response->assertViewHas('perPage', 20);
+});
+
+it('accepts all allowed per page values', function (int $perPage): void {
+    Article::factory()->count(5)->create();
+
+    $response = $this->get(route('admin.articles.index', ['perPage' => $perPage]));
+
+    $response->assertSuccessful();
+    $response->assertViewHas('perPage', $perPage);
+})->with([10, 20, 50, 100]);
