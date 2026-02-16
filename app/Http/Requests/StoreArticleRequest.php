@@ -35,8 +35,7 @@ class StoreArticleRequest extends FormRequest
             'featured_image_alt' => ['nullable', 'string', 'max:255'],
             'featured_image_caption' => ['nullable', 'string', 'max:500'],
             'remove_featured_image' => ['nullable', 'boolean'],
-            'categories' => ['nullable', 'array'],
-            'categories.*' => ['exists:categories,id'],
+            'category_id' => ['nullable', 'integer', 'exists:categories,id'],
             'meta' => ['nullable', 'array'],
             'meta.meta_title' => ['nullable', 'string', 'max:255'],
             'meta.meta_description' => ['nullable', 'string', 'max:500'],
@@ -53,7 +52,7 @@ class StoreArticleRequest extends FormRequest
     {
         return [
             'slug.regex' => 'Slug can only contain lowercase letters, numbers, and hyphens.',
-            'categories.*.exists' => 'One or more selected categories do not exist.',
+            'category_id.exists' => 'The selected category does not exist.',
         ];
     }
 

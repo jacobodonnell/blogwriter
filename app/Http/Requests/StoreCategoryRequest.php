@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreCategoryRequest extends FormRequest
 {
@@ -21,10 +22,19 @@ class StoreCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
+        $categoryId = $this->route('category')?->id;
+
         return [
             'name' => ['required', 'string', 'min:2', 'max:100'],
-            'slug' => ['required', 'string', 'unique:categories', 'max:100', 'regex:/^[a-z0-9-]+$/'],
+            'slug' => [
+                'nullable',
+                'string',
+                'max:100',
+                'regex:/^[a-z0-9-]+$/',
+                Rule::unique('categories', 'slug')->ignore($categoryId),
+            ],
             'description' => ['nullable', 'string', 'max:500'],
+            'parent_id' => ['nullable', 'integer', 'exists:categories,id'],
         ];
     }
 
