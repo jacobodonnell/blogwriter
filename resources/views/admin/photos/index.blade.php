@@ -8,10 +8,16 @@
                 <h1 class="text-3xl font-bold">Photos</h1>
                 <p class="text-gray-600 dark:text-gray-400 mt-1">Manage your photo library.</p>
             </div>
-            <a href="{{ route('admin.photos.create') }}" class="btn btn-primary">
-                <i class="ph ph-plus text-xl mr-2"></i>
-                New Photo
-            </a>
+            <div class="flex gap-2">
+                <a href="{{ route('photos.index') }}" class="btn btn-ghost" target="_blank">
+                    <i class="ph ph-arrow-square-out text-xl mr-2"></i>
+                    View Photos
+                </a>
+                <a href="{{ route('admin.photos.create') }}" class="btn btn-primary">
+                    <i class="ph ph-plus text-xl mr-2"></i>
+                    New Photo
+                </a>
+            </div>
         </div>
 
         {{-- Filters --}}

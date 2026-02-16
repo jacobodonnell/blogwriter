@@ -8,10 +8,16 @@
                 <h1 class="text-3xl font-bold">Articles</h1>
                 <p class="text-gray-600 dark:text-gray-400 mt-1">Manage your blog articles.</p>
             </div>
-            <a href="{{ route('admin.articles.create') }}" class="btn btn-primary">
-                <i class="ph ph-plus text-xl mr-2"></i>
-                New Article
-            </a>
+            <div class="flex gap-2">
+                <a href="{{ route('articles.index') }}" class="btn btn-ghost" target="_blank">
+                    <i class="ph ph-arrow-square-out text-xl mr-2"></i>
+                    View Articles
+                </a>
+                <a href="{{ route('admin.articles.create') }}" class="btn btn-primary">
+                    <i class="ph ph-plus text-xl mr-2"></i>
+                    New Article
+                </a>
+            </div>
         </div>
 
         {{-- Filters --}}

@@ -47,7 +47,7 @@
             © {{ date('Y') }} {{ config('app.name', 'BlogWriter') }}
         </p>
         <p class="text-xs text-base-content/40">
-            Powered by <a href="https://blogwriter.dev" class="link" target="_blank">BlogWriter</a>
+            Powered by <a href="https://blogwriter.tech" class="link" target="_blank">BlogWriter</a>
         </p>
     </div>
 </footer>

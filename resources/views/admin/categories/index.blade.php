@@ -55,7 +55,12 @@
                                 @foreach($categories as $category)
                                     <tr>
                                         <td>
-                                            <div class="font-semibold">{{ $category->name }}</div>
+                                            <div class="font-semibold">
+                                                {{ $category->name }}
+                                                <a href="{{ route('category.show', $category->slug) }}" class="inline-block align-middle ml-1 opacity-50 hover:opacity-100" target="_blank" title="View category">
+                                                    <i class="ph ph-arrow-square-out text-sm"></i>
+                                                </a>
+                                            </div>
                                             @if($category->description)
                                                 <div class="text-sm text-gray-500">{{ Str::limit($category->description, 50) }}</div>
                                             @endif
