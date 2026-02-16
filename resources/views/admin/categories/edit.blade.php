@@ -24,8 +24,8 @@
                         <label class="label">
                             <span class="label-text">Name</span>
                         </label>
-                        <input type="text" name="name" 
-                            class="input input-bordered @error('name') input-error @enderror" 
+                        <input type="text" name="name"
+                            class="input input-bordered @error('name') input-error @enderror"
                             value="{{ old('name', $category->name) }}" required>
                         @error('name')
                             <label class="label">
@@ -39,8 +39,8 @@
                             <span class="label-text">Slug</span>
                             <span class="label-text-alt">URL-friendly identifier</span>
                         </label>
-                        <input type="text" name="slug" 
-                            class="input input-bordered @error('slug') input-error @enderror" 
+                        <input type="text" name="slug"
+                            class="input input-bordered @error('slug') input-error @enderror"
                             value="{{ old('slug', $category->slug) }}" required>
                         @error('slug')
                             <label class="label">
@@ -51,9 +51,28 @@
 
                     <div class="form-control">
                         <label class="label">
+                            <span class="label-text">Parent Category</span>
+                        </label>
+                        <select name="parent_id" class="select select-bordered @error('parent_id') select-error @enderror">
+                            <option value="">None (Root)</option>
+                            @foreach($allCategories as $cat)
+                                <option value="{{ $cat->id }}" {{ old('parent_id', $category->parent_id) == $cat->id ? 'selected' : '' }}>
+                                    {{ $cat->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('parent_id')
+                            <label class="label">
+                                <span class="label-text-alt text-error">{{ $message }}</span>
+                            </label>
+                        @enderror
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
                             <span class="label-text">Description</span>
                         </label>
-                        <textarea name="description" 
+                        <textarea name="description"
                             class="textarea textarea-bordered h-24 @error('description') textarea-error @enderror">{{ old('description', $category->description) }}</textarea>
                         @error('description')
                             <label class="label">
