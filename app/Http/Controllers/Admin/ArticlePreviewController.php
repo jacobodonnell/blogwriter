@@ -85,11 +85,13 @@ class ArticlePreviewController extends Controller
             $updateData['photo_id'] = null;
         }
 
+        if (array_key_exists('category_id', $data)) {
+            $updateData['category_id'] = $data['category_id'] ?: null;
+        }
+
         $article->update($updateData);
 
-        $article->categories()->sync($data['categories'] ?? []);
-
-        $article->refresh()->load('categories');
+        $article->refresh()->load('category');
 
         return view('admin.articles.preview', ['article' => $article]);
     }

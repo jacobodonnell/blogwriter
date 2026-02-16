@@ -16,7 +16,7 @@ class DashboardController extends Controller
     public function __invoke(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $recentArticles = Article::query()
-            ->with('categories')
+            ->with('category')
             ->orderBy('updated_at', 'desc')
             ->limit(5)
             ->get();

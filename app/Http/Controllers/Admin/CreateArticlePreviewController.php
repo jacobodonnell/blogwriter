@@ -52,9 +52,11 @@ class CreateArticlePreviewController extends Controller
             $article->meta = $meta;
         }
 
-        // Build categories relation for preview
-        $categoryIds = $data['categories'] ?? [];
-        $article->setRelation('categories', $categoryIds ? Category::whereIn('id', $categoryIds)->get() : collect());
+        // Build category relation for preview
+        if (! empty($data['category_id'])) {
+            $article->category_id = $data['category_id'];
+            $article->setRelation('category', Category::find($data['category_id']));
+        }
 
         return view('admin.articles.preview', ['article' => $article]);
     }

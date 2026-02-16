@@ -33,11 +33,10 @@ class CreateArticleController extends Controller
             'summary' => '',
             'status' => Status::Draft,
         ]);
-        $article->setRelation('categories', collect());
 
         return view('admin.articles.customizer', [
             'article' => $article,
-            'categories' => Category::orderBy('name')->get(),
+            'categories' => Category::query()->with('children')->whereNull('parent_id')->orderBy('name')->get(),
             'photos' => Photo::published()->latest()->limit(50)->get(),
             'isNew' => true,
         ]);
@@ -79,11 +78,8 @@ class CreateArticleController extends Controller
             'published_at' => $data['published_at'] ?? null,
             'meta' => $meta,
             'photo_id' => $photoId,
+            'category_id' => $data['category_id'] ?? null,
         ]);
-
-        if (! empty($data['categories'])) {
-            $article->categories()->attach($data['categories']);
-        }
 
         session()->forget('draft_article');
 

@@ -47,7 +47,7 @@ class ArticleController extends Controller
             : 'desc';
 
         $query = Article::query()
-            ->with(['categories', 'featuredPhoto.media'])
+            ->with(['category', 'featuredPhoto.media'])
             ->orderBy($currentSort, $currentDirection);
 
         if ($request->filled('search')) {
@@ -59,9 +59,7 @@ class ArticleController extends Controller
         }
 
         if ($request->filled('category')) {
-            $query->whereHas('categories', function ($q) use ($request): void {
-                $q->where('slug', $request->category);
-            });
+            $query->where('category_id', $request->category);
         }
 
         if ($request->filled('status')) {
@@ -73,7 +71,11 @@ class ArticleController extends Controller
             : 20;
 
         $articles = $query->paginate($perPage)->withQueryString();
-        $categories = Category::orderBy('name')->get();
+        $categories = Category::query()
+            ->with('children')
+            ->whereNull('parent_id')
+            ->orderBy('name')
+            ->get();
 
         $viewData = [
             'articles' => $articles,
@@ -95,7 +97,7 @@ class ArticleController extends Controller
      */
     public function show(Article $article): View
     {
-        $article->load('categories');
+        $article->load('category');
 
         return view('admin.articles.preview-fullscreen', [
             'article' => $article,
@@ -107,8 +109,12 @@ class ArticleController extends Controller
      */
     public function edit(Article $article): View
     {
-        $article->load('categories');
-        $categories = Category::orderBy('name')->get();
+        $article->load('category');
+        $categories = Category::query()
+            ->with('children')
+            ->whereNull('parent_id')
+            ->orderBy('name')
+            ->get();
         $photos = Photo::published()->latest()->limit(50)->get();
 
         return view('admin.articles.customizer', [
@@ -166,9 +172,8 @@ class ArticleController extends Controller
             'published_at' => $data['published_at'] ?? $article->published_at,
             'meta' => $meta,
             'photo_id' => $data['photo_id'],
+            'category_id' => $data['category_id'] ?? null,
         ]);
-
-        $article->categories()->sync($data['categories'] ?? []);
 
         return redirect()->route('admin.articles.edit', $article)
             ->with('success', 'Article updated successfully.');
@@ -179,7 +184,6 @@ class ArticleController extends Controller
      */
     public function destroy(Article $article): RedirectResponse
     {
-        $article->categories()->detach();
         $article->delete();
 
         return redirect()->route('admin.articles.index')
