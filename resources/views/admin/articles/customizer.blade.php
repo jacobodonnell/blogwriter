@@ -135,7 +135,7 @@
               action="{{ ($isNew ?? false) ? route('admin.articles.preview.store') : route('admin.articles.preview.update', $article) }}"
               x-target="preview-panel"
               @ajax:success="saved = true; setTimeout(() => saved = false, 2000)"
-              @input.debounce.600ms="$el.requestSubmit()"
+              @input.debounce.300ms="$el.requestSubmit()"
               novalidate>
             @csrf
             @unless($isNew ?? false)
@@ -157,7 +157,7 @@
                            class="input input-bordered w-full @error('title') input-error @enderror"
                            placeholder="Article title">
                     @error('title')
-                        <span class="text-error text-sm">{{ $message }}</span>
+                    <span class="text-error text-sm">{{ $message }}</span>
                     @enderror
                 </fieldset>
 
@@ -172,7 +172,7 @@
                                placeholder="auto-generated from title">
                     </div>
                     @error('slug')
-                        <span class="text-error text-sm">{{ $message }}</span>
+                    <span class="text-error text-sm">{{ $message }}</span>
                     @enderror
                 </fieldset>
 
@@ -184,10 +184,11 @@
                               class="textarea textarea-bordered w-full h-64 font-mono text-sm @error('content') textarea-error @enderror"
                               placeholder="## Write your article here...">{{ old('content', $article->content) }}</textarea>
                     @error('content')
-                        <div role="alert" class="alert alert-error mt-2" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 8000)" x-transition>
-                            <i class="ph ph-x-circle text-xl"></i>
-                            <span>{{ $message }}</span>
-                        </div>
+                    <div role="alert" class="alert alert-error mt-2" x-data="{ show: true }" x-show="show"
+                         x-init="setTimeout(() => show = false, 8000)" x-transition>
+                        <i class="ph ph-x-circle text-xl"></i>
+                        <span>{{ $message }}</span>
+                    </div>
                     @enderror
 
                     {{-- Client-side: content required warning --}}
@@ -212,19 +213,20 @@
                               class="textarea textarea-bordered w-full h-20 text-sm @error('summary') textarea-error @enderror"
                               placeholder="Auto-generated if empty">{{ old('summary', $article->summary) }}</textarea>
                     @error('summary')
-                        <span class="text-error text-sm">{{ $message }}</span>
+                    <span class="text-error text-sm">{{ $message }}</span>
                     @enderror
                 </fieldset>
 
                 {{-- Status --}}
                 <fieldset class="fieldset">
                     <legend class="fieldset-legend">Status</legend>
-                    <select name="status" x-model="currentStatus" data-test="status-select" class="select select-bordered w-full @error('status') select-error @enderror">
+                    <select name="status" x-model="currentStatus" data-test="status-select"
+                            class="select select-bordered w-full @error('status') select-error @enderror">
                         <option value="draft">Draft</option>
                         <option value="published">Published</option>
                     </select>
                     @error('status')
-                        <span class="text-error text-sm">{{ $message }}</span>
+                    <span class="text-error text-sm">{{ $message }}</span>
                     @enderror
                 </fieldset>
 
@@ -233,14 +235,17 @@
                     <legend class="fieldset-legend">Categories</legend>
                     <div class="space-y-1 max-h-36 overflow-y-auto p-2 bg-base-200 rounded-lg">
                         @forelse($categories ?? [] as $category)
-                            <label class="flex items-center gap-2 cursor-pointer hover:bg-base-300 p-1 rounded transition-colors">
+                            <label
+                                class="flex items-center gap-2 cursor-pointer hover:bg-base-300 p-1 rounded transition-colors">
                                 <input type="checkbox" name="categories[]" value="{{ $category->id }}"
                                        class="checkbox checkbox-sm"
-                                       {{ in_array($category->id, old('categories', $article->categories->pluck('id')->toArray())) ? 'checked' : '' }}>
+                                    {{ in_array($category->id, old('categories', $article->categories->pluck('id')->toArray())) ? 'checked' : '' }}>
                                 <span class="text-sm">{{ $category->name }}</span>
                             </label>
                         @empty
-                            <p class="text-sm text-base-content/50 italic p-2">No categories. <a href="{{ route('admin.categories.index') }}" class="link link-primary">Create one</a></p>
+                            <p class="text-sm text-base-content/50 italic p-2">No categories. <a
+                                    href="{{ route('admin.categories.index') }}" class="link link-primary">Create
+                                    one</a></p>
                         @endforelse
                     </div>
                 </fieldset>
@@ -288,7 +293,7 @@
 
             {{-- Sticky bottom buttons --}}
             <div class="sticky bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-base-100 from-60% to-transparent pt-8">
-                <x-article-save-button :article="$article" />
+                <x-article-save-button :article="$article"/>
             </div>
         </form>
 
@@ -297,7 +302,8 @@
             <p>This article will be live and visible to everyone.</p>
 
             <x-slot:actions>
-                <button type="button" class="btn btn-success" @click="document.getElementById('publish-modal').close(); submitFullSave()">
+                <button type="button" class="btn btn-success"
+                        @click="document.getElementById('publish-modal').close(); submitFullSave()">
                     Publish
                 </button>
             </x-slot:actions>
@@ -305,10 +311,12 @@
 
         {{-- Republish Modal --}}
         <x-editor-modal id="republish-modal" title="Republish this article?">
-            <p>This article was originally published on <strong x-text="originalPublishedAt"></strong>. The original publish date will be preserved.</p>
+            <p>This article was originally published on <strong x-text="originalPublishedAt"></strong>. The original
+                publish date will be preserved.</p>
 
             <x-slot:actions>
-                <button type="button" class="btn btn-success" @click="document.getElementById('republish-modal').close(); submitFullSave()">
+                <button type="button" class="btn btn-success"
+                        @click="document.getElementById('republish-modal').close(); submitFullSave()">
                     Republish
                 </button>
             </x-slot:actions>
@@ -316,10 +324,12 @@
 
         {{-- Unpublish Modal --}}
         <x-editor-modal id="unpublish-modal" title="Revert to draft?">
-            <p>This article will no longer be visible on your site. Anyone with the link will see a 404 until you republish.</p>
+            <p>This article will no longer be visible on your site. Anyone with the link will see a 404 until you
+                republish.</p>
 
             <x-slot:actions>
-                <button type="button" class="btn btn-error" @click="document.getElementById('unpublish-modal').close(); submitFullSave()">
+                <button type="button" class="btn btn-error"
+                        @click="document.getElementById('unpublish-modal').close(); submitFullSave()">
                     Unpublish
                 </button>
             </x-slot:actions>
