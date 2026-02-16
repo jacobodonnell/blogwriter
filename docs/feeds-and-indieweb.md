@@ -1,6 +1,6 @@
 ---
 title: Feeds & IndieWeb
-description: Embrace the decentralized web with RSS/Atom/JSON feeds, microformats, and IndieAuth support.
+description: Microformats markup, RSS/Atom/JSON feeds, and IndieWeb protocol support.
 extends: _layouts.documentation
 section: content
 category: configuration
@@ -9,99 +9,22 @@ order: 7
 
 # Feeds & IndieWeb
 
-> **🚧 IndieWeb Features Coming Soon**
->
-> RSS/Atom/JSON feeds, microformats (h-card, h-entry, h-feed), IndieAuth, and Webmention support are planned but not yet implemented. This documentation serves as the design specification. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues) to help prioritize and design these features.
-
-**Current State:** No feeds, no microformats markup, no IndieAuth endpoints, no Webmentions.
-
-**The Vision:**
-
-**The web was supposed to be decentralized.**
-
-Before Facebook, before Twitter, before Substack — we had RSS feeds, blogs that linked to each other, and protocols anyone could use. You owned your words. You controlled your distribution. The web was a network of independent voices, not a handful of platforms deciding what gets seen.
-
-BlogWriter will bring that back. Not out of nostalgia, but because it's the right architecture for publishing on the internet.
-
-This page explains what BlogWriter will do to make you a citizen of the open web — feeds, microformats, IndieAuth. None of it will require configuration. It will just work.
+BlogWriter implements IndieWeb microformats markup throughout its templates. Feed generation and additional IndieWeb protocols are planned.
 
 ---
 
-## Feeds: You Publish, They Subscribe (Planned)
+## Microformats: Implemented
 
-Feeds are how the decentralized web works. You publish to your own site. Readers subscribe with the tool of their choice. No algorithm in between deciding what to show. No platform taking a cut. Just a simple protocol that's worked since 1999.
-
-### What BlogWriter Will Generate
-
-Your blog will automatically produce three feed formats:
-
-| Feed      | URL                                 | Format        |
-|-----------|-------------------------------------|---------------|
-| RSS       | `yourdomain.com/feed` (also `/rss`) | RSS 2.0       |
-| Atom      | `yourdomain.com/atom`               | Atom 1.0      |
-| JSON Feed | `yourdomain.com/feed.json`          | JSON Feed 1.1 |
-
-All three include your last 50 posts — articles, notes, photos — with full content. Newest first.
-
-### Why Multiple Formats?
-
-Different tools prefer different formats. RSS is the most widely supported. Atom is more precise. JSON Feed is easier
-for developers. We generate all three so your content works everywhere.
-
-### Who Uses Feeds?
-
-Anyone with a feed reader: Feedly, NetNewsWire, Inoreader, Miniflux, or any of dozens of others. When you publish, your
-subscribers see it. No one needs permission from a platform. No one can take your distribution away.
-
-IndieWeb tools also consume feeds — Microsub readers, Bridgy for syndication, aggregators. The web talks to itself
-through feeds.
-
-### Discovery (Planned)
-
-BlogWriter will tell browsers and feed readers where to find your feeds:
-
-```html
-
-<link rel="alternate" type="application/rss+xml"
-      title="Your Site Name - RSS" href="https://yourdomain.com/feed"/>
-<link rel="alternate" type="application/atom+xml"
-      title="Your Site Name - Atom" href="https://yourdomain.com/atom"/>
-<link rel="alternate" type="application/feed+json"
-      title="Your Site Name - JSON Feed" href="https://yourdomain.com/feed.json"/>
-```
-
-Someone types your domain into their feed reader, it finds the feeds automatically. You don't have to tell anyone the
-exact URL.
-
----
-
-## Microformats: Structured Data for Humans (Planned)
-
-Microformats will solve a problem: how do you mark up content so both humans and machines can understand it?
-
-The answer: use classes that mean something. Not `.card` or `.post`, but `.h-entry` (this is a blog post) and
-`.p-author` (this is the author). Simple, semantic, human-readable.
-
-Microformats let other websites understand your content without needing an API or a partnership deal. Someone can write
-software that reads your blog and knows what's a post, what's a title, when it was published — just by reading the HTML.
-
-### Why This Matters
-
-When you use microformats:
-
-- IndieWeb services can read and display your posts
-- Your blog becomes queryable by tools you haven't even heard of yet
-- Other sites can properly attribute quotes and mentions
-- Your identity travels with your content
-
-You're not locked into one platform's data format. You're using standards.
+BlogWriter's templates include Microformats2 markup, making your content machine-readable using semantic HTML classes.
 
 ### h-card: Your Identity
 
-An h-card says "this is me." It's a virtual business card embedded in your homepage.
+An h-card is a virtual business card embedded in your site. BlogWriter renders h-card markup in:
+
+- **Site footer** — Your name, avatar, bio, and rel="me" links
+- **Profile page** — Full h-card with all author information
 
 ```html
-
 <div class="h-card">
     <img src="/avatar.jpg" alt="Your Name" class="u-photo">
     <a href="https://yourdomain.com" class="u-url p-name" rel="me">Your Name</a>
@@ -109,22 +32,14 @@ An h-card says "this is me." It's a virtual business card embedded in your homep
 </div>
 ```
 
-When you sign in to an IndieWeb service, it checks your h-card. When someone mentions you, they use your h-card to
-display your name and photo. You become portable. Your identity isn't locked in Facebook's database — it's on your
-website, under your control.
-
 ### h-entry: Your Posts
 
-Every post gets wrapped in h-entry markup. This tells machines what they're looking at:
+Every article and photo is wrapped in h-entry markup:
 
-- **Articles** have a title (`p-name`) and content (`e-content`)
-- **Notes** have content but no title — the content *is* the name
-- **Photos** have an image (`u-photo`) and optional caption
-
-Example (article):
+- **Articles** have a title (`p-name`), content (`e-content`), published date (`dt-published`), and author
+- **Photos** have an image (`u-photo`), optional caption, and published date
 
 ```html
-
 <article class="h-entry">
     <h1 class="p-name">My Article Title</h1>
     <time class="dt-published" datetime="2026-01-31">January 31, 2026</time>
@@ -134,145 +49,82 @@ Example (article):
 </article>
 ```
 
-IndieWeb tools can now understand what this is, when it was published, and what the content says. No API needed. Just
-HTML.
+### h-feed: Your Post Lists
 
-### h-feed: Your Post List
+Post listing pages are wrapped in h-feed markup, identifying them as feeds of h-entry items. This is implemented on:
 
-Wrap your homepage post list in an h-feed, and feed readers know it's a list of posts:
+- Home page
+- Articles index
+- Photos index
+- Category pages
 
 ```html
-
 <div class="h-feed">
     <span class="p-name hidden">My Blog</span>
-
     <article class="h-entry"><!-- post 1 --></article>
     <article class="h-entry"><!-- post 2 --></article>
-    <article class="h-entry"><!-- post 3 --></article>
 </div>
 ```
 
-Same idea as RSS, but embedded directly in your HTML. Some tools prefer to read the HTML rather than fetching a separate
-feed file. You support both.
+### rel="me" Links
+
+BlogWriter outputs `rel="me"` links for identity verification across services. These are rendered in the site footer and profile page for:
+
+- GitHub
+- Mastodon
+- Bluesky
+- Email
+
+These links allow IndieWeb services and social platforms to verify that your profiles belong to the same person.
+
+### Validation
+
+You can verify your microformats implementation using:
+
+- [IndieWebify.me](https://indiewebify.me) — Checks h-card, h-entry, and feed discovery
+- [php-mf2 parser](https://php.microformats.io) — See what machines see
+- [pin13.net parser](https://pin13.net/mf2/) — Paste your URL, see structured data
 
 ---
 
-## IndieAuth: Sign In With Your Domain (Planned)
+## Feeds: Planned
 
-Why should Google or Facebook be your identity on the web? You have a domain. That's your identity.
+RSS, Atom, and JSON Feed generation is planned. When implemented, BlogWriter will produce:
 
-IndieAuth will let you sign in to websites by proving you control your domain. No third-party identity provider needed.
+| Feed      | URL                                 | Format        |
+|-----------|-------------------------------------|---------------|
+| RSS       | `yourdomain.com/feed` (also `/rss`) | RSS 2.0       |
+| Atom      | `yourdomain.com/atom`               | Atom 1.0      |
+| JSON Feed | `yourdomain.com/feed.json`          | JSON Feed 1.1 |
 
-### How It Works
+All three will include full content (not excerpts) for recent published posts.
 
-1. You go to an IndieWeb service
-2. They ask "Who are you?"
-3. You give them your domain: `yourdomain.com`
-4. They redirect you to your BlogWriter login
-5. You log in and approve
-6. They get a token proving you own that domain
-7. You're signed in as `yourdomain.com`
-
-Your domain is your username. Your BlogWriter installation is your identity provider.
-
-### Why This Matters
-
-You're not renting your identity from a corporation. You own it. If Facebook bans your account, you're still you — your
-domain still works. If Twitter changes its name to X and implodes, you're unaffected.
-
-Your identity on the web should be something you control. IndieAuth makes that real.
-
-### Your Endpoints (Planned)
-
-BlogWriter will provide these endpoints automatically:
-
-| Endpoint      | URL                                                     | Purpose                              |
-|---------------|---------------------------------------------------------|--------------------------------------|
-| Authorization | `yourdomain.com/indieauth/auth`                         | Where users authorize apps           |
-| Token         | `yourdomain.com/indieauth/token`                        | Where apps exchange codes for tokens |
-| Metadata      | `yourdomain.com/.well-known/oauth-authorization-server` | OAuth server info                    |
-
-You won't need to configure anything. It will just be there, working.
-
-**Current State:** No IndieAuth endpoints exist.
-
-### Testing It (When Available)
-
-Go to [IndieLogin.com](https://indielogin.com) and try signing in with your domain. If it works, congratulations — you're using your own website as your identity.
+Feed discovery `<link>` tags will be added to the HTML head so feed readers can auto-discover your feeds.
 
 ---
 
-## Why Any of This Matters
+## IndieAuth: Planned
 
-You could ignore all of this. Publish to Medium, build an audience on Twitter, use Substack for paid content. Millions
-of people do.
+IndieAuth will let you sign in to websites by proving you control your domain. Your domain becomes your identity, and your BlogWriter installation becomes your identity provider.
 
-But here's what you're giving up:
-
-**Portability** — Your content is locked in their format, on their servers. Moving it is hard. Sometimes impossible.
-
-**Control** — They can change the rules. Add paywalls. Alter the algorithm. Ban your account. You have no recourse.
-
-**Longevity** — Platforms shut down. GeoCities, Google Reader, Vine, Tumblr (effectively), dozens more. Your content
-disappears with them.
-
-**Independence** — You're building on rented land. They own the relationship with your readers. They own your
-distribution. You're a tenant, not a homeowner.
-
-Feeds and microformats solve these problems. They're old, boring, and reliable. They work because they're simple. They
-last because they're standards, not platforms.
-
-BlogWriter implements them because we believe the web works better when people own their content, control their
-distribution, and build on protocols instead of platforms.
+When implemented, BlogWriter will provide authorization, token, and metadata endpoints automatically.
 
 ---
 
-## Validation (When Implemented)
+## Webmentions: Planned
 
-When IndieWeb features are implemented, you'll be able to check that your site implements everything correctly:
-
-### IndieWebify.me
-
-Visit [IndieWebify.me](https://indiewebify.me) and enter your domain. It will check:
-
-- h-card (your identity)
-- h-entry (your posts)
-- Feed discovery
-
-If you're using BlogWriter's built-in themes or components, you'll pass.
-
-**Current State:** Validation will fail as these features are not yet implemented.
-
-### Microformats Parsers
-
-See what machines see:
-
-- [php-mf2 parser](https://php.microformats.io)
-- [pin13.net parser](https://pin13.net/mf2/)
-
-Paste your URL, see the structured data.
-
-### Feed Validators
-
-Make sure your feeds are valid:
-
-- [W3C Feed Validator](https://validator.w3.org/feed/) (RSS/Atom)
-- [JSON Feed Validator](https://validator.jsonfeed.org/)
+Webmentions are a protocol for sites to notify each other when they link to one another. When implemented, BlogWriter will support both sending and receiving webmentions.
 
 ---
 
 ## Summary
 
-BlogWriter gives you:
-
-| Feature                                | What It Is                  | Why It Matters                                              |
-|----------------------------------------|-----------------------------|-------------------------------------------------------------|
-| RSS/Atom/JSON Feeds                    | Syndication formats         | Readers can subscribe without giving a platform their email |
-| Microformats (h-card, h-entry, h-feed) | Semantic HTML markup        | Machines can understand your content without an API         |
-| IndieAuth                              | Domain-based authentication | Your website is your identity                               |
-
-None of this is theoretical. It's all implemented, tested, and working. Your blog speaks the protocols of the open web.
-
-You're not dependent on platforms. You're a peer.
+| Feature                                | Status      |
+|----------------------------------------|-------------|
+| Microformats (h-card, h-entry, h-feed) | Implemented |
+| rel="me" identity links                | Implemented |
+| RSS/Atom/JSON Feeds                    | Planned     |
+| IndieAuth                              | Planned     |
+| Webmentions                            | Planned     |
 
 #### [Up Next: *Architecture*](/docs/advanced/architecture)

@@ -33,33 +33,7 @@ database is just a simple file on your server.
   the `storage/` and `bootstrap/cache/` directories.
 </x-callout>
 
-## Easiest: One-Click Installers
-
-<x-callout type="planned" title="One-Click Installers (Coming Soon)" collapsible>
-If your hosting provider supports Installatron or Softaculous, you'll be able to install BlogWriter with one click. Look for
-BlogWriter in your hosting control panel's app installer, click Install, and you're done.
-</x-callout>
-
-## Quick Install on VPS
-
-<x-callout type="planned" title="Quick Install on VPS (Coming Soon)" collapsible>
-One command to install BlogWriter with FrankenPHP on a fresh VPS:
-
-```bash
-curl -sSL https://blogwriter.io/install.sh | bash
-```
-
-This installer will set up FrankenPHP, download BlogWriter, and walk you through the initial configuration.
-</x-callout>
-
-## Manual Installation
-
-<x-callout type="info" title="V0.1 Deployment Target">
-  V0.1 targets **Laravel Forge** and VPS deployments. One-click installers and the web installer for shared hosting
-  are planned for a future release.
-</x-callout>
-
-### CLI Installer ✅ (Recommended - Fully Working)
+## CLI Installer
 
 If you have SSH access to your server, use the CLI installer:
 
@@ -67,15 +41,15 @@ If you have SSH access to your server, use the CLI installer:
 php artisan blogwriter:install
 ```
 
-This fully-functional installer uses Laravel Prompts for an interactive terminal experience:
+The installer uses Laravel Prompts for an interactive terminal experience:
 
-- ✅ Checks all system requirements
-- ✅ Creates `.env` file and generates `APP_KEY`
-- ✅ Sets up SQLite database
-- ✅ Runs all migrations
-- ✅ Creates your admin account
-- ✅ Seeds initial data
-- ✅ Configures site settings
+- Checks all system requirements
+- Creates `.env` file and generates `APP_KEY`
+- Sets up SQLite database
+- Runs all migrations
+- Creates your admin account
+- Seeds initial data
+- Configures site settings
 
 **Non-interactive mode** is also available for automated deployments:
 
@@ -83,24 +57,9 @@ This fully-functional installer uses Laravel Prompts for an interactive terminal
 php artisan blogwriter:install --non-interactive
 ```
 
-<x-callout type="planned" title="Web Installer (Coming Soon)" collapsible>
-A browser-based installer for shared hosting (no SSH required) is planned but needs a setup script before it can work
-reliably across hosting environments. Use the CLI installer for now.
+<x-callout type="info" title="Web Installer" collapsible>
+  A browser-based web installer exists at `/install` but is disabled by default (`blogwriter.web_installer` config is `false`). It needs further development before it's reliable. Use the CLI installer.
 </x-callout>
-
-<!--
-### Web Installer (For Shared Hosting)
-
-If you don't have SSH access, upload BlogWriter's files to your web server and visit your domain in a browser:
-
-```
-https://yourdomain.com/install
-```
-
-You'll see a terminal-styled wizard — dark background, JetBrains Mono font, and progressive terminal output. It looks like a terminal but runs entirely in your browser with real form validation.
-
-The web installer walks through the same steps as the CLI installer: requirements check, account creation, site configuration, database setup, and optional demo content seeding.
--->
 
 ---
 
@@ -264,7 +223,7 @@ Step 5 of 5
   Behind the scenes, the CLI installer copies `.env.example` to `.env` (if it doesn't exist),
   generates an `APP_KEY`, creates the SQLite database file at `database/database.sqlite`, runs all database migrations,
   creates your admin user, writes your site configuration to `.env`, seeds initial data, and creates
-  `storage/installed.lock` to prevent re-installation. (Theme activation will be added when the theme system is implemented.)
+  `storage/installed.lock` to prevent re-installation.
 </x-callout>
 
 ## Installation Lock
@@ -317,10 +276,10 @@ window, home screen icon, faster loads, and an offline fallback page.
 
 ## After Installation
 
-- **Visit your site** at your domain to see the default theme
+- **Visit your site** at your domain
 - **Log in** at `/admin` with the email and password you chose
 - **Start writing** — see the [Writing Content](/docs/content/writing-content) guide
-- **Customize your theme** — see the [Themes](/docs/customization/themes) guide
+- **Customize your appearance** — see the [Appearance](/docs/customization/appearance) guide
 
 ## Troubleshooting
 
@@ -343,3 +302,4 @@ root.
 reset if you want a fresh start, or "No" to cancel if your data is still accessible.
 
 #### [Up Next: *Writing Content*](/docs/content/writing-content)
+

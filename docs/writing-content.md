@@ -1,6 +1,6 @@
 ---
 title: Writing Content
-description: Learn how to create and manage articles, notes, and photos with BlogWriter's intuitive editors and publishing workflow.
+description: Create and manage articles and photos with BlogWriter's editors and publishing workflow.
 extends: _layouts.documentation
 section: content
 category: content
@@ -10,217 +10,108 @@ order: 3
 
 # Writing Content
 
-BlogWriter supports three types of content: **articles** (✅ implemented), **notes** (🚧 coming soon), and **photos** (✅ implemented). Each has its own editor and its own place on your site, sharing the same draft/publish workflow and appearing together in your feeds.
+BlogWriter supports two content types: **articles** and **photos**. Each has its own editor and publishing workflow.
 
 ## The Admin Dashboard
 
-After logging in at `/admin`, you'll see your dashboard:
+After logging in at `/admin`, you'll see your dashboard with:
 
-- **Recent posts** across all types (articles, notes, photos)
-- **Draft counts** and **published counts** for each type
-- **Quick actions:** New Article, New Note, New Photo
+- Article and photo counts (published and drafts)
+- Quick actions to create new content
 
 The sidebar navigation gives you access to:
 
-- **Articles** ✅
-- **Notes** 🚧 (coming soon)
-- **Photos** ✅
-- **Categories** ✅
-- **Tags** 🚧 (coming soon)
-- **Settings** ✅ (minimal UI currently)
+- **Articles**
+- **Photos**
+- **Categories**
+- **Settings**
 - **View Site** — opens your blog as visitors see it
 
 ---
 
-## Articles ✅
+## Articles
 
-Articles are long-form posts with titles. Think blog posts, essays, tutorials.
+Articles are long-form posts with titles. Blog posts, essays, tutorials.
 
-### The Editor
+### The Customizer
 
-**Current:** Articles use a simple **Markdown textarea** editor. Write your content in Markdown and it will be rendered as HTML on your site.
+The Customizer is BlogWriter's article editor — a WordPress-style split-pane view with editing controls in a drawer on the left and a live preview on the right. The preview pane is resizable.
 
-**Why Markdown:**
-- **Portable** — Standard format, works everywhere
-- **Simple** — No complex editor dependencies
-- **CLI-friendly** — Can write posts in any text editor
-- **Version control** — Easy to diff and commit
-
-> **🚧 Editor.js Coming Soon**
->
-> A rich block-based editor (Editor.js) is planned as an alternative for those who prefer a visual editing experience. Markdown will remain supported even after Editor.js is added — important for CLI workflow. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues) on editor preferences.
-
-**Planned Editor.js Features:**
-- Build posts from individual blocks (paragraphs, headings, lists, quotes, code, images, embeds)
-- Click between blocks to add new ones, drag to reorder
-- Keyboard shortcuts and inline Markdown that converts to rich text (like Notion)
-- Each block independent — no fighting with formatting
+As you type, your changes auto-save in the background via AJAX and the preview updates. The editor uses **EasyMDE**, a Markdown editor with toolbar formatting buttons and live Markdown preview.
 
 ### Fields
 
-- **Title** (required) — Your article's headline. BlogWriter auto-generates a URL slug from the title as you type. You can edit the slug manually.
-- **Summary** (nullable) — A short description used in article lists and SEO meta tags.
-- **Content** (required) — Markdown textarea for your article content.
-- **Featured Photo** (nullable) — Select a photo to feature with the article.
-- **Categories** ✅ — Assign one or more categories (e.g., "Tech", "Life", "Travel"). Create new categories on the fly.
-- **Tags** 🚧 — Coming soon. Will work across all post types.
-- **SEO fields** ✅ — Meta title, meta description, and Open Graph image.
+- **Title** (required) — Your article's headline. A URL slug is auto-generated from the title. You can edit the slug manually.
+- **Summary** (optional) — A short description used in article lists and SEO meta tags.
+- **Content** (required) — Markdown content via EasyMDE editor. A `NoH1Heading` validation rule prevents H1 headings in content (the title serves as the H1).
+- **Featured Image** (optional) — Attach a photo in two ways:
+  1. Select an existing photo from the dropdown
+  2. Upload a new photo directly from the customizer via a modal — the photo is created and associated automatically
+  - Featured images can also be set via an external URL
+- **Categories** — Assign one or more categories. Create new categories on the fly from the editor.
 
-### Draft and Publish
+### Content Storage
 
-Every article starts as a **draft**. Drafts are only visible to you in the admin.
-
-When you're ready, change the status to **Published**. BlogWriter sets the publish date to now (or you can schedule a
-future date). Published articles appear on your site and in your feeds.
-
-You can unpublish an article at any time by switching it back to draft.
-
-### Where Articles Live
-
-Your article's URL follows this structure:
-
-```
-yourdomain.com/articles/your-article-title
-```
-
-The slug is automatically generated from your title when you first create the article. Once published, the URL never changes — permanent links matter.
-
-## The Customizer ✅
-
-The Customizer is BlogWriter's article editor — a split-pane view with a live preview on the right and your editing controls on the left. As you type, your changes auto-save in the background and the preview updates instantly. No more guessing what your post looks like.
+Article content is stored as Markdown in the database. On save, double newlines are normalized. On read, collapsed newlines are expanded back, preserving code blocks. The `content_html` accessor renders Markdown to HTML for display.
 
 ### Publishing Workflow
 
 The save button adapts to what you're about to do:
 
 - **Save Draft** — You're working on a draft. Save and keep writing.
-- **Publish** — Your draft is ready. A confirmation dialog makes sure you meant it — once you publish, the article is live and visible to everyone.
-- **Save Changes** — Already published? Edit freely. Your changes save without ceremony.
-- **Unpublish** — Need to take something down? Switch the status to draft and confirm. The article disappears from your site (visitors see a 404) until you republish.
-- **Republish** — Bringing back an unpublished article? BlogWriter preserves your original publish date so your content history stays intact.
+- **Publish** — Your draft is ready. A confirmation dialog appears — once you publish, the article is live.
+- **Save Changes** — Already published? Your changes save without ceremony.
+- **Unpublish** — Switch the status to draft and confirm. The article returns a 404 until republished.
+- **Republish** — Bringing back an unpublished article preserves the original publish date.
 
-### Featured Images
+### Permalinks
 
-You can attach a featured image to any article in two ways:
-
-1. **Select an existing Photo** from the dropdown
-2. **Upload a new Photo** directly from the customizer — a modal handles the upload without leaving the editor, and the photo is automatically associated with your article
-
-### Permalinks Are Forever
-
-> *Cool URIs don't change.* — Tim Berners-Lee
-
-When you change an article's slug, BlogWriter remembers the old one. Anyone visiting the old URL gets a **301 permanent redirect** to the new address. Search engines transfer their ranking, bookmarks keep working, and shared links don't break.
-
-<!-- TODO: Add screenshots and video demos -->
-
-> **🚧 Automatic Backups & Markdown Export Coming Soon**
->
-> Automatic Markdown file backups and `.md` URL endpoints are planned but not yet implemented. Articles already store content as Markdown in the database. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues).
-
-**Planned Features:**
-
-BlogWriter will automatically back up each article as a Markdown file with YAML frontmatter. Your content will live in the database for fast retrieval, and as `.md` files for portability and peace of mind.
-
-You'll be able to append `.md` to any article URL to get the raw Markdown version:
+Articles live at:
 
 ```
-yourdomain.com/articles/your-article-title.md
+yourdomain.com/articles/your-article-slug
 ```
 
-This will return:
-
-```markdown
----
-title: Your Article Title
-date: 2026-01-15
-slug: your-article-title
-categories: [Tech, Laravel]
-tags: [php, blogging]
----
-
-Your article content in Markdown...
-```
-
-**Current State:** Articles store Markdown in database `content` column. File export to be added.
+The slug is generated from the title when you create the article. If you change the slug later, BlogWriter stores the old slug in a `past_slugs` JSON column. Anyone visiting the old URL gets a **301 permanent redirect** to the new address.
 
 ---
 
-> **🚧 Coming Soon: Notes**
->
-> The Note content type is planned but not yet implemented. Model, controller, views, and routes need to be built. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues) on the Note design below.
+## Photos
 
-## Notes (Planned)
+Photos are image posts with captions. For photographers, visual bloggers, or anyone sharing images as standalone content.
 
-Notes are short posts without titles. Use them for quick thoughts, links, updates — anything that doesn't need the full article treatment. Think tweets, but on your own site.
-
-### The Editor
-
-Notes use a streamlined inline editor (like Twitter or Facebook). Just start typing. You can use keyboard shortcuts or
-type inline Markdown that automatically converts to rich text. The editor is simpler than the article editor — perfect
-for quick posts.
-
-You can paste images directly into notes, and they'll appear inline in your content.
-
-### Fields
-
-- **Content** (required) — Your note text. No title field — notes are titleless by design.
-- **Tags** — Same tag system as articles. Create new tags on the fly.
-
-### Publishing Notes
-
-Notes don't have drafts — when you hit publish, they go live immediately. You can delete notes, but there's no
-draft/publish workflow.
-
-### Where Notes Live
-
-Notes use UUIDs instead of slugs:
-
-```
-yourdomain.com/notes/a1b2c3d4-e5f6-7890-abcd-ef1234567890
-```
-
-### Markdown Export (Optional)
-
-Like articles, you can append `.md` to get the raw Markdown version (if enabled in Settings):
-
-```
-yourdomain.com/notes/a1b2c3d4-e5f6-7890-abcd-ef1234567890.md
-```
-
----
-
-## Photos ✅
-
-Photos are image posts with captions. For photographers, visual bloggers, or anyone who wants to share images as first-class content (not just inline in articles or notes).
-
-**Implementation:** Uses [Spatie Laravel MediaLibrary](https://spatie.be/docs/laravel-medialibrary) for professional media handling with automatic image conversions.
+Uses [Spatie Laravel MediaLibrary](https://spatie.be/docs/laravel-medialibrary) for image handling.
 
 ### Uploading
 
 Upload an image using the file picker. BlogWriter accepts common image formats (JPEG, PNG, WebP, GIF).
 
-**MediaLibrary automatically generates multiple conversions:**
+MediaLibrary automatically generates three conversions:
+
 - **thumbnail** (150x150) — For gallery views
 - **medium** (800x600) — For content display
 - **large** (1600x1200) — For full-size viewing
 
 ### Fields
 
-- **Image** (required) — The photo itself. Uploaded via Spatie MediaLibrary.
-- **Title** (nullable) — Optional title for the photo.
-- **Caption** (nullable) — Markdown text that appears with your photo.
-- **Alt text** (nullable) — Describes the image for screen readers and when images can't load. Always fill this in.
-- **External URL** (nullable) — Optional link to original source.
-- **Tags** 🚧 — Coming soon. Will work same as articles.
+- **Image** (required) — The photo file, managed via MediaLibrary.
+- **Caption** (optional) — Markdown text displayed with the photo.
+- **Alt text** (required) — Describes the image for screen readers.
+- **Slug** — Auto-generated, unique identifier.
 
-<x-callout type="info" title="Technical Note">
-  Spatie MediaLibrary handles EXIF metadata extraction, responsive image conversions, and file storage. Metadata can be accessed and displayed in your theme.
-</x-callout>
+### EXIF Data
+
+MediaLibrary extracts EXIF metadata from uploaded photos. This data (camera model, date taken, dimensions, etc.) is stored in the photo's `meta` column and can be displayed on the photo page.
 
 ### Draft and Publish
 
-Same workflow. Draft until you're ready, then publish.
+Same workflow as articles. Draft until ready, then publish.
+
+When a photo is used as a featured image on an article and the article is set to draft, the photo is automatically detached.
+
+### Media Serving
+
+Photos are stored on a private disk and served through a controller with authentication checks. This ensures media files are access-controlled.
 
 ### Where Photos Live
 
@@ -228,20 +119,17 @@ Same workflow. Draft until you're ready, then publish.
 yourdomain.com/photos/42
 ```
 
-Photos use a numeric ID.
+Photos use a numeric ID in their URL.
 
 ---
 
-## Categories ✅
+## Categories
 
-Categories organize your **articles** into broad topics. An article can belong to multiple categories.
-
-Examples: "Tech", "Life", "Travel", "Cooking"
+Categories organize your articles into broad topics. An article can belong to multiple categories.
 
 ### Managing Categories
 
-Go to **Categories** in the admin sidebar to manage all your categories. You can also create categories on the fly when
-editing an article — just type a new category name and it'll open a popup to create it.
+Go to **Categories** in the admin sidebar. You can also create categories on the fly when editing an article.
 
 Each category gets a URL slug generated from its name:
 
@@ -249,61 +137,23 @@ Each category gets a URL slug generated from its name:
 yourdomain.com/category/tech
 ```
 
-Visiting a category page shows all published articles in that category.
+Visiting a category page shows all published articles in that category, with h-feed microformats markup.
 
 ---
 
-> **🚧 Coming Soon: Tags**
->
-> Polymorphic tagging system is planned but not yet implemented. [Feedback welcome on GitHub](https://github.com/jacobodonnell/blogwriter/issues) on tagging design.
+## Admin Features
 
-## Tags (Planned)
+### Articles Table
 
-Tags will provide finer-grained organization and work across **all post types** — articles, notes, and photos.
+The articles index provides a sortable, filterable table:
 
-Examples: "php", "laravel", "indieweb", "photography", "weekend"
+- **Sort** by title, status, published date, or created date
+- **Filter** by status (all, published, drafts)
+- **Column toggles** — show or hide columns
+- **Per-page pagination** — choose how many articles per page
 
-### Managing Tags
+### Dashboard
 
-Go to **Tags** in the admin sidebar to manage all your tags. You can also create tags on the fly when editing any post —
-just type a new tag name and it's created automatically.
+The dashboard displays content stats and quick action links.
 
-Each tag gets a page:
-
-```
-yourdomain.com/tag/laravel
-```
-
-Tag pages show all published posts (articles, notes, and photos) with that tag.
-
----
-
-## Settings ⚠️ (Minimal UI Currently)
-
-> **Current State:** Settings page exists but is minimal and read-only, displaying environment information only. Extensive settings UI is coming soon.
-
-The Settings page will let you update your site and author information.
-
-### Site Settings
-
-- **Site name** — Appears in the header, feeds, and page titles
-- **Tagline** — A short description of your blog
-- **Domain** — Your site's domain (used for generating URLs and feeds)
-- **Markdown export** — Enable or disable `.md` URLs for articles and notes
-
-### Author Settings
-
-- **Name** — Your display name, shown on posts and in your h-card
-- **Bio** — A short about-you blurb
-- **Avatar** — Your profile photo
-- **Email** — Contact email (not displayed publicly by default)
-
-### Theme
-
-- **Active theme** — Choose which theme your site uses. Changes take effect immediately.
-
-<x-callout type="info" title="For Developers">
-  Settings can also be managed via the CLI or by editing configuration files directly.
-</x-callout>
-
-#### [Up Next: *Themes*](/docs/customization/themes)
+#### [Up Next: *Appearance*](/docs/customization/appearance)

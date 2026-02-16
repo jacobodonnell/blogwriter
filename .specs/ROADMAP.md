@@ -25,35 +25,35 @@ fees or platform risk.
 
 ### Identity & Authentication
 
-- [ ] Personal domain setup
-- [ ] Laravel Fortify authentication (custom UI with Blade + Alpine.js)
+- [x] Personal domain setup
+- [x] Laravel Fortify authentication (custom UI with Blade + Alpine.js)
 - [ ] IndieAuth server implementation (domain = identity)
-- [ ] h-card markup (homepage identity)
-- [ ] rel-me links (identity elsewhere)
+- [x] h-card markup (homepage identity)
+- [x] rel-me links (identity elsewhere)
 
 ### Content Types
 
-- [ ] Articles (long-form with titles)
+- [x] Articles (long-form with titles)
 - [ ] Notes (short Twitter-style posts)
 - [ ] Pages (static content: About, Contact, etc.)
 - [ ] Markdown auto-backup system
-- [ ] Permalinks for all content
+- [x] Permalinks for all content
 
 ### Frontend
 
-- [ ] Alpine.js + Alpine AJAX integration
-- [ ] DaisyUI default theme
-- [ ] Microformats markup (h-entry, h-card, h-feed)
-- [ ] Responsive design
-- [ ] Dark mode support
+- [x] Alpine.js + Alpine AJAX integration
+- [x] DaisyUI default theme
+- [x] Microformats markup (h-entry, h-card, h-feed)
+- [x] Responsive design
+- [x] Dark mode support
 
 ### Publishing
 
-- [ ] Article editor (Editor.js integration)
+- [x] Article editor (EasyMDE Markdown editor)
 - [ ] Note composer (quick post interface)
-- [ ] Draft/published workflow
-- [ ] Categories and tags
-- [ ] Featured images
+- [x] Draft/published workflow
+- [x] Categories (tags planned)
+- [x] Featured images
 - [ ] SEO optimization
 
 ### Feeds
@@ -64,26 +64,26 @@ fees or platform risk.
 
 ### Installation
 
-- [ ] One-command installer: `php artisan blogwriter:install`
+- [x] One-command installer: `php artisan blogwriter:install`
 - [ ] Installation wizard (web-based)
-- [ ] Works on shared hosting ($3-5/month)
-- [ ] SQLite database setup
+- [x] Works on shared hosting ($3-5/month)
+- [x] SQLite database setup
 
 ### Documentation
 
 - [ ] Custom Filament CMS for docs
-- [ ] Getting started guide
+- [x] Getting started guide
 - [ ] IndieAuth setup walkthrough
 - [ ] First post tutorial
 - [ ] Theming basics
-- [ ] Troubleshooting guide
+- [x] Troubleshooting guide
 - [ ] `.md` URL support (example.com/page.md)
 
 ### Core Features
 
 - [ ] `.md` route support (LLM-friendly, portable)
-- [ ] Beautiful defaults
-- [ ] Simple admin interface
+- [x] Beautiful defaults
+- [x] Simple admin interface
 
 ---
 
@@ -527,10 +527,10 @@ fees or platform risk.
 
 ## Current Status
 
-**Phase:** Planning
-**Next:** Start building V0.1
-**Focus:** Get basic blogging working with IndieWeb protocols
+**Phase:** Pre-Alpha
+**Next:** Complete remaining V0.1 features
+**Focus:** Notes, Tags, Feeds, IndieAuth
 
 ---
 
-**Last Updated:** January 2026
+**Last Updated:** February 2026
