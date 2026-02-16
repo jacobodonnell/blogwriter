@@ -9,8 +9,8 @@
                 <p class="text-gray-600 dark:text-gray-400 mt-1">Manage your photo library.</p>
             </div>
             <div class="flex gap-2">
-                <a href="{{ route('photos.index') }}" class="btn btn-ghost" target="_blank">
-                    <i class="ph ph-arrow-square-out text-xl mr-2"></i>
+                <a href="{{ route('photos.index') }}" class="btn btn-ghost">
+                    <i class="ph ph-eye text-xl mr-2"></i>
                     View Photos
                 </a>
                 <a href="{{ route('admin.photos.create') }}" class="btn btn-primary">

@@ -57,8 +57,8 @@
                                         <td>
                                             <div class="font-semibold">
                                                 {{ $category->name }}
-                                                <a href="{{ route('category.show', $category->slug) }}" class="inline-block align-middle ml-1 opacity-50 hover:opacity-100" target="_blank" title="View category">
-                                                    <i class="ph ph-arrow-square-out text-sm"></i>
+                                                <a href="{{ route('category.show', $category->slug) }}" class="inline-block align-middle ml-1 opacity-50 hover:opacity-100" title="View category">
+                                                    <i class="ph ph-eye text-sm"></i>
                                                 </a>
                                             </div>
                                             @if($category->description)
