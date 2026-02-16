@@ -23,6 +23,10 @@ return new class extends Migration
             $table->timestamp('published_at')->nullable();
             $table->timestamp('last_edited_at')->nullable();
             $table->json('meta')->nullable();
+            $table->foreignId('category_id')
+                ->nullable()
+                ->constrained('categories')
+                ->nullOnDelete();
             $table->foreignId('photo_id')
                 ->nullable()
                 ->constrained('photos')
