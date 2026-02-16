@@ -205,7 +205,7 @@ it('admin controls stay in Instrument Sans during font preview', function (): vo
         ->wait(0.3);
 
     // Hover over a pixel font
-    $page->hover('@font-option-press-start-2p')
+    $page->hover('@font-option-pixelify-sans')
         ->wait(0.3);
 
     // The font toggle button (has .font-admin) should still use Instrument Sans

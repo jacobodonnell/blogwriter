@@ -479,11 +479,11 @@ class InstallCommand extends Command
     {
         $demoImagesPath = database_path('seeders/demo-images');
         $requiredImages = [
-            'demo-image-1.png',
-            'demo-image-2.png',
-            'demo-image-3.png',
-            'demo-image-4.png',
-            'demo-image-5.png',
+            'demo-image-1.jpg',
+            'demo-image-2.jpg',
+            'demo-image-3.jpg',
+            'demo-image-4.jpg',
+            'demo-image-5.jpg',
         ];
 
         $missingOrInvalid = [];
