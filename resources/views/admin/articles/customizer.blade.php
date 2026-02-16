@@ -230,24 +230,24 @@
                     @enderror
                 </fieldset>
 
-                {{-- Categories --}}
+                {{-- Category --}}
                 <fieldset class="fieldset">
-                    <legend class="fieldset-legend">Categories</legend>
-                    <div class="space-y-1 max-h-36 overflow-y-auto p-2 bg-base-200 rounded-lg">
-                        @forelse($categories ?? [] as $category)
-                            <label
-                                class="flex items-center gap-2 cursor-pointer hover:bg-base-300 p-1 rounded transition-colors">
-                                <input type="checkbox" name="categories[]" value="{{ $category->id }}"
-                                       class="checkbox checkbox-sm"
-                                    {{ in_array($category->id, old('categories', $article->categories->pluck('id')->toArray())) ? 'checked' : '' }}>
-                                <span class="text-sm">{{ $category->name }}</span>
-                            </label>
+                    <legend class="fieldset-legend">Category</legend>
+                    <select name="category_id" class="select select-bordered w-full">
+                        <option value="">No Category</option>
+                        @forelse($categories ?? [] as $rootCat)
+                            <option value="{{ $rootCat->id }}" {{ old('category_id', $article->category_id) == $rootCat->id ? 'selected' : '' }}>
+                                {{ $rootCat->name }}
+                            </option>
+                            @foreach($rootCat->children as $childCat)
+                                <option value="{{ $childCat->id }}" {{ old('category_id', $article->category_id) == $childCat->id ? 'selected' : '' }}>
+                                    &nbsp;&nbsp;└ {{ $childCat->name }}
+                                </option>
+                            @endforeach
                         @empty
-                            <p class="text-sm text-base-content/50 italic p-2">No categories. <a
-                                    href="{{ route('admin.categories.index') }}" class="link link-primary">Create
-                                    one</a></p>
+                            <option disabled>No categories. Create one first.</option>
                         @endforelse
-                    </div>
+                    </select>
                 </fieldset>
 
                 {{-- Featured Image --}}

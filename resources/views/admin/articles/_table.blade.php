@@ -16,7 +16,7 @@
                                 @include('admin.articles._sort-header', ['column' => 'status', 'label' => 'Status'])
                             </th>
                             <th x-show="columns.categories">
-                                Categories
+                                Category
                             </th>
                             <th x-show="columns.publishedAt" x-cloak>
                                 @include('admin.articles._sort-header', ['column' => 'published_at', 'label' => 'Published'])
@@ -64,9 +64,11 @@
                                     </span>
                                 </td>
                                 <td x-show="columns.categories">
-                                    @foreach($article->categories as $category)
-                                        <span class="badge badge-sm badge-outline mr-1">{{ $category->name }}</span>
-                                    @endforeach
+                                    @if($article->category)
+                                        <span class="badge badge-sm badge-outline">{{ $article->category->name }}</span>
+                                    @else
+                                        <span class="text-gray-400 text-sm">—</span>
+                                    @endif
                                 </td>
                                 <td x-show="columns.publishedAt" x-cloak class="text-sm text-gray-500">
                                     {{ $article->published_at?->diffForHumans() ?? '—' }}

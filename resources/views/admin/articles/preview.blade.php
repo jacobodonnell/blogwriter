@@ -1,12 +1,10 @@
 <div id="preview-panel">
     <article class="max-w-3xl mx-auto">
 
-        {{-- Categories --}}
-        @if($article->categories->count() > 0)
+        {{-- Category --}}
+        @if($article->category)
             <div class="flex flex-wrap gap-2 mb-4">
-                @foreach($article->categories as $category)
-                    <span class="badge badge-primary badge-outline">{{ $category->name }}</span>
-                @endforeach
+                <span class="badge badge-primary badge-outline">{{ $article->category->name }}</span>
             </div>
         @endif
 

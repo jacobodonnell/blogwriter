@@ -29,19 +29,17 @@
         <nav class="text-sm breadcrumbs mb-6">
             <ul>
                 <li><span class="text-base-content/40">Home</span></li>
-                @if($article->categories->count() > 0)
-                    <li><span class="text-base-content/40">{{ $article->categories->first()->name }}</span></li>
+                @if($article->category)
+                    <li><span class="text-base-content/40">{{ $article->category->name }}</span></li>
                 @endif
                 <li class="text-base-content/60 truncate max-w-xs">{{ $article->title }}</li>
             </ul>
         </nav>
 
-        {{-- Categories --}}
-        @if($article->categories->count() > 0)
+        {{-- Category --}}
+        @if($article->category)
             <div class="flex flex-wrap gap-2 mb-4">
-                @foreach($article->categories as $category)
-                    <span class="badge badge-primary badge-outline">{{ $category->name }}</span>
-                @endforeach
+                <span class="badge badge-primary badge-outline">{{ $article->category->name }}</span>
             </div>
         @endif
 

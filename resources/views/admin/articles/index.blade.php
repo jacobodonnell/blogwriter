@@ -66,7 +66,7 @@
                         <li>
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox" class="checkbox checkbox-sm" :checked="columns.categories" @change="toggle('categories')" />
-                                <span>Categories</span>
+                                <span>Category</span>
                             </label>
                         </li>
                         <li>
@@ -130,10 +130,15 @@
                         </label>
                         <select name="category" class="select select-bordered w-full md:w-auto" onchange="this.form.requestSubmit()">
                             <option value="">All Categories</option>
-                            @foreach($categories as $category)
-                                <option value="{{ $category->slug }}" {{ request('category') == $category->slug ? 'selected' : '' }}>
-                                    {{ $category->name }}
+                            @foreach($categories as $rootCat)
+                                <option value="{{ $rootCat->id }}" {{ request('category') == $rootCat->id ? 'selected' : '' }}>
+                                    {{ $rootCat->name }}
                                 </option>
+                                @foreach($rootCat->children as $childCat)
+                                    <option value="{{ $childCat->id }}" {{ request('category') == $childCat->id ? 'selected' : '' }}>
+                                        &nbsp;&nbsp;└ {{ $childCat->name }}
+                                    </option>
+                                @endforeach
                             @endforeach
                         </select>
                     </div>
