@@ -9,7 +9,9 @@
             <header class="flex flex-wrap items-center justify-between gap-4 mb-8">
                 <div class="min-w-0">
                     <h1 class="text-3xl font-bold mb-2">Recent Articles</h1>
-                    <p class="text-base-content/60">Latest thoughts on technology, life, and the absurdity of modern startup culture.</p>
+                    @if($subtitle)
+                        <p class="text-base-content/60">{{ $subtitle }}</p>
+                    @endif
                 </div>
                 <div class="flex shrink-0 gap-2">
                     <a href="{{ route('articles.index') }}" class="btn btn-ghost btn-sm gap-1">

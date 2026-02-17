@@ -52,12 +52,67 @@
                 </div>
             </div>
 
+            {{-- Page Subtitles --}}
+            <div class="card bg-base-100 shadow lg:col-span-2">
+                <div class="card-body">
+                    <h2 class="card-title text-xl mb-4">Page Subtitles</h2>
+
+                    @if(session('success') && str_contains(session('success'), 'subtitles'))
+                        <div class="alert alert-success mb-4">
+                            <i class="ph ph-check-circle text-xl"></i>
+                            <span>{{ session('success') }}</span>
+                        </div>
+                    @endif
+
+                    <form action="{{ route('admin.settings.pages.update') }}" method="POST">
+                        @csrf
+                        @method('PUT')
+
+                        <div class="space-y-4">
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text font-medium">Home Page</span>
+                                </label>
+                                <textarea name="page_home_subtitle" class="textarea textarea-bordered" rows="2" maxlength="500" placeholder="Subtitle shown on the home page">{{ old('page_home_subtitle', setting('page_home_subtitle', '')) }}</textarea>
+                                @error('page_home_subtitle')
+                                    <label class="label"><span class="label-text-alt text-error">{{ $message }}</span></label>
+                                @enderror
+                            </div>
+
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text font-medium">Articles Page</span>
+                                </label>
+                                <textarea name="page_articles_subtitle" class="textarea textarea-bordered" rows="2" maxlength="500" placeholder="Subtitle shown on the articles page">{{ old('page_articles_subtitle', setting('page_articles_subtitle', '')) }}</textarea>
+                                @error('page_articles_subtitle')
+                                    <label class="label"><span class="label-text-alt text-error">{{ $message }}</span></label>
+                                @enderror
+                            </div>
+
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text font-medium">Photos Page</span>
+                                </label>
+                                <textarea name="page_photos_subtitle" class="textarea textarea-bordered" rows="2" maxlength="500" placeholder="Subtitle shown on the photos page">{{ old('page_photos_subtitle', setting('page_photos_subtitle', '')) }}</textarea>
+                                @error('page_photos_subtitle')
+                                    <label class="label"><span class="label-text-alt text-error">{{ $message }}</span></label>
+                                @enderror
+                            </div>
+
+                            <div class="form-control mt-6">
+                                <button type="submit" class="btn btn-primary">Save Subtitles</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             {{-- User Profile --}}
             <div class="card bg-base-100 shadow">
                 <div class="card-body">
                     <h2 class="card-title text-xl mb-4">Your Profile</h2>
 
-                    @if(session('success'))
+                    @if(session('success') && !str_contains(session('success'), 'subtitles'))
                         <div class="alert alert-success mb-4">
                             <i class="ph ph-check-circle text-xl"></i>
                             <span>{{ session('success') }}</span>

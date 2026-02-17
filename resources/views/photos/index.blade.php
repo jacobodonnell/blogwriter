@@ -7,7 +7,9 @@
         <header class="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div class="min-w-0">
                 <h1 class="text-4xl font-bold mb-1">Photos</h1>
-                <p class="text-base-content/60">A visual collection of moments and memories.</p>
+                @if($subtitle)
+                    <p class="text-base-content/60">{{ $subtitle }}</p>
+                @endif
             </div>
             @auth
                 <div class="flex shrink-0 gap-2">

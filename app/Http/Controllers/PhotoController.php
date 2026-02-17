@@ -19,6 +19,7 @@ class PhotoController extends Controller
 
         return view('photos.index', [
             'photos' => $photos,
+            'subtitle' => setting('page_photos_subtitle', ''),
         ]);
     }
 

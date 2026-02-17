@@ -20,6 +20,7 @@ class ArticleController extends Controller
 
         return view('public.articles', [
             'articles' => $articles,
+            'subtitle' => setting('page_articles_subtitle', ''),
         ]);
     }
 

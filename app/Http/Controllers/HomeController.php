@@ -26,6 +26,7 @@ class HomeController extends Controller
         return view('public.index', [
             'articles' => $articles,
             'photos' => $photos,
+            'subtitle' => setting('page_home_subtitle', ''),
         ]);
     }
 }
