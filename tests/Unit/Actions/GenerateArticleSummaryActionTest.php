@@ -79,6 +79,20 @@ it('limits generated summary to 255 characters', function (): void {
     expect(strlen($result))->toBeLessThanOrEqual(258); // 255 + '...'
 });
 
+it('decodes HTML entities from markdown content', function (): void {
+    $result = $this->action->handle(null, 'She said "hello" & waved');
+
+    expect($result)->toBe('She said "hello" & waved')
+        ->not->toContain('&quot;')
+        ->not->toContain('&amp;');
+});
+
+it('separates heading text from paragraph text', function (): void {
+    $result = $this->action->handle(null, "## Heading\n\nParagraph text here");
+
+    expect($result)->toBe('Heading Paragraph text here');
+});
+
 it('handles null content gracefully', function (): void {
     $result = $this->action->handle(null, null);
 
