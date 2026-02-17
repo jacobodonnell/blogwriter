@@ -26,15 +26,11 @@ class PhotoSeeder extends Seeder
             ],
             3 => [
                 'caption' => 'Illustration by: [Bilicube Studio](https://unsplash.com/@bilicubestudio/illustrations)',
-                'alt_text' => 'Demo image 3',
+                'alt_text' => 'Dog looking back over its shoulder',
             ],
             4 => [
                 'caption' => 'Illustration by: [Cecilia Miraldi](https://unsplash.com/@ceciliamiraldi)',
                 'alt_text' => 'Girl flying through the sky with a magic umbrella',
-            ],
-            5 => [
-                'caption' => 'Illustration by: [ål nik](https://unsplash.com/@aaaalnik)',
-                'alt_text' => 'Silhouette of a woman with the words "My Body My Choice"',
             ],
         ];
 
