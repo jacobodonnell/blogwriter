@@ -93,13 +93,11 @@
                     </button>
                 </div>
 
-                {{-- Forgot Password Link --}}
+                {{-- Forgot Password Hint --}}
                 <div class="mt-4 text-center">
-                    @if (Route::has('password.request'))
-                        <a href="{{ route('password.request') }}" class="link link-primary text-sm">
-                            Forgot your password?
-                        </a>
-                    @endif
+                    <p class="text-base-content/50 text-xs">
+                        Forgot your password? Run <code>php artisan blogwriter:user:reset-password</code> via SSH.
+                    </p>
                 </div>
             </form>
         </div>
