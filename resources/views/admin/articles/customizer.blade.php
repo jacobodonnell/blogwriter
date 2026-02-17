@@ -40,12 +40,6 @@
                 }
             },
 
-            generateSummary() {
-                if (!this.summary && this.content) {
-                    this.summary = this.content.substring(0, 255);
-                }
-            },
-
             hasNewPhoto: false,
 
             get buttonAction() {
@@ -180,7 +174,6 @@
                 <fieldset class="fieldset">
                     <legend class="fieldset-legend">Content (Markdown)</legend>
                     <textarea id="content-editor" name="content" x-model="content"
-                              @blur="generateSummary()"
                               class="textarea textarea-bordered w-full h-64 font-mono text-sm @error('content') textarea-error @enderror"
                               placeholder="## Write your article here...">{{ old('content', $article->content) }}</textarea>
                     @error('content')

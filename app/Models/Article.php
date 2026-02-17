@@ -230,7 +230,7 @@ class Article extends Model
             return $this->summary;
         }
 
-        return Str::limit(strip_tags($this->attributes['content'] ?? ''), 255);
+        return Str::limit(Markdown::toPlainText($this->attributes['content'] ?? ''), 255);
     }
 
     /**

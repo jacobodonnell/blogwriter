@@ -13,13 +13,13 @@ it('returns provided summary when not blank', function (): void {
 });
 
 it('generates summary from content when summary is null', function (): void {
-    $result = $this->action->handle(null, '<p>Hello world</p>');
+    $result = $this->action->handle(null, 'Hello world');
 
     expect($result)->toBe('Hello world');
 });
 
 it('generates summary from content when summary is empty string', function (): void {
-    $result = $this->action->handle('', '<p>Hello world</p>');
+    $result = $this->action->handle('', 'Hello world');
 
     expect($result)->toBe('Hello world');
 });
@@ -27,7 +27,48 @@ it('generates summary from content when summary is empty string', function (): v
 it('strips HTML tags from content', function (): void {
     $result = $this->action->handle(null, '<h1>Title</h1><p>Body <strong>text</strong></p>');
 
-    expect($result)->toBe('TitleBody text');
+    expect($result)->toContain('Title')
+        ->toContain('Body')
+        ->toContain('text')
+        ->not->toContain('<');
+});
+
+it('strips markdown bold and italic', function (): void {
+    $result = $this->action->handle(null, 'This is **bold** and *italic* text');
+
+    expect($result)->toBe('This is bold and italic text');
+});
+
+it('strips markdown headings', function (): void {
+    $result = $this->action->handle(null, "## Heading Two\n\nSome paragraph text");
+
+    expect($result)->toContain('Heading Two')
+        ->toContain('Some paragraph text')
+        ->not->toContain('#');
+});
+
+it('strips markdown links', function (): void {
+    $result = $this->action->handle(null, 'Check [this link](https://example.com) out');
+
+    expect($result)->toContain('this link')
+        ->not->toContain('https://example.com')
+        ->not->toContain('[')
+        ->not->toContain(']');
+});
+
+it('strips markdown blockquotes', function (): void {
+    $result = $this->action->handle(null, "> This is a quote\n\nNormal text");
+
+    expect($result)->toContain('This is a quote')
+        ->toContain('Normal text')
+        ->not->toContain('>');
+});
+
+it('strips markdown inline code', function (): void {
+    $result = $this->action->handle(null, 'Use the `strip_tags()` function');
+
+    expect($result)->toContain('strip_tags()')
+        ->not->toContain('`');
 });
 
 it('limits generated summary to 255 characters', function (): void {
