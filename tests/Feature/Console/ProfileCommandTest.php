@@ -21,16 +21,14 @@ it('sets profile settings non-interactively', function (): void {
         '--mastodon' => 'https://mastodon.social/@janedoe',
         '--bluesky' => 'https://bsky.app/profile/janedoe',
         '--email' => 'jane@example.com',
-        '--website' => 'https://janedoe.com',
     ])->assertSuccessful();
 
-    expect(Setting::get('profile_name'))->toBe('Jane Doe')
+    expect($this->user->fresh()->name)->toBe('Jane Doe')
         ->and(Setting::get('profile_bio'))->toBe('A writer and developer.')
         ->and(Setting::get('profile_github'))->toBe('https://github.com/janedoe')
         ->and(Setting::get('profile_mastodon'))->toBe('https://mastodon.social/@janedoe')
         ->and(Setting::get('profile_bluesky'))->toBe('https://bsky.app/profile/janedoe')
-        ->and(Setting::get('profile_email'))->toBe('jane@example.com')
-        ->and(Setting::get('profile_url'))->toBe('https://janedoe.com');
+        ->and(Setting::get('profile_email'))->toBe('jane@example.com');
 });
 
 it('validates URLs in non-interactive mode', function (): void {
@@ -50,7 +48,7 @@ it('defaults name to current user name', function (): void {
         '--name' => '',
     ])->assertSuccessful();
 
-    expect(Setting::get('profile_name'))->toBe('Test User');
+    expect($this->user->fresh()->name)->toBe('Test User');
 });
 
 it('defaults email to current user email', function (): void {
@@ -71,32 +69,32 @@ it('displays summary table after saving', function (): void {
         ->assertSuccessful();
 });
 
-it('saves settings to database', function (): void {
+it('saves name to users table', function (): void {
     $this->artisan('blogwriter:profile', [
         '--name' => 'Saved User',
         '--bio' => 'Persisted bio.',
     ])->assertSuccessful();
 
-    $this->assertDatabaseHas('settings', [
-        'key' => 'profile_name',
-        'value' => 'Saved User',
-    ]);
+    expect($this->user->fresh()->name)->toBe('Saved User');
 
     $this->assertDatabaseHas('settings', [
         'key' => 'profile_bio',
         'value' => 'Persisted bio.',
     ]);
+
+    $this->assertDatabaseMissing('settings', [
+        'key' => 'profile_name',
+    ]);
 });
 
 it('updates existing settings', function (): void {
-    Setting::set('profile_name', 'Old Name');
+    Setting::set('profile_bio', 'Old Bio');
 
     $this->artisan('blogwriter:profile', [
         '--name' => 'New Name',
     ])->assertSuccessful();
 
-    expect(Setting::get('profile_name'))->toBe('New Name');
-    expect(Setting::query()->where('key', 'profile_name')->count())->toBe(1);
+    expect($this->user->fresh()->name)->toBe('New Name');
 });
 
 it('skips empty optional fields without saving them', function (): void {
@@ -104,6 +102,6 @@ it('skips empty optional fields without saving them', function (): void {
         '--name' => 'Jane Doe',
     ])->assertSuccessful();
 
-    expect(Setting::get('profile_name'))->toBe('Jane Doe');
+    expect($this->user->fresh()->name)->toBe('Jane Doe');
     $this->assertDatabaseMissing('settings', ['key' => 'profile_github']);
 });

@@ -128,7 +128,7 @@
                                 <label class="label">
                                     <span class="label-text font-medium">Name</span>
                                 </label>
-                                <input type="text" name="profile_name" class="input input-bordered" value="{{ old('profile_name', setting('profile_name', auth()->user()?->name ?? '')) }}" required />
+                                <input type="text" name="profile_name" class="input input-bordered" value="{{ old('profile_name', auth()->user()->name) }}" required />
                                 @error('profile_name')
                                     <label class="label"><span class="label-text-alt text-error">{{ $message }}</span></label>
                                 @enderror
@@ -150,16 +150,6 @@
                                 </label>
                                 <input type="url" name="profile_avatar" class="input input-bordered" value="{{ old('profile_avatar', setting('profile_avatar', '')) }}" placeholder="https://example.com/avatar.jpg" />
                                 @error('profile_avatar')
-                                    <label class="label"><span class="label-text-alt text-error">{{ $message }}</span></label>
-                                @enderror
-                            </div>
-
-                            <div class="form-control">
-                                <label class="label">
-                                    <span class="label-text font-medium">Website URL</span>
-                                </label>
-                                <input type="url" name="profile_url" class="input input-bordered" value="{{ old('profile_url', setting('profile_url', '')) }}" placeholder="https://example.com" />
-                                @error('profile_url')
                                     <label class="label"><span class="label-text-alt text-error">{{ $message }}</span></label>
                                 @enderror
                             </div>

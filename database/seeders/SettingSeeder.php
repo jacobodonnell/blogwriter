@@ -16,9 +16,7 @@ class SettingSeeder extends Seeder
         $user = User::first();
 
         $defaults = [
-            'profile_name' => $user?->name ?? config('app.name', 'BlogWriter'),
             'profile_email' => $user?->email,
-            'profile_url' => config('app.url'),
         ];
 
         foreach ($defaults as $key => $value) {

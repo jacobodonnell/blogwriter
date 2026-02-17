@@ -10,7 +10,7 @@ it('returns successful response for public navigation links', function (string $
     $this->get($route)->assertSuccessful();
 })->with([
     'home' => fn () => route('home'),
-    'profile' => fn () => route('profile'),
+    'about' => fn () => route('about'),
 ]);
 
 it('returns successful response for admin navigation links when authenticated', function (string $route): void {
@@ -40,7 +40,7 @@ it('has no broken links in public pages smoke test', function (): void {
 
     $pages = [
         route('home'),
-        route('profile'),
+        route('about'),
         route('article.show', $article->slug),
         route('category.show', $category->slug),
     ];

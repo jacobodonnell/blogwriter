@@ -13,6 +13,7 @@ use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\note;
 use function Laravel\Prompts\password;
+use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 use function Laravel\Prompts\warning;
 
@@ -77,31 +78,50 @@ class InstallCommand extends Command
             warning('BlogWriter is already installed.');
             $this->newLine();
 
-            $runReset = confirm(
-                label: 'Do you want to reset BlogWriter first? (This will DELETE all content)',
-                default: false
+            $action = select(
+                label: 'What would you like to do?',
+                options: [
+                    'password' => 'Reset my password',
+                    'profile' => 'Update my profile settings',
+                    'reinstall' => 'Reinstall from scratch (DELETE all content)',
+                    'cancel' => 'Never mind, cancel',
+                ],
             );
 
-            if ($runReset) {
-                $resetService = app(ResetService::class);
-                $resetExitCode = $resetService->reset($this);
+            if ($action === 'password') {
+                note('Run: php artisan blogwriter:user:reset-password');
 
-                if ($resetExitCode !== 0) {
-                    error('Reset failed. Installation cancelled.');
+                return self::SUCCESS;
+            }
 
-                    return self::FAILURE;
-                }
+            if ($action === 'profile') {
+                note('Run: php artisan blogwriter:profile');
+                note('Site name and URL are configured in your .env file (APP_NAME, APP_URL).');
 
-                $this->newLine();
-                info('Reset complete. Continuing with installation...');
-                $this->newLine();
+                return self::SUCCESS;
+            }
 
-                $didFreshInstall = true;
-            } else {
+            if ($action === 'cancel') {
                 info('Installation cancelled.');
 
                 return self::SUCCESS;
             }
+
+            // action === 'reinstall'
+            $resetService = app(ResetService::class);
+            $resetExitCode = $resetService->reset($this);
+
+            if ($resetExitCode !== 0) {
+                error('Reset failed. Installation cancelled.');
+
+                return self::FAILURE;
+            }
+
+            $this->newLine();
+            info('Reset complete. Continuing with installation...');
+            $this->newLine();
+
+            $didFreshInstall = true;
         }
 
         $config = $this->gatherConfiguration();

@@ -1,4 +1,4 @@
-<x-layouts.public title="Profile - {{ config('app.name', 'BlogWriter') }}">
+<x-layouts.public title="About - {{ config('app.name', 'BlogWriter') }}">
 
     <div class="max-w-3xl mx-auto">
 
@@ -6,7 +6,7 @@
         <nav class="text-sm breadcrumbs mb-6">
             <ul>
                 <li><a href="{{ route('home') }}" class="link link-hover">Home</a></li>
-                <li class="text-base-content/60">Profile</li>
+                <li class="text-base-content/60">About</li>
             </ul>
         </nav>
 
@@ -17,13 +17,13 @@
             <header class="mb-12 flex flex-col md:flex-row items-center md:items-start gap-6">
                 @if(setting('profile_avatar'))
                     <img src="{{ setting('profile_avatar') }}"
-                         alt="{{ setting('profile_name', 'Author') }}"
+                         alt="{{ $user->name ?? 'Author' }}"
                          class="u-photo w-32 h-32 rounded-full object-cover shadow-lg">
                 @endif
 
                 <div class="text-center md:text-left">
                     <h1 class="p-name text-4xl font-bold mb-4">
-                        {{ setting('profile_name', $user->name ?? 'Author') }}
+                        {{ $user->name ?? 'Author' }}
                     </h1>
 
                     @if(setting('profile_bio'))
@@ -71,9 +71,7 @@
             @endif
 
             {{-- Hidden h-card properties --}}
-            @if(setting('profile_url'))
-                <a href="{{ setting('profile_url') }}" class="u-url hidden" rel="me">Website</a>
-            @endif
+            <a href="{{ config('app.url') }}" class="u-url hidden" rel="me">Website</a>
             <a href="{{ route('home') }}" class="u-url hidden">Homepage</a>
         </div>
 

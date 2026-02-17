@@ -1,0 +1,31 @@
+<?php
+
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
+
+uses(RefreshDatabase::class);
+
+it('resets password non-interactively with --password', function (): void {
+    $user = User::factory()->create();
+
+    $this->artisan('blogwriter:user:reset-password', [
+        '--password' => 'NewSecureP@ss1234',
+    ])->assertSuccessful();
+
+    expect(Hash::check('NewSecureP@ss1234', $user->fresh()->password))->toBeTrue();
+});
+
+it('fails when no user exists', function (): void {
+    $this->artisan('blogwriter:user:reset-password', [
+        '--password' => 'NewSecureP@ss1234',
+    ])->assertFailed();
+});
+
+it('validates password rules', function (): void {
+    User::factory()->create();
+
+    $this->artisan('blogwriter:user:reset-password', [
+        '--password' => 'short',
+    ])->assertFailed();
+});

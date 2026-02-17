@@ -37,13 +37,13 @@
     </li>
 
     <li>
-        <a href="{{ route('profile') }}"
-           class="{{ request()->is('profile') ? 'active' : '' }}"
+        <a href="{{ route('about') }}"
+           class="{{ request()->is('about') ? 'active' : '' }}"
            :class="!expanded && isDesktop && 'justify-center'"
-           @mouseenter="showTooltip($event, 'Profile')"
+           @mouseenter="showTooltip($event, 'About')"
            @mouseleave="hideTooltip()">
             <i class="ph ph-user text-lg"></i>
-            <span x-show="expanded || !isDesktop" x-cloak>Profile</span>
+            <span x-show="expanded || !isDesktop" x-cloak>About</span>
         </a>
     </li>
 

@@ -13,15 +13,15 @@ beforeEach(function (): void {
     ]);
 });
 
-it('displays profile page with settings data', function (): void {
-    Setting::set('profile_name', 'Jane Doe');
+it('displays about page with user and settings data', function (): void {
+    $this->user->update(['name' => 'Jane Doe']);
     Setting::set('profile_bio', 'IndieWeb enthusiast and writer.');
     Setting::set('profile_github', 'https://github.com/janedoe');
     Setting::set('profile_mastodon', 'https://mastodon.social/@janedoe');
     Setting::set('profile_bluesky', 'https://bsky.app/profile/janedoe');
     Setting::set('profile_email', 'jane@example.com');
 
-    $response = $this->get('/profile');
+    $response = $this->get('/about');
 
     $response->assertSuccessful()
         ->assertSee('Jane Doe')
@@ -33,17 +33,16 @@ it('displays profile page with settings data', function (): void {
 });
 
 it('displays default values when no settings exist', function (): void {
-    $response = $this->get('/profile');
+    $response = $this->get('/about');
 
     $response->assertSuccessful()
         ->assertSee('Test Author');
 });
 
 it('renders h-card microformat markup', function (): void {
-    Setting::set('profile_name', 'Jane Doe');
     Setting::set('profile_bio', 'A short bio.');
 
-    $response = $this->get('/profile');
+    $response = $this->get('/about');
 
     $response->assertSuccessful()
         ->assertSee('h-card', false)
@@ -54,21 +53,21 @@ it('renders h-card microformat markup', function (): void {
 
 it('conditionally shows social links', function (): void {
     // No social links set — should not show Connect section
-    $response = $this->get('/profile');
+    $response = $this->get('/about');
     $response->assertSuccessful()
         ->assertDontSee('Connect');
 
     // Set one social link
     Setting::set('profile_github', 'https://github.com/janedoe');
 
-    $response = $this->get('/profile');
+    $response = $this->get('/about');
     $response->assertSuccessful()
         ->assertSee('Connect')
         ->assertSee('GitHub');
 });
 
-it('layout h-card uses settings data', function (): void {
-    Setting::set('profile_name', 'Layout Author');
+it('layout h-card uses user name', function (): void {
+    $this->user->update(['name' => 'Layout Author']);
     Setting::set('profile_bio', 'Layout bio text.');
     Setting::set('profile_github', 'https://github.com/layoutauthor');
 

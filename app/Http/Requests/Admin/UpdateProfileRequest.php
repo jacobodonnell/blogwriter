@@ -23,7 +23,6 @@ class UpdateProfileRequest extends FormRequest
             'profile_name' => 'required|string|max:255',
             'profile_bio' => 'nullable|string|max:1000',
             'profile_avatar' => 'nullable|url|max:2048',
-            'profile_url' => 'nullable|url|max:2048',
             'profile_github' => 'nullable|url|max:2048',
             'profile_mastodon' => 'nullable|url|max:2048',
             'profile_bluesky' => 'nullable|url|max:2048',

@@ -282,34 +282,42 @@ describe('interactive installation (prompts)', function (): void {
 });
 
 describe('already installed detection', function (): void {
-    it('detects installation via lock file', function (): void {
-        // Create lock file to simulate already installed state
+    it('detects installation via lock file and allows cancellation', function (): void {
         file_put_contents(storage_path('installed.lock'), now());
 
         $this->artisan('blogwriter:install')
             ->expectsOutputToContain('BlogWriter is already installed')
-            ->expectsConfirmation('Do you want to reset BlogWriter first? (This will DELETE all content)', false)
+            ->expectsQuestion('What would you like to do?', 'cancel')
             ->expectsOutputToContain('Installation cancelled')
             ->assertSuccessful();
 
-        // Lock file should still exist
         expect(file_exists(storage_path('installed.lock')))->toBeTrue();
 
-        // Clean up
         @unlink(storage_path('installed.lock'));
     });
 
-    it('prompts for reset when already installed', function (): void {
-        // Create lock file to simulate already installed state
+    it('suggests password reset command when selected', function (): void {
         file_put_contents(storage_path('installed.lock'), now());
 
         $this->artisan('blogwriter:install')
             ->expectsOutputToContain('BlogWriter is already installed')
-            ->expectsConfirmation('Do you want to reset BlogWriter first? (This will DELETE all content)', true)
-            ->run();
+            ->expectsQuestion('What would you like to do?', 'password')
+            ->expectsOutputToContain('blogwriter:user:reset-password')
+            ->assertSuccessful();
 
-        // The test verifies the prompt appears - full reset integration is complex
-        // due to exec() calls in reset command and is better tested manually
+        @unlink(storage_path('installed.lock'));
+    });
+
+    it('suggests profile command when selected', function (): void {
+        file_put_contents(storage_path('installed.lock'), now());
+
+        $this->artisan('blogwriter:install')
+            ->expectsOutputToContain('BlogWriter is already installed')
+            ->expectsQuestion('What would you like to do?', 'profile')
+            ->expectsOutputToContain('blogwriter:profile')
+            ->assertSuccessful();
+
+        @unlink(storage_path('installed.lock'));
     });
 });
 

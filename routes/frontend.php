@@ -21,7 +21,7 @@ Route::get('/category/{slug}', [CategoryArticleController::class, 'index'])->nam
 Route::get('/photos', [PhotoController::class, 'index'])->name('photos.index');
 Route::get('/photos/{photo:slug}', [PhotoController::class, 'show'])->name('photos.show');
 
-// Profile
-Route::get('/profile', fn () => view('public.profile', [
+// About
+Route::get('/about', fn () => view('public.about', [
     'user' => \App\Models\User::first(),
-]))->name('profile');
+]))->name('about');

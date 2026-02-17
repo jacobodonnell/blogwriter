@@ -20,7 +20,7 @@ it('redirects unauthenticated users from settings update', function (): void {
 });
 
 it('displays settings page with current profile data in form', function (): void {
-    Setting::set('profile_name', 'Jane Doe');
+    $this->user->update(['name' => 'Jane Doe']);
     Setting::set('profile_bio', 'A writer.');
     Setting::set('profile_github', 'https://github.com/janedoe');
 
@@ -38,7 +38,6 @@ it('can save profile settings via form', function (): void {
             'profile_name' => 'Updated Name',
             'profile_bio' => 'Updated bio.',
             'profile_avatar' => 'https://example.com/avatar.jpg',
-            'profile_url' => 'https://example.com',
             'profile_github' => 'https://github.com/updated',
             'profile_mastodon' => 'https://mastodon.social/@updated',
             'profile_bluesky' => 'https://bsky.app/profile/updated',
@@ -47,7 +46,7 @@ it('can save profile settings via form', function (): void {
         ->assertRedirect(route('admin.settings'))
         ->assertSessionHas('profile_success');
 
-    expect(Setting::get('profile_name'))->toBe('Updated Name')
+    expect($this->user->fresh()->name)->toBe('Updated Name')
         ->and(Setting::get('profile_bio'))->toBe('Updated bio.')
         ->and(Setting::get('profile_avatar'))->toBe('https://example.com/avatar.jpg')
         ->and(Setting::get('profile_github'))->toBe('https://github.com/updated')
@@ -71,7 +70,6 @@ it('validates url fields', function (string $field): void {
         ->assertSessionHasErrors($field);
 })->with([
     'profile_avatar',
-    'profile_url',
     'profile_github',
     'profile_mastodon',
     'profile_bluesky',
@@ -98,7 +96,7 @@ it('clears settings when fields are empty', function (): void {
         ])
         ->assertRedirect(route('admin.settings'));
 
-    expect(Setting::get('profile_name'))->toBe('Still Here')
+    expect($this->user->fresh()->name)->toBe('Still Here')
         ->and(Setting::get('profile_bio'))->toBeNull()
         ->and(Setting::get('profile_github'))->toBeNull();
 });

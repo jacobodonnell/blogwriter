@@ -4,11 +4,11 @@
         <div class="flex items-center gap-2">
             @if(setting('profile_avatar'))
                 <img src="{{ setting('profile_avatar') }}"
-                     alt="{{ setting('profile_name', \App\Models\User::first()?->name ?? 'Author') }}"
+                     alt="{{ \App\Models\User::first()?->name ?? 'Author' }}"
                      class="u-photo w-8 h-8 rounded-full object-cover">
             @endif
             <a href="{{ route('home') }}" rel="me" class="u-url u-uid p-name text-sm font-medium link link-hover">
-                {{ setting('profile_name', \App\Models\User::first()?->name ?? 'Author') }}
+                {{ \App\Models\User::first()?->name ?? 'Author' }}
             </a>
         </div>
 
@@ -39,9 +39,7 @@
         @endif
 
         {{-- Hidden h-card properties for microformats --}}
-        @if(setting('profile_url'))
-            <a href="{{ setting('profile_url') }}" class="u-url hidden" rel="me">Website</a>
-        @endif
+        <a href="{{ config('app.url') }}" class="u-url hidden" rel="me">Website</a>
 
         <p class="text-sm text-base-content/60">
             © {{ date('Y') }} {{ config('app.name', 'BlogWriter') }}

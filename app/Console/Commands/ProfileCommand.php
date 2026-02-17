@@ -19,8 +19,7 @@ class ProfileCommand extends Command
                             {--github= : GitHub profile URL}
                             {--mastodon= : Mastodon profile URL}
                             {--bluesky= : Bluesky profile URL}
-                            {--email= : Contact email}
-                            {--website= : Website URL}';
+                            {--email= : Contact email}';
 
     protected $description = 'Configure your public profile (h-card) settings';
 
@@ -40,7 +39,8 @@ class ProfileCommand extends Command
 
         if ($this->option('name') !== null) {
             $name = $this->option('name') ?: $user?->name;
-            $settings['profile_name'] = $name;
+            $user?->update(['name' => $name]);
+            $settings['name'] = $name;
         }
 
         if ($this->option('bio') !== null) {
@@ -100,19 +100,6 @@ class ProfileCommand extends Command
             $settings['profile_email'] = $email;
         }
 
-        if ($this->option('website') !== null) {
-            $website = $this->option('website');
-            if ($website !== '') {
-                if ($error = $this->validateUrl($website)) {
-                    $this->error('Invalid website URL: '.$error);
-
-                    return self::FAILURE;
-                }
-
-                $settings['profile_url'] = $website;
-            }
-        }
-
         return $this->saveAndDisplay($settings);
     }
 
@@ -127,7 +114,7 @@ class ProfileCommand extends Command
         $name = text(
             label: 'Display name',
             placeholder: 'Your public name',
-            default: Setting::get('profile_name', $user?->name ?? ''),
+            default: $user?->name ?? '',
             required: true,
         );
 
@@ -165,14 +152,8 @@ class ProfileCommand extends Command
             validate: fn (string $value): ?string => $value !== '' ? $this->validateEmail($value) : null,
         );
 
-        $website = text(
-            label: 'Website URL',
-            placeholder: 'https://example.com',
-            default: Setting::get('profile_url', config('app.url')),
-            validate: fn (string $value): ?string => $value !== '' ? $this->validateUrl($value) : null,
-        );
-
-        $settings = ['profile_name' => $name];
+        $user?->update(['name' => $name]);
+        $settings = ['name' => $name];
 
         if ($bio !== '') {
             $settings['profile_bio'] = $bio;
@@ -194,17 +175,15 @@ class ProfileCommand extends Command
             $settings['profile_email'] = $email;
         }
 
-        if ($website !== '') {
-            $settings['profile_url'] = $website;
-        }
-
         return $this->saveAndDisplay($settings);
     }
 
     protected function saveAndDisplay(array $settings): int
     {
         foreach ($settings as $key => $value) {
-            Setting::set($key, $value);
+            if (str_starts_with((string) $key, 'profile_')) {
+                Setting::set($key, $value);
+            }
         }
 
         $this->newLine();
@@ -253,10 +232,6 @@ class ProfileCommand extends Command
             return true;
         }
 
-        if ($this->option('email') !== null) {
-            return true;
-        }
-
-        return $this->option('website') !== null;
+        return $this->option('email') !== null;
     }
 }

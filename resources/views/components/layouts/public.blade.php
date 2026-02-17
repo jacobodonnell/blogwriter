@@ -123,7 +123,7 @@
                         <a href="{{ route('home') }}" class="btn btn-ghost">Home</a>
                         <a href="{{ route('articles.index') }}" class="btn btn-ghost">Articles</a>
                         <a href="{{ route('photos.index') }}" class="btn btn-ghost">Photos</a>
-                        <a href="{{ route('profile') }}" class="btn btn-ghost">Profile</a>
+                        <a href="{{ route('about') }}" class="btn btn-ghost">About</a>
                     </div>
 
                     {{-- Theme Mode Cycle (always visible) --}}
@@ -174,7 +174,7 @@
                     <li><a href="{{ route('home') }}"><i class="ph ph-house text-lg"></i> Home</a></li>
                     <li><a href="{{ route('articles.index') }}"><i class="ph ph-article text-lg"></i> Articles</a></li>
                     <li><a href="{{ route('photos.index') }}"><i class="ph ph-camera text-lg"></i> Photos</a></li>
-                    <li><a href="{{ route('profile') }}"><i class="ph ph-user text-lg"></i> Profile</a></li>
+                    <li><a href="{{ route('about') }}"><i class="ph ph-user text-lg"></i> About</a></li>
                 </ul>
             </div>
 
