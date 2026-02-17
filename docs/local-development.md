@@ -155,10 +155,10 @@ This creates a ZIP file containing:
 
 1. Upload and extract the ZIP to your web host
 2. Point your domain's document root to the `public/` directory
-3. Visit your domain — the web installer will guide you through setup
+3. SSH into your server and run `php artisan blogwriter:install`
 
 ### Deploying to Laravel Forge
 
 1. Create a new site on Forge pointing to your repository
 2. Set the web root to `/public`
-3. In your deploy script, add: `php artisan blogwriter:install --non-interactive` (or use the web installer)
+3. In your deploy script, add: `php artisan blogwriter:install --non-interactive`

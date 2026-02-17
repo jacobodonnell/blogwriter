@@ -22,7 +22,7 @@ BlogWriter is for personal bloggers who want independence:
 - Developers who want a blog that's simple code, not a sprawling CMS
 - Anyone who cares about owning their content and keeping it portable
 
-You don't need to be technical. If you can upload files to a web host, you can run BlogWriter.
+You'll need basic comfort with a terminal — copying and pasting a few commands, and optionally SSH access to your server. If that sounds doable, you can run BlogWriter.
 
 ## What You Get
 

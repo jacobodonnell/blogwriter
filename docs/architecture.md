@@ -49,7 +49,7 @@ Alpine AJAX handles dynamic updates (auto-save, search, form submissions, sortab
 
 ### Custom Auth UI
 
-Authentication uses Laravel Fortify for the backend, with a custom UI built using Alpine AJAX and DaisyUI forms. Login, registration, password reset, and email verification all use `x-target` for AJAX form submissions.
+Authentication uses Laravel Fortify for the backend, with a custom login UI built using Alpine AJAX and DaisyUI forms. Login is the only web auth flow — registration, password reset, and email verification are all handled via CLI commands.
 
 ### Single-Author Only
 
@@ -97,7 +97,7 @@ blogwriter/
 │   │   │   ├── PhotoController.php         # Public photo display
 │   │   │   ├── CategoryArticleController.php
 │   │   │   ├── HomeController.php          # Public homepage
-│   │   │   ├── InstallController.php       # Web installer (disabled)
+│   │   │   ├── InstallController.php       # Install page (shows CLI instructions)
 │   │   │   └── Admin/
 │   │   │       ├── ArticleController.php   # Article CRUD
 │   │   │       ├── CreateArticleController.php
@@ -125,7 +125,6 @@ blogwriter/
 │   └── View/
 │       └── Components/
 ├── config/
-│   ├── blogwriter.php                      # Web installer toggle
 │   └── appearance.php                      # Themes, fonts, defaults
 ├── database/
 │   ├── database.sqlite                     # Created by installer
@@ -150,10 +149,7 @@ blogwriter/
 │   │   │   ├── categories/
 │   │   │   └── settings/
 │   │   ├── auth/                           # Custom Fortify auth UI
-│   │   │   ├── login.blade.php
-│   │   │   ├── forgot-password.blade.php
-│   │   │   ├── reset-password.blade.php
-│   │   │   └── verify-email.blade.php
+│   │   │   └── login.blade.php
 │   │   ├── components/                     # Shared Blade components
 │   │   │   ├── layouts/                    # Layout components
 │   │   │   ├── article-save-button.blade.php
@@ -225,13 +221,14 @@ blogwriter/
 
 ### Backend: Laravel Fortify
 
-Fortify provides routes and controllers:
+Fortify provides routes and controllers. Only `/login` and `/logout` are active web routes:
 
 - `/login` --- POST to authenticate
-- `/register` --- POST to create user (disabled after first user)
 - `/logout` --- POST to destroy session
-- `/forgot-password` --- Password reset flow
-- `/email/verify` --- Email verification
+
+Registration, password reset, and email verification are disabled. User creation and password resets are handled via CLI commands (`blogwriter:install`, `blogwriter:user:reset-password`).
+
+BlogWriter does not send or receive email out of the box.
 
 ### Frontend: Custom Alpine UI
 

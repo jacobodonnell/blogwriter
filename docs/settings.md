@@ -61,7 +61,6 @@ These values are accessible in Blade templates via helper functions:
 For developers who prefer working with configuration files:
 
 **Config files:**
-- `config/blogwriter.php` — Web installer toggle
 - `config/appearance.php` — Available themes, fonts, and defaults
 
 **Clear config cache after changes:**
@@ -69,5 +68,11 @@ For developers who prefer working with configuration files:
 ```bash
 php artisan config:clear
 ```
+
+## Maintenance Commands
+
+- `php artisan blogwriter:user:reset-password` — Reset your admin password via SSH
+- `php artisan blogwriter:diagnose` — Run health checks to identify common issues
+- `php artisan blogwriter:uninstall` — Full reset (destructive — removes database and configuration)
 
 #### [Up Next: *Feeds & IndieWeb*](/docs/configuration/feeds-and-indieweb)

@@ -28,6 +28,8 @@ BlogWriter works on most modern web hosting. You need:
 That's it. No separate database server to set up. No Redis. No Node.js. BlogWriter uses SQLite, which means your
 database is just a simple file on your server.
 
+BlogWriter does not send or receive email out of the box — no mail server needed. Your email address is used as your login credential and public identity (h-card), not for sending mail.
+
 <x-callout type="info" title="Technical Note" collapsible>
   BlogWriter requires PHP 8.4+ with the SQLite and PDO extensions enabled, plus write permissions on
   the `storage/` and `bootstrap/cache/` directories.
@@ -63,168 +65,19 @@ php artisan blogwriter:install --non-interactive
 
 ---
 
-## Installation Steps
+## What the Installer Does
 
-The CLI installer covers these steps:
+Behind the scenes, the CLI installer:
 
-### Step 1: Welcome
-
-```text
-┌─────────────────────────────────────────────────────────────┐
-│                        BlogWriter                           │
-│                Own Your Content. Own Your Domain.            │
-└─────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────┐
-│ Installation Wizard                                         │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  Welcome to BlogWriter!                                     │
-│                                                             │
-│  This wizard will help you set up your blog in a few steps. │
-│                                                             │
-│  What we'll do:                                             │
-│  • Check system requirements                                │
-│  • Create your admin account                                │
-│  • Configure your site                                      │
-│  • Activate your theme                                      │
-│                                                             │
-│  [Continue]  [Cancel]                                       │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-
-Step 1 of 5
-```
-
-### Step 2: Requirements Check
-
-The installer verifies your server meets the requirements.
-
-```text
-┌─────────────────────────────────────────────────────────────┐
-│ System Requirements                                         │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  ✓ PHP 8.4+                    [8.4.17]                     │
-│  ✓ SQLite Extension            [Enabled]                    │
-│  ✓ PDO Extension               [Enabled]                   │
-│  ✓ Storage Writable            [OK]                         │
-│  ✓ Cache Writable              [OK]                         │
-│                                                             │
-│  All required checks passed!                                │
-│                                                             │
-│  [Continue]  [Back]                                         │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-
-Step 2 of 5
-```
-
-Green checkmarks mean you're good. Red X marks mean something needs fixing — the installer tells you what.
-
-### Step 3: Create Admin Account
-
-Your blog has one admin user — you.
-
-```text
-┌─────────────────────────────────────────────────────────────┐
-│ Create Admin Account                                        │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  Email                                                      │
-│  ┌────────────────────────────────────────────────────┐     │
-│  │ you@example.com                                    │     │
-│  └────────────────────────────────────────────────────┘     │
-│                                                             │
-│  Password                                                   │
-│  ┌────────────────────────────────────────────────────┐     │
-│  │ ••••••••••••                                       │     │
-│  └────────────────────────────────────────────────────┘     │
-│                                                             │
-│  Confirm Password                                           │
-│  ┌────────────────────────────────────────────────────┐     │
-│  │ ••••••••••••                                       │     │
-│  └────────────────────────────────────────────────────┘     │
-│                                                             │
-│  [Continue]  [Back]                                         │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-
-Step 3 of 5
-```
-
-### Step 4: Site Configuration
-
-Tell BlogWriter about your site and yourself.
-
-```text
-┌─────────────────────────────────────────────────────────────┐
-│ Site Configuration                                          │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  Site Name                                                  │
-│  ┌────────────────────────────────────────────────────┐     │
-│  │ My Blog                                            │     │
-│  └────────────────────────────────────────────────────┘     │
-│                                                             │
-│  Site Domain                                                │
-│  ┌────────────────────────────────────────────────────┐     │
-│  │ blog.example.com                                   │     │
-│  └────────────────────────────────────────────────────┘     │
-│                                                             │
-│  Tagline                                                    │
-│  ┌────────────────────────────────────────────────────┐     │
-│  │ Thoughts on tech, life, and everything else        │     │
-│  └────────────────────────────────────────────────────┘     │
-│                                                             │
-│  Author Name                                                │
-│  ┌────────────────────────────────────────────────────┐     │
-│  │ Your Name                                          │     │
-│  └────────────────────────────────────────────────────┘     │
-│                                                             │
-│  [Continue]  [Back]                                         │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-
-Step 4 of 5
-```
-
-These values are stored in your `.env` file and can be changed later from Settings in the admin dashboard.
-
-### Step 5: Done
-
-```text
-┌─────────────────────────────────────────────────────────────┐
-│ Installation Complete!                                      │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  ✓ Database created                                         │
-│  ✓ Admin account created                                    │
-│  ✓ Site configured                                          │
-│  ✓ Default theme activated                                  │
-│                                                             │
-│  Your blog is ready!                                        │
-│                                                             │
-│  Next steps:                                                │
-│  • Visit your site: https://blog.example.com                │
-│  • Admin dashboard: https://blog.example.com/admin          │
-│  • Write your first post!                                   │
-│                                                             │
-│  [Visit Site]  [Go to Admin]                                │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-
-Step 5 of 5
-```
+1. **Checks requirements** — Verifies PHP version, SQLite extension, PDO extension, and directory permissions
+2. **Sets up the environment** — Copies `.env.example` to `.env` (if needed) and generates an `APP_KEY`
+3. **Creates the database** — Creates the SQLite database file at `database/database.sqlite` and runs all migrations
+4. **Creates your admin account** — Prompts for your email and password (email doubles as your public identity for h-card markup)
+5. **Configures your site** — Sets site name, domain, tagline, and author information in `.env`
+6. **Seeds initial data** — Creates default categories and other starter content
+7. **Locks the installation** — Creates `storage/installed.lock` to prevent accidental reinstallation
 
 ---
-
-<x-callout type="info" title="Technical Details" collapsible>
-  Behind the scenes, the CLI installer copies `.env.example` to `.env` (if it doesn't exist),
-  generates an `APP_KEY`, creates the SQLite database file at `database/database.sqlite`, runs all database migrations,
-  creates your admin user, writes your site configuration to `.env`, seeds initial data, and creates
-  `storage/installed.lock` to prevent re-installation.
-</x-callout>
 
 ## Installation Lock
 
@@ -298,8 +151,11 @@ chmod -R 775 storage bootstrap/cache
 **"Install page shows 404"** — Make sure your web server points to BlogWriter's `public/` directory, not the project
 root.
 
+**Forgot your password?** — Run `php artisan blogwriter:user:reset-password` via SSH to reset your admin password.
+
+**Something not working?** — Run `php artisan blogwriter:diagnose` for health checks that identify common issues.
+
 **Accidentally locked out** — Re-run the installer (`php artisan blogwriter:install`). When prompted, choose "Yes" to
 reset if you want a fresh start, or "No" to cancel if your data is still accessible.
 
 #### [Up Next: *Writing Content*](/docs/content/writing-content)
-

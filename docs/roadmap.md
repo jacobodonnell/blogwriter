@@ -87,40 +87,36 @@ BlogWriter is in pre-alpha. This roadmap shows what's built and what's planned.
 ### Admin Improvements
 
 - Tag management interface
-- Web installer (partially built, needs further development)
 
 ---
 
 ## Future
 
-### Enhanced IndieWeb (V0.2)
+### V0.2 — Federation & Discovery
 
 - Micropub support (publish from third-party clients)
 - ActivityPub integration
 - Webmention dashboard
 - POSSE to Bluesky and Mastodon
 
-### Monetization (V0.3)
+### V0.3 — Creator Monetization
 
 - Member-only content
-- Newsletter support
+- Newsletter support (BYOK email relay)
 - Stripe integration
 
-### Rich Media (V0.4)
+### Beyond V0.3
 
 - Podcast hosting (audio files + RSS podcast feed)
 - Video integration (Bunny.net or Vimeo API)
-
-### Managed Hosting (V0.5)
-
-- BlogWriter Hosted SaaS offering
-
-### Ecosystem (V0.6+)
-
 - Theme system with custom templates and overrides
 - Plugin architecture (Composer-based, open store spec)
 - Theme and plugin marketplace
 - Import tools (Substack, Medium, WordPress, Ghost)
+
+### BlogWriter Hosted
+
+A separate management application that provisions BlogWriter instances inside Docker containers. The management app makes artisan calls under the hood — the FOSS product requires CLI skills; the hosted version provides the GUI for non-technical users.
 
 ---
 

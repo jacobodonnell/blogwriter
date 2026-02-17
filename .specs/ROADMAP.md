@@ -65,7 +65,6 @@ fees or platform risk.
 ### Installation
 
 - [x] One-command installer: `php artisan blogwriter:install`
-- [ ] Installation wizard (web-based)
 - [x] Works on shared hosting ($3-5/month)
 - [x] SQLite database setup
 
@@ -180,174 +179,37 @@ fees or platform risk.
 
 ---
 
-## V0.4 - Rich Media (Patreon Alternative)
+## Future
 
-**Goal:** Full creator platform for podcasts and video.
+Features beyond V0.3 are planned but not assigned to rigid version numbers. They ship when ready.
 
-**Success Metric:** Podcast/video creator owns their content on their domain.
+### Rich Media
 
-### Podcasting
+- [ ] Podcast feed (RSS with enclosures), episode management, show notes
+- [ ] Video posts with player embed, thumbnails, chapters, transcripts
+- [ ] BYOK media hosting (Bunny.net, Vimeo, S3-compatible)
+- [ ] Media library with upload interface and bulk operations
 
-- [ ] Podcast feed (RSS with enclosures)
-- [ ] Episode management
-- [ ] Show notes (articles with audio)
-- [ ] Podcast metadata (title, description, artwork)
-- [ ] Submit to Apple Podcasts
-- [ ] Submit to Spotify
-- [ ] Submit to other directories
+### BlogWriter Hosted (SaaS)
 
-### Video
+A separate Laravel management application that provisions BlogWriter instances inside Docker containers. The management app makes artisan calls under the hood — the FOSS product requires CLI skills; the hosted version provides the GUI for non-technical users.
 
-- [ ] Video posts (articles with video)
-- [ ] Video player embed
-- [ ] Thumbnails
-- [ ] Video chapters
-- [ ] Transcripts
-- [ ] Members-only videos
+- [ ] Docker containerization (one container per customer)
+- [ ] Customer provisioning, billing (Stripe), and monitoring
+- [ ] $20/month or $199/year pricing
+- [ ] Marketing site and onboarding
 
-### Media Hosting (BYOK)
+### Ecosystem
 
-- [ ] Bunny.net integration (recommended)
-- [ ] Bunny Stream integration
-- [ ] Vimeo integration (alternative)
-- [ ] S3-compatible integration (Cloudflare R2, Backblaze B2)
-- [ ] Media upload workflow
-- [ ] CDN auto-publishing
-- [ ] Bandwidth tracking
-- [ ] Cost dashboard
-
-### Media Management
-
-- [ ] Media library
-- [ ] Upload interface
-- [ ] File organization
-- [ ] Metadata editing
-- [ ] Bulk operations
-
-### Documentation
-
-- [ ] "Setting up Bunny.net" (recommended)
-- [ ] "Why Bunny.net for indie creators" (cost breakdown)
-- [ ] "Setting up Vimeo"
-- [ ] "Setting up Cloudflare R2"
-- [ ] "Setting up Backblaze B2"
-- [ ] "Podcast setup guide (Apple/Spotify)"
-- [ ] "Video hosting costs explained"
-- [ ] "Publishing workflow: website first, YouTube later"
-- [ ] "Podcast best practices"
-- [ ] "Video best practices"
-
----
-
-## V0.5 - BlogWriter Hosted (SaaS)
-
-**Goal:** Launch managed hosting for non-technical users.
-
-**Success Metric:** First paying customers, profitable margins (80%+).
-
-### Infrastructure
-
-- [ ] Docker containerization
-- [ ] One container per customer
-- [ ] Forge + VPS setup
-- [ ] Customer provisioning automation
-- [ ] Traefik routing (or similar)
-- [ ] Automated SSL (Let's Encrypt)
-- [ ] Daily backups
-- [ ] Monitoring (uptime, resources)
-
-### Customer Management
-
-- [ ] Signup flow
-- [ ] Billing (Stripe)
-- [ ] Customer dashboard
-- [ ] Instance provisioning (via Forge API)
-- [ ] Support ticketing
-- [ ] Email onboarding sequence
-
-### Pricing
-
-- [ ] $20/month (monthly billing)
-- [ ] $199/year (annual billing, save ~2 months)
-- [ ] Pricing page
-- [ ] Comparison: self-hosted vs. hosted
-
-### Marketing Site
-
-- [ ] Product overview
-- [ ] Feature highlights
-- [ ] Pricing page
-- [ ] Testimonials
-- [ ] Demo video
-- [ ] "Substack alternative" positioning
-
-### Documentation
-
-- [ ] "Self-hosted vs. Hosted comparison"
-- [ ] "Getting started with Hosted"
-- [ ] "Migrating from hosted to self-hosted"
-- [ ] "Exporting your data"
-- [ ] Support documentation
-
----
-
-## V0.6+ - Maturity & Polish
-
-**Goal:** Ecosystem growth, community contributions, sustainable business.
-
-### Theme Marketplace
-
-- [ ] Theme submission system
-- [ ] Premium themes ($29-79)
-- [ ] Community themes (free)
-- [ ] Theme showcase
-- [ ] Revenue sharing for theme developers
-- [ ] Theme review process
-- [ ] Theme documentation standards
-
-### Plugin Store
-
-- [ ] Plugin submission system
-- [ ] Official store (curated, 15% commission)
-- [ ] Third-party store support (open API spec)
-- [ ] Plugin install/uninstall UI in admin
-- [ ] `blogwriter:plugin:install` command
-- [ ] Plugin developer documentation
-
-### Import Tools
-
-- [ ] Substack import
-- [ ] Medium import
-- [ ] WordPress import
-- [ ] Patreon import
-- [ ] Ghost import
-- [ ] Generic RSS import
-
-### Advanced Features
-
-- [ ] Custom domain setup (easier)
-- [ ] Analytics integration (privacy-focused)
-- [ ] Advanced SEO tools
-- [ ] Performance optimizations
-- [ ] Multi-language support
-- [ ] Accessibility improvements
-
-### Community
-
-- [ ] Showcase of BlogWriter sites
-- [ ] Theme developer resources
-- [ ] IndieWeb integration examples
-- [ ] Community forum
-- [ ] Case studies
-- [ ] Success stories
+- [ ] Theme marketplace (free + premium)
+- [ ] Plugin store (Composer-based, open API spec, 15% official commission)
+- [ ] Import tools (Substack, Medium, WordPress, Ghost)
 
 ### Polish
 
-- [ ] Comprehensive test suite
-- [ ] Performance benchmarks
-- [ ] Security audit
-- [ ] Accessibility audit
-- [ ] UX improvements based on feedback
+- [ ] Comprehensive test suite and security audit
+- [ ] Performance benchmarks and accessibility audit
+- [ ] Multi-language support
 
 ---
 
@@ -382,7 +244,7 @@ fees or platform risk.
 - **Database:** SQLite (simple, portable, fast)
 - **Authentication:** Laravel Fortify
 - **Frontend:** Blade + Alpine.js + Alpine AJAX + Tailwind CSS + DaisyUI
-- **Editor:** Editor.js (with Markdown backups)
+- **Editor:** EasyMDE (current), block-based rich text editor (planned)
 - **Runtime:** FrankenPHP (optional, for performance)
 
 ### Why This Stack
