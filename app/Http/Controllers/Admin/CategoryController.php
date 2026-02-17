@@ -5,14 +5,16 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Models\Category;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
     /**
      * Display a listing of categories, optionally scoped to a parent.
      */
-    public function index(Request $request): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function index(Request $request): View
     {
         $parentId = $request->input('parent');
         $parent = $parentId ? Category::findOrFail($parentId) : null;
@@ -48,25 +50,20 @@ class CategoryController extends Controller
     /**
      * Store a newly created category.
      */
-    public function store(StoreCategoryRequest $request)
+    public function store(StoreCategoryRequest $request): RedirectResponse
     {
         $data = $request->validated();
 
         Category::create($data);
 
-        $redirectUrl = route('admin.categories.index');
-        if (! empty($data['parent_id'])) {
-            $redirectUrl .= '?parent='.$data['parent_id'];
-        }
-
-        return redirect($redirectUrl)
+        return redirect($this->categoryRedirectUrl($data['parent_id'] ?? null))
             ->with('success', 'Category created successfully.');
     }
 
     /**
      * Show the form for editing the specified category.
      */
-    public function edit(Category $category): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function edit(Category $category): View
     {
         $excludeIds = array_merge([$category->id], $category->descendantIds());
 
@@ -84,7 +81,7 @@ class CategoryController extends Controller
     /**
      * Update the specified category.
      */
-    public function update(StoreCategoryRequest $request, Category $category)
+    public function update(StoreCategoryRequest $request, Category $category): RedirectResponse
     {
         $data = $request->validated();
 
@@ -97,37 +94,34 @@ class CategoryController extends Controller
     /**
      * Remove the specified category.
      */
-    public function destroy(Category $category)
+    public function destroy(Category $category): RedirectResponse
     {
-        if ($category->children()->count() > 0) {
-            $redirectUrl = route('admin.categories.index');
-            if ($category->parent_id) {
-                $redirectUrl .= '?parent='.$category->parent_id;
-            }
+        $redirectUrl = $this->categoryRedirectUrl($category->parent_id);
 
+        if ($category->children()->count() > 0) {
             return redirect($redirectUrl)
                 ->with('error', 'Cannot delete category with subcategories. Remove subcategories first.');
         }
 
         if ($category->articles()->count() > 0) {
-            $redirectUrl = route('admin.categories.index');
-            if ($category->parent_id) {
-                $redirectUrl .= '?parent='.$category->parent_id;
-            }
-
             return redirect($redirectUrl)
                 ->with('error', 'Cannot delete category with articles. Remove articles first.');
         }
 
-        $parentId = $category->parent_id;
         $category->delete();
-
-        $redirectUrl = route('admin.categories.index');
-        if ($parentId) {
-            $redirectUrl .= '?parent='.$parentId;
-        }
 
         return redirect($redirectUrl)
             ->with('success', 'Category deleted successfully.');
+    }
+
+    private function categoryRedirectUrl(?int $parentId): string
+    {
+        $url = route('admin.categories.index');
+
+        if ($parentId) {
+            $url .= '?parent='.$parentId;
+        }
+
+        return $url;
     }
 }

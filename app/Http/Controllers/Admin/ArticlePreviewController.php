@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateArticlePreviewRequest;
 use App\Models\Article;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class ArticlePreviewController extends Controller
 {
@@ -17,7 +18,7 @@ class ArticlePreviewController extends Controller
     /**
      * Update article for live preview (AJAX auto-save).
      */
-    public function update(UpdateArticlePreviewRequest $request, Article $article): \Illuminate\View\View
+    public function __invoke(UpdateArticlePreviewRequest $request, Article $article): View
     {
         $data = $request->validated();
 

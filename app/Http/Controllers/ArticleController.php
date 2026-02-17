@@ -3,13 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class ArticleController extends Controller
 {
     /**
      * Display the articles listing page.
      */
-    public function index(): \Illuminate\View\View
+    public function index(): View
     {
         $articles = Article::published()
             ->with('category')
@@ -24,7 +26,7 @@ class ArticleController extends Controller
     /**
      * Display a single article.
      */
-    public function show(string $slug): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+    public function show(string $slug): View|RedirectResponse
     {
         $article = Article::published()
             ->where('slug', $slug)

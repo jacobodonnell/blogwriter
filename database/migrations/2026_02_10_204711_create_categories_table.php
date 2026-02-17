@@ -21,8 +21,6 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->text('description')->nullable();
             $table->timestamps();
-
-            $table->index('slug');
         });
     }
 

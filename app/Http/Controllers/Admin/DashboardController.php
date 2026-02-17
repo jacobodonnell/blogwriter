@@ -7,13 +7,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\Photo;
+use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
     /**
      * Display the admin dashboard.
      */
-    public function __invoke(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function __invoke(): View
     {
         $recentArticles = Article::query()
             ->with('category')

@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use App\Models\Category;
+use Illuminate\View\View;
 
 class CategoryArticleController extends Controller
 {
     /**
      * Display articles by category (including subcategory articles).
      */
-    public function index(string $slug): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function index(string $slug): View
     {
         $category = Category::where('slug', $slug)->firstOrFail();
 

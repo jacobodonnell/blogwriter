@@ -21,7 +21,7 @@ class CreateArticlePreviewController extends Controller
     /**
      * Auto-save preview for new articles — session only, no DB write.
      */
-    public function store(UpdateArticlePreviewRequest $request): View
+    public function __invoke(UpdateArticlePreviewRequest $request): View
     {
         $data = $request->validated();
         session()->put('draft_article', $data);

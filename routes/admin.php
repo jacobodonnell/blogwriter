@@ -18,7 +18,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function (): v
 
     // Articles — new article flow (session-based, no DB until first save)
     Route::get('/articles/create', [CreateArticleController::class, 'create'])->name('articles.create');
-    Route::post('/articles/preview', [CreateArticlePreviewController::class, 'store'])->name('articles.preview.store');
+    Route::post('/articles/preview', CreateArticlePreviewController::class)->name('articles.preview.store');
     Route::post('/articles', [CreateArticleController::class, 'store'])->name('articles.store');
 
     // Articles — existing articles
@@ -26,7 +26,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function (): v
     Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
     Route::get('/articles/{article}/edit', [ArticleController::class, 'edit'])->name('articles.edit');
     Route::put('/articles/{article}', [ArticleController::class, 'update'])->name('articles.update');
-    Route::match(['post', 'put'], '/articles/{article}/preview', [ArticlePreviewController::class, 'update'])->name('articles.preview.update');
+    Route::match(['post', 'put'], '/articles/{article}/preview', ArticlePreviewController::class)->name('articles.preview.update');
     Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy');
 
     // Photos

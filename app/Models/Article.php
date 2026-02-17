@@ -106,12 +106,10 @@ class Article extends Model
                 $article->addPastSlug($article->getOriginal('slug'));
             }
 
-            // Handle status transitions for published_at
-            // When status changes TO 'published' and published_at is null, set it to now
-            $originalStatus = $article->getOriginal('status');
+            // Set published_at when first published
             $newStatus = $article->status;
 
-            if ($article->isDirty('status') && ($newStatus === Status::Published && is_null($article->published_at))) {
+            if ($article->isDirty('status') && $newStatus === Status::Published && is_null($article->published_at)) {
                 $article->published_at = now()->startOfSecond();
             }
 
@@ -122,14 +120,7 @@ class Article extends Model
                 $article->meta = $meta;
             }
 
-            // When saving an article that was already published before (has original published_at),
-            // track the edit time. This handles both:
-            // 1. Editing an already-published article (status stays published)
-            // 2. Re-publishing a previously-published article (status changes from draft to published)
-            // Only set last_edited_at if:
-            // 1. Status is 'published'
-            // 2. The article was already published before this save (has original published_at)
-            // 3. last_edited_at hasn't been manually set already
+            // Track edit time for previously-published articles
             if ($newStatus === Status::Published
                 && ! is_null($article->getOriginal('published_at'))
                 && is_null($article->last_edited_at)) {
