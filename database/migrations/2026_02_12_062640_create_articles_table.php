@@ -38,12 +38,4 @@ return new class extends Migration
             $table->index('status');
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('articles');
-    }
 };

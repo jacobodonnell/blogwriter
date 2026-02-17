@@ -28,12 +28,4 @@ return new class extends Migration
             $table->index('published_at');
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('photos');
-    }
 };

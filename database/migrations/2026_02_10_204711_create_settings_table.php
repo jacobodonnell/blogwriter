@@ -21,12 +21,4 @@ return new class extends Migration
             $table->index('key');
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('settings');
-    }
 };
