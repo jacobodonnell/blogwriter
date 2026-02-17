@@ -4,6 +4,20 @@ use App\Models\User;
 
 beforeEach(function (): void {
     @unlink(storage_path('installed.lock'));
+
+    // Backup .env so tests that modify it don't corrupt development settings
+    $this->envPath = base_path('.env');
+    $this->envBackupPath = base_path('.env.test-backup');
+    if (file_exists($this->envPath)) {
+        copy($this->envPath, $this->envBackupPath);
+    }
+});
+
+afterEach(function (): void {
+    // Restore .env from backup
+    if (file_exists($this->envBackupPath)) {
+        rename($this->envBackupPath, $this->envPath);
+    }
 });
 
 describe('non-interactive installation (arguments/flags)', function (): void {
@@ -323,8 +337,7 @@ describe('already installed detection', function (): void {
 
 describe('environment configuration', function (): void {
     it('creates .env file from .env.example', function (): void {
-        // Remove lock file and .env to ensure fresh install state
-        @unlink(storage_path('installed.lock'));
+        // Remove .env to test fresh creation (beforeEach already removed lock file)
         @unlink(base_path('.env'));
 
         $this->artisan('blogwriter:install', [
@@ -360,17 +373,14 @@ describe('environment configuration', function (): void {
     });
 
     it('fails gracefully when .env.example is missing', function (): void {
-        $envPath = base_path('.env');
         $envExamplePath = base_path('.env.example');
-        $envBackupPath = base_path('.env.backup');
         $envExampleBackupPath = base_path('.env.example.backup');
 
-        $hasEnv = file_exists($envPath);
         $hasExample = file_exists($envExamplePath);
 
-        if ($hasEnv) {
-            rename($envPath, $envBackupPath);
-        }
+        // Remove .env so install tries to create it from .env.example
+        @unlink(base_path('.env'));
+
         if ($hasExample) {
             rename($envExamplePath, $envExampleBackupPath);
         }
@@ -386,9 +396,6 @@ describe('environment configuration', function (): void {
             ])->run()
             )->toThrow(\RuntimeException::class, 'Cannot create .env file');
         } finally {
-            if ($hasEnv && file_exists($envBackupPath)) {
-                rename($envBackupPath, $envPath);
-            }
             if ($hasExample && file_exists($envExampleBackupPath)) {
                 rename($envExampleBackupPath, $envExamplePath);
             }
