@@ -158,11 +158,7 @@
                         <span class="hidden sm:inline">Preview</span>
                     </a>
                 @endif
-                <button @click="darkMode = !darkMode" class="btn btn-ghost btn-circle btn-sm"
-                        aria-label="Toggle dark mode">
-                    <i x-show="!darkMode" class="ph ph-moon text-lg" x-cloak></i>
-                    <i x-show="darkMode" class="ph ph-sun text-lg" x-cloak></i>
-                </button>
+                <x-theme-toggle size="sm" />
             </div>
         </header>
 

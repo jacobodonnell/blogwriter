@@ -128,11 +128,7 @@
 
                     {{-- Theme Mode Cycle (always visible) --}}
                     <div class="flex-none ml-2">
-                        <button @click="cycleTheme()" class="btn btn-ghost btn-circle" aria-label="Cycle theme mode">
-                            <i x-show="themeMode === 'light'" class="ph ph-sun text-xl" x-cloak></i>
-                            <i x-show="themeMode === 'dark'" class="ph ph-moon text-xl" x-cloak></i>
-                            <i x-show="themeMode === 'system'" class="ph ph-monitor text-xl" x-cloak></i>
-                        </button>
+                        <x-theme-toggle />
                     </div>
                 </div>
             </nav>

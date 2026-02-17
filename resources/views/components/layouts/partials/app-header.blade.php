@@ -1,5 +1,5 @@
 {{-- Shared header for authenticated layouts --}}
-{{-- Expects Alpine.js context with: expanded, mobileDrawerOpen, isDesktop, toggle(), themeMode, cycleTheme() --}}
+{{-- Expects Alpine.js context with: expanded, mobileDrawerOpen, isDesktop, toggle() --}}
 
 <header class="navbar bg-base-100 sticky top-0 z-30 shadow-sm h-16">
     <div class="flex-none">
@@ -16,12 +16,7 @@
     </div>
 
     <div class="flex-none gap-2">
-        {{-- Theme Mode Cycle: light → dark → system --}}
-        <button @click="cycleTheme()" class="btn btn-ghost btn-circle" aria-label="Cycle theme mode">
-            <i x-show="themeMode === 'light'" class="ph ph-sun text-xl" x-cloak></i>
-            <i x-show="themeMode === 'dark'" class="ph ph-moon text-xl" x-cloak></i>
-            <i x-show="themeMode === 'system'" class="ph ph-monitor text-xl" x-cloak></i>
-        </button>
+        <x-theme-toggle />
 
         {{-- User Dropdown --}}
         <div class="dropdown dropdown-end" x-data="{ open: false }" @click.outside="open = false">
@@ -40,7 +35,7 @@
                 <li>
                     <form method="POST" action="{{ route('logout') }}" class="w-full">
                         @csrf
-                        <button type="submit" class="w-full text-left text-error">Logout</button>
+                        <button type="submit" @click.stop class="w-full text-left text-error">Logout</button>
                     </form>
                 </li>
             </ul>
