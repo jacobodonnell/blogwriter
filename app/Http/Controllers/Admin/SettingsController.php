@@ -25,6 +25,6 @@ class SettingsController extends Controller
             }
         }
 
-        return redirect()->route('admin.settings')->with('success', 'Profile updated successfully.');
+        return redirect()->route('admin.settings')->with('profile_success', 'Profile updated successfully.');
     }
 }

@@ -45,7 +45,7 @@ it('can save profile settings via form', function (): void {
             'profile_email' => 'updated@example.com',
         ])
         ->assertRedirect(route('admin.settings'))
-        ->assertSessionHas('success');
+        ->assertSessionHas('profile_success');
 
     expect(Setting::get('profile_name'))->toBe('Updated Name')
         ->and(Setting::get('profile_bio'))->toBe('Updated bio.')

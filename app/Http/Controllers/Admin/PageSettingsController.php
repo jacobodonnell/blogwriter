@@ -19,6 +19,6 @@ class PageSettingsController extends Controller
             }
         }
 
-        return redirect()->route('admin.settings')->with('success', 'Page subtitles updated.');
+        return redirect()->route('admin.settings')->with('subtitles_success', 'Page subtitles updated.');
     }
 }
