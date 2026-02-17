@@ -165,6 +165,24 @@ class Article extends Model
     }
 
     /**
+     * Get the featured image caption — custom meta caption, or Photo's native caption if toggled.
+     */
+    public function getFeaturedImageCaptionAttribute(): ?string
+    {
+        $meta = $this->meta ?? [];
+
+        if (! empty($meta['featured_image_caption'])) {
+            return $meta['featured_image_caption'];
+        }
+
+        if (! empty($meta['use_photo_caption']) && $this->photo_id) {
+            return $this->featuredPhoto?->caption;
+        }
+
+        return null;
+    }
+
+    /**
      * Scope for published articles.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query

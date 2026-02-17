@@ -33,6 +33,8 @@ class UpdateArticlePreviewRequest extends FormRequest
             'meta.meta_title' => ['nullable', 'string', 'max:255'],
             'meta.meta_description' => ['nullable', 'string', 'max:500'],
             'meta.og_image' => ['nullable', 'string', 'max:500'],
+            'meta.featured_image_caption' => ['nullable', 'string', 'max:500'],
+            'meta.use_photo_caption' => ['nullable'],
             'photo_id' => ['nullable', 'integer', 'exists:photos,id', new PublishedPhoto],
             'featured_image' => ['nullable', 'url', 'max:500'],
         ];

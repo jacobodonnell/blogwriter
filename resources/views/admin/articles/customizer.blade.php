@@ -14,6 +14,8 @@
             uploading: false,
             featuredImageUrl: @js(old('featured_image', $article->meta['featured_image_url'] ?? '')),
             showUrlField: @js(!empty(old('featured_image', $article->meta['featured_image_url'] ?? ''))),
+            featuredImageCaption: @js(old('meta.featured_image_caption', $article->meta['featured_image_caption'] ?? '')),
+            usePhotoCaption: @js(old('meta.use_photo_caption', !empty($article->meta['use_photo_caption']))),
             easyMDE: null,
             initialStatus: @js($article->status->value),
             currentStatus: @js($article->status->value),
@@ -140,6 +142,8 @@
             <input type="file" id="featured-image-file-input" name="featured_image_file" class="hidden">
             <input type="hidden" id="featured-image-alt-input" name="featured_image_alt" value="">
             <input type="hidden" id="featured-image-caption-input" name="featured_image_caption" value="">
+            <input type="hidden" name="meta[featured_image_caption]" :value="usePhotoCaption ? '' : featuredImageCaption">
+            <input type="hidden" name="meta[use_photo_caption]" :value="usePhotoCaption ? '1' : ''">
 
             <div class="space-y-4">
 

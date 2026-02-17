@@ -68,6 +68,18 @@ class CreateArticleController extends Controller
             $photoId = $data['photo_id'];
         }
 
+        // Caption meta mutual exclusion
+        if (! empty($meta['use_photo_caption'])) {
+            unset($meta['featured_image_caption']);
+        } else {
+            unset($meta['use_photo_caption']);
+        }
+
+        // Clear caption keys if no featured image at all
+        if (empty($photoId) && empty($meta['featured_image_url'])) {
+            unset($meta['featured_image_caption'], $meta['use_photo_caption']);
+        }
+
         $article = Article::create([
             'user_id' => auth()->id(),
             'title' => $data['title'] ?? 'Untitled Article',

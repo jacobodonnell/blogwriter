@@ -1,10 +1,12 @@
 @php
     $featuredPhoto = $article->exists ? $article->featuredPhoto : null;
     $photoMap = $photos->mapWithKeys(fn ($p) => [$p->id => $p->image_url])->toArray();
+    $captionMap = $photos->mapWithKeys(fn ($p) => [$p->id => $p->caption])->toArray();
 @endphp
 
 <div x-data="{
         photoUrls: @js($photoMap),
+        photoCaptions: @js($captionMap),
         get previewUrl() {
             if (this.uploadedPhotoUrl) return this.uploadedPhotoUrl;
             if (this.selectedPhotoId && this.photoUrls[this.selectedPhotoId]) return this.photoUrls[this.selectedPhotoId];
@@ -15,7 +17,7 @@
 
     {{-- Photo Select --}}
     <select x-model="selectedPhotoId" data-test="photo-select"
-            @change="if (selectedPhotoId) { featuredImageUrl = ''; uploadedPhotoUrl = null; hasNewPhoto = false; const fi = document.getElementById('featured-image-file-input'); if (fi) fi.value = ''; }"
+            @change="if (selectedPhotoId) { featuredImageUrl = ''; uploadedPhotoUrl = null; hasNewPhoto = false; usePhotoCaption = false; featuredImageCaption = ''; const fi = document.getElementById('featured-image-file-input'); if (fi) fi.value = ''; }"
             class="select select-bordered select-sm w-full">
         <option value="">No featured image</option>
         @foreach($photos as $photo)
@@ -54,7 +56,7 @@
                x-model="featuredImageUrl"
                class="input input-bordered input-sm w-full"
                placeholder="https://example.com/image.jpg"
-               @input="if (featuredImageUrl) { selectedPhotoId = ''; uploadedPhotoUrl = null; hasNewPhoto = false; const fi = document.getElementById('featured-image-file-input'); if (fi) fi.value = ''; }">
+               @input="if (featuredImageUrl) { selectedPhotoId = ''; uploadedPhotoUrl = null; hasNewPhoto = false; usePhotoCaption = false; const fi = document.getElementById('featured-image-file-input'); if (fi) fi.value = ''; }">
         <p class="text-xs text-base-content/50 mt-1">External URL overrides photo selection.</p>
     </div>
 
@@ -78,4 +80,30 @@
                  class="w-full max-h-32 object-cover rounded-lg">
         </div>
     @endif
+
+    {{-- Caption Section --}}
+    <template x-if="previewUrl || featuredImageUrl">
+        <div class="mt-3 space-y-2">
+            {{-- Use Photo Caption toggle (only when a photo is selected, not URL/upload) --}}
+            <div x-show="selectedPhotoId && !uploadedPhotoUrl && !featuredImageUrl" x-cloak>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" class="toggle toggle-sm" x-model="usePhotoCaption">
+                    <span class="text-xs">Use photo's caption</span>
+                </label>
+            </div>
+
+            {{-- Photo caption preview (read-only) --}}
+            <div x-show="usePhotoCaption && selectedPhotoId && photoCaptions[selectedPhotoId]" x-cloak>
+                <div class="bg-base-200 rounded-lg px-3 py-2 text-sm text-base-content/70"
+                     x-text="photoCaptions[selectedPhotoId]"></div>
+            </div>
+
+            {{-- Custom caption textarea --}}
+            <div x-show="!usePhotoCaption || !selectedPhotoId" x-cloak>
+                <textarea x-model="featuredImageCaption"
+                          class="textarea textarea-bordered textarea-sm w-full h-16 text-sm"
+                          placeholder="Image caption (optional)"></textarea>
+            </div>
+        </div>
+    </template>
 </div>

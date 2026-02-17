@@ -136,7 +136,7 @@ class ArticleController extends Controller
         // Handle featured image removal
         if ($request->boolean('remove_featured_image')) {
             $data['photo_id'] = null;
-            unset($meta['featured_image_url']);
+            unset($meta['featured_image_url'], $meta['featured_image_caption'], $meta['use_photo_caption']);
         } elseif ($request->hasFile('featured_image_file')) {
             $result = $this->handlePhotoUpload->handle(
                 $request->file('featured_image_file'),
@@ -161,6 +161,18 @@ class ArticleController extends Controller
             if (isset($existingMeta['featured_image_url']) && ! isset($meta['featured_image_url'])) {
                 $meta['featured_image_url'] = $existingMeta['featured_image_url'];
             }
+        }
+
+        // Caption meta mutual exclusion
+        if (! empty($meta['use_photo_caption'])) {
+            unset($meta['featured_image_caption']);
+        } else {
+            unset($meta['use_photo_caption']);
+        }
+
+        // Clear caption keys if no featured image at all
+        if (empty($data['photo_id']) && empty($meta['featured_image_url'])) {
+            unset($meta['featured_image_caption'], $meta['use_photo_caption']);
         }
 
         $article->update([
