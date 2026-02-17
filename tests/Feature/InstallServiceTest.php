@@ -73,7 +73,7 @@ it('replaces existing user when creating a new one', function (): void {
 });
 
 it('generates a passphrase string', function (): void {
-    $passphrase = $this->service->generatePassphrase();
+    $passphrase = \App\Services\PasswordGenerator::generate();
 
     expect($passphrase)->toBeString()->not->toBeEmpty();
 });

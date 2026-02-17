@@ -11,7 +11,7 @@ class InstallController extends Controller
     public function index(InstallService $installService): View|RedirectResponse
     {
         if ($installService->isAlreadyInstalled()) {
-            return redirect('/admin');
+            return redirect()->route('admin.dashboard');
         }
 
         return view('install.cli');

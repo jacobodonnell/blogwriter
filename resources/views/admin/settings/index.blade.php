@@ -5,7 +5,7 @@
         {{-- Header --}}
         <div>
             <h1 class="text-3xl font-bold">Settings</h1>
-            <p class="text-gray-600 dark:text-gray-400 mt-1">Configure your BlogWriter site.</p>
+            <p class="text-base-content/60 mt-1">Configure your BlogWriter site.</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -269,7 +269,7 @@
                     </div>
 
                     <div class="mt-4 p-4 bg-base-200 rounded-lg">
-                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                        <p class="text-sm text-base-content/60">
                             <i class="ph ph-terminal text-lg mr-2"></i>
                             Use <code class="bg-base-300 px-2 py-1 rounded">php artisan blogwriter:install</code> to reconfigure your site,
                             or edit the <code class="bg-base-300 px-2 py-1 rounded">.env</code> file directly.

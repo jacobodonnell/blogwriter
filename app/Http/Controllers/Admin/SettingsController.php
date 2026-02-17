@@ -24,9 +24,6 @@ class SettingsController extends Controller
         unset($validated['profile_name']);
         $request->user()->update(['name' => $name]);
 
-        // Clean up any leftover profile_name in settings table
-        Setting::query()->where('key', 'profile_name')->delete();
-
         foreach ($validated as $key => $value) {
             if (blank($value)) {
                 Setting::query()->where('key', $key)->delete();

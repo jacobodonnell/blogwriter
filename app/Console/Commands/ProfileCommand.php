@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Commands\Concerns\ValidatesInput;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Console\Command;
@@ -13,6 +14,8 @@ use function Laravel\Prompts\textarea;
 
 class ProfileCommand extends Command
 {
+    use ValidatesInput;
+
     protected $signature = 'blogwriter:profile
                             {--name= : Display name}
                             {--bio= : Short bio}
@@ -200,38 +203,9 @@ class ProfileCommand extends Command
         return self::SUCCESS;
     }
 
-    protected function validateUrl(string $value): ?string
-    {
-        return filter_var($value, FILTER_VALIDATE_URL) ? null : 'Please enter a valid URL.';
-    }
-
-    protected function validateEmail(string $value): ?string
-    {
-        return filter_var($value, FILTER_VALIDATE_EMAIL) ? null : 'Please enter a valid email address.';
-    }
-
     protected function hasAnyOption(): bool
     {
-        if ($this->option('name') !== null) {
-            return true;
-        }
-
-        if ($this->option('bio') !== null) {
-            return true;
-        }
-
-        if ($this->option('github') !== null) {
-            return true;
-        }
-
-        if ($this->option('mastodon') !== null) {
-            return true;
-        }
-
-        if ($this->option('bluesky') !== null) {
-            return true;
-        }
-
-        return $this->option('email') !== null;
+        return collect(['name', 'bio', 'github', 'mastodon', 'bluesky', 'email'])
+            ->contains(fn (string $option): bool => $this->option($option) !== null);
     }
 }

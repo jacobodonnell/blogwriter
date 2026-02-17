@@ -15,14 +15,8 @@ class SettingSeeder extends Seeder
     {
         $user = User::first();
 
-        $defaults = [
-            'profile_email' => $user?->email,
-        ];
-
-        foreach ($defaults as $key => $value) {
-            if ($value !== null) {
-                Setting::set($key, $value);
-            }
+        if ($user?->email) {
+            Setting::set('profile_email', $user->email);
         }
     }
 }

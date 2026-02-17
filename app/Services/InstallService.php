@@ -240,14 +240,6 @@ class InstallService
     }
 
     /**
-     * Generate a secure passphrase using the EFF wordlist.
-     */
-    public function generatePassphrase(): string
-    {
-        return PasswordGenerator::generate();
-    }
-
-    /**
      * Update or add an environment variable value.
      */
     private function updateEnvValue(string $content, string $key, string $value): string

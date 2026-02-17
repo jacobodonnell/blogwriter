@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AboutController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CategoryArticleController;
 use App\Http\Controllers\HomeController;
@@ -22,6 +23,4 @@ Route::get('/photos', [PhotoController::class, 'index'])->name('photos.index');
 Route::get('/photos/{photo:slug}', [PhotoController::class, 'show'])->name('photos.show');
 
 // About
-Route::get('/about', fn () => view('public.about', [
-    'user' => \App\Models\User::first(),
-]))->name('about');
+Route::get('/about', AboutController::class)->name('about');

@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Commands\Concerns\PromptsForPassword;
+use App\Console\Commands\Concerns\ValidatesInput;
 use App\Models\User;
 use App\Services\InstallService;
 use App\Services\ResetService;
@@ -12,13 +14,15 @@ use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\note;
-use function Laravel\Prompts\password;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 use function Laravel\Prompts\warning;
 
 class InstallCommand extends Command
 {
+    use PromptsForPassword;
+    use ValidatesInput;
+
     protected $signature = 'blogwriter:install
                             {--site-name= : Site name}
                             {--site-url= : Site URL}
@@ -184,7 +188,7 @@ class InstallCommand extends Command
             throw new \InvalidArgumentException('Invalid admin email: '.$error);
         }
 
-        if ($error = $this->validatePasswordLength($password)) {
+        if ($error = $this->validatePassword($password)) {
             throw new \InvalidArgumentException('Invalid admin password: '.$error);
         }
 
@@ -253,94 +257,6 @@ class InstallCommand extends Command
             'password' => $password,
             'seed' => $seedData,
         ];
-    }
-
-    protected function validateUrl(string $value): ?string
-    {
-        return filter_var($value, FILTER_VALIDATE_URL) ? null : 'Please enter a valid URL.';
-    }
-
-    protected function validateEmail(string $value): ?string
-    {
-        return filter_var($value, FILTER_VALIDATE_EMAIL) ? null : 'Please enter a valid email address.';
-    }
-
-    protected function validatePasswordLength(string $value): ?string
-    {
-        if (env('BYPASS_PASSWORD_RULES', false)) {
-            return strlen($value) >= 8 ? null : 'Password must be at least 8 characters.';
-        }
-
-        if (strlen($value) < 16) {
-            return 'Password must be at least 16 characters.';
-        }
-
-        if (! preg_match('/[a-zA-Z]/', $value)) {
-            return 'Password must contain at least one letter.';
-        }
-
-        if (! preg_match('/\d/', $value)) {
-            return 'Password must contain at least one number.';
-        }
-
-        if (! preg_match('/[^a-zA-Z0-9]/', $value)) {
-            return 'Password must contain at least one symbol.';
-        }
-
-        return null;
-    }
-
-    protected function promptForPassword(): string
-    {
-        $suggestedPassphrase = $this->installService->generatePassphrase();
-
-        info('Suggested secure passphrase (memorable & strong):');
-        info($suggestedPassphrase);
-        $this->newLine();
-
-        $useSuggested = confirm(
-            label: 'Use this passphrase?',
-            default: false
-        );
-
-        if ($useSuggested) {
-            info('Your passphrase: '.$suggestedPassphrase);
-            info('Please save this in a password manager!');
-            $this->newLine();
-
-            return $suggestedPassphrase;
-        }
-
-        $attempts = 0;
-        $maxAttempts = 3;
-
-        while ($attempts < $maxAttempts) {
-            $password = password(
-                label: 'Create a password',
-                placeholder: 'Min 8 characters',
-                validate: $this->validatePasswordLength(...)
-            );
-
-            $confirm = password(
-                label: 'Confirm your password',
-                placeholder: 'Enter the same password'
-            );
-
-            if ($password === $confirm) {
-                return $password;
-            }
-
-            warning('Passwords do not match. Please try again.');
-            $this->newLine();
-            $attempts++;
-        }
-
-        warning('Maximum attempts reached. Generating a secure passphrase for you.');
-        $generatedPassphrase = $this->installService->generatePassphrase();
-        info('Your generated passphrase: '.$generatedPassphrase);
-        info('Please save this in a password manager!');
-
-        return $generatedPassphrase;
     }
 
     protected function install(array $config): void
@@ -447,7 +363,7 @@ class InstallCommand extends Command
     {
         $output = shell_exec($command);
 
-        return ! in_array($output, ['', '0', false, null], true) && $output !== '0';
+        return ! in_array($output, [null, '', false], true);
     }
 
     protected function determineSeedOption(): bool
