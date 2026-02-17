@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Actions\GenerateArticleSummaryAction;
+use App\Actions\NormalizeCaptionMetaAction;
 use App\Actions\Photos\HandleArticlePhotoUploadAction;
 use App\Enums\Status;
 use App\Http\Controllers\Controller;
@@ -19,6 +20,7 @@ class CreateArticleController extends Controller
     public function __construct(
         private readonly HandleArticlePhotoUploadAction $handlePhotoUpload,
         private readonly GenerateArticleSummaryAction $generateSummary,
+        private readonly NormalizeCaptionMetaAction $normalizeCaptionMeta,
     ) {}
 
     /**
@@ -68,17 +70,7 @@ class CreateArticleController extends Controller
             $photoId = $data['photo_id'];
         }
 
-        // Caption meta mutual exclusion
-        if (! empty($meta['use_photo_caption'])) {
-            unset($meta['featured_image_caption']);
-        } else {
-            unset($meta['use_photo_caption']);
-        }
-
-        // Clear caption keys if no featured image at all
-        if (empty($photoId) && empty($meta['featured_image_url'])) {
-            unset($meta['featured_image_caption'], $meta['use_photo_caption']);
-        }
+        $meta = $this->normalizeCaptionMeta->handle($meta, $photoId, $meta['featured_image_url'] ?? null);
 
         $article = Article::create([
             'user_id' => auth()->id(),
