@@ -57,8 +57,8 @@ The installer uses Laravel Prompts for an interactive terminal experience:
 php artisan blogwriter:install --non-interactive
 ```
 
-<x-callout type="info" title="Web Installer" collapsible>
-  A browser-based web installer exists at `/install` but is disabled by default (`blogwriter.web_installer` config is `false`). It needs further development before it's reliable. Use the CLI installer.
+<x-callout type="info" title="Install Page">
+  If you visit your site before running the installer, you'll see a page at `/install` with instructions to run the CLI command.
 </x-callout>
 
 ---

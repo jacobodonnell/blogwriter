@@ -14,6 +14,6 @@ class InstallController extends Controller
             return redirect('/admin');
         }
 
-        return view('install.index');
+        return view('install.cli');
     }
 }
