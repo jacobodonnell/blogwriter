@@ -164,7 +164,7 @@
                     <legend class="fieldset-legend">Slug</legend>
                     <input type="hidden" name="slug" :value="slug">
                     <div class="join w-full">
-                        <span class="join-item btn btn-sm btn-disabled no-animation">/blog/</span>
+                        <span class="join-item btn btn-sm btn-disabled no-animation">/articles/</span>
                         <input type="text" x-model="displaySlug"
                                class="join-item input input-bordered input-sm flex-1 @error('slug') input-error @enderror"
                                placeholder="auto-generated from title">

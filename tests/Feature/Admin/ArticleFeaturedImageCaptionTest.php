@@ -133,7 +133,7 @@ it('renders figcaption on public article page when caption exists', function ():
         ],
     ]);
 
-    get(route('article.show', $article->slug))
+    get(route('articles.show', $article->slug))
         ->assertOk()
         ->assertSee('A beautiful sunset')
         ->assertSee('<figcaption', false);
@@ -146,7 +146,7 @@ it('omits figcaption on public article page when no caption', function (): void 
         ],
     ]);
 
-    get(route('article.show', $article->slug))
+    get(route('articles.show', $article->slug))
         ->assertOk()
         ->assertDontSee('<figcaption', false);
 });

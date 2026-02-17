@@ -12,8 +12,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Articles
 Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
-Route::redirect('/blog', '/');
-Route::get('/blog/{slug}', [ArticleController::class, 'show'])->name('article.show');
+Route::get('/articles/{slug}', [ArticleController::class, 'show'])->name('articles.show');
 
 // Categories
 Route::get('/category/{slug}', [CategoryArticleController::class, 'index'])->name('category.show');

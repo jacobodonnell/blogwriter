@@ -14,7 +14,7 @@ uses(RefreshDatabase::class);
 it('does not show edit links on article show for guests', function (): void {
     $article = Article::factory()->published()->create();
 
-    $this->get(route('article.show', $article->slug))
+    $this->get(route('articles.show', $article->slug))
         ->assertSuccessful()
         ->assertDontSee(route('admin.articles.edit', $article))
         ->assertDontSee('All Articles');
@@ -25,7 +25,7 @@ it('shows edit and all articles links on article show for auth users', function 
     $article = Article::factory()->published()->create();
 
     $this->actingAs($user)
-        ->get(route('article.show', $article->slug))
+        ->get(route('articles.show', $article->slug))
         ->assertSuccessful()
         ->assertSee(route('admin.articles.edit', $article))
         ->assertSee('All Articles');

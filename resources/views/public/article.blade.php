@@ -86,7 +86,7 @@
             <div class="flex items-center gap-2 text-sm text-base-content/60 mb-4">
                 <i class="ph ph-link"></i>
                 <span>Permalink:</span>
-                <a href="{{ route('article.show', $article->slug) }}" class="u-url link link-primary">
+                <a href="{{ route('articles.show', $article->slug) }}" class="u-url link link-primary">
                     {{ url()->current() }}
                 </a>
             </div>

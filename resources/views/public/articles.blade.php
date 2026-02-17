@@ -34,7 +34,7 @@
                             {{-- Featured Image --}}
                             @if($article->featured_image_url)
                                 <figure class="md:w-2/5 aspect-video md:aspect-auto overflow-hidden {{ $loop->odd ? 'md:rounded-l-2xl md:rounded-r-none' : 'md:rounded-r-2xl md:rounded-l-none' }} rounded-t-2xl md:rounded-t-none">
-                                    <a href="{{ route('article.show', $article->slug) }}">
+                                    <a href="{{ route('articles.show', $article->slug) }}">
                                         <img src="{{ $article->featured_image_url }}"
                                              alt="{{ $article->title }}"
                                              class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
@@ -56,7 +56,7 @@
 
                                 {{-- Title (p-name) --}}
                                 <h2 class="p-name card-title text-xl">
-                                    <a href="{{ route('article.show', $article->slug) }}" class="u-url hover:link-primary">
+                                    <a href="{{ route('articles.show', $article->slug) }}" class="u-url hover:link-primary">
                                         {{ $article->title }}
                                     </a>
                                 </h2>
@@ -88,7 +88,7 @@
                                             Edit
                                         </a>
                                     @endauth
-                                    <a href="{{ route('article.show', $article->slug) }}"
+                                    <a href="{{ route('articles.show', $article->slug) }}"
                                        class="btn btn-primary btn-sm">
                                         Read More
                                         <i class="ph ph-arrow-right"></i>

@@ -29,11 +29,6 @@ it('renders customizer for new article without DB write', function (): void {
         ->assertViewIs('admin.articles.customizer');
 });
 
-it('redirects blog route to home', function (): void {
-    $this->get('/blog')
-        ->assertRedirect('/');
-});
-
 it('has no broken links in public pages smoke test', function (): void {
     $article = \App\Models\Article::factory()->published()->create();
     $category = \App\Models\Category::factory()->create();
@@ -41,7 +36,7 @@ it('has no broken links in public pages smoke test', function (): void {
     $pages = [
         route('home'),
         route('about'),
-        route('article.show', $article->slug),
+        route('articles.show', $article->slug),
         route('category.show', $category->slug),
     ];
 

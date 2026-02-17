@@ -35,7 +35,7 @@
                         <div class="card-body">
                             {{-- Title (p-name) --}}
                             <h2 class="p-name card-title text-xl">
-                                <a href="{{ route('article.show', $article->slug) }}" class="u-url hover:link-primary">
+                                <a href="{{ route('articles.show', $article->slug) }}" class="u-url hover:link-primary">
                                     {{ $article->title }}
                                 </a>
                             </h2>
@@ -58,7 +58,7 @@
 
                             {{-- Read More --}}
                             <div class="card-actions justify-end mt-4">
-                                <a href="{{ route('article.show', $article->slug) }}" 
+                                <a href="{{ route('articles.show', $article->slug) }}" 
                                    class="btn btn-primary btn-sm btn-ghost gap-1">
                                     Read Article
                                     <i class="ph ph-arrow-right"></i>

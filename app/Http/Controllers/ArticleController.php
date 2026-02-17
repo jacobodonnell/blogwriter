@@ -46,7 +46,7 @@ class ArticleController extends Controller
             ->first();
 
         if ($article) {
-            return redirect()->route('article.show', $article->slug, 301);
+            return redirect()->route('articles.show', $article->slug, 301);
         }
 
         abort(404);
