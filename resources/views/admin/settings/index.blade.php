@@ -57,10 +57,10 @@
                 <div class="card-body">
                     <h2 class="card-title text-xl mb-4">Page Subtitles</h2>
 
-                    @if(session('success') && str_contains(session('success'), 'subtitles'))
+                    @if(session('subtitles_success'))
                         <div class="alert alert-success mb-4">
                             <i class="ph ph-check-circle text-xl"></i>
-                            <span>{{ session('success') }}</span>
+                            <span>{{ session('subtitles_success') }}</span>
                         </div>
                     @endif
 
@@ -112,10 +112,10 @@
                 <div class="card-body">
                     <h2 class="card-title text-xl mb-4">Your Profile</h2>
 
-                    @if(session('success') && !str_contains(session('success'), 'subtitles'))
+                    @if(session('profile_success'))
                         <div class="alert alert-success mb-4">
                             <i class="ph ph-check-circle text-xl"></i>
-                            <span>{{ session('success') }}</span>
+                            <span>{{ session('profile_success') }}</span>
                         </div>
                     @endif
 
@@ -213,7 +213,7 @@
             </div>
 
             {{-- Security Alerts --}}
-            @if(env('BYPASS_PASSWORD_RULES', false))
+            @if(config('auth.bypass_password_rules'))
                 <div class="card bg-error text-error-content shadow lg:col-span-2">
                     <div class="card-body">
                         <h2 class="card-title text-xl">

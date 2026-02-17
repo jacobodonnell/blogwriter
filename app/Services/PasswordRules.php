@@ -8,7 +8,7 @@ class PasswordRules
 {
     public static function rules(): Password
     {
-        if (env('BYPASS_PASSWORD_RULES', false)) {
+        if (config('auth.bypass_password_rules')) {
             return Password::min(8);
         }
 

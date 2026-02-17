@@ -112,4 +112,16 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Bypass Password Rules
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, reduces password requirements to minimum 8 characters.
+    | This should only be used in development/testing environments.
+    |
+    */
+
+    'bypass_password_rules' => env('BYPASS_PASSWORD_RULES', false),
+
 ];
