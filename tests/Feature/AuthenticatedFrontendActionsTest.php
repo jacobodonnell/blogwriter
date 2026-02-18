@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Article;
+use App\Models\Category;
 use App\Models\Photo;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -123,4 +124,101 @@ it('prevents guests from uploading photos', function (): void {
         'alt_text' => 'Test',
         'status' => 'published',
     ])->assertUnauthorized();
+});
+
+// --- Category Page Auth Links ---
+
+it('does not show manage categories link on category page for guests', function (): void {
+    $category = Category::factory()->create();
+
+    $this->get(route('categories.show', $category->slug))
+        ->assertSuccessful()
+        ->assertDontSee('Manage Categories');
+});
+
+it('shows manage categories link on category page for auth users', function (): void {
+    $user = User::factory()->create();
+    $category = Category::factory()->create();
+
+    $this->actingAs($user)
+        ->get(route('categories.show', $category->slug))
+        ->assertSuccessful()
+        ->assertSee('Manage Categories');
+});
+
+// --- About Page Auth Links ---
+
+it('does not show edit profile link on about page for guests', function (): void {
+    $this->get(route('about'))
+        ->assertSuccessful()
+        ->assertDontSee('Edit Profile');
+});
+
+it('shows edit profile link on about page for auth users', function (): void {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->get(route('about'))
+        ->assertSuccessful()
+        ->assertSee('Edit Profile');
+});
+
+// --- Article Breadcrumb ---
+
+it('shows Articles link in article breadcrumb instead of category', function (): void {
+    $category = Category::factory()->create(['name' => 'Technology']);
+    $article = Article::factory()->published()->create(['category_id' => $category->id]);
+
+    $response = $this->get(route('articles.show', $article->slug));
+
+    $response->assertSuccessful();
+    $response->assertSee(route('articles.index'));
+    $response->assertSee('Articles</a>', false);
+});
+
+// --- Photo Categories ---
+
+it('allows auth user to upload a photo with category via AJAX', function (): void {
+    Storage::fake('public');
+    $user = User::factory()->create();
+    $category = Category::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->postJson(route('admin.photos.store'), [
+            'image_file' => UploadedFile::fake()->image('categorized.jpg', 800, 600),
+            'alt_text' => 'Categorized photo',
+            'status' => 'published',
+            'category_id' => $category->id,
+        ]);
+
+    $response->assertSuccessful();
+    $this->assertDatabaseHas('photos', [
+        'alt_text' => 'Categorized photo',
+        'category_id' => $category->id,
+    ]);
+});
+
+it('shows category badge on photo show page', function (): void {
+    $category = Category::factory()->create(['name' => 'Landscapes']);
+    $photo = Photo::factory()->published()->withCategory($category)->create();
+
+    $this->get(route('photos.show', $photo->slug))
+        ->assertSuccessful()
+        ->assertSee('Landscapes');
+});
+
+it('allows updating photo category', function (): void {
+    Storage::fake('public');
+    $user = User::factory()->create();
+    $photo = Photo::factory()->published()->create();
+    $category = Category::factory()->create();
+
+    $this->actingAs($user)
+        ->put(route('admin.photos.update', $photo), [
+            'alt_text' => $photo->alt_text,
+            'status' => 'published',
+            'category_id' => $category->id,
+        ]);
+
+    expect($photo->fresh()->category_id)->toBe($category->id);
 });

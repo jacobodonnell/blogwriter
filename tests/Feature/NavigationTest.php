@@ -69,7 +69,7 @@ it('has no broken links in public pages smoke test', function (): void {
         route('home'),
         route('about'),
         route('articles.show', $article->slug),
-        route('category.show', $category->slug),
+        route('categories.show', $category->slug),
     ];
 
     foreach ($pages as $page) {
