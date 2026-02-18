@@ -59,7 +59,10 @@ class ArticleController extends Controller
         }
 
         if ($request->filled('category')) {
-            $query->where('category_id', $request->category);
+            $category = Category::where('slug', $request->input('category'))->first();
+            if ($category) {
+                $query->where('category_id', $category->id);
+            }
         }
 
         if ($request->filled('status')) {

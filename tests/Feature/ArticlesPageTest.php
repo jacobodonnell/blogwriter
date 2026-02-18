@@ -86,7 +86,7 @@ it('filters articles by category', function (): void {
     $article = Article::factory()->published()->create(['title' => 'Tech Article', 'category_id' => $category->id]);
     $other = Article::factory()->published()->create(['title' => 'Uncategorized Article']);
 
-    $this->get('/articles?category='.$category->id)
+    $this->get('/articles?category='.$category->slug)
         ->assertSuccessful()
         ->assertSee('Tech Article')
         ->assertDontSee('Uncategorized Article');
@@ -140,7 +140,7 @@ it('combines multiple filters', function (): void {
     Article::factory()->draft()->create(['title' => 'Laravel Code Draft', 'category_id' => $category->id]);
 
     $this->actingAs($user)
-        ->get('/articles?search=Laravel&category='.$category->id.'&status=published')
+        ->get('/articles?search=Laravel&category='.$category->slug.'&status=published')
         ->assertSuccessful()
         ->assertSee('Laravel Code Tips')
         ->assertDontSee('Laravel Other Tips')

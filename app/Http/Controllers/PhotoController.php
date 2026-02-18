@@ -29,7 +29,10 @@ class PhotoController extends Controller
         }
 
         if ($request->filled('category')) {
-            $photoQuery->where('category_id', $request->input('category'));
+            $category = Category::where('slug', $request->input('category'))->first();
+            if ($category) {
+                $photoQuery->where('category_id', $category->id);
+            }
         }
 
         if (auth()->check() && $request->filled('status')) {

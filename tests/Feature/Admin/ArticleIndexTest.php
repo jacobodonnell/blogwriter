@@ -145,7 +145,7 @@ it('combines search with category and status filters', function (): void {
 
     $response = $this->get(route('admin.articles.index', [
         'search' => 'Laravel',
-        'category' => $category->id,
+        'category' => $category->slug,
         'status' => 'published',
     ]));
 

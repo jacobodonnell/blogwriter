@@ -119,6 +119,7 @@
                                value="{{ request('search') }}"
                                placeholder="Search by title or slug..."
                                class="input input-bordered w-full"
+                               x-autofocus
                                @input.debounce.400ms="$el.form.requestSubmit()" />
                     </div>
 
@@ -129,11 +130,11 @@
                         <select name="category" class="select select-bordered w-full md:w-auto" onchange="this.form.requestSubmit()">
                             <option value="">All Categories</option>
                             @foreach($categories as $rootCat)
-                                <option value="{{ $rootCat->id }}" {{ request('category') == $rootCat->id ? 'selected' : '' }}>
+                                <option value="{{ $rootCat->slug }}" {{ request('category') == $rootCat->slug ? 'selected' : '' }}>
                                     {{ $rootCat->name }}
                                 </option>
                                 @foreach($rootCat->children as $childCat)
-                                    <option value="{{ $childCat->id }}" {{ request('category') == $childCat->id ? 'selected' : '' }}>
+                                    <option value="{{ $childCat->slug }}" {{ request('category') == $childCat->slug ? 'selected' : '' }}>
                                         &nbsp;&nbsp;└ {{ $childCat->name }}
                                     </option>
                                 @endforeach

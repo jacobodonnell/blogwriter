@@ -66,7 +66,7 @@ it('filters photos by category', function (): void {
     Photo::factory()->published()->create(['alt_text' => 'Nature Photo', 'category_id' => $category->id]);
     Photo::factory()->published()->create(['alt_text' => 'Urban Photo']);
 
-    $this->get('/photos?category='.$category->id)
+    $this->get('/photos?category='.$category->slug)
         ->assertSuccessful()
         ->assertSee('Nature Photo')
         ->assertDontSee('Urban Photo');
