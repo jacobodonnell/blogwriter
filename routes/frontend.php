@@ -3,6 +3,7 @@
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CategoryArticleController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PhotoController;
 use Illuminate\Support\Facades\Route;
@@ -15,6 +16,7 @@ Route::get('/articles', [ArticleController::class, 'index'])->name('articles.ind
 Route::get('/articles/{slug}', [ArticleController::class, 'show'])->name('articles.show');
 
 // Categories
+Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 Route::get('/categories/{path}', [CategoryArticleController::class, 'index'])
     ->where('path', '.*')
     ->name('categories.show');

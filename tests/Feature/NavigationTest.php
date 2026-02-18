@@ -10,6 +10,7 @@ it('returns successful response for public navigation links', function (string $
     $this->get($route)->assertSuccessful();
 })->with([
     'home' => fn () => route('home'),
+    'categories' => fn () => route('categories.index'),
     'about' => fn () => route('about'),
 ]);
 
@@ -48,6 +49,7 @@ it('shows menu-active on guest desktop nav for current route', function (string 
 })->with([
     'home' => fn () => route('home'),
     'articles' => fn () => route('articles.index'),
+    'categories' => fn () => route('categories.index'),
     'about' => fn () => route('about'),
 ]);
 
@@ -58,6 +60,7 @@ it('shows menu-active on guest mobile drawer for current route', function (strin
 })->with([
     'home' => fn () => route('home'),
     'articles' => fn () => route('articles.index'),
+    'categories' => fn () => route('categories.index'),
     'about' => fn () => route('about'),
 ]);
 
@@ -68,6 +71,7 @@ it('has no broken links in public pages smoke test', function (): void {
     $pages = [
         route('home'),
         route('about'),
+        route('categories.index'),
         route('articles.show', $article->slug),
         route('categories.show', $category->slug),
     ];

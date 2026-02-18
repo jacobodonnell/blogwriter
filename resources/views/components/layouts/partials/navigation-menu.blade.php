@@ -37,6 +37,17 @@
     </li>
 
     <li>
+        <a href="{{ route('categories.index') }}"
+           class="{{ request()->is('categories*') && !request()->is('admin*') ? 'menu-active' : '' }}"
+           :class="!expanded && isDesktop && 'justify-center'"
+           @mouseenter="showTooltip($event, 'Categories')"
+           @mouseleave="hideTooltip()">
+            <i class="ph ph-folder-open text-lg"></i>
+            <span x-show="expanded || !isDesktop" x-cloak>Categories</span>
+        </a>
+    </li>
+
+    <li>
         <a href="{{ route('about') }}"
            class="{{ request()->is('about') ? 'menu-active' : '' }}"
            :class="!expanded && isDesktop && 'justify-center'"
