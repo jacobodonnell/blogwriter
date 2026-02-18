@@ -7,18 +7,17 @@
     <div class="space-y-6"
          x-data="{
             columns: {
-                featuredImage: localStorage.getItem('articles_col_featuredImage') === 'true',
-                title: localStorage.getItem('articles_col_title') !== 'false',
-                status: localStorage.getItem('articles_col_status') !== 'false',
-                categories: localStorage.getItem('articles_col_categories') !== 'false',
-                publishedAt: localStorage.getItem('articles_col_publishedAt') === 'true',
-                createdAt: localStorage.getItem('articles_col_createdAt') === 'true',
-                updatedAt: localStorage.getItem('articles_col_updatedAt') !== 'false',
+                featuredImage: $persist(false).as('articles_col_featuredImage'),
+                title: $persist(true).as('articles_col_title'),
+                status: $persist(true).as('articles_col_status'),
+                categories: $persist(true).as('articles_col_categories'),
+                publishedAt: $persist(false).as('articles_col_publishedAt'),
+                createdAt: $persist(false).as('articles_col_createdAt'),
+                updatedAt: $persist(true).as('articles_col_updatedAt'),
             },
             filtersOpen: false,
             toggle(col) {
                 this.columns[col] = !this.columns[col];
-                localStorage.setItem('articles_col_' + col, this.columns[col]);
             }
          }">
         {{-- Header --}}

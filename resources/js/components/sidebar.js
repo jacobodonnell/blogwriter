@@ -1,6 +1,6 @@
 export default function sidebar() {
     return {
-        expanded: localStorage.getItem('sidebarExpanded') !== 'false',
+        expanded: this.$persist(true).as('sidebarExpanded'),
         mobileDrawerOpen: false,
         isDesktop: window.matchMedia('(min-width: 1024px)').matches,
         tooltipText: '',
@@ -38,9 +38,6 @@ export default function sidebar() {
                 if (!e.matches) {
                     this.mobileDrawerOpen = false;
                 }
-            });
-            this.$watch('expanded', (v) => {
-                localStorage.setItem('sidebarExpanded', v);
             });
         }
     };

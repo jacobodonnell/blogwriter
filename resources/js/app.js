@@ -2,9 +2,11 @@ import './bootstrap';
 
 import Alpine from 'alpinejs';
 import ajax from '@imacrayon/alpine-ajax';
+import persist from '@alpinejs/persist';
 import sidebar from './components/sidebar';
 
 Alpine.plugin(ajax);
+Alpine.plugin(persist);
 Alpine.data('sidebar', sidebar);
 
 window.Alpine = Alpine;
