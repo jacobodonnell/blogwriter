@@ -30,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
             'photos.*',
             'components.seo-meta',
             'components.layouts.partials.public-footer',
+            'components.category-feed',
         ], function ($view): void {
             $view->with('authorName', User::first()?->name ?? 'Author');
         });

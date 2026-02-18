@@ -11,9 +11,9 @@ it('renders the categories index page', function (): void {
         ->assertViewIs('public.categories');
 });
 
-it('shows all root categories', function (): void {
-    $cat1 = Category::factory()->create(['name' => 'Alpha Category']);
-    $cat2 = Category::factory()->create(['name' => 'Beta Category']);
+it('shows root categories as collapsible children', function (): void {
+    Category::factory()->create(['name' => 'Alpha Category']);
+    Category::factory()->create(['name' => 'Beta Category']);
 
     $this->get(route('categories.index'))
         ->assertOk()
@@ -21,31 +21,29 @@ it('shows all root categories', function (): void {
         ->assertSee('Beta Category');
 });
 
-it('does not show child categories at root level', function (): void {
+it('does not show child categories in collapsible nav', function (): void {
     $parent = Category::factory()->create(['name' => 'Parent Category']);
-    $child = Category::factory()->withParent($parent)->create(['name' => 'Child Category']);
+    Category::factory()->withParent($parent)->create(['name' => 'Child Category']);
 
     $response = $this->get(route('categories.index'));
 
     $response->assertOk()
         ->assertSee('Parent Category')
-        ->assertViewHas('categories', fn ($categories) => $categories->pluck('id')->doesntContain($child->id));
+        ->assertViewHas('children', fn ($children) => $children->pluck('name')->doesntContain('Child Category'));
 });
 
-it('shows article, photo, and subcategory counts', function (): void {
-    $category = Category::factory()->create(['name' => 'Counted Category']);
+it('shows total article and photo counts in header', function (): void {
+    $category = Category::factory()->create();
     Article::factory()->published()->count(3)->create(['category_id' => $category->id]);
     Photo::factory()->published()->count(2)->create(['category_id' => $category->id]);
-    Category::factory()->withParent($category)->count(1)->create();
 
     $this->get(route('categories.index'))
         ->assertOk()
         ->assertSee('3 articles')
-        ->assertSee('2 photos')
-        ->assertSee('1 subcategory');
+        ->assertSee('2 photos');
 });
 
-it('links to category permalink', function (): void {
+it('links to category permalink in children nav', function (): void {
     $category = Category::factory()->create(['name' => 'Linked Category']);
 
     $this->get(route('categories.index'))
@@ -53,18 +51,17 @@ it('links to category permalink', function (): void {
         ->assertSee($category->permalink());
 });
 
-it('shows empty state when no categories exist', function (): void {
+it('shows no content yet when no content exists', function (): void {
     $this->get(route('categories.index'))
         ->assertOk()
-        ->assertSee('No categories yet');
+        ->assertSee('No content yet');
 });
 
 it('hides draft content from guest counts', function (): void {
-    $category = Category::factory()->create();
-    Article::factory()->published()->count(2)->create(['category_id' => $category->id]);
-    Article::factory()->draft()->create(['category_id' => $category->id]);
-    Photo::factory()->published()->create(['category_id' => $category->id]);
-    Photo::factory()->draft()->create(['category_id' => $category->id]);
+    Article::factory()->published()->count(2)->create();
+    Article::factory()->draft()->create();
+    Photo::factory()->published()->create();
+    Photo::factory()->draft()->create();
 
     // Guest sees only published counts
     $this->get(route('categories.index'))
@@ -79,8 +76,6 @@ it('hides draft content from guest counts', function (): void {
 });
 
 it('shows manage link for auth users only', function (): void {
-    Category::factory()->create();
-
     $guestResponse = $this->get(route('categories.index'));
     $guestResponse->assertOk()
         ->assertDontSee('Manage');
