@@ -1,5 +1,9 @@
 <x-layouts.public title="About - {{ config('app.name', 'BlogWriter') }}">
 
+    <x-slot:seo>
+        <x-seo-meta title="About - {{ config('app.name', 'BlogWriter') }}" description="{{ setting('profile_bio', '') }}" />
+    </x-slot:seo>
+
     <div class="max-w-3xl mx-auto">
 
         {{-- Breadcrumbs --}}

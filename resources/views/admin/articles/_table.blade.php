@@ -46,6 +46,10 @@
                                              alt=""
                                              class="w-12 h-12 rounded object-cover" />
                                         <span class="badge badge-info badge-xs mt-1">External</span>
+                                    @elseif(placeholder_image_url())
+                                        <img src="{{ placeholder_image_url() }}"
+                                             alt=""
+                                             class="w-12 h-12 rounded object-cover opacity-40" />
                                     @else
                                         <span class="text-base-content/40 text-sm">None</span>
                                     @endif

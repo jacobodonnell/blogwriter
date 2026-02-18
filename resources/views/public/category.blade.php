@@ -1,5 +1,9 @@
 <x-layouts.public :title="$category->name . ' - ' . config('app.name')">
 
+    <x-slot:seo>
+        <x-seo-meta :title="$category->name . ' - ' . config('app.name')" :description="$category->description" />
+    </x-slot:seo>
+
     {{-- h-feed for IndieWeb --}}
     <div class="h-feed max-w-4xl mx-auto">
         

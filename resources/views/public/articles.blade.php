@@ -1,5 +1,9 @@
 <x-layouts.public title="Articles - {{ config('app.name', 'BlogWriter') }}">
 
+    <x-slot:seo>
+        <x-seo-meta title="Articles - {{ config('app.name', 'BlogWriter') }}" description="{{ setting('page_articles_subtitle', 'All articles') }}" />
+    </x-slot:seo>
+
     {{-- h-feed for IndieWeb --}}
     <div class="h-feed max-w-5xl mx-auto">
 
@@ -32,10 +36,11 @@
                     <article class="h-entry card bg-base-100 shadow-sm border border-base-200 hover:shadow-md transition-shadow">
                         <div class="flex flex-col {{ $loop->odd ? 'md:flex-row' : 'md:flex-row-reverse' }}">
                             {{-- Featured Image --}}
-                            @if($article->featured_image_url)
+                            @php($articleImage = $article->featured_image_url ?? placeholder_image_url())
+                            @if($articleImage)
                                 <figure class="md:w-2/5 aspect-video md:aspect-auto overflow-hidden {{ $loop->odd ? 'md:rounded-l-2xl md:rounded-r-none' : 'md:rounded-r-2xl md:rounded-l-none' }} rounded-t-2xl md:rounded-t-none">
                                     <a href="{{ route('articles.show', $article->slug) }}">
-                                        <img src="{{ $article->featured_image_url }}"
+                                        <img src="{{ $articleImage }}"
                                              alt="{{ $article->title }}"
                                              class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
                                     </a>
@@ -43,7 +48,7 @@
                             @endif
 
                             {{-- Content --}}
-                            <div class="card-body {{ $article->featured_image_url ? 'md:w-3/5' : 'w-full' }}">
+                            <div class="card-body {{ $articleImage ? 'md:w-3/5' : 'w-full' }}">
                                 {{-- Category --}}
                                 @if($article->category)
                                     <div class="flex flex-wrap gap-2">

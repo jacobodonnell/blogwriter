@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Console\Commands\Concerns\PromptsForPassword;
 use App\Console\Commands\Concerns\ValidatesInput;
+use App\Models\Setting;
 use App\Models\User;
 use App\Services\InstallService;
 use App\Services\ResetService;
@@ -11,6 +12,7 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Console\Migrations\FreshCommand;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\error;
@@ -330,6 +332,8 @@ class InstallCommand extends Command
             info('✓ Demo content added');
         }
 
+        $this->seedPlaceholderImage();
+
         info('Clearing caches...');
         $this->installService->clearCaches();
         info('✓ Caches cleared');
@@ -369,6 +373,22 @@ class InstallCommand extends Command
         $this->newLine();
 
         info('Happy blogging! Remember: own your content, own your domain.');
+    }
+
+    protected function seedPlaceholderImage(): void
+    {
+        $source = storage_path('app/blogwriter/blogwriter-placeholder.jpg');
+        $destination = 'blogwriter/blogwriter-placeholder.jpg';
+
+        if (file_exists($source) && ! Storage::disk('public')->exists($destination)) {
+            Storage::disk('public')->makeDirectory('blogwriter');
+            Storage::disk('public')->put($destination, file_get_contents($source));
+        }
+
+        if (! Setting::get('site_placeholder_image') && Storage::disk('public')->exists($destination)) {
+            Setting::set('site_placeholder_image', $destination);
+            info('✓ Default placeholder image configured');
+        }
     }
 
     protected function isComposerAvailable(): bool

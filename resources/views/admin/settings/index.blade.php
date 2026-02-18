@@ -22,6 +22,45 @@
                 </div>
             </a>
 
+            {{-- Default Placeholder Image --}}
+            <div class="card bg-base-100 shadow">
+                <div class="card-body">
+                    <h2 class="card-title text-xl mb-4">Default Image</h2>
+                    <p class="text-sm text-base-content/60 mb-4">Used as a fallback when articles have no featured image.</p>
+
+                    @if(session('placeholder_success'))
+                        <div class="alert alert-success mb-4">
+                            <i class="ph ph-check-circle text-xl"></i>
+                            <span>{{ session('placeholder_success') }}</span>
+                        </div>
+                    @endif
+
+                    @if(placeholder_image_url())
+                        <div class="mb-4">
+                            <img src="{{ placeholder_image_url() }}" alt="Current placeholder" class="w-full max-w-xs rounded-lg shadow" />
+                        </div>
+                    @else
+                        <div class="mb-4 text-base-content/40 text-sm">No placeholder image set.</div>
+                    @endif
+
+                    <form action="{{ route('admin.settings.placeholder-image.update') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT')
+
+                        <div class="form-control">
+                            <input type="file" name="placeholder_image" accept="image/*" class="file-input file-input-bordered w-full" />
+                            @error('placeholder_image')
+                                <label class="label"><span class="label-text-alt text-error">{{ $message }}</span></label>
+                            @enderror
+                        </div>
+
+                        <div class="form-control mt-4">
+                            <button type="submit" class="btn btn-primary btn-sm">Upload Image</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             {{-- Site Settings --}}
             <div class="card bg-base-100 shadow">
                 <div class="card-body">

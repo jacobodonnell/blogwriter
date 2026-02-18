@@ -7,6 +7,7 @@
         <style>
             [x-cloak] { display: none !important; }
         </style>
+        {{ $seo ?? '' }}
         @yield('head')
     </x-slot:head>
 

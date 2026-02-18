@@ -49,6 +49,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function (): v
     // Settings
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
     Route::put('/settings/profile', [SettingsController::class, 'update'])->name('settings.profile.update');
+    Route::put('/settings/placeholder-image', [SettingsController::class, 'updatePlaceholderImage'])->name('settings.placeholder-image.update');
 
     // Page Settings
     Route::put('/settings/pages', [PageSettingsController::class, 'update'])->name('settings.pages.update');

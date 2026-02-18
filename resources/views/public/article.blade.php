@@ -1,5 +1,9 @@
 <x-layouts.public :title="$article->meta_title . ' - ' . config('app.name')">
 
+    <x-slot:seo>
+        <x-seo-meta :article="$article" />
+    </x-slot:seo>
+
     {{-- h-entry for IndieWeb --}}
     <article class="h-entry max-w-3xl mx-auto">
 

@@ -1,5 +1,9 @@
 <x-layouts.public :title="$photo->alt_text . ' - ' . config('app.name')">
 
+    <x-slot:seo>
+        <x-seo-meta :photo="$photo" />
+    </x-slot:seo>
+
     {{-- h-entry for IndieWeb --}}
     <article class="h-entry max-w-4xl mx-auto">
 

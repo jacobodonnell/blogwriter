@@ -1,5 +1,9 @@
 <x-layouts.public title="Home - {{ config('app.name', 'BlogWriter') }}">
 
+    <x-slot:seo>
+        <x-seo-meta title="Home - {{ config('app.name', 'BlogWriter') }}" />
+    </x-slot:seo>
+
     <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[1fr_18rem] xl:grid-cols-[1fr_20rem] gap-8">
 
         {{-- Main: Articles h-feed --}}
@@ -34,10 +38,10 @@
                         {{-- h-entry for each article --}}
                         <article class="h-entry card bg-base-100 shadow-sm border border-base-200 hover:shadow-md transition-shadow {{ $loop->first ? 'md:col-span-2' : '' }}">
                             {{-- Featured Image --}}
-                            @if($article->featured_image_url)
+                            @if($article->featured_image_url || placeholder_image_url())
                                 <figure class="{{ $loop->first ? 'aspect-[16/10]' : 'aspect-video' }} overflow-hidden">
                                     <a href="{{ route('articles.show', $article->slug) }}">
-                                        <img src="{{ $article->featured_image_url }}"
+                                        <img src="{{ $article->featured_image_url ?? placeholder_image_url() }}"
                                              alt="{{ $article->title }}"
                                              class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
                                     </a>
