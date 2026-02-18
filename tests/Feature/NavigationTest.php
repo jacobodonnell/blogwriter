@@ -30,16 +30,16 @@ it('renders customizer for new article without DB write', function (): void {
         ->assertViewIs('admin.articles.customizer');
 });
 
-it('shows menu-active on admin sidebar for current route', function (string $route, string $activeText): void {
+it('shows menu-active on admin sidebar for current route', function (string $route): void {
     $this->actingAs($this->user)
         ->get($route)
         ->assertOk()
         ->assertSee('menu-active', false);
 })->with([
-    'dashboard' => fn () => [route('admin.dashboard'), 'Dashboard'],
-    'articles' => fn () => [route('admin.articles.index'), 'Manage Articles'],
-    'categories' => fn () => [route('admin.categories.index'), 'Categories'],
-    'settings' => fn () => [route('admin.settings.profile'), 'Settings'],
+    'dashboard' => fn () => route('admin.dashboard'),
+    'articles' => fn () => route('admin.articles.index'),
+    'categories' => fn () => route('admin.categories.index'),
+    'settings' => fn () => route('admin.settings.profile'),
 ]);
 
 it('shows menu-active on guest desktop nav for current route', function (string $url): void {
@@ -63,6 +63,17 @@ it('shows menu-active on guest mobile drawer for current route', function (strin
     'categories' => fn () => route('categories.index'),
     'about' => fn () => route('about'),
 ]);
+
+it('welcome blade file does not exist', function (): void {
+    expect(file_exists(resource_path('views/welcome.blade.php')))->toBeFalse();
+});
+
+it('renders custom 404 page', function (): void {
+    $this->get('/this-page-does-not-exist-at-all')
+        ->assertStatus(404)
+        ->assertSee('Page Not Found')
+        ->assertSee('Go Home');
+});
 
 it('has no broken links in public pages smoke test', function (): void {
     $article = \App\Models\Article::factory()->published()->create();

@@ -21,24 +21,24 @@ it('defaults to all content when no type param', function (): void {
     $this->get(route('categories.show', $this->category->slug))
         ->assertOk()
         ->assertViewHas('currentType', 'all')
-        ->assertViewHas('articles', fn ($articles) => $articles !== null && $articles->count() === 1)
-        ->assertViewHas('photos', fn ($photos) => $photos !== null && $photos->count() === 1);
+        ->assertViewHas('articles', fn ($articles) => $articles->count() === 1)
+        ->assertViewHas('photos', fn ($photos) => $photos->count() === 1);
 });
 
 it('shows only articles when type is articles', function (): void {
     $this->get(route('categories.show', $this->category->slug).'?type=articles')
         ->assertOk()
         ->assertViewHas('currentType', 'articles')
-        ->assertViewHas('articles', fn ($articles) => $articles !== null && $articles->count() === 1)
-        ->assertViewHas('photos', fn ($photos) => $photos === null);
+        ->assertViewHas('articles', fn ($articles) => $articles->count() === 1)
+        ->assertViewHas('photos', fn ($photos) => $photos->isEmpty());
 });
 
 it('shows only photos when type is photos', function (): void {
     $this->get(route('categories.show', $this->category->slug).'?type=photos')
         ->assertOk()
         ->assertViewHas('currentType', 'photos')
-        ->assertViewHas('articles', fn ($articles) => $articles === null)
-        ->assertViewHas('photos', fn ($photos) => $photos !== null && $photos->count() === 1);
+        ->assertViewHas('articles', fn ($articles) => $articles->isEmpty())
+        ->assertViewHas('photos', fn ($photos) => $photos->count() === 1);
 });
 
 it('falls back to all for invalid type', function (): void {
@@ -61,8 +61,7 @@ it('respects draft visibility with type filter', function (): void {
         ->assertViewHas('articles', fn ($articles) => $articles->count() === 1);
 
     // Auth users should see draft articles
-    $user = User::first();
-    $this->actingAs($user)
+    $this->actingAs(User::first())
         ->get(route('categories.show', $this->category->slug).'?type=articles')
         ->assertOk()
         ->assertViewHas('articles', fn ($articles) => $articles->count() === 2);

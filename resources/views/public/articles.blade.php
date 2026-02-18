@@ -122,7 +122,7 @@
             </div>
         @else
             <div class="text-center py-16">
-                <div class="text-6xl mb-4">📝</div>
+                <div class="text-6xl mb-4"><i class="ph ph-note-blank text-base-content/30"></i></div>
                 <h2 class="text-2xl font-bold mb-2">No articles yet</h2>
                 <p class="text-base-content/60 mb-6">Check back soon for new articles.</p>
                 @auth

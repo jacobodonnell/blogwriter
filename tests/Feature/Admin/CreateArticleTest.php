@@ -145,6 +145,59 @@ it('rejects storing article with missing content', function (): void {
     expect(Article::count())->toBe(0);
 });
 
+it('stores null summary when summary is empty', function (): void {
+    post(route('admin.articles.store'), [
+        'title' => 'No Summary Article',
+        'slug' => 'no-summary-article',
+        'content' => 'Some content here',
+        'summary' => '',
+        'status' => 'draft',
+    ])->assertRedirect();
+
+    $article = Article::where('slug', 'no-summary-article')->first();
+
+    expect($article)->not->toBeNull()
+        ->and($article->getRawOriginal('summary'))->toBeNull();
+});
+
+it('stores null summary when summary is not provided', function (): void {
+    post(route('admin.articles.store'), [
+        'title' => 'Missing Summary Article',
+        'slug' => 'missing-summary-article',
+        'content' => 'Some content here',
+        'status' => 'draft',
+    ])->assertRedirect();
+
+    $article = Article::where('slug', 'missing-summary-article')->first();
+
+    expect($article)->not->toBeNull()
+        ->and($article->getRawOriginal('summary'))->toBeNull();
+});
+
+it('excerpt accessor returns content fallback when summary is null', function (): void {
+    $article = new Article;
+    $article->setRawAttributes([
+        'summary' => null,
+        'content' => 'This is the article content for testing excerpts.',
+    ]);
+
+    expect($article->excerpt)->toContain('This is the article content');
+});
+
+it('preserves user-provided summary on save', function (): void {
+    post(route('admin.articles.store'), [
+        'title' => 'Has Summary',
+        'slug' => 'has-summary',
+        'content' => 'Some content',
+        'summary' => 'My custom summary',
+        'status' => 'draft',
+    ])->assertRedirect();
+
+    $article = Article::where('slug', 'has-summary')->first();
+
+    expect($article->getRawOriginal('summary'))->toBe('My custom summary');
+});
+
 it('requires auth for create page', function (): void {
     auth()->logout();
 

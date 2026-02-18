@@ -2,9 +2,6 @@
 
 use App\Models\Article;
 use App\Models\Photo;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 it('opens the BlogWriter footer link in a new tab', function (): void {
     $response = $this->get(route('home'));

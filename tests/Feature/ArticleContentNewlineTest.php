@@ -1,9 +1,6 @@
 <?php
 
 use App\Models\Article;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-pest()->extend(Tests\TestCase::class)->use(RefreshDatabase::class);
 
 it('expands single newlines to double newlines on save', function (): void {
     $article = Article::factory()->create(['content' => "Line one\nLine two\nLine three"]);

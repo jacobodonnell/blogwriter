@@ -1,7 +1,7 @@
 <x-layouts.public title="Photos - {{ config('app.name') }}">
 
     {{-- h-feed for IndieWeb --}}
-    <div class="h-feed max-w-6xl mx-auto" x-data="{ uploading: false }">
+    <div class="h-feed max-w-6xl mx-auto">
 
         {{-- Header --}}
         <header class="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -68,7 +68,7 @@
             </div>
         @else
             <div class="text-center py-16">
-                <div class="text-6xl mb-4">📷</div>
+                <div class="text-6xl mb-4"><i class="ph ph-camera-slash text-base-content/30"></i></div>
                 <h2 class="text-2xl font-bold mb-2">No photos yet</h2>
                 <p class="text-base-content/60">Check back soon for new photos.</p>
             </div>
@@ -81,30 +81,7 @@
                       method="POST"
                       action="{{ route('admin.photos.store') }}"
                       enctype="multipart/form-data"
-                      x-data="{ uploadPreview: null }"
-                      @submit.prevent="
-                          uploading = true;
-                          const form = document.getElementById('frontend-photo-upload-form');
-                          const formData = new FormData(form);
-
-                          fetch(form.action, {
-                              method: 'POST',
-                              headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                              body: formData,
-                          })
-                          .then(r => {
-                              if (!r.ok) throw r;
-                              return r.json();
-                          })
-                          .then(data => {
-                              document.getElementById('upload-photo-modal').close();
-                              uploading = false;
-                              form.reset();
-                              uploadPreview = null;
-                              window.location.reload();
-                          })
-                          .catch(() => { uploading = false; })
-                      ">
+                      x-data="{ uploadPreview: null }">
                     @csrf
 
                     <div class="space-y-3">
@@ -152,9 +129,8 @@
                 </form>
 
                 <x-slot:actions>
-                    <button type="submit" form="frontend-photo-upload-form" class="btn btn-primary" :disabled="uploading">
-                        <span x-show="!uploading">Upload Photo</span>
-                        <span x-show="uploading" class="loading loading-spinner loading-sm" x-cloak></span>
+                    <button type="submit" form="frontend-photo-upload-form" class="btn btn-primary">
+                        Upload Photo
                     </button>
                 </x-slot:actions>
             </x-editor-modal>

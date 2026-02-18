@@ -3,11 +3,8 @@
 use App\Models\Article;
 use App\Models\Photo;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-
-uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
     $this->user = User::factory()->create();
@@ -155,4 +152,35 @@ it('setting photo_id clears meta.featured_image_url on save', function (): void 
 
     expect($article->photo_id)->toBe($photo->id);
     expect($article->meta)->not->toHaveKey('featured_image_url');
+});
+
+it('returns title as fallback alt text', function (): void {
+    $article = Article::factory()->create(['title' => 'Test Title']);
+
+    expect($article->featured_image_alt)->toBe('Test Title');
+});
+
+it('returns meta alt text when set', function (): void {
+    $article = Article::factory()->create([
+        'meta' => ['featured_image_alt' => 'Custom alt text'],
+    ]);
+
+    expect($article->featured_image_alt)->toBe('Custom alt text');
+});
+
+it('returns photo alt text when photo has alt_text', function (): void {
+    $photo = Photo::factory()->create(['alt_text' => 'Photo alt description']);
+    $article = Article::factory()->create(['photo_id' => $photo->id]);
+
+    expect($article->featured_image_alt)->toBe('Photo alt description');
+});
+
+it('prefers meta alt over photo alt text', function (): void {
+    $photo = Photo::factory()->create(['alt_text' => 'Photo alt']);
+    $article = Article::factory()->create([
+        'photo_id' => $photo->id,
+        'meta' => ['featured_image_alt' => 'Meta alt'],
+    ]);
+
+    expect($article->featured_image_alt)->toBe('Meta alt');
 });

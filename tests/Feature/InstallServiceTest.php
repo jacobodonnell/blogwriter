@@ -2,9 +2,6 @@
 
 use App\Models\User;
 use App\Services\InstallService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
     $this->service = app(InstallService::class);

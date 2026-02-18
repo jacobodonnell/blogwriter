@@ -4,10 +4,7 @@ use App\Models\Article;
 use App\Models\User;
 
 beforeEach(function (): void {
-    $this->user = User::factory()->create([
-        'email' => 'admin@example.com',
-        'password' => 'password123',
-    ]);
+    $this->user = User::factory()->create();
 });
 
 it('redirects guest to login when accessing admin dashboard', function (): void {

@@ -4,11 +4,8 @@ use App\Models\Article;
 use App\Models\Category;
 use App\Models\Photo;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-
-uses(RefreshDatabase::class);
 
 // --- Article Auth Links ---
 

@@ -37,19 +37,10 @@
                 <p class="text-base-content/70 text-lg max-w-2xl mt-2">{{ $category->description }}</p>
             @endif
 
-            @php
-                $totalArticles = auth()->check()
-                    ? $category->articles()->count()
-                    : $category->articles()->where('status', \App\Enums\Status::Published)->count();
-                $totalPhotos = auth()->check()
-                    ? $category->photos()->count()
-                    : $category->photos()->where('status', \App\Enums\Status::Published)->count();
-            @endphp
-
             <p class="text-sm text-base-content/60 mt-2">
-                {{ $totalArticles }} {{ Str::plural('article', $totalArticles) }}
-                @if($totalPhotos > 0)
-                    &middot; {{ $totalPhotos }} {{ Str::plural('photo', $totalPhotos) }}
+                {{ $articleCount }} {{ Str::plural('article', $articleCount) }}
+                @if($photoCount > 0)
+                    &middot; {{ $photoCount }} {{ Str::plural('photo', $photoCount) }}
                 @endif
             </p>
 
@@ -82,7 +73,7 @@
         </nav>
 
         {{-- Articles List --}}
-        @if($articles !== null && $articles->count() > 0)
+        @if($articles->isNotEmpty())
             <div class="space-y-8">
                 @foreach($articles as $article)
                     {{-- h-entry for each article --}}
@@ -119,7 +110,7 @@
                             {{-- Read More --}}
                             <div class="card-actions justify-end mt-4">
                                 <a href="{{ route('articles.show', $article->slug) }}"
-                                   class="btn btn-primary btn-sm btn-ghost gap-1">
+                                   class="btn btn-primary btn-sm gap-1">
                                     Read Article
                                     <i class="ph ph-arrow-right"></i>
                                 </a>
@@ -141,8 +132,8 @@
         @endif
 
         {{-- Photos Grid --}}
-        @if($photos !== null && $photos->count() > 0)
-            <div class="{{ $articles !== null && $articles->count() > 0 ? 'mt-12' : '' }}">
+        @if($photos->isNotEmpty())
+            <div class="{{ $articles->isNotEmpty() ? 'mt-12' : '' }}">
                 <h2 class="text-2xl font-bold mb-6">
                     <i class="ph ph-camera text-primary mr-2"></i>
                     Photos
@@ -184,7 +175,7 @@
         @endif
 
         {{-- Empty state when no content matches filter --}}
-        @if(($articles === null || $articles->count() === 0) && ($photos === null || $photos->count() === 0))
+        @if($articles->isEmpty() && $photos->isEmpty())
             <div class="text-center py-16 bg-base-100 rounded-lg border border-base-200">
                 <div class="text-6xl mb-4"><i class="ph ph-folder-dashed text-base-content/30"></i></div>
                 <h2 class="text-xl font-bold mb-2">No content yet</h2>

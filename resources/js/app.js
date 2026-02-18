@@ -1,5 +1,3 @@
-import './bootstrap';
-
 import Alpine from 'alpinejs';
 import ajax from '@imacrayon/alpine-ajax';
 import persist from '@alpinejs/persist';

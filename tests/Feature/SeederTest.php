@@ -4,9 +4,6 @@ use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Category;
 use Database\Seeders\DatabaseSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 describe('seeder tests', function (): void {
     it('seeds categories with correct data', function (): void {

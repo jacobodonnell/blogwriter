@@ -1,9 +1,6 @@
 <?php
 
 use App\Models\Photo;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 it('displays photo gallery with only published photos', function (): void {
     $publishedPhoto = Photo::factory()->published()->create(['alt_text' => 'Published Photo Alt']);

@@ -3,9 +3,6 @@
 use App\Models\Article;
 use App\Models\Photo;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 it('isPublic returns true for published photo with past date', function (): void {
     $photo = Photo::factory()->published()->create([

@@ -6,9 +6,10 @@ use App\Models\Article;
 use App\Models\Category;
 use App\Models\Photo;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
 
-class CategoryArticleController extends Controller
+class CategoryContentController extends Controller
 {
     /**
      * Display articles and photos by category (including subcategories).
@@ -27,6 +28,7 @@ class CategoryArticleController extends Controller
         }
 
         $categoryIds = array_merge([$category->id], $category->descendantIds());
+        $isAuth = auth()->check();
 
         $type = $request->query('type', 'all');
 
@@ -34,11 +36,11 @@ class CategoryArticleController extends Controller
             $type = 'all';
         }
 
-        $articles = null;
-        $photos = null;
+        $articles = new LengthAwarePaginator([], 0, 10);
+        $photos = new LengthAwarePaginator([], 0, 12);
 
         if ($type === 'all' || $type === 'articles') {
-            $articleQuery = auth()->check()
+            $articleQuery = $isAuth
                 ? Article::whereIn('category_id', $categoryIds)
                 : Article::published()->whereIn('category_id', $categoryIds);
 
@@ -49,7 +51,7 @@ class CategoryArticleController extends Controller
         }
 
         if ($type === 'all' || $type === 'photos') {
-            $photoQuery = auth()->check()
+            $photoQuery = $isAuth
                 ? Photo::whereIn('category_id', $categoryIds)
                 : Photo::published()->whereIn('category_id', $categoryIds);
 
@@ -58,16 +60,24 @@ class CategoryArticleController extends Controller
                 ->withQueryString();
         }
 
+        $articleCount = $isAuth
+            ? $category->articles()->count()
+            : $category->articles()->published()->count();
+
+        $photoCount = $isAuth
+            ? $category->photos()->count()
+            : $category->photos()->published()->count();
+
         $children = $category->children()->orderBy('name')->get();
 
-        $viewData = [
+        return view('public.category', [
             'category' => $category,
             'articles' => $articles,
             'photos' => $photos,
             'children' => $children,
             'currentType' => $type,
-        ];
-
-        return view('public.category', $viewData);
+            'articleCount' => $articleCount,
+            'photoCount' => $photoCount,
+        ]);
     }
 }

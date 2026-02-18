@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\Status;
 use App\Models\Category;
 use Illuminate\View\View;
 
@@ -17,8 +16,8 @@ class CategoryController extends Controller
 
         $categories = Category::whereNull('parent_id')
             ->withCount([
-                'articles' => fn ($q) => $isAuth ? $q : $q->where('status', Status::Published),
-                'photos' => fn ($q) => $isAuth ? $q : $q->where('status', Status::Published),
+                'articles' => fn ($q) => $isAuth ? $q : $q->published(),
+                'photos' => fn ($q) => $isAuth ? $q : $q->published(),
                 'children',
             ])
             ->orderBy('name')

@@ -2,9 +2,6 @@
 
 use App\Services\ResetService;
 use Illuminate\Console\Command;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 afterEach(function (): void {
     @unlink(storage_path('installed.lock'));
