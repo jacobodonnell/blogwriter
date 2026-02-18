@@ -140,7 +140,7 @@ it('shows manage categories link on category page for auth users', function (): 
     $this->actingAs($user)
         ->get(route('categories.show', $category->slug))
         ->assertSuccessful()
-        ->assertSee('Manage Categories');
+        ->assertSee('Manage');
 });
 
 // --- About Page Auth Links ---

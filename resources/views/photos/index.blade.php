@@ -3,6 +3,14 @@
     {{-- h-feed for IndieWeb --}}
     <div class="h-feed max-w-6xl mx-auto">
 
+        {{-- Breadcrumbs --}}
+        <nav class="text-sm breadcrumbs mb-4">
+            <ul>
+                <li><a href="{{ route('home') }}" class="link link-hover">Home</a></li>
+                <li class="text-base-content/60">Photos</li>
+            </ul>
+        </nav>
+
         {{-- Header --}}
         <header class="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div class="min-w-0">

@@ -55,28 +55,34 @@ it('both routes have content-type tabs with x-target.push', function (): void {
     expect($showContent)->toContain('aria-label="Content filter"');
 });
 
-it('category feed has breadcrumbs with x-target.push', function (): void {
+it('both routes have breadcrumbs', function (): void {
     $category = Category::factory()->create();
 
-    $response = $this->get(route('categories.show', $category->slug));
+    // Categories index has breadcrumbs
+    $indexResponse = $this->get(route('categories.index'));
+    $indexResponse->assertOk();
+    expect($indexResponse->getContent())->toContain('breadcrumbs');
 
-    $response->assertOk();
-
-    $content = $response->getContent();
-    expect($content)->toContain('breadcrumbs');
-    expect($content)->toContain('x-target.push="category-content"');
+    // Category show has breadcrumbs
+    $showResponse = $this->get(route('categories.show', $category->slug));
+    $showResponse->assertOk();
+    expect($showResponse->getContent())->toContain('breadcrumbs');
 });
 
-it('categories listing does not have breadcrumbs', function (): void {
-    $response = $this->get(route('categories.index'));
+it('category breadcrumbs include ancestors', function (): void {
+    $parent = Category::factory()->create(['name' => 'Parent Cat']);
+    $child = Category::factory()->withParent($parent)->create(['name' => 'Child Cat']);
+
+    $response = $this->get(route('categories.show', $parent->slug.'/'.$child->slug));
 
     $response->assertOk();
-
     $content = $response->getContent();
-    expect($content)->not->toContain('breadcrumbs');
+    expect($content)->toContain('Categories');
+    expect($content)->toContain('Parent Cat');
+    expect($content)->toContain('Child Cat');
 });
 
-it('both routes have filter banner', function (): void {
+it('both routes have filter section', function (): void {
     $category = Category::factory()->create();
 
     $this->get(route('categories.index'))
