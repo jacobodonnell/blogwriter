@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\Photo;
@@ -36,6 +37,11 @@ class CategoryContentController extends Controller
             $type = 'all';
         }
 
+        $search = $request->query('search');
+        $status = $isAuth && $request->filled('status')
+            ? Status::from($request->input('status'))
+            : null;
+
         $articles = new LengthAwarePaginator([], 0, 10);
         $photos = new LengthAwarePaginator([], 0, 12);
 
@@ -43,6 +49,14 @@ class CategoryContentController extends Controller
             $articleQuery = $isAuth
                 ? Article::whereIn('category_id', $categoryIds)
                 : Article::published()->whereIn('category_id', $categoryIds);
+
+            if ($search) {
+                $articleQuery->where('title', 'like', sprintf('%%%s%%', $search));
+            }
+
+            if ($status) {
+                $articleQuery->where('status', $status);
+            }
 
             $articles = $articleQuery->with('category')
                 ->orderBy('published_at', 'desc')
@@ -54,6 +68,17 @@ class CategoryContentController extends Controller
             $photoQuery = $isAuth
                 ? Photo::whereIn('category_id', $categoryIds)
                 : Photo::published()->whereIn('category_id', $categoryIds);
+
+            if ($search) {
+                $photoQuery->where(function ($q) use ($search): void {
+                    $q->where('alt_text', 'like', sprintf('%%%s%%', $search))
+                        ->orWhere('caption', 'like', sprintf('%%%s%%', $search));
+                });
+            }
+
+            if ($status) {
+                $photoQuery->where('status', $status);
+            }
 
             $photos = $photoQuery->orderBy('published_at', 'desc')
                 ->paginate(12, ['*'], 'photos_page')

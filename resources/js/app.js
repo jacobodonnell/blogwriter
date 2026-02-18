@@ -14,6 +14,14 @@ Alpine.data('sidebar', sidebar);
 window.Alpine = Alpine;
 Alpine.start();
 
+// Sync document.title from data-page-title after Alpine AJAX morph
+document.addEventListener('ajax:after', () => {
+    const target = document.querySelector('[data-page-title]');
+    if (target) {
+        document.title = target.getAttribute('data-page-title');
+    }
+});
+
 // Honor Laravel's @method('PUT/PATCH/DELETE') directive in Alpine AJAX requests
 document.addEventListener('ajax:send', (event) => {
     if (event.detail.body instanceof FormData && event.detail.body.has('_method')) {

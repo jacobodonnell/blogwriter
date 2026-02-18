@@ -13,6 +13,7 @@ beforeEach(function (): void {
     ]);
     $this->photo = Photo::factory()->published()->create([
         'alt_text' => 'Test Photo Alt',
+        'caption' => 'A beautiful sunset',
         'category_id' => $this->category->id,
     ]);
 });
@@ -73,4 +74,76 @@ it('pagination works with type filter', function (): void {
     $this->get(route('categories.show', $this->category->slug).'?type=articles&articles_page=2')
         ->assertOk()
         ->assertViewHas('articles', fn ($articles) => $articles->currentPage() === 2);
+});
+
+it('filters articles by search on title', function (): void {
+    Article::factory()->published()->create([
+        'title' => 'Laravel Tips',
+        'category_id' => $this->category->id,
+    ]);
+
+    $this->get(route('categories.show', $this->category->slug).'?search=Laravel&type=articles')
+        ->assertOk()
+        ->assertViewHas('articles', fn ($articles) => $articles->count() === 1 && $articles->first()->title === 'Laravel Tips');
+});
+
+it('filters photos by search on alt_text', function (): void {
+    $this->get(route('categories.show', $this->category->slug).'?search=Photo+Alt&type=photos')
+        ->assertOk()
+        ->assertViewHas('photos', fn ($photos) => $photos->count() === 1);
+});
+
+it('filters photos by search on caption', function (): void {
+    $this->get(route('categories.show', $this->category->slug).'?search=sunset&type=photos')
+        ->assertOk()
+        ->assertViewHas('photos', fn ($photos) => $photos->count() === 1);
+});
+
+it('search returns no results when nothing matches', function (): void {
+    $this->get(route('categories.show', $this->category->slug).'?search=nonexistent')
+        ->assertOk()
+        ->assertViewHas('articles', fn ($articles) => $articles->isEmpty())
+        ->assertViewHas('photos', fn ($photos) => $photos->isEmpty());
+});
+
+it('auth user can filter by published status', function (): void {
+    Article::factory()->draft()->create([
+        'title' => 'Draft Only',
+        'category_id' => $this->category->id,
+    ]);
+
+    $this->actingAs(User::first())
+        ->get(route('categories.show', $this->category->slug).'?status=published&type=articles')
+        ->assertOk()
+        ->assertViewHas('articles', fn ($articles) => $articles->count() === 1 && $articles->first()->title === 'Test Article');
+});
+
+it('auth user can filter by draft status', function (): void {
+    Article::factory()->draft()->create([
+        'title' => 'Draft Only',
+        'category_id' => $this->category->id,
+    ]);
+
+    $this->actingAs(User::first())
+        ->get(route('categories.show', $this->category->slug).'?status=draft&type=articles')
+        ->assertOk()
+        ->assertViewHas('articles', fn ($articles) => $articles->count() === 1 && $articles->first()->title === 'Draft Only');
+});
+
+it('guest ignores status filter', function (): void {
+    $this->get(route('categories.show', $this->category->slug).'?status=draft&type=articles')
+        ->assertOk()
+        ->assertViewHas('articles', fn ($articles) => $articles->count() === 1);
+});
+
+it('search and type filters work together', function (): void {
+    Article::factory()->published()->create([
+        'title' => 'Unique Searchable',
+        'category_id' => $this->category->id,
+    ]);
+
+    $this->get(route('categories.show', $this->category->slug).'?search=Unique&type=articles')
+        ->assertOk()
+        ->assertViewHas('articles', fn ($articles) => $articles->count() === 1)
+        ->assertViewHas('photos', fn ($photos) => $photos->isEmpty());
 });

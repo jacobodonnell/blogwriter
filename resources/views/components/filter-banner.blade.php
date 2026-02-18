@@ -1,7 +1,7 @@
 @props(['action', 'target', 'clearRoute'])
 
 @php
-    $hasFilters = request('search') || request('category') || request('status');
+    $hasFilters = request('search') || request('category') || request('type') || request('status');
 @endphp
 
 <div x-data="{ open: {{ $hasFilters ? 'true' : 'false' }} }" class="mb-6">
@@ -16,7 +16,7 @@
             <i class="ph ph-caret-down text-sm transition-transform duration-200" :class="open && 'rotate-180'"></i>
         </button>
         @if($hasFilters)
-            <a href="{{ $clearRoute }}" class="btn btn-ghost btn-sm gap-1">
+            <a href="{{ $clearRoute }}" x-target.push="{{ $target }}" class="btn btn-ghost btn-sm gap-1">
                 <i class="ph ph-x text-sm"></i>
                 Clear
             </a>
