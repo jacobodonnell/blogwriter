@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Actions\GenerateArticleSummaryAction;
 use App\Enums\Status;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateArticlePreviewRequest;
@@ -14,10 +13,6 @@ use Illuminate\View\View;
 
 class CreateArticlePreviewController extends Controller
 {
-    public function __construct(
-        private readonly GenerateArticleSummaryAction $generateSummary,
-    ) {}
-
     /**
      * Auto-save preview for new articles — session only, no DB write.
      */
@@ -35,7 +30,7 @@ class CreateArticlePreviewController extends Controller
             'title' => $data['title'] ?? 'Untitled Article',
             'slug' => $slug,
             'content' => $data['content'] ?? '',
-            'summary' => $this->generateSummary->handle($data['summary'] ?? null, $data['content'] ?? ''),
+            'summary' => $data['summary'] ?? null,
             'status' => $data['status'] ?? Status::Draft,
             'meta' => $data['meta'] ?? [],
         ]);

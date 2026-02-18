@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Actions\GenerateArticleSummaryAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateArticlePreviewRequest;
 use App\Models\Article;
@@ -11,10 +10,6 @@ use Illuminate\View\View;
 
 class ArticlePreviewController extends Controller
 {
-    public function __construct(
-        private readonly GenerateArticleSummaryAction $generateSummary,
-    ) {}
-
     /**
      * Update article for live preview (AJAX auto-save).
      */
@@ -51,15 +46,10 @@ class ArticlePreviewController extends Controller
 
         if (array_key_exists('content', $data)) {
             $updateData['content'] = $data['content'] ?? $article->content;
-            $updateData['summary'] = $this->generateSummary->handle(
-                $data['summary'] ?? null,
-                $updateData['content'],
-            );
-        } elseif (array_key_exists('summary', $data)) {
-            $updateData['summary'] = $this->generateSummary->handle(
-                $data['summary'] ?? null,
-                $article->content,
-            );
+        }
+
+        if (array_key_exists('summary', $data)) {
+            $updateData['summary'] = $data['summary'] ?? null;
         }
 
         if (isset($data['meta'])) {

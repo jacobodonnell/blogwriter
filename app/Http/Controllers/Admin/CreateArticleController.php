@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Actions\GenerateArticleSummaryAction;
 use App\Actions\NormalizeCaptionMetaAction;
 use App\Actions\Photos\HandleArticlePhotoUploadAction;
 use App\Enums\Status;
@@ -19,7 +18,6 @@ class CreateArticleController extends Controller
 {
     public function __construct(
         private readonly HandleArticlePhotoUploadAction $handlePhotoUpload,
-        private readonly GenerateArticleSummaryAction $generateSummary,
         private readonly NormalizeCaptionMetaAction $normalizeCaptionMeta,
     ) {}
 
@@ -77,7 +75,7 @@ class CreateArticleController extends Controller
             'title' => $data['title'] ?? 'Untitled Article',
             'slug' => $data['slug'] ?? 'untitled-'.Str::lower(Str::random(8)),
             'content' => $data['content'] ?? '',
-            'summary' => $this->generateSummary->handle($data['summary'] ?? null, $data['content'] ?? ''),
+            'summary' => $data['summary'] ?? null,
             'status' => $data['status'] ?? 'draft',
             'published_at' => $data['published_at'] ?? null,
             'meta' => $meta,

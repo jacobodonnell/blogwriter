@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Actions\GenerateArticleSummaryAction;
 use App\Actions\NormalizeCaptionMetaAction;
 use App\Actions\Photos\HandleArticlePhotoUploadAction;
 use App\Http\Controllers\Controller;
@@ -18,7 +17,6 @@ class ArticleController extends Controller
 {
     public function __construct(
         private readonly HandleArticlePhotoUploadAction $handlePhotoUpload,
-        private readonly GenerateArticleSummaryAction $generateSummary,
         private readonly NormalizeCaptionMetaAction $normalizeCaptionMeta,
     ) {}
 
@@ -171,7 +169,7 @@ class ArticleController extends Controller
             'title' => $data['title'],
             'slug' => $data['slug'],
             'content' => $data['content'] ?? $article->content,
-            'summary' => $this->generateSummary->handle($data['summary'] ?? null, $data['content'] ?? $article->content),
+            'summary' => $data['summary'] ?? null,
             'status' => $data['status'],
             'published_at' => $data['published_at'] ?? $article->published_at,
             'meta' => $meta,

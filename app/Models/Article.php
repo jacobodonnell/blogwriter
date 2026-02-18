@@ -183,6 +183,24 @@ class Article extends Model
     }
 
     /**
+     * Get the featured image alt text — meta override, then Photo alt_text, then article title.
+     */
+    public function getFeaturedImageAltAttribute(): string
+    {
+        $meta = $this->meta ?? [];
+
+        if (! empty($meta['featured_image_alt'])) {
+            return $meta['featured_image_alt'];
+        }
+
+        if ($this->photo_id && $this->featuredPhoto?->alt_text) {
+            return $this->featuredPhoto->alt_text;
+        }
+
+        return $this->title;
+    }
+
+    /**
      * Scope for published articles.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query

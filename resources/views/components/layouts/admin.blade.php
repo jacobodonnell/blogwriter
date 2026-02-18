@@ -1,5 +1,5 @@
 <x-layouts.base
-    :title="(isset($title) ? $title . ' - ' : '') . config('app.name', 'BlogWriter')"
+    :title="View::hasSection('title') ? View::getSection('title') . ' - ' . config('app.name', 'BlogWriter') : config('app.name', 'BlogWriter')"
     :dark-mode="true"
     icon-weight="regular">
 
