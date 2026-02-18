@@ -19,7 +19,7 @@ it('returns successful response for admin navigation links when authenticated', 
     'dashboard' => fn () => route('admin.dashboard'),
     'articles index' => fn () => route('admin.articles.index'),
     'categories index' => fn () => route('admin.categories.index'),
-    'settings' => fn () => route('admin.settings'),
+    'settings' => fn () => route('admin.settings.profile'),
 ]);
 
 it('renders customizer for new article without DB write', function (): void {
@@ -38,7 +38,7 @@ it('shows menu-active on admin sidebar for current route', function (string $rou
     'dashboard' => fn () => [route('admin.dashboard'), 'Dashboard'],
     'articles' => fn () => [route('admin.articles.index'), 'Manage Articles'],
     'categories' => fn () => [route('admin.categories.index'), 'Categories'],
-    'settings' => fn () => [route('admin.settings'), 'Settings'],
+    'settings' => fn () => [route('admin.settings.profile'), 'Settings'],
 ]);
 
 it('shows menu-active on guest desktop nav for current route', function (string $url): void {

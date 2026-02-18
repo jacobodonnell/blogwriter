@@ -1,9 +1,4 @@
-<x-layouts.admin title="Appearance" page-title="Appearance" page-subtitle="Customize your site's theme and font.">
-    <x-slot:breadcrumb>
-        <li><a href="{{ route('admin.settings') }}">Settings</a></li>
-        <li>Appearance</li>
-    </x-slot:breadcrumb>
-
+<x-settings-layout active="appearance">
     <div x-data="{
             lightTheme: '{{ $currentLight }}',
             darkTheme: '{{ $currentDark }}',
@@ -281,4 +276,4 @@
             </div>
         </div>
     </div>
-</x-layouts.admin>
+</x-settings-layout>

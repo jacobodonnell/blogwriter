@@ -8,11 +8,11 @@ use App\Models\Setting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
-class SettingsController extends Controller
+class ProfileSettingsController extends Controller
 {
-    public function index(): View
+    public function edit(): View
     {
-        return view('admin.settings.index');
+        return view('admin.settings.profile');
     }
 
     public function update(UpdateProfileRequest $request): RedirectResponse
@@ -32,6 +32,6 @@ class SettingsController extends Controller
             }
         }
 
-        return redirect()->route('admin.settings')->with('profile_success', 'Profile updated successfully.');
+        return redirect()->route('admin.settings.profile')->with('success', 'Profile updated successfully.');
     }
 }

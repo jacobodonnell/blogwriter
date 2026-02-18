@@ -25,7 +25,7 @@ it('displays settings page with current profile data in form', function (): void
     Setting::set('profile_github', 'https://github.com/janedoe');
 
     $this->actingAs($this->user)
-        ->get(route('admin.settings'))
+        ->get(route('admin.settings.profile'))
         ->assertSuccessful()
         ->assertSee('Jane Doe')
         ->assertSee('A writer.')
@@ -43,8 +43,8 @@ it('can save profile settings via form', function (): void {
             'profile_bluesky' => 'https://bsky.app/profile/updated',
             'profile_email' => 'updated@example.com',
         ])
-        ->assertRedirect(route('admin.settings'))
-        ->assertSessionHas('profile_success');
+        ->assertRedirect(route('admin.settings.profile'))
+        ->assertSessionHas('success');
 
     expect($this->user->fresh()->name)->toBe('Updated Name')
         ->and(Setting::get('profile_bio'))->toBe('Updated bio.')
@@ -94,7 +94,7 @@ it('clears settings when fields are empty', function (): void {
             'profile_bio' => '',
             'profile_github' => '',
         ])
-        ->assertRedirect(route('admin.settings'));
+        ->assertRedirect(route('admin.settings.profile'));
 
     expect($this->user->fresh()->name)->toBe('Still Here')
         ->and(Setting::get('profile_bio'))->toBeNull()

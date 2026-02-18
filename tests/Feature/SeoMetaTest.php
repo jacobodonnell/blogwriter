@@ -144,10 +144,10 @@ it('uploads a new placeholder image', function (): void {
     $file = \Illuminate\Http\UploadedFile::fake()->image('new-placeholder.jpg', 400, 300);
 
     $this->actingAs($this->user)
-        ->put(route('admin.settings.placeholder-image.update'), [
+        ->put(route('admin.settings.site.image.update'), [
             'placeholder_image' => $file,
         ])
-        ->assertRedirect(route('admin.settings'));
+        ->assertRedirect(route('admin.settings.site'));
 
     expect(Setting::get('site_placeholder_image'))->not->toBeNull();
     Storage::disk('public')->assertExists(Setting::get('site_placeholder_image'));
@@ -159,7 +159,7 @@ it('rejects non-image files for placeholder upload', function (): void {
     $file = \Illuminate\Http\UploadedFile::fake()->create('document.pdf', 100);
 
     $this->actingAs($this->user)
-        ->put(route('admin.settings.placeholder-image.update'), [
+        ->put(route('admin.settings.site.image.update'), [
             'placeholder_image' => $file,
         ])
         ->assertSessionHasErrors('placeholder_image');

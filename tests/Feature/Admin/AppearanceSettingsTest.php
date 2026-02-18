@@ -108,9 +108,9 @@ it('displays current settings on appearance page', function (): void {
         ->assertSee('JetBrains Mono');
 });
 
-it('shows appearance link on settings index', function (): void {
+it('shows appearance tab in settings navigation', function (): void {
     $this->actingAs($this->user)
-        ->get(route('admin.settings'))
+        ->get(route('admin.settings.profile'))
         ->assertSuccessful()
         ->assertSee('Appearance');
 });

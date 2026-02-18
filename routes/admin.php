@@ -9,9 +9,9 @@ use App\Http\Controllers\Admin\CreateArticleController;
 use App\Http\Controllers\Admin\CreateArticlePreviewController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MediaController;
-use App\Http\Controllers\Admin\PageSettingsController;
 use App\Http\Controllers\Admin\PlaceholderImageController;
-use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\ProfileSettingsController;
+use App\Http\Controllers\Admin\SiteSettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function (): void {
@@ -47,13 +47,17 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function (): v
     Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
-    // Settings
-    Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
-    Route::put('/settings/profile', [SettingsController::class, 'update'])->name('settings.profile.update');
-    Route::put('/settings/placeholder-image', [PlaceholderImageController::class, 'update'])->name('settings.placeholder-image.update');
+    // Settings — redirect index to first tab
+    Route::redirect('/settings', '/admin/settings/profile')->name('settings');
 
-    // Page Settings
-    Route::put('/settings/pages', [PageSettingsController::class, 'update'])->name('settings.pages.update');
+    // Profile
+    Route::get('/settings/profile', [ProfileSettingsController::class, 'edit'])->name('settings.profile');
+    Route::put('/settings/profile', [ProfileSettingsController::class, 'update'])->name('settings.profile.update');
+
+    // Site
+    Route::get('/settings/site', [SiteSettingsController::class, 'edit'])->name('settings.site');
+    Route::put('/settings/site', [SiteSettingsController::class, 'update'])->name('settings.site.update');
+    Route::put('/settings/site/image', [PlaceholderImageController::class, 'update'])->name('settings.site.image.update');
 
     // Appearance
     Route::get('/settings/appearance', [AppearanceController::class, 'index'])->name('settings.appearance');

@@ -95,7 +95,7 @@
     </li>
 
     <li>
-        <a href="{{ route('admin.settings') }}"
+        <a href="{{ route('admin.settings.profile') }}"
            class="{{ request()->is('admin/settings*') ? 'menu-active' : '' }}"
            :class="!expanded && isDesktop && 'justify-center'"
            @mouseenter="showTooltip($event, 'Settings')"

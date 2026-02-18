@@ -22,6 +22,6 @@ class PlaceholderImageController extends Controller
 
         Setting::set('site_placeholder_image', $path);
 
-        return redirect()->route('admin.settings')->with('placeholder_success', 'Placeholder image updated successfully.');
+        return redirect()->route('admin.settings.site')->with('success', 'Placeholder image updated successfully.');
     }
 }

@@ -52,12 +52,12 @@ it('saves page subtitles as authenticated user', function (): void {
     $user = User::factory()->create();
 
     $this->actingAs($user)
-        ->put(route('admin.settings.pages.update'), [
+        ->put(route('admin.settings.site.update'), [
             'page_home_subtitle' => 'My home subtitle',
             'page_articles_subtitle' => 'My articles subtitle',
             'page_photos_subtitle' => 'My photos subtitle',
         ])
-        ->assertRedirect(route('admin.settings'));
+        ->assertRedirect(route('admin.settings.site'));
 
     expect(Setting::get('page_home_subtitle'))->toBe('My home subtitle');
     expect(Setting::get('page_articles_subtitle'))->toBe('My articles subtitle');
@@ -65,7 +65,7 @@ it('saves page subtitles as authenticated user', function (): void {
 });
 
 it('requires authentication to update page subtitles', function (): void {
-    $this->put(route('admin.settings.pages.update'), [
+    $this->put(route('admin.settings.site.update'), [
         'page_home_subtitle' => 'Test',
     ])->assertRedirect(route('login'));
 });
@@ -74,7 +74,7 @@ it('validates subtitle max length', function (): void {
     $user = User::factory()->create();
 
     $this->actingAs($user)
-        ->put(route('admin.settings.pages.update'), [
+        ->put(route('admin.settings.site.update'), [
             'page_home_subtitle' => str_repeat('a', 501),
         ])
         ->assertSessionHasErrors('page_home_subtitle');
@@ -85,12 +85,12 @@ it('deletes setting when subtitle is cleared', function (): void {
     Setting::set('page_home_subtitle', 'Old subtitle');
 
     $this->actingAs($user)
-        ->put(route('admin.settings.pages.update'), [
+        ->put(route('admin.settings.site.update'), [
             'page_home_subtitle' => '',
             'page_articles_subtitle' => '',
             'page_photos_subtitle' => '',
         ])
-        ->assertRedirect(route('admin.settings'));
+        ->assertRedirect(route('admin.settings.site'));
 
     expect(Setting::get('page_home_subtitle'))->toBeNull();
 });
