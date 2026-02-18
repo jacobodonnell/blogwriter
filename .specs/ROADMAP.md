@@ -261,7 +261,7 @@ A separate Laravel management application that provisions BlogWriter instances i
 - Official store (curated, 15% commission) + third-party stores (open spec, 0% commission)
 - Install via UI store, direct Composer, or manual filesystem
 - No lock-in: plugins work regardless of installation source
-- See `.ai/guidelines/plugins.md` for full architecture spec
+- See `.specs/plugins.md` for full architecture spec
 
 ---
 
