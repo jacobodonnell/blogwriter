@@ -1,7 +1,3 @@
-@php
-    $photo = $photo ?? new \App\Models\Photo();
-@endphp
-
 <div class="space-y-6">
     {{-- Current Image Preview --}}
     @if($photo->exists && $photo->getFirstMedia('image'))
