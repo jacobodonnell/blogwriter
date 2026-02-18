@@ -43,8 +43,24 @@
 
     <title>{!! $title ?: config('app.name', 'BlogWriter') !!}</title>
 
+    <!-- Prevent x-cloak elements from flashing before Alpine -->
+    <style>[x-cloak] { display: none !important; }</style>
+
     <!-- Font override from appearance settings -->
     <style>:root { --font-sans: var(--font-{{ $themeFont }}); --font-size-scale: {{ $fontSizeScale }}; }</style>
+
+    @if($darkMode)
+    <!-- Instant theme application to prevent FOUC -->
+    <script>
+        (function() {
+            var m = localStorage.getItem('themeMode') || 'system';
+            var d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.setAttribute('data-theme',
+                m === 'dark' ? '{{ $themeDark }}' : m === 'light' ? '{{ $themeLight }}' : (d ? '{{ $themeDark }}' : '{{ $themeLight }}')
+            );
+        })();
+    </script>
+    @endif
 
     <!-- Phosphor Icons -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/{{ $iconWeight }}/style.css" />

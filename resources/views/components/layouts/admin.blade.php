@@ -9,13 +9,7 @@
     :dark-mode="true"
     icon-weight="regular">
 
-    <x-slot:head>
-        <style>
-            [x-cloak] { display: none !important; }
-        </style>
-    </x-slot:head>
-
-    <div x-data="sidebar"
+    <div x-cloak x-data="sidebar"
         class="flex flex-col min-h-screen">
 
         {{-- Full-width Header --}}
