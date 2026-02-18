@@ -15,6 +15,8 @@
     $title = $isRoot ? 'Categories' : $category->name;
     $pageTitle = $title . ' - ' . config('app.name');
     $childrenLabel = $isRoot ? 'Categories' : 'Subcategories';
+    $parentUrl = $isRoot ? null : ($category->parent ? $category->parent->permalink() : route('categories.index'));
+    $parentLabel = $isRoot ? null : ($category->parent ? $category->parent->name : 'All Categories');
 @endphp
 
 {{-- h-feed for IndieWeb --}}
@@ -76,6 +78,8 @@
             :photoCount="$photoCount"
             :searchPlaceholder="$searchPlaceholder"
             :childrenLabel="$childrenLabel"
+            :parentUrl="$parentUrl"
+            :parentLabel="$parentLabel"
         />
 
     </div>

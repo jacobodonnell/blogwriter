@@ -92,6 +92,41 @@ it('home breadcrumb link does not use x-target to avoid AJAX into non-category p
     expect($content)->not->toContain('href="'.route('home').'" x-target');
 });
 
+it('root categories shows top level indicator in subcategory panel', function (): void {
+    Category::factory()->create();
+
+    $response = $this->get(route('categories.index'));
+
+    $response->assertOk();
+    $content = $response->getContent();
+    expect($content)->toContain('Top Level');
+    expect($content)->toContain('ph-house-simple');
+});
+
+it('child category shows parent up button in subcategory panel', function (): void {
+    $parent = Category::factory()->create(['name' => 'Parent Cat']);
+    $child = Category::factory()->withParent($parent)->create(['name' => 'Child Cat']);
+
+    $response = $this->get(route('categories.show', $parent->slug.'/'.$child->slug));
+
+    $response->assertOk();
+    $content = $response->getContent();
+    expect($content)->toContain('Parent Cat');
+    expect($content)->toContain('ph-arrow-up');
+    expect($content)->toContain('btn-primary');
+});
+
+it('top-level category shows all categories up button', function (): void {
+    $category = Category::factory()->create();
+
+    $response = $this->get(route('categories.show', $category->slug));
+
+    $response->assertOk();
+    $content = $response->getContent();
+    expect($content)->toContain('All Categories');
+    expect($content)->toContain('ph-arrow-up');
+});
+
 it('both routes have filter section', function (): void {
     $category = Category::factory()->create();
 

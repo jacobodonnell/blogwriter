@@ -8,6 +8,8 @@
     'photoCount',
     'searchPlaceholder' => 'Search content...',
     'childrenLabel' => 'Subcategories',
+    'parentUrl' => null,
+    'parentLabel' => null,
 ])
 
 @php
@@ -46,9 +48,20 @@
         </div>
 
         {{-- Subcategory panel --}}
-        @if($children->isNotEmpty())
+        @if($children->isNotEmpty() || $parentUrl)
             <div x-show="subcatsOpen" x-collapse x-cloak>
                 <div class="flex flex-wrap gap-2">
+                    @if($parentUrl)
+                        <a href="{{ $parentUrl }}" x-target.push="category-content" class="btn btn-sm btn-primary gap-1">
+                            <i class="ph ph-arrow-up text-sm"></i>
+                            {{ $parentLabel }}
+                        </a>
+                    @else
+                        <span class="btn btn-sm btn-disabled btn-neutral gap-1">
+                            <i class="ph ph-house-simple text-sm"></i>
+                            Top Level
+                        </span>
+                    @endif
                     @foreach($children as $child)
                         <a href="{{ $child->permalink() }}" x-target.push="category-content" class="btn btn-sm btn-outline gap-1">
                             <i class="ph ph-folder text-sm"></i>
