@@ -15,76 +15,78 @@
 @endphp
 
 {{-- Unified Toolbar --}}
-<div x-data="{ subcatsOpen: false, filtersOpen: {{ $hasFilters ? 'true' : 'false' }} }" class="mb-6">
-    {{-- Horizontal button row --}}
-    <div class="flex flex-wrap items-center gap-2">
-        @if($children->isNotEmpty())
-            <button @click="subcatsOpen = !subcatsOpen" class="btn btn-ghost btn-sm gap-1" type="button">
-                <i class="ph ph-folders text-lg"></i>
-                {{ $childrenLabel }} ({{ $children->count() }})
-                <i class="ph ph-caret-down text-sm transition-transform duration-200" :class="subcatsOpen && 'rotate-180'"></i>
-            </button>
-        @endif
-
-        <button @click="filtersOpen = !filtersOpen" class="btn btn-ghost btn-sm gap-1" type="button">
-            <i class="ph ph-funnel text-lg"></i>
-            Filters
-            @if($hasFilters)
-                <span class="badge badge-xs badge-primary"></span>
+<div x-data="{ subcatsOpen: false, filtersOpen: {{ $hasFilters ? 'true' : 'false' }} }"
+     class="card card-compact bg-base-200/50 mb-6">
+    <div class="card-body gap-3">
+        {{-- Horizontal button row --}}
+        <div class="flex flex-wrap items-center gap-2">
+            @if($children->isNotEmpty())
+                <button @click="subcatsOpen = !subcatsOpen" class="btn btn-ghost btn-sm gap-1" type="button">
+                    <i class="ph ph-folders text-lg"></i>
+                    {{ $childrenLabel }} ({{ $children->count() }})
+                    <i class="ph ph-caret-down text-sm transition-transform duration-200" :class="subcatsOpen && 'rotate-180'"></i>
+                </button>
             @endif
-            <i class="ph ph-caret-down text-sm transition-transform duration-200" :class="filtersOpen && 'rotate-180'"></i>
-        </button>
 
-        @if($hasFilters)
-            <a href="{{ $feedUrl }}" x-target.push="category-content" class="btn btn-ghost btn-sm gap-1">
-                <i class="ph ph-x text-sm"></i>
-                Clear
-            </a>
-        @endif
-    </div>
-
-    {{-- Subcategory panel --}}
-    @if($children->isNotEmpty())
-        <div x-show="subcatsOpen" x-collapse x-cloak class="mt-3">
-            <div class="flex flex-wrap gap-2">
-                @foreach($children as $child)
-                    <a href="{{ $child->permalink() }}" x-target.push="category-content" class="btn btn-sm btn-outline gap-1">
-                        <i class="ph ph-folder text-sm"></i>
-                        {{ $child->name }}
-                    </a>
-                @endforeach
-            </div>
-        </div>
-    @endif
-
-    {{-- Filters panel --}}
-    <div x-show="filtersOpen" x-collapse x-cloak class="mt-3">
-        <form method="GET" action="{{ $feedUrl }}"
-              x-target.push="category-content"
-              @submit="$el.querySelectorAll('[name]').forEach(el => { if (!el.value) el.removeAttribute('name') })"
-              class="card bg-base-200/50 card-body p-4 gap-3">
-            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                <div class="@auth sm:col-span-2 @else sm:col-span-3 @endauth">
-                    <input type="text" name="search" value="{{ request('search') }}"
-                           placeholder="{{ $searchPlaceholder }}"
-                           class="input input-bordered w-full"
-                           @input.debounce.400ms="$el.form.requestSubmit()">
-                </div>
-                @auth
-                    <div class="sm:col-span-1">
-                        <select name="status" class="select select-bordered w-full"
-                                @change="$el.form.requestSubmit()">
-                            <option value="">All Status</option>
-                            <option value="published" @selected(request('status') === 'published')>Published</option>
-                            <option value="draft" @selected(request('status') === 'draft')>Draft</option>
-                        </select>
-                    </div>
-                @endauth
-                @if(request('type'))
-                    <input type="hidden" name="type" value="{{ request('type') }}">
+            <button @click="filtersOpen = !filtersOpen" class="btn btn-ghost btn-sm gap-1" type="button">
+                <i class="ph ph-funnel text-lg"></i>
+                Filters
+                @if($hasFilters)
+                    <span class="badge badge-xs badge-primary"></span>
                 @endif
+                <i class="ph ph-caret-down text-sm transition-transform duration-200" :class="filtersOpen && 'rotate-180'"></i>
+            </button>
+
+            @if($hasFilters)
+                <a href="{{ $feedUrl }}" x-target.push="category-content" class="btn btn-ghost btn-sm gap-1">
+                    <i class="ph ph-x text-sm"></i>
+                    Clear
+                </a>
+            @endif
+        </div>
+
+        {{-- Subcategory panel --}}
+        @if($children->isNotEmpty())
+            <div x-show="subcatsOpen" x-collapse x-cloak>
+                <div class="flex flex-wrap gap-2">
+                    @foreach($children as $child)
+                        <a href="{{ $child->permalink() }}" x-target.push="category-content" class="btn btn-sm btn-outline gap-1">
+                            <i class="ph ph-folder text-sm"></i>
+                            {{ $child->name }}
+                        </a>
+                    @endforeach
+                </div>
             </div>
-        </form>
+        @endif
+
+        {{-- Filters panel --}}
+        <div x-show="filtersOpen" x-collapse x-cloak>
+            <form method="GET" action="{{ $feedUrl }}"
+                  x-target.push="category-content"
+                  @submit="$el.querySelectorAll('[name]').forEach(el => { if (!el.value) el.removeAttribute('name') })">
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    <div class="@auth sm:col-span-2 @else sm:col-span-3 @endauth">
+                        <input type="text" name="search" value="{{ request('search') }}"
+                               placeholder="{{ $searchPlaceholder }}"
+                               class="input input-bordered w-full"
+                               @input.debounce.400ms="$el.form.requestSubmit()">
+                    </div>
+                    @auth
+                        <div class="sm:col-span-1">
+                            <select name="status" class="select select-bordered w-full"
+                                    @change="$el.form.requestSubmit()">
+                                <option value="">All Status</option>
+                                <option value="published" @selected(request('status') === 'published')>Published</option>
+                                <option value="draft" @selected(request('status') === 'draft')>Draft</option>
+                            </select>
+                        </div>
+                    @endauth
+                    @if(request('type'))
+                        <input type="hidden" name="type" value="{{ request('type') }}">
+                    @endif
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
