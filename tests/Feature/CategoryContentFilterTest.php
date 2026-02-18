@@ -49,14 +49,6 @@ it('falls back to all for invalid type', function (): void {
         ->assertViewHas('photos', fn ($photos) => $photos !== null);
 });
 
-it('returns partial for AJAX requests', function (): void {
-    $this->get(route('categories.show', $this->category->slug).'?type=articles', [
-        'X-Alpine-Target' => 'category-content',
-    ])
-        ->assertOk()
-        ->assertViewIs('public.category._content');
-});
-
 it('respects draft visibility with type filter', function (): void {
     $draftArticle = Article::factory()->draft()->create([
         'title' => 'Draft Article',

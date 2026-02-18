@@ -68,10 +68,6 @@ class CategoryArticleController extends Controller
             'currentType' => $type,
         ];
 
-        if ($request->header('X-Alpine-Target')) {
-            return view('public.category._content', $viewData);
-        }
-
         return view('public.category', $viewData);
     }
 }
