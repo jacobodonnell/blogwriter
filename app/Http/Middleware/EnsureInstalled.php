@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class EnsureInstalled
 {
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): mixed
     {
         // Skip in testing environment
         if (app()->environment('testing')) {
@@ -19,8 +19,8 @@ class EnsureInstalled
             return $next($request);
         }
 
-        // Skip auth routes (login, register, password reset)
-        if ($request->is('login') || $request->is('register') || $request->is('password/*')) {
+        // Skip login route (only auth route needed for CLI-only install)
+        if ($request->is('login')) {
             return $next($request);
         }
 

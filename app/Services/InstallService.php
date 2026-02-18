@@ -213,16 +213,6 @@ class InstallService
     }
 
     /**
-     * Seed demo content.
-     */
-    public function seedDemoContent(): void
-    {
-        \Illuminate\Support\Facades\Storage::disk('local')->deleteDirectory('media-library/temp');
-
-        Artisan::call('blogwriter:seed', ['--state' => 'demo', '--no-interaction' => true]);
-    }
-
-    /**
      * Clear application caches.
      */
     public function clearCaches(): void

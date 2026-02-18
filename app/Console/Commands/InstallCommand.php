@@ -8,7 +8,9 @@ use App\Models\User;
 use App\Services\InstallService;
 use App\Services\ResetService;
 use Illuminate\Console\Command;
+use Illuminate\Database\Console\Migrations\FreshCommand;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\error;
@@ -57,19 +59,38 @@ class InstallCommand extends Command
             }
         }
 
+        // Check system requirements
+        $requirements = $this->installService->checkRequirements();
+
+        if (! $requirements['allPassed']) {
+            error('System requirements not met:');
+            $this->newLine();
+
+            foreach ($requirements['requirements'] as $req) {
+                $status = $req['passed'] ? '✓' : '✗';
+                $method = $req['passed'] ? 'info' : 'error';
+                $method("  {$status} {$req['name']}: {$req['value']}");
+            }
+
+            $this->newLine();
+            error('Please fix the above issues before installing BlogWriter.');
+
+            return self::FAILURE;
+        }
+
         // Check current prohibition state using reflection
-        $reflection = new \ReflectionClass(\Illuminate\Database\Console\Migrations\FreshCommand::class);
+        $reflection = new \ReflectionClass(FreshCommand::class);
         $property = $reflection->getProperty('prohibitedFromRunning');
         $wasProhibited = $property->getValue();
 
         // Disable destructive command prohibition for installer context
-        \Illuminate\Support\Facades\DB::prohibitDestructiveCommands(false);
+        DB::prohibitDestructiveCommands(false);
 
         try {
             return $this->runInstallation();
         } finally {
             // Restore original prohibition state
-            \Illuminate\Support\Facades\DB::prohibitDestructiveCommands($wasProhibited);
+            DB::prohibitDestructiveCommands($wasProhibited);
         }
     }
 
@@ -352,15 +373,7 @@ class InstallCommand extends Command
 
     protected function isComposerAvailable(): bool
     {
-        if ($this->commandExists('which composer')) {
-            return true;
-        }
-
-        return $this->commandExists('where composer');
-    }
-
-    private function commandExists(string $command): bool
-    {
+        $command = PHP_OS_FAMILY === 'Windows' ? 'where composer' : 'which composer';
         $output = shell_exec($command);
 
         return ! in_array($output, [null, '', false], true);
