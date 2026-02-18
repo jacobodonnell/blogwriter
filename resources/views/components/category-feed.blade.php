@@ -23,10 +23,14 @@
     <div class="card-body gap-3">
         {{-- Horizontal button row --}}
         <div class="flex flex-wrap items-center gap-2">
-            @if($children->isNotEmpty())
+            @if($children->isNotEmpty() || $parentUrl)
                 <button @click="subcatsOpen = !subcatsOpen" class="btn btn-ghost btn-sm gap-1" type="button">
                     <i class="ph ph-folders text-lg"></i>
-                    {{ $childrenLabel }} ({{ $children->count() }})
+                    @if($children->isNotEmpty())
+                        {{ $childrenLabel }} ({{ $children->count() }})
+                    @else
+                        Navigate
+                    @endif
                     <i class="ph ph-caret-down text-sm transition-transform duration-200" :class="subcatsOpen && 'rotate-180'"></i>
                 </button>
             @endif
