@@ -82,6 +82,16 @@ it('category breadcrumbs include ancestors', function (): void {
     expect($content)->toContain('Child Cat');
 });
 
+it('home breadcrumb link does not use x-target to avoid AJAX into non-category page', function (): void {
+    $response = $this->get(route('categories.index'));
+
+    $response->assertOk();
+
+    // The Home link should be a plain link (no x-target), since / has no #category-content
+    $content = $response->getContent();
+    expect($content)->not->toContain('href="'.route('home').'" x-target');
+});
+
 it('both routes have filter section', function (): void {
     $category = Category::factory()->create();
 

@@ -26,7 +26,7 @@
         {{-- Breadcrumbs --}}
         <nav class="text-sm breadcrumbs mb-4">
             <ul>
-                <li><a href="{{ route('home') }}" x-target.push="category-content" class="link link-hover">Home</a></li>
+                <li><a href="{{ route('home') }}" class="link link-hover">Home</a></li>
                 @if($isRoot)
                     <li class="text-base-content/60">Categories</li>
                 @else
