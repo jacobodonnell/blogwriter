@@ -30,7 +30,7 @@
         </header>
 
         {{-- Filter banner + Results (Alpine AJAX target) --}}
-        <div id="article-results">
+        <div id="article-results" x-merge="morph">
             <x-filter-banner :action="route('articles.index')" target="article-results" :clearRoute="route('articles.index')">
                 <div class="sm:col-span-2">
                     <input type="text" name="search" value="{{ request('search') }}"

@@ -22,7 +22,7 @@ if (! function_exists('placeholder_image_url')) {
         $path = setting('site_placeholder_image');
 
         if ($path && Storage::disk('public')->exists($path)) {
-            return Storage::disk('public')->url($path);
+            return asset('storage/'.$path);
         }
 
         return null;

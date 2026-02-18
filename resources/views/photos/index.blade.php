@@ -27,7 +27,7 @@
         </header>
 
         {{-- Filter banner + Results (Alpine AJAX target) --}}
-        <div id="photo-results">
+        <div id="photo-results" x-merge="morph">
             <x-filter-banner :action="route('photos.index')" target="photo-results" :clearRoute="route('photos.index')">
                 <div class="sm:col-span-2">
                     <input type="text" name="search" value="{{ request('search') }}"
