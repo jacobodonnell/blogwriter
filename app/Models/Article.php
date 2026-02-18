@@ -310,25 +310,6 @@ class Article extends Model
     }
 
     /**
-     * Publish the article.
-     */
-    public function publish(): void
-    {
-        $this->status = Status::Published;
-        $this->published_at = now();
-        $this->save();
-    }
-
-    /**
-     * Unpublish the article (set to draft).
-     */
-    public function unpublish(): void
-    {
-        $this->status = Status::Draft;
-        $this->save();
-    }
-
-    /**
      * Add a slug to the past_slugs array.
      */
     public function addPastSlug(string $slug): void
@@ -339,13 +320,5 @@ class Article extends Model
             $pastSlugs[] = $slug;
             $this->past_slugs = $pastSlugs;
         }
-    }
-
-    /**
-     * Check if a slug exists in past_slugs.
-     */
-    public function hasPastSlug(string $slug): bool
-    {
-        return in_array($slug, $this->past_slugs ?? []);
     }
 }

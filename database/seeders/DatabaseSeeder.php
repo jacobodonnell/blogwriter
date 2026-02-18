@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Article;
-use App\Models\Category;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -17,7 +15,7 @@ class DatabaseSeeder extends Seeder
      */
     protected array $userConfig = [
         'name' => 'Jacob',
-        'email' => 'jmodonnell96@gmail.com',
+        'email' => 'demo@example.com',
         'password' => 'password',
     ];
 
@@ -73,20 +71,6 @@ class DatabaseSeeder extends Seeder
             throw new \InvalidArgumentException(sprintf('Invalid state: %s. Valid states: ', $state).implode(', ', $this->validStates));
         }
 
-        $this->currentState = $state;
-
-        return $this;
-    }
-
-    /**
-     * Chain additional state (for progressive seeding)
-     */
-    public function then(string $state): self
-    {
-        // Execute current state first
-        $this->seedState($this->currentState);
-
-        // Set next state
         $this->currentState = $state;
 
         return $this;
@@ -170,21 +154,5 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->asUser(trim($parts[0]), trim($parts[1]), trim($parts[2]));
-    }
-
-    /**
-     * Clear all seeded data
-     */
-    public function clear(): self
-    {
-        $this->command?->info('Clearing seeded data...');
-
-        Article::query()->delete();
-        Category::query()->delete();
-        User::query()->delete();
-
-        $this->command?->info('All data cleared!');
-
-        return $this;
     }
 }

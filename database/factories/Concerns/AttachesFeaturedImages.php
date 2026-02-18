@@ -42,19 +42,4 @@ trait AttachesFeaturedImages
             ]);
         }
     }
-
-    /**
-     * Attach a picsum image to a model using a seed.
-     */
-    protected function attachPicsumImage(Model $model, string $seed): void
-    {
-        // Note: This method is a placeholder for future implementation
-        // Picsum.photos URLs are not suitable for seeding since they require external network access
-        // For now, we'll just log a warning
-        Log::info('Picsum image attachment requested but not implemented', [
-            'model_class' => $model::class,
-            'model_id' => $model->id,
-            'seed' => $seed,
-        ]);
-    }
 }

@@ -35,9 +35,4 @@ class PasswordGenerator
             }
         }
     }
-
-    public static function validateLength(string $password): bool
-    {
-        return strlen($password) >= 16;
-    }
 }

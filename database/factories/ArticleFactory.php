@@ -3,9 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\Status;
-use App\Models\Category;
 use App\Models\User;
-use Database\Factories\Concerns\AttachesFeaturedImages;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -13,8 +11,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ArticleFactory extends Factory
 {
-    use AttachesFeaturedImages;
-
     /**
      * Sequence counter for unique slugs.
      */
@@ -262,36 +258,6 @@ class ArticleFactory extends Factory
         return $this->state(fn (array $attributes): array => [
             'status' => 'draft',
             'published_at' => fake()->optional(0.3)->dateTimeBetween('-6 months', '+6 months'),
-        ]);
-    }
-
-    /**
-     * State to attach a specific demo image.
-     */
-    public function withDemoImage(int $imageNumber): static
-    {
-        return $this->afterCreating(function (\App\Models\Article $article) use ($imageNumber): void {
-            $this->attachDemoImage($article, $imageNumber);
-        });
-    }
-
-    /**
-     * State to attach a picsum image with seed.
-     */
-    public function withPicsumImage(string $seed): static
-    {
-        return $this->afterCreating(function (\App\Models\Article $article) use ($seed): void {
-            $this->attachPicsumImage($article, $seed);
-        });
-    }
-
-    /**
-     * State to assign article to a specific category by name.
-     */
-    public function inCategory(string $categoryName): static
-    {
-        return $this->state(fn (): array => [
-            'category_id' => Category::where('name', $categoryName)->value('id'),
         ]);
     }
 }

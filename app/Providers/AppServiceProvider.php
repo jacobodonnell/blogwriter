@@ -2,10 +2,8 @@
 
 namespace App\Providers;
 
-use App\Models\Article;
 use App\Models\Photo;
 use App\Models\User;
-use App\Observers\ArticleObserver;
 use App\Observers\PhotoObserver;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -25,7 +23,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Article::observe(ArticleObserver::class);
         Photo::observe(PhotoObserver::class);
 
         View::composer([

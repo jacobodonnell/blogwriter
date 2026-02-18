@@ -83,35 +83,6 @@ class Category extends Model
     }
 
     /**
-     * Get the count of published articles including descendants.
-     */
-    public function getArticleCountAttribute(): int
-    {
-        $ids = array_merge([$this->id], $this->descendantIds());
-
-        return Article::query()
-            ->published()
-            ->whereIn('category_id', $ids)
-            ->count();
-    }
-
-    /**
-     * Check if this is a root category (no parent).
-     */
-    public function isRoot(): bool
-    {
-        return $this->parent_id === null;
-    }
-
-    /**
-     * Get the depth of this category in the hierarchy (0 = root).
-     */
-    public function depth(): int
-    {
-        return $this->ancestors()->count();
-    }
-
-    /**
      * Get the permalink for this category.
      */
     public function permalink(): string

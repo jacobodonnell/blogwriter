@@ -90,16 +90,6 @@ it('allows deletion when category has no children or articles', function (): voi
     expect(Category::find($category->id))->toBeNull();
 });
 
-it('includes descendant articles in article count', function (): void {
-    $parent = Category::factory()->create(['name' => 'Programming']);
-    $child = Category::factory()->withParent($parent)->create(['name' => 'PHP']);
-
-    Article::factory()->published()->create(['category_id' => $parent->id]);
-    Article::factory()->published()->create(['category_id' => $child->id]);
-
-    expect($parent->article_count)->toBe(2);
-});
-
 it('builds correct breadcrumbs for nested category', function (): void {
     $root = Category::factory()->create(['name' => 'Programming']);
     $child = Category::factory()->withParent($root)->create(['name' => 'PHP']);
