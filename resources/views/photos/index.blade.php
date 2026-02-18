@@ -135,16 +135,7 @@
 
                         <fieldset class="fieldset">
                             <legend class="fieldset-legend">Category (optional)</legend>
-                            <select name="category_id" class="select select-bordered w-full">
-                                <option value="">No Category</option>
-                                @forelse($categories ?? [] as $rootCat)
-                                    <option value="{{ $rootCat->id }}">{{ $rootCat->name }}</option>
-                                    @foreach($rootCat->children as $childCat)
-                                        <option value="{{ $childCat->id }}">&nbsp;&nbsp;└ {{ $childCat->name }}</option>
-                                    @endforeach
-                                @empty
-                                @endforelse
-                            </select>
+                            <x-category-select :categories="$categories ?? collect()" />
                         </fieldset>
 
                         <fieldset class="fieldset">

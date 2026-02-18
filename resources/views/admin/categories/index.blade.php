@@ -59,22 +59,14 @@
             <label class="label">
                 <span class="label-text font-medium">Viewing:</span>
             </label>
-            <select name="parent"
-                    x-model="currentParent"
-                    onchange="this.form.requestSubmit()"
-                    class="select select-bordered select-sm">
-                <option value="">Root Categories</option>
-                @foreach($allCategories as $rootCat)
-                    <option value="{{ $rootCat->id }}">
-                        {{ $rootCat->name }}
-                    </option>
-                    @foreach($rootCat->children as $childCat)
-                        <option value="{{ $childCat->id }}">
-                            &nbsp;&nbsp;└ {{ $childCat->name }}
-                        </option>
-                    @endforeach
-                @endforeach
-            </select>
+            <x-category-select
+                :categories="$allCategories"
+                name="parent"
+                empty-label="Root Categories"
+                x-model="currentParent"
+                onchange="this.form.requestSubmit()"
+                class="select select-bordered select-sm"
+            />
         </form>
 
         {{-- Categories List --}}
