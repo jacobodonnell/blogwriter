@@ -143,3 +143,28 @@ it('does not show subcategory section for leaf categories', function (): void {
     $response->assertSuccessful();
     $response->assertViewHas('children', fn ($children) => $children->isEmpty());
 });
+
+it('includes deeply nested descendant articles (3+ levels)', function (): void {
+    $root = Category::factory()->create(['name' => 'Root', 'slug' => 'root']);
+    $child = Category::factory()->withParent($root)->create(['name' => 'Child', 'slug' => 'child']);
+    $grandchild = Category::factory()->withParent($child)->create(['name' => 'Grandchild', 'slug' => 'grandchild']);
+    $greatGrandchild = Category::factory()->withParent($grandchild)->create(['name' => 'Great Grandchild', 'slug' => 'great-grandchild']);
+
+    Article::factory()->published()->create(['title' => 'Deep Article', 'category_id' => $greatGrandchild->id]);
+
+    $this->get(route('categories.show', $root->slug))
+        ->assertSuccessful()
+        ->assertSee('Deep Article');
+});
+
+it('builds correct ancestor breadcrumbs for deeply nested categories', function (): void {
+    $root = Category::factory()->create(['name' => 'Tech', 'slug' => 'tech']);
+    $mid = Category::factory()->withParent($root)->create(['name' => 'Web', 'slug' => 'web']);
+    $leaf = Category::factory()->withParent($mid)->create(['name' => 'Laravel', 'slug' => 'laravel']);
+
+    $ancestors = $leaf->ancestors();
+
+    expect($ancestors)->toHaveCount(2);
+    expect($ancestors->first()->slug)->toBe('tech');
+    expect($ancestors->last()->slug)->toBe('web');
+});

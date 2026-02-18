@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class Category extends Model
@@ -58,36 +59,45 @@ class Category extends Model
     }
 
     /**
-     * Walk up the parent chain and return ancestors (nearest first).
+     * Walk up the parent chain and return ancestors (root first) using a recursive CTE.
      */
     public function ancestors(): Collection
     {
-        $ancestors = collect();
-        $current = $this->parent;
-
-        while ($current) {
-            $ancestors->push($current);
-            $current = $current->parent;
+        if (! $this->parent_id) {
+            return collect();
         }
 
-        return $ancestors->reverse()->values();
+        $rows = DB::select(<<<'SQL'
+            WITH RECURSIVE ancestor_tree AS (
+                SELECT *, 0 AS depth FROM categories WHERE id = ?
+                UNION ALL
+                SELECT c.*, a.depth + 1 FROM categories c
+                INNER JOIN ancestor_tree a ON c.id = a.parent_id
+            )
+            SELECT * FROM ancestor_tree ORDER BY depth DESC
+        SQL, [$this->parent_id]);
+
+        return self::hydrate($rows);
     }
 
     /**
-     * Recursively collect all descendant category IDs.
+     * Collect all descendant category IDs using a recursive CTE.
      *
      * @return array<int>
      */
     public function descendantIds(): array
     {
-        $ids = [];
+        $rows = DB::select(<<<'SQL'
+            WITH RECURSIVE descendant_tree AS (
+                SELECT id FROM categories WHERE parent_id = ?
+                UNION ALL
+                SELECT c.id FROM categories c
+                INNER JOIN descendant_tree d ON c.parent_id = d.id
+            )
+            SELECT id FROM descendant_tree
+        SQL, [$this->id]);
 
-        foreach ($this->children()->with('children')->get() as $child) {
-            $ids[] = $child->id;
-            $ids = array_merge($ids, $child->descendantIds());
-        }
-
-        return $ids;
+        return array_column($rows, 'id');
     }
 
     /**
