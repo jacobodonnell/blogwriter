@@ -5,14 +5,16 @@ namespace App\Http\Controllers\Admin;
 use App\Actions\Photos\CreatePhotoFromUploadAction;
 use App\Actions\Photos\ExtractExifDataAction;
 use App\Actions\UpdatePublishedStatusAction;
-use App\Enums\Status;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StorePhotoRequest;
 use App\Http\Requests\Admin\UpdatePhotoRequest;
 use App\Models\Category;
 use App\Models\Photo;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
 
 class AdminPhotoController extends Controller
 {
@@ -25,7 +27,7 @@ class AdminPhotoController extends Controller
     /**
      * Display a listing of photos.
      */
-    public function index(Request $request): \Illuminate\View\View
+    public function index(Request $request): View
     {
         $query = Photo::query()
             ->orderBy('created_at', 'desc');
@@ -44,25 +46,23 @@ class AdminPhotoController extends Controller
     /**
      * Show the form for creating a new photo.
      */
-    public function create(): \Illuminate\View\View
+    public function create(): View
     {
-        $categories = Category::whereNull('parent_id')->with('children')->orderBy('name')->get();
-
         return view('admin.photos.create', [
-            'categories' => $categories,
+            'photo' => new Photo,
+            'categories' => $this->categoryTree(),
         ]);
     }
 
     /**
      * Store a newly created photo.
      */
-    public function store(StorePhotoRequest $request)
+    public function store(StorePhotoRequest $request): \Illuminate\Http\JsonResponse|RedirectResponse
     {
         $data = $request->validated();
 
         try {
             $photo = $this->createPhotoFromUpload->handle($request->file('image_file'), [
-                'slug' => pathinfo($request->file('image_file')->getClientOriginalName(), PATHINFO_FILENAME),
                 'alt_text' => $data['alt_text'],
                 'caption' => $data['caption'] ?? null,
                 'status' => $data['status'],
@@ -100,7 +100,7 @@ class AdminPhotoController extends Controller
     /**
      * Display the specified photo.
      */
-    public function show(Photo $photo): \Illuminate\View\View
+    public function show(Photo $photo): View
     {
         return view('admin.photos.show', [
             'photo' => $photo,
@@ -110,54 +110,35 @@ class AdminPhotoController extends Controller
     /**
      * Show the form for editing the specified photo.
      */
-    public function edit(Photo $photo): \Illuminate\View\View
+    public function edit(Photo $photo): View
     {
-        $categories = Category::whereNull('parent_id')->with('children')->orderBy('name')->get();
-
         return view('admin.photos.edit', [
             'photo' => $photo,
             'articleCount' => $photo->articles()->count(),
-            'categories' => $categories,
+            'categories' => $this->categoryTree(),
         ]);
     }
 
     /**
      * Update the specified photo.
      */
-    public function update(UpdatePhotoRequest $request, Photo $photo)
+    public function update(UpdatePhotoRequest $request, Photo $photo): RedirectResponse
     {
         $data = $request->validated();
 
-        // Update photo attributes
         $photo->caption = $data['caption'] ?? null;
         $photo->alt_text = $data['alt_text'];
         $photo->status = $data['status'];
         $photo->taken_at = $data['taken_at'] ?? null;
         $photo->category_id = $data['category_id'] ?? null;
 
-        // Update published_at based on status
         $this->updatePublishedStatus->handle($photo, $data['status']);
 
-        $photo->save();
-
-        // Handle new image upload
         if ($request->hasFile('image_file')) {
             try {
-                // Extract new EXIF metadata
                 $exif = $this->extractExif->handle($request->file('image_file'));
                 $photo->meta = array_merge($photo->meta ?? [], $exif);
-
-                // Update filename
-                $filename = $request->file('image_file')->getClientOriginalName();
-                $photo->filename = $filename;
-                $photo->save();
-
-                // Determine disk based on status
-                $disk = $photo->status->isPublic() ? 'public' : 'private';
-
-                // Replace existing media
-                $photo->addMedia($request->file('image_file'))
-                    ->toMediaCollection('image', $disk);
+                $photo->filename = $request->file('image_file')->getClientOriginalName();
             } catch (\Exception $e) {
                 Log::error('Failed to update photo in MediaLibrary', [
                     'photo_id' => $photo->id,
@@ -170,6 +151,15 @@ class AdminPhotoController extends Controller
             }
         }
 
+        $photo->save();
+
+        if ($request->hasFile('image_file')) {
+            $disk = $photo->status->isPublic() ? 'public' : 'private';
+
+            $photo->addMedia($request->file('image_file'))
+                ->toMediaCollection('image', $disk);
+        }
+
         return redirect()->route('admin.photos.edit', $photo)
             ->with('success', 'Photo updated successfully.');
     }
@@ -177,9 +167,8 @@ class AdminPhotoController extends Controller
     /**
      * Remove the specified photo.
      */
-    public function destroy(Photo $photo)
+    public function destroy(Photo $photo): RedirectResponse
     {
-        // Check if photo is used by any articles
         if ($photo->articles()->exists()) {
             $articleCount = $photo->articles()->count();
 
@@ -203,5 +192,13 @@ class AdminPhotoController extends Controller
             return redirect()->back()
                 ->withErrors(['photo' => 'Failed to delete photo. Please try again.']);
         }
+    }
+
+    /**
+     * @return Collection<int, Category>
+     */
+    private function categoryTree(): Collection
+    {
+        return Category::whereNull('parent_id')->with('children')->orderBy('name')->get();
     }
 }
