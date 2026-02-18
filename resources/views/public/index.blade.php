@@ -53,7 +53,7 @@
                                 {{-- Category --}}
                                 @if($article->category)
                                     <div class="flex flex-wrap gap-2">
-                                        <a href="{{ route('category.show', $article->category->slug) }}"
+                                        <a href="{{ $article->category->permalink() }}"
                                            class="badge badge-primary badge-sm">
                                             {{ $article->category->name }}
                                         </a>

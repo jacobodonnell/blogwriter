@@ -14,6 +14,15 @@
             </ul>
         </nav>
 
+        @auth
+            <div class="flex items-center gap-2 mb-6">
+                <a href="{{ route('admin.settings') }}" class="btn btn-ghost btn-sm gap-1">
+                    <i class="ph ph-gear text-lg"></i>
+                    Edit Profile
+                </a>
+            </div>
+        @endauth
+
         {{-- Profile h-card --}}
         <div class="h-card">
 

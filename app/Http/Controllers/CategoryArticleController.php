@@ -11,9 +11,18 @@ class CategoryArticleController extends Controller
     /**
      * Display articles by category (including subcategory articles).
      */
-    public function index(string $slug): View
+    public function index(string $path): View
     {
-        $category = Category::where('slug', $slug)->firstOrFail();
+        $segments = explode('/', $path);
+        $parentId = null;
+
+        foreach ($segments as $segment) {
+            $category = Category::where('slug', $segment)
+                ->where('parent_id', $parentId)
+                ->firstOrFail();
+
+            $parentId = $category->id;
+        }
 
         $categoryIds = array_merge([$category->id], $category->descendantIds());
 
@@ -23,9 +32,12 @@ class CategoryArticleController extends Controller
             ->orderBy('published_at', 'desc')
             ->paginate(10);
 
+        $children = $category->children()->orderBy('name')->get();
+
         return view('public.category', [
             'category' => $category,
             'articles' => $articles,
+            'children' => $children,
         ]);
     }
 }

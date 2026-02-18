@@ -50,6 +50,14 @@ class Category extends Model
     }
 
     /**
+     * @return HasMany<Photo, $this>
+     */
+    public function photos(): HasMany
+    {
+        return $this->hasMany(Photo::class);
+    }
+
+    /**
      * Walk up the parent chain and return ancestors (nearest first).
      */
     public function ancestors(): Collection
@@ -83,10 +91,12 @@ class Category extends Model
     }
 
     /**
-     * Get the permalink for this category.
+     * Get the permalink for this category using full ancestor path.
      */
     public function permalink(): string
     {
-        return route('category.show', $this->slug);
+        $slugs = $this->ancestors()->pluck('slug')->push($this->slug)->all();
+
+        return route('categories.show', implode('/', $slugs));
     }
 }

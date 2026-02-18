@@ -54,7 +54,7 @@
         {{-- Parent Filter --}}
         <form method="GET"
               action="{{ route('admin.categories.index') }}"
-              x-target="categories-table"
+              x-target.push="categories-table"
               class="flex items-center gap-3">
             <label class="label">
                 <span class="label-text font-medium">Viewing:</span>

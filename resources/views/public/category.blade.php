@@ -6,28 +6,50 @@
 
     {{-- h-feed for IndieWeb --}}
     <div class="h-feed max-w-4xl mx-auto">
-        
+
         {{-- Category Header --}}
         <header class="mb-8">
             <nav class="text-sm breadcrumbs mb-4">
                 <ul>
                     <li><a href="{{ route('home') }}" class="link link-hover">Home</a></li>
+                    @foreach($category->ancestors() as $ancestor)
+                        <li><a href="{{ $ancestor->permalink() }}" class="link link-hover">{{ $ancestor->name }}</a></li>
+                    @endforeach
                     <li class="text-base-content/60">{{ $category->name }}</li>
                 </ul>
             </nav>
-            
-            <h1 class="text-3xl font-bold mb-2">
-                <i class="ph ph-folder text-primary mr-2"></i>
-                {{ $category->name }}
-            </h1>
-            
+
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <h1 class="text-3xl font-bold">
+                    <i class="ph ph-folder text-primary mr-2"></i>
+                    {{ $category->name }}
+                </h1>
+                @auth
+                    <a href="{{ route('admin.categories.index') }}" class="btn btn-ghost btn-sm gap-1">
+                        <i class="ph ph-gear text-lg"></i>
+                        Manage Categories
+                    </a>
+                @endauth
+            </div>
+
             @if($category->description)
-                <p class="text-base-content/70 text-lg max-w-2xl">{{ $category->description }}</p>
+                <p class="text-base-content/70 text-lg max-w-2xl mt-2">{{ $category->description }}</p>
             @endif
-            
+
             <p class="text-sm text-base-content/60 mt-2">
                 {{ $articles->total() }} {{ Str::plural('article', $articles->total()) }} in this category
             </p>
+
+            @if($children->isNotEmpty())
+                <div class="flex flex-wrap gap-2 mt-4">
+                    @foreach($children as $child)
+                        <a href="{{ $child->permalink() }}" class="btn btn-sm btn-outline gap-1">
+                            <i class="ph ph-folder text-sm"></i>
+                            {{ $child->name }}
+                        </a>
+                    @endforeach
+                </div>
+            @endif
         </header>
 
         {{-- Articles List --}}
@@ -62,7 +84,7 @@
 
                             {{-- Read More --}}
                             <div class="card-actions justify-end mt-4">
-                                <a href="{{ route('articles.show', $article->slug) }}" 
+                                <a href="{{ route('articles.show', $article->slug) }}"
                                    class="btn btn-primary btn-sm btn-ghost gap-1">
                                     Read Article
                                     <i class="ph ph-arrow-right"></i>

@@ -22,22 +22,18 @@
         @endauth
 
         {{-- Breadcrumbs --}}
-        <nav class="text-sm breadcrumbs mb-6">
+        <nav class="text-sm breadcrumbs overflow-x-auto mb-6">
             <ul>
                 <li><a href="{{ route('home') }}" class="link link-hover">Home</a></li>
-                @if($article->category)
-                    <li><a href="{{ route('category.show', $article->category->slug) }}" class="link link-hover">
-                        {{ $article->category->name }}
-                    </a></li>
-                @endif
-                <li class="text-base-content/60 truncate max-w-xs">{{ $article->title }}</li>
+                <li><a href="{{ route('articles.index') }}" class="link link-hover">Articles</a></li>
+                <li class="text-base-content/60">{{ $article->title }}</li>
             </ul>
         </nav>
 
         {{-- Category --}}
         @if($article->category)
             <div class="flex flex-wrap gap-2 mb-4">
-                <a href="{{ route('category.show', $article->category->slug) }}"
+                <a href="{{ $article->category->permalink() }}"
                    class="badge badge-primary badge-outline">
                     {{ $article->category->name }}
                 </a>

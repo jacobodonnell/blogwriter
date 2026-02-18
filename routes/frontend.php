@@ -15,7 +15,9 @@ Route::get('/articles', [ArticleController::class, 'index'])->name('articles.ind
 Route::get('/articles/{slug}', [ArticleController::class, 'show'])->name('articles.show');
 
 // Categories
-Route::get('/category/{slug}', [CategoryArticleController::class, 'index'])->name('category.show');
+Route::get('/categories/{path}', [CategoryArticleController::class, 'index'])
+    ->where('path', '.*')
+    ->name('categories.show');
 
 // Photos
 Route::get('/photos', [PhotoController::class, 'index'])->name('photos.index');

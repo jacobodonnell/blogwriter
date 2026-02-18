@@ -134,7 +134,7 @@ Go to **Categories** in the admin sidebar. You can also create categories on the
 Each category gets a URL slug generated from its name:
 
 ```
-yourdomain.com/category/tech
+yourdomain.com/categories/tech
 ```
 
 Visiting a category page shows all published articles in that category, with h-feed microformats markup.

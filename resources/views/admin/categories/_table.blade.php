@@ -9,7 +9,7 @@
                     <ul class="flex-wrap">
                         <li>
                             <a href="{{ route('admin.categories.index') }}"
-                               x-target="categories-table"
+                               x-target.push="categories-table"
                                class="link link-hover">
                                 <i class="ph ph-house mr-1"></i> Root
                             </a>
@@ -18,7 +18,7 @@
                             @if(!$loop->last)
                                 <li>
                                     <a href="{{ route('admin.categories.index', ['parent' => $crumb->id]) }}"
-                                       x-target="categories-table"
+                                       x-target.push="categories-table"
                                        class="link link-hover">
                                         {{ $crumb->name }}
                                     </a>
@@ -52,7 +52,7 @@
                                         <div class="font-semibold">
                                             @if($category->children_count > 0)
                                                 <a href="{{ route('admin.categories.index', ['parent' => $category->id]) }}"
-                                                   x-target="categories-table"
+                                                   x-target.push="categories-table"
                                                    class="link link-hover inline-flex items-center gap-1">
                                                     {{ $category->name }}
                                                     <i class="ph ph-caret-right text-xs"></i>
@@ -60,7 +60,7 @@
                                             @else
                                                 {{ $category->name }}
                                             @endif
-                                            <a href="{{ route('category.show', $category->slug) }}" class="inline-block align-middle ml-1 opacity-50 hover:opacity-100" title="View category">
+                                            <a href="{{ $category->permalink() }}" class="inline-block align-middle ml-1 opacity-50 hover:opacity-100" title="View category">
                                                 <i class="ph ph-eye text-sm"></i>
                                             </a>
                                         </div>
