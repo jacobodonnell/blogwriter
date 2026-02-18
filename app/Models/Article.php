@@ -226,30 +226,6 @@ class Article extends Model
     }
 
     /**
-     * Scope for articles visible to public.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function visibleToPublic($query)
-    {
-        return $query->where('status', Status::Published);
-    }
-
-    /**
-     * Scope for articles visible to owner.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function visibleToOwner($query)
-    {
-        return $query->where('status', Status::Published);
-    }
-
-    /**
      * Get the HTML content rendered from markdown with XSS protection.
      */
     public function getContentHtmlAttribute(): string

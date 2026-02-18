@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\CreateArticlePreviewController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\PageSettingsController;
+use App\Http\Controllers\Admin\PlaceholderImageController;
 use App\Http\Controllers\Admin\SettingsController;
 use Illuminate\Support\Facades\Route;
 
@@ -49,7 +50,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function (): v
     // Settings
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
     Route::put('/settings/profile', [SettingsController::class, 'update'])->name('settings.profile.update');
-    Route::put('/settings/placeholder-image', [SettingsController::class, 'updatePlaceholderImage'])->name('settings.placeholder-image.update');
+    Route::put('/settings/placeholder-image', [PlaceholderImageController::class, 'update'])->name('settings.placeholder-image.update');
 
     // Page Settings
     Route::put('/settings/pages', [PageSettingsController::class, 'update'])->name('settings.pages.update');

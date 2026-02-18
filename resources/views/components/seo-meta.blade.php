@@ -10,7 +10,6 @@
 
 @php
     $siteName = config('app.name', 'BlogWriter');
-    $authorName = \App\Models\User::first()?->name ?? 'Author';
     $siteUrl = config('app.url');
 
     // Resolve values with smart defaults

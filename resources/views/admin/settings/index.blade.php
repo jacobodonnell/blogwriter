@@ -35,9 +35,10 @@
                         </div>
                     @endif
 
-                    @if(placeholder_image_url())
+                    @php $placeholderUrl = placeholder_image_url(); @endphp
+                    @if($placeholderUrl)
                         <div class="mb-4">
-                            <img src="{{ placeholder_image_url() }}" alt="Current placeholder" class="w-full max-w-xs rounded-lg shadow" />
+                            <img src="{{ $placeholderUrl }}" alt="Current placeholder" class="w-full max-w-xs rounded-lg shadow" />
                         </div>
                     @else
                         <div class="mb-4 text-base-content/40 text-sm">No placeholder image set.</div>

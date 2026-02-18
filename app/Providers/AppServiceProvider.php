@@ -28,7 +28,12 @@ class AppServiceProvider extends ServiceProvider
         Article::observe(ArticleObserver::class);
         Photo::observe(PhotoObserver::class);
 
-        View::composer(['public.*', 'photos.*'], function ($view): void {
+        View::composer([
+            'public.*',
+            'photos.*',
+            'components.seo-meta',
+            'components.layouts.partials.public-footer',
+        ], function ($view): void {
             $view->with('authorName', User::first()?->name ?? 'Author');
         });
     }

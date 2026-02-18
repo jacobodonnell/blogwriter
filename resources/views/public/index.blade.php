@@ -33,15 +33,16 @@
 
             {{-- Articles Bento Grid --}}
             @if($articles->count() > 0)
+                @php $placeholderUrl = placeholder_image_url(); @endphp
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     @foreach($articles as $index => $article)
                         {{-- h-entry for each article --}}
                         <article class="h-entry card bg-base-100 shadow-sm border border-base-200 hover:shadow-md transition-shadow {{ $loop->first ? 'md:col-span-2' : '' }}">
                             {{-- Featured Image --}}
-                            @if($article->featured_image_url || placeholder_image_url())
+                            @if($article->featured_image_url || $placeholderUrl)
                                 <figure class="{{ $loop->first ? 'aspect-[16/10]' : 'aspect-video' }} overflow-hidden">
                                     <a href="{{ route('articles.show', $article->slug) }}">
-                                        <img src="{{ $article->featured_image_url ?? placeholder_image_url() }}"
+                                        <img src="{{ $article->featured_image_url ?? $placeholderUrl }}"
                                              alt="{{ $article->title }}"
                                              class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
                                     </a>

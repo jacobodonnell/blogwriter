@@ -4,11 +4,11 @@
         <div class="flex items-center gap-2">
             @if(setting('profile_avatar'))
                 <img src="{{ setting('profile_avatar') }}"
-                     alt="{{ \App\Models\User::first()?->name ?? 'Author' }}"
+                     alt="{{ $authorName }}"
                      class="u-photo w-8 h-8 rounded-full object-cover">
             @endif
             <a href="{{ route('home') }}" rel="me" class="u-url u-uid p-name text-sm font-medium link link-hover">
-                {{ \App\Models\User::first()?->name ?? 'Author' }}
+                {{ $authorName }}
             </a>
         </div>
 

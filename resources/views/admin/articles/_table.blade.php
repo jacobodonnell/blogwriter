@@ -31,6 +31,7 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @php $placeholderUrl = placeholder_image_url(); @endphp
                         @foreach($articles as $article)
                             <tr>
                                 <td x-show="columns.featuredImage" x-cloak>
@@ -46,8 +47,8 @@
                                              alt=""
                                              class="w-12 h-12 rounded object-cover" />
                                         <span class="badge badge-info badge-xs mt-1">External</span>
-                                    @elseif(placeholder_image_url())
-                                        <img src="{{ placeholder_image_url() }}"
+                                    @elseif($placeholderUrl)
+                                        <img src="{{ $placeholderUrl }}"
                                              alt=""
                                              class="w-12 h-12 rounded object-cover opacity-40" />
                                     @else

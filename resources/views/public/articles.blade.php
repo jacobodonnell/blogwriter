@@ -31,12 +31,13 @@
 
         {{-- Alternating Article Cards --}}
         @if($articles->count() > 0)
+            @php $placeholderUrl = placeholder_image_url(); @endphp
             <div class="flex flex-col gap-6">
                 @foreach($articles as $article)
                     <article class="h-entry card bg-base-100 shadow-sm border border-base-200 hover:shadow-md transition-shadow">
                         <div class="flex flex-col {{ $loop->odd ? 'md:flex-row' : 'md:flex-row-reverse' }}">
                             {{-- Featured Image --}}
-                            @php($articleImage = $article->featured_image_url ?? placeholder_image_url())
+                            @php($articleImage = $article->featured_image_url ?? $placeholderUrl)
                             @if($articleImage)
                                 <figure class="md:w-2/5 aspect-video md:aspect-auto overflow-hidden {{ $loop->odd ? 'md:rounded-l-2xl md:rounded-r-none' : 'md:rounded-r-2xl md:rounded-l-none' }} rounded-t-2xl md:rounded-t-none">
                                     <a href="{{ route('articles.show', $article->slug) }}">
