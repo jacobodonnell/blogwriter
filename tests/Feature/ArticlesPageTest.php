@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Article;
+use App\Models\Category;
 use App\Models\User;
 
 it('renders the articles page', function (): void {
@@ -58,4 +59,90 @@ it('shows edit button on articles for authenticated users', function (): void {
         ->get('/articles')
         ->assertSuccessful()
         ->assertSee('Edit');
+});
+
+it('filters articles by search on title', function (): void {
+    Article::factory()->published()->create(['title' => 'Laravel Tips and Tricks']);
+    Article::factory()->published()->create(['title' => 'PHP Best Practices']);
+
+    $this->get('/articles?search=Laravel')
+        ->assertSuccessful()
+        ->assertSee('Laravel Tips and Tricks')
+        ->assertDontSee('PHP Best Practices');
+});
+
+it('filters articles by search on slug', function (): void {
+    Article::factory()->published()->create(['title' => 'My Article', 'slug' => 'laravel-tips']);
+    Article::factory()->published()->create(['title' => 'Other Article', 'slug' => 'php-basics']);
+
+    $this->get('/articles?search=laravel-tips')
+        ->assertSuccessful()
+        ->assertSee('My Article')
+        ->assertDontSee('Other Article');
+});
+
+it('filters articles by category', function (): void {
+    $category = Category::factory()->create(['name' => 'Tech']);
+    $article = Article::factory()->published()->create(['title' => 'Tech Article', 'category_id' => $category->id]);
+    $other = Article::factory()->published()->create(['title' => 'Uncategorized Article']);
+
+    $this->get('/articles?category='.$category->id)
+        ->assertSuccessful()
+        ->assertSee('Tech Article')
+        ->assertDontSee('Uncategorized Article');
+});
+
+it('filters articles by status for authenticated users', function (): void {
+    $user = User::factory()->create();
+    Article::factory()->published()->create(['title' => 'Published One']);
+    Article::factory()->draft()->create(['title' => 'Draft One']);
+
+    $this->actingAs($user)
+        ->get('/articles?status=draft')
+        ->assertSuccessful()
+        ->assertSee('Draft One')
+        ->assertDontSee('Published One');
+});
+
+it('guests cannot see drafts via status filter', function (): void {
+    Article::factory()->published()->create(['title' => 'Published Article']);
+    Article::factory()->draft()->create(['title' => 'Secret Draft']);
+
+    $this->get('/articles?status=draft')
+        ->assertSuccessful()
+        ->assertDontSee('Secret Draft');
+});
+
+it('preserves query string in pagination', function (): void {
+    Article::factory()->published()->count(15)
+        ->sequence(fn ($seq) => ['title' => 'Searchable Article '.$seq->index])
+        ->create();
+
+    $this->get('/articles?search=Searchable')
+        ->assertSuccessful()
+        ->assertSee('search=Searchable');
+});
+
+it('passes categories to view', function (): void {
+    Category::factory()->create(['name' => 'TestCategory']);
+
+    $this->get('/articles')
+        ->assertSuccessful()
+        ->assertViewHas('categories');
+});
+
+it('combines multiple filters', function (): void {
+    $user = User::factory()->create();
+    $category = Category::factory()->create(['name' => 'Code']);
+
+    Article::factory()->published()->create(['title' => 'Laravel Code Tips', 'category_id' => $category->id]);
+    Article::factory()->published()->create(['title' => 'Laravel Other Tips']);
+    Article::factory()->draft()->create(['title' => 'Laravel Code Draft', 'category_id' => $category->id]);
+
+    $this->actingAs($user)
+        ->get('/articles?search=Laravel&category='.$category->id.'&status=published')
+        ->assertSuccessful()
+        ->assertSee('Laravel Code Tips')
+        ->assertDontSee('Laravel Other Tips')
+        ->assertDontSee('Laravel Code Draft');
 });

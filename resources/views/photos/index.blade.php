@@ -26,6 +26,41 @@
             @endauth
         </header>
 
+        {{-- Filters --}}
+        <form method="GET" action="{{ route('photos.index') }}"
+              x-data="{
+                  search: $persist('{{ request('search') }}').as('photos_filter_search'),
+                  category: $persist('{{ request('category') }}').as('photos_filter_category'),
+                  status: $persist('{{ request('status') }}').as('photos_filter_status'),
+              }"
+              class="flex flex-wrap gap-3 mb-6 items-end">
+
+            <input type="text" name="search" x-model="search"
+                   placeholder="Search photos..."
+                   class="input input-bordered flex-1 min-w-48"
+                   @input.debounce.400ms="$el.form.requestSubmit()">
+
+            <x-category-select :categories="$categories"
+                name="category" emptyLabel="All Categories"
+                :selected="request('category')"
+                x-model="category"
+                onchange="this.form.requestSubmit()" />
+
+            @auth
+                <select name="status" x-model="status"
+                        class="select select-bordered"
+                        onchange="this.form.requestSubmit()">
+                    <option value="">All Status</option>
+                    <option value="published" @selected(request('status') === 'published')>Published</option>
+                    <option value="draft" @selected(request('status') === 'draft')>Draft</option>
+                </select>
+            @endauth
+
+            @if(request('search') || request('category') || request('status'))
+                <a href="{{ route('photos.index') }}" class="btn btn-ghost btn-sm">Clear</a>
+            @endif
+        </form>
+
         {{-- IG-Style Grid --}}
         @if($photos->count() > 0)
             <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1">
@@ -69,8 +104,14 @@
         @else
             <div class="text-center py-16">
                 <div class="text-6xl mb-4"><i class="ph ph-camera-slash text-base-content/30"></i></div>
-                <h2 class="text-2xl font-bold mb-2">No photos yet</h2>
-                <p class="text-base-content/60">Check back soon for new photos.</p>
+                @if(request('search') || request('category') || request('status'))
+                    <h2 class="text-2xl font-bold mb-2">No photos found</h2>
+                    <p class="text-base-content/60 mb-6">Try adjusting your filters.</p>
+                    <a href="{{ route('photos.index') }}" class="btn btn-ghost">Clear Filters</a>
+                @else
+                    <h2 class="text-2xl font-bold mb-2">No photos yet</h2>
+                    <p class="text-base-content/60">Check back soon for new photos.</p>
+                @endif
             </div>
         @endif
 

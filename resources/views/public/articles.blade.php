@@ -29,6 +29,41 @@
             @endauth
         </header>
 
+        {{-- Filters --}}
+        <form method="GET" action="{{ route('articles.index') }}"
+              x-data="{
+                  search: $persist('{{ request('search') }}').as('articles_filter_search'),
+                  category: $persist('{{ request('category') }}').as('articles_filter_category'),
+                  status: $persist('{{ request('status') }}').as('articles_filter_status'),
+              }"
+              class="flex flex-wrap gap-3 mb-6 items-end">
+
+            <input type="text" name="search" x-model="search"
+                   placeholder="Search articles..."
+                   class="input input-bordered flex-1 min-w-48"
+                   @input.debounce.400ms="$el.form.requestSubmit()">
+
+            <x-category-select :categories="$categories"
+                name="category" emptyLabel="All Categories"
+                :selected="request('category')"
+                x-model="category"
+                onchange="this.form.requestSubmit()" />
+
+            @auth
+                <select name="status" x-model="status"
+                        class="select select-bordered"
+                        onchange="this.form.requestSubmit()">
+                    <option value="">All Status</option>
+                    <option value="published" @selected(request('status') === 'published')>Published</option>
+                    <option value="draft" @selected(request('status') === 'draft')>Draft</option>
+                </select>
+            @endauth
+
+            @if(request('search') || request('category') || request('status'))
+                <a href="{{ route('articles.index') }}" class="btn btn-ghost btn-sm">Clear</a>
+            @endif
+        </form>
+
         {{-- Alternating Article Cards --}}
         @if($articles->count() > 0)
             @php $placeholderUrl = placeholder_image_url(); @endphp
@@ -123,14 +158,20 @@
         @else
             <div class="text-center py-16">
                 <div class="text-6xl mb-4"><i class="ph ph-note-blank text-base-content/30"></i></div>
-                <h2 class="text-2xl font-bold mb-2">No articles yet</h2>
-                <p class="text-base-content/60 mb-6">Check back soon for new articles.</p>
-                @auth
-                    <a href="{{ route('admin.articles.create') }}" class="btn btn-primary">
-                        <i class="ph ph-plus"></i>
-                        Write Article
-                    </a>
-                @endauth
+                @if(request('search') || request('category') || request('status'))
+                    <h2 class="text-2xl font-bold mb-2">No articles found</h2>
+                    <p class="text-base-content/60 mb-6">Try adjusting your filters.</p>
+                    <a href="{{ route('articles.index') }}" class="btn btn-ghost">Clear Filters</a>
+                @else
+                    <h2 class="text-2xl font-bold mb-2">No articles yet</h2>
+                    <p class="text-base-content/60 mb-6">Check back soon for new articles.</p>
+                    @auth
+                        <a href="{{ route('admin.articles.create') }}" class="btn btn-primary">
+                            <i class="ph ph-plus"></i>
+                            Write Article
+                        </a>
+                    @endauth
+                @endif
             </div>
         @endif
     </div>
