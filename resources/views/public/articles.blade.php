@@ -36,7 +36,6 @@
                     <input type="text" name="search" value="{{ request('search') }}"
                            placeholder="Search articles..."
                            class="input input-bordered w-full"
-                           x-autofocus
                            @input.debounce.400ms="$el.form.requestSubmit()">
                 </div>
                 <div class="@auth sm:col-span-1 @else sm:col-span-2 @endauth">

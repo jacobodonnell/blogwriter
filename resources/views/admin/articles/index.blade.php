@@ -119,7 +119,6 @@
                                value="{{ request('search') }}"
                                placeholder="Search by title or slug..."
                                class="input input-bordered w-full"
-                               x-autofocus
                                @input.debounce.400ms="$el.form.requestSubmit()" />
                     </div>
 
