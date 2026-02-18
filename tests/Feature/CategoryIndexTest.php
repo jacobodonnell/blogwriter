@@ -59,6 +59,25 @@ it('shows empty state when no categories exist', function (): void {
         ->assertSee('No categories yet');
 });
 
+it('hides draft content from guest counts', function (): void {
+    $category = Category::factory()->create();
+    Article::factory()->published()->count(2)->create(['category_id' => $category->id]);
+    Article::factory()->draft()->create(['category_id' => $category->id]);
+    Photo::factory()->published()->create(['category_id' => $category->id]);
+    Photo::factory()->draft()->create(['category_id' => $category->id]);
+
+    // Guest sees only published counts
+    $this->get(route('categories.index'))
+        ->assertSee('2 articles')
+        ->assertSee('1 photo');
+
+    // Auth user sees all counts
+    $this->actingAs(User::first())
+        ->get(route('categories.index'))
+        ->assertSee('3 articles')
+        ->assertSee('2 photos');
+});
+
 it('shows manage link for auth users only', function (): void {
     Category::factory()->create();
 
