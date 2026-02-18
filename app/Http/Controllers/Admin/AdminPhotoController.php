@@ -9,6 +9,7 @@ use App\Enums\Status;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StorePhotoRequest;
 use App\Http\Requests\Admin\UpdatePhotoRequest;
+use App\Models\Category;
 use App\Models\Photo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -45,7 +46,11 @@ class AdminPhotoController extends Controller
      */
     public function create(): \Illuminate\View\View
     {
-        return view('admin.photos.create');
+        $categories = Category::whereNull('parent_id')->with('children')->orderBy('name')->get();
+
+        return view('admin.photos.create', [
+            'categories' => $categories,
+        ]);
     }
 
     /**
@@ -62,6 +67,7 @@ class AdminPhotoController extends Controller
                 'caption' => $data['caption'] ?? null,
                 'status' => $data['status'],
                 'taken_at' => $data['taken_at'] ?? null,
+                'category_id' => $data['category_id'] ?? null,
             ]);
 
             if ($request->wantsJson() || $request->ajax()) {
@@ -106,9 +112,12 @@ class AdminPhotoController extends Controller
      */
     public function edit(Photo $photo): \Illuminate\View\View
     {
+        $categories = Category::whereNull('parent_id')->with('children')->orderBy('name')->get();
+
         return view('admin.photos.edit', [
             'photo' => $photo,
             'articleCount' => $photo->articles()->count(),
+            'categories' => $categories,
         ]);
     }
 
@@ -124,6 +133,7 @@ class AdminPhotoController extends Controller
         $photo->alt_text = $data['alt_text'];
         $photo->status = $data['status'];
         $photo->taken_at = $data['taken_at'] ?? null;
+        $photo->category_id = $data['category_id'] ?? null;
 
         // Update published_at based on status
         $this->updatePublishedStatus->handle($photo, $data['status']);

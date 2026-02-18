@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Photo;
 use Illuminate\View\View;
 
@@ -17,9 +18,12 @@ class PhotoController extends Controller
             ->paginate(12)
             ->withQueryString();
 
+        $categories = Category::whereNull('parent_id')->with('children')->orderBy('name')->get();
+
         return view('photos.index', [
             'photos' => $photos,
             'subtitle' => setting('page_photos_subtitle', ''),
+            'categories' => $categories,
         ]);
     }
 
@@ -32,6 +36,8 @@ class PhotoController extends Controller
         if (! $photo->isPublic()) {
             abort(404);
         }
+
+        $photo->load('category');
 
         return view('photos.show', [
             'photo' => $photo,

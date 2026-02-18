@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Category;
 use App\Models\User;
 use Database\Factories\Concerns\AttachesFeaturedImages;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -47,6 +48,14 @@ class PhotoFactory extends Factory
     public function draft(): static
     {
         return $this->state(['status' => 'draft', 'published_at' => null]);
+    }
+
+    /**
+     * Assign a category to the photo.
+     */
+    public function withCategory(Category $category): static
+    {
+        return $this->state(['category_id' => $category->id]);
     }
 
     /**

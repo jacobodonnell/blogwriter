@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('status')->default('draft');
             $table->timestamp('published_at')->nullable();
             $table->timestamp('taken_at')->nullable();
+            $table->foreignId('category_id')->nullable()->constrained()->nullOnDelete();
             $table->json('meta')->nullable();
             $table->timestamps();
 

@@ -78,6 +78,14 @@ class Photo extends Model implements HasMedia
     }
 
     /**
+     * @return BelongsTo<Category, $this>
+     */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    /**
      * Get all articles using this photo as featured image.
      *
      * @return HasMany<Article, $this>

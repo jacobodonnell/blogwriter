@@ -44,6 +44,16 @@
             </div>
         @endif
 
+        {{-- Category Badge --}}
+        @if($photo->category)
+            <div class="flex flex-wrap gap-2 mb-4">
+                <a href="{{ $photo->category->permalink() }}"
+                   class="badge badge-primary badge-outline">
+                    {{ $photo->category->name }}
+                </a>
+            </div>
+        @endif
+
         {{-- Metadata Bar --}}
         <div class="flex flex-wrap items-center gap-4 text-sm text-base-content/60 mb-8 pb-8 border-b border-base-200">
             <div class="flex items-center gap-2">

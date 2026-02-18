@@ -28,6 +28,7 @@ final readonly class CreatePhotoFromUploadAction
             'status' => $attributes['status'] ?? 'draft',
             'published_at' => ($attributes['status'] ?? 'draft') === 'published' ? now() : null,
             'taken_at' => $attributes['taken_at'] ?? null,
+            'category_id' => $attributes['category_id'] ?? null,
             'meta' => $exifData,
         ]);
 
