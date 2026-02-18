@@ -63,9 +63,9 @@ Articles use EasyMDE, a Markdown editor with toolbar buttons and preview. Conten
 
 Article content undergoes newline normalization: double newlines are collapsed on save and expanded on read, while preserving formatting inside code blocks. This ensures consistent storage and display.
 
-### Media Serving Through Controller
+### Dual-Disk Media Storage
 
-Photos are stored on a private disk. Media files are served through a controller (`MediaController`) with authentication checks, rather than being publicly accessible via symlinked storage.
+Photos use conditional disk assignment based on publish status. Draft photos are stored on the `private` disk and served through `MediaController` with authentication checks. Published photos are moved to the `public` disk and served directly via symlink — no controller overhead, no auth required.
 
 ---
 
@@ -108,7 +108,7 @@ blogwriter/
 │   │   │       ├── DashboardController.php
 │   │   │       ├── SettingsController.php
 │   │   │       ├── AppearanceController.php
-│   │   │       └── MediaController.php     # Private media serving
+│   │   │       └── MediaController.php     # Serves draft media from private disk
 │   │   └── Requests/
 │   │       ├── StoreArticleRequest.php
 │   │       ├── UpdateArticleRequest.php
@@ -270,7 +270,7 @@ php artisan test --compact              # Compact output
 - CSRF protection on all forms
 - Session-based auth (no API tokens)
 - File uploads validated by MIME type, filenames sanitized
-- Media stored on private disk, served via authenticated controller
+- Draft media protected on private disk, served via authenticated controller; published media publicly accessible
 - User content escaped with `{{ }}` (not `{!! !!}` except for rendered HTML content)
 - Single-user enforcement prevents unauthorized account creation
 

@@ -55,7 +55,7 @@ BlogWriter is in pre-alpha. This roadmap shows what's built and what's planned.
 - Laravel Fortify authentication with custom Alpine AJAX UI
 - Single-user enforcement (`SingleUserViolationException`)
 - Progressive Web App support
-- Media served via authenticated controller (private disk)
+- Draft media served via authenticated controller (private disk); published media served from public disk
 - Profile page with h-card
 
 ### Developer Experience

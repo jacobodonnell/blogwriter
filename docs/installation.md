@@ -23,12 +23,13 @@ BlogWriter works on most modern web hosting. You need:
 
 - **PHP 8.4 or newer** — Most hosts support this now
 - **A web server** — Shared hosting, VPS, or cloud hosting all work
-- **About 50 MB of disk space** — For the application and your content
+- **About 100 MB of disk space** — For the application and your content
 
 That's it. No separate database server to set up. No Redis. No Node.js. BlogWriter uses SQLite, which means your
 database is just a simple file on your server.
 
-BlogWriter does not send or receive email out of the box — no mail server needed. Your email address is used as your login credential and public identity (h-card), not for sending mail.
+BlogWriter does not send or receive email out of the box — no mail server needed. Your email address is used as your
+login credential and public identity (h-card), not for sending mail.
 
 <x-callout type="info" title="Technical Note" collapsible>
   BlogWriter requires PHP 8.4+ with the SQLite and PDO extensions enabled, plus write permissions on
@@ -37,7 +38,7 @@ BlogWriter does not send or receive email out of the box — no mail server need
 
 ## CLI Installer
 
-If you have SSH access to your server, use the CLI installer:
+If you have SSH access to your server (or access to the web-based terminal in Laravel Forge), use the CLI installer:
 
 ```bash
 php artisan blogwriter:install
@@ -72,7 +73,8 @@ Behind the scenes, the CLI installer:
 1. **Checks requirements** — Verifies PHP version, SQLite extension, PDO extension, and directory permissions
 2. **Sets up the environment** — Copies `.env.example` to `.env` (if needed) and generates an `APP_KEY`
 3. **Creates the database** — Creates the SQLite database file at `database/database.sqlite` and runs all migrations
-4. **Creates your admin account** — Prompts for your email and password (email doubles as your public identity for h-card markup)
+4. **Creates your admin account** — Prompts for your email and password (email doubles as your public identity for
+   h-card markup)
 5. **Configures your site** — Sets site name, domain, tagline, and author information in `.env`
 6. **Seeds initial data** — Creates default categories and other starter content
 7. **Locks the installation** — Creates `storage/installed.lock` to prevent accidental reinstallation
@@ -93,7 +95,7 @@ overwriting your configuration. This protects your site from accidental reinstal
 
 BlogWriter is a Progressive Web App (PWA). You can install it on your device for a native app-like experience —
 full-screen
-window, home screen icon, faster loads, and an offline fallback page.
+window, faster loads, and a home screen icon.
 
 ### iOS / iPadOS
 

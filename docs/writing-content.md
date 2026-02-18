@@ -111,7 +111,7 @@ When a photo is used as a featured image on an article and the article is set to
 
 ### Media Serving
 
-Photos are stored on a private disk and served through a controller with authentication checks. This ensures media files are access-controlled.
+Draft photos are stored on a private disk and served through a controller with authentication checks, keeping unpublished media access-controlled. When a photo is published, it moves to the public disk and is served directly — no authentication required.
 
 ### Where Photos Live
 
