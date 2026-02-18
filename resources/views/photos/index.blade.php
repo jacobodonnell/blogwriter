@@ -12,14 +12,6 @@
                 @endif
             </div>
             <div class="flex shrink-0 gap-2">
-                <button class="btn btn-ghost btn-sm gap-1"
-                        onclick="document.getElementById('photo-filter-modal').showModal()">
-                    <i class="ph ph-funnel text-lg"></i>
-                    Filters
-                    @if(request('search') || request('category') || request('status'))
-                        <span class="badge badge-xs badge-primary"></span>
-                    @endif
-                </button>
                 @auth
                     <a href="{{ route('admin.photos.index') }}" class="btn btn-ghost btn-sm gap-1">
                         <i class="ph ph-gear text-lg"></i>
@@ -34,66 +26,85 @@
             </div>
         </header>
 
-        {{-- IG-Style Grid --}}
-        @if($photos->count() > 0)
-            <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1">
-                @foreach($photos as $photo)
-                    {{-- h-entry for each photo --}}
-                    <article class="h-entry relative group">
-                        <a href="{{ route('photos.show', $photo->slug) }}"
-                           class="block aspect-square overflow-hidden">
-                            <img src="{{ $photo->image_url }}"
-                                 alt="{{ $photo->alt_text }}"
-                                 class="u-photo w-full h-full object-cover group-hover:brightness-75 transition-all duration-200">
-                        </a>
-
-                        {{-- Auth overlays --}}
-                        @auth
-                            @if($photo->status === \App\Enums\Status::Draft)
-                                <span class="absolute top-2 left-2 badge badge-warning badge-sm">Draft</span>
-                            @endif
-                            <a href="{{ route('admin.photos.edit', $photo) }}"
-                               class="absolute top-2 right-2 btn btn-circle btn-xs btn-ghost bg-base-100/80 opacity-0 group-hover:opacity-100 transition-opacity"
-                               title="Edit photo">
-                                <i class="ph ph-pencil-simple text-sm"></i>
+        {{-- Filter banner + Results (Alpine AJAX target) --}}
+        <div id="photo-results">
+            <x-filter-banner :action="route('photos.index')" target="photo-results" :clearRoute="route('photos.index')">
+                <div class="sm:col-span-2">
+                    <input type="text" name="search" value="{{ request('search') }}"
+                           placeholder="Search photos..."
+                           class="input input-bordered w-full"
+                           @input.debounce.400ms="$el.form.requestSubmit()">
+                </div>
+                <div class="@auth sm:col-span-1 @else sm:col-span-2 @endauth">
+                    <x-category-select :categories="$categories"
+                        name="category" emptyLabel="All Categories"
+                        :selected="request('category')"
+                        @change="$el.form.requestSubmit()" />
+                </div>
+                @auth
+                    <div class="sm:col-span-1">
+                        <select name="status" class="select select-bordered w-full"
+                                @change="$el.form.requestSubmit()">
+                            <option value="">All Status</option>
+                            <option value="published" @selected(request('status') === 'published')>Published</option>
+                            <option value="draft" @selected(request('status') === 'draft')>Draft</option>
+                        </select>
+                    </div>
+                @endauth
+            </x-filter-banner>
+            @if($photos->count() > 0)
+                <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1">
+                    @foreach($photos as $photo)
+                        {{-- h-entry for each photo --}}
+                        <article class="h-entry relative group">
+                            <a href="{{ route('photos.show', $photo->slug) }}"
+                               class="block aspect-square overflow-hidden">
+                                <img src="{{ $photo->image_url }}"
+                                     alt="{{ $photo->alt_text }}"
+                                     class="u-photo w-full h-full object-cover group-hover:brightness-75 transition-all duration-200">
                             </a>
-                        @endauth
 
-                        {{-- Hidden microformat data --}}
-                        <span class="hidden">
-                            <span class="p-name">{{ $photo->alt_text }}</span>
-                            <time class="dt-published" datetime="{{ $photo->published_at?->toIso8601String() }}">{{ $photo->published_at?->format('F j, Y') }}</time>
-                            <a class="u-url" href="{{ route('photos.show', $photo->slug) }}">Permalink</a>
-                            <span class="p-author h-card"><span class="p-name">{{ $authorName }}</span></span>
-                        </span>
-                    </article>
-                @endforeach
-            </div>
+                            {{-- Auth overlays --}}
+                            @auth
+                                @if($photo->status === \App\Enums\Status::Draft)
+                                    <span class="absolute top-2 left-2 badge badge-warning badge-sm">Draft</span>
+                                @endif
+                                <a href="{{ route('admin.photos.edit', $photo) }}"
+                                   class="absolute top-2 right-2 btn btn-circle btn-xs btn-ghost bg-base-100/80 opacity-0 group-hover:opacity-100 transition-opacity"
+                                   title="Edit photo">
+                                    <i class="ph ph-pencil-simple text-sm"></i>
+                                </a>
+                            @endauth
 
-            {{-- Pagination --}}
-            <div class="mt-8">
-                {{ $photos->links() }}
-            </div>
-        @else
-            <div class="text-center py-16">
-                <div class="text-6xl mb-4"><i class="ph ph-camera-slash text-base-content/30"></i></div>
-                @if(request('search') || request('category') || request('status'))
-                    <h2 class="text-2xl font-bold mb-2">No photos found</h2>
-                    <p class="text-base-content/60 mb-6">Try adjusting your filters.</p>
-                    <a href="{{ route('photos.index') }}" class="btn btn-ghost"
-                       x-data
-                       @click.prevent="
-                           localStorage.removeItem('_x_photos_filter_search');
-                           localStorage.removeItem('_x_photos_filter_category');
-                           localStorage.removeItem('_x_photos_filter_status');
-                           window.location = '{{ route('photos.index') }}';
-                       ">Clear Filters</a>
-                @else
-                    <h2 class="text-2xl font-bold mb-2">No photos yet</h2>
-                    <p class="text-base-content/60">Check back soon for new photos.</p>
-                @endif
-            </div>
-        @endif
+                            {{-- Hidden microformat data --}}
+                            <span class="hidden">
+                                <span class="p-name">{{ $photo->alt_text }}</span>
+                                <time class="dt-published" datetime="{{ $photo->published_at?->toIso8601String() }}">{{ $photo->published_at?->format('F j, Y') }}</time>
+                                <a class="u-url" href="{{ route('photos.show', $photo->slug) }}">Permalink</a>
+                                <span class="p-author h-card"><span class="p-name">{{ $authorName }}</span></span>
+                            </span>
+                        </article>
+                    @endforeach
+                </div>
+
+                {{-- Pagination --}}
+                <div class="mt-8">
+                    {{ $photos->links() }}
+                </div>
+            @else
+                <div class="text-center py-16">
+                    <div class="text-6xl mb-4"><i class="ph ph-camera-slash text-base-content/30"></i></div>
+                    @if(request('search') || request('category') || request('status'))
+                        <h2 class="text-2xl font-bold mb-2">No photos found</h2>
+                        <p class="text-base-content/60 mb-6">Try adjusting your filters.</p>
+                        <a href="{{ route('photos.index') }}" class="btn btn-ghost">Clear Filters</a>
+                    @else
+                        <h2 class="text-2xl font-bold mb-2">No photos yet</h2>
+                        <p class="text-base-content/60">Check back soon for new photos.</p>
+                    @endif
+                </div>
+            @endif
+        </div>
 
         {{-- Upload Modal (auth only) --}}
         @auth
@@ -157,46 +168,5 @@
             </x-editor-modal>
         @endauth
     </div>
-
-    {{-- Filter Modal --}}
-    <x-slot:filters>
-        <x-filter-modal id="photo-filter-modal" title="Filter Photos"
-            :action="route('photos.index')" :clearRoute="route('photos.index')"
-            x-data="{
-                search: $persist('{{ request('search') }}').as('photos_filter_search'),
-                category: $persist('{{ request('category') }}').as('photos_filter_category'),
-                status: $persist('{{ request('status') }}').as('photos_filter_status'),
-            }">
-
-            {{-- Search: half width on sm+ --}}
-            <div class="sm:col-span-2">
-                <label class="label"><span class="label-text">Search</span></label>
-                <input type="text" name="search" x-model="search"
-                       placeholder="Search photos..."
-                       class="input input-bordered w-full">
-            </div>
-
-            {{-- Category --}}
-            <div class="@auth sm:col-span-1 @else sm:col-span-2 @endauth">
-                <label class="label"><span class="label-text">Category</span></label>
-                <x-category-select :categories="$categories"
-                    name="category" emptyLabel="All Categories"
-                    :selected="request('category')"
-                    x-model="category" />
-            </div>
-
-            {{-- Status: auth only --}}
-            @auth
-                <div class="sm:col-span-1">
-                    <label class="label"><span class="label-text">Status</span></label>
-                    <select name="status" x-model="status" class="select select-bordered w-full">
-                        <option value="">All Status</option>
-                        <option value="published" @selected(request('status') === 'published')>Published</option>
-                        <option value="draft" @selected(request('status') === 'draft')>Draft</option>
-                    </select>
-                </div>
-            @endauth
-        </x-filter-modal>
-    </x-slot:filters>
 
 </x-layouts.public>
