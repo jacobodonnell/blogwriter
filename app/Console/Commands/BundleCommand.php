@@ -35,8 +35,7 @@ class BundleCommand extends Command
             mkdir($distPath, 0755, true);
         }
 
-        // Get version from composer.json or default
-        $version = '0.1a';
+        $version = config('app.version');
         $zipName = sprintf('blogwriter-v%s.zip', $version);
         $zipPath = $distPath.'/'.$zipName;
 

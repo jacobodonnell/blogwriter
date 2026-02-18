@@ -1,5 +1,4 @@
-<x-layouts.admin>
-    @section('title', 'Settings')
+<x-layouts.admin title="Settings">
 
     <div class="space-y-6">
         {{-- Header --}}
@@ -264,7 +263,7 @@
 
                         <div class="stat bg-base-200 rounded-lg">
                             <div class="stat-title">Version</div>
-                            <div class="stat-value text-lg">v0.1a Alpha</div>
+                            <div class="stat-value text-lg">v{{ config('app.version') }}</div>
                         </div>
                     </div>
 

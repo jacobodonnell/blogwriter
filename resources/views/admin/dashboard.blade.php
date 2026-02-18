@@ -1,5 +1,4 @@
-<x-layouts.admin>
-    @section('title', 'Dashboard')
+<x-layouts.admin title="Dashboard">
 
     <div class="space-y-6">
         {{-- Header --}}

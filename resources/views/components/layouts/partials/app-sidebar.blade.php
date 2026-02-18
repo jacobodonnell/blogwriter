@@ -36,11 +36,6 @@
         @include('components.layouts.partials.navigation-menu')
     </nav>
 
-    {{-- Sidebar Footer --}}
-    <div class="mt-auto pt-4 pb-4 border-t border-base-300 px-4 shrink-0"
-         x-show="expanded || !isDesktop" x-cloak>
-        <p class="text-xs text-base-content/50">{{ config('app.name', 'BlogWriter') }} v0.1a</p>
-    </div>
 </aside>
 
 {{-- Fixed tooltip for collapsed sidebar --}}

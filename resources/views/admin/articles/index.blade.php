@@ -1,5 +1,4 @@
-<x-layouts.admin>
-    @section('title', 'Articles')
+<x-layouts.admin title="Articles">
 
     @php
         $activeFilterCount = collect([request('search'), request('category'), request('status')])->filter()->count();

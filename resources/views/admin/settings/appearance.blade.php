@@ -1,13 +1,8 @@
-<x-layouts.admin>
-    @section('title', 'Appearance')
-
-    @section('breadcrumb')
+<x-layouts.admin title="Appearance" page-title="Appearance" page-subtitle="Customize your site's theme and font.">
+    <x-slot:breadcrumb>
         <li><a href="{{ route('admin.settings') }}">Settings</a></li>
         <li>Appearance</li>
-    @endsection
-
-    @section('page-title', 'Appearance')
-    @section('page-subtitle', 'Customize your site\'s theme and font.')
+    </x-slot:breadcrumb>
 
     <div x-data="{
             lightTheme: '{{ $currentLight }}',

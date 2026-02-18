@@ -1,5 +1,4 @@
-<x-layouts.admin>
-    @section('title', 'Edit Category')
+<x-layouts.admin title="Edit Category">
 
     <div class="space-y-6">
         {{-- Header --}}

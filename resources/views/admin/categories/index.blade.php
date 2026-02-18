@@ -1,5 +1,4 @@
-<x-layouts.admin>
-    @section('title', 'Categories')
+<x-layouts.admin title="Categories">
 
     <div class="space-y-6" x-data="{ currentParent: @js((string) ($parent?->id ?? '')) }">
         {{-- Header --}}
