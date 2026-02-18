@@ -47,12 +47,12 @@
                                              class="w-12 h-12 rounded object-cover" />
                                         <span class="badge badge-info badge-xs mt-1">External</span>
                                     @else
-                                        <span class="text-gray-400 text-sm">None</span>
+                                        <span class="text-base-content/40 text-sm">None</span>
                                     @endif
                                 </td>
                                 <td x-show="columns.title">
                                     <div class="font-semibold">{{ $article->title }}</div>
-                                    <div class="text-sm text-gray-500">{{ Str::limit($article->slug, 40) }}</div>
+                                    <div class="text-sm text-base-content/60">{{ Str::limit($article->slug, 40) }}</div>
                                 </td>
                                 <td x-show="columns.status">
                                     <span @class([
@@ -67,16 +67,16 @@
                                     @if($article->category)
                                         <span class="badge badge-sm badge-outline">{{ $article->category->name }}</span>
                                     @else
-                                        <span class="text-gray-400 text-sm">—</span>
+                                        <span class="text-base-content/40 text-sm">—</span>
                                     @endif
                                 </td>
-                                <td x-show="columns.publishedAt" x-cloak class="text-sm text-gray-500">
+                                <td x-show="columns.publishedAt" x-cloak class="text-sm text-base-content/60">
                                     {{ $article->published_at?->diffForHumans() ?? '—' }}
                                 </td>
-                                <td x-show="columns.createdAt" x-cloak class="text-sm text-gray-500">
+                                <td x-show="columns.createdAt" x-cloak class="text-sm text-base-content/60">
                                     {{ $article->created_at->diffForHumans() }}
                                 </td>
-                                <td x-show="columns.updatedAt" class="text-sm text-gray-500">
+                                <td x-show="columns.updatedAt" class="text-sm text-base-content/60">
                                     {{ $article->updated_at->diffForHumans() }}
                                 </td>
                                 <td class="text-right">
@@ -114,7 +114,7 @@
             </div>
         @else
             <div class="text-center py-12">
-                <p class="text-gray-500 mb-4">No articles found.</p>
+                <p class="text-base-content/60 mb-4">No articles found.</p>
                 @if(request('category') || request('status') || request('search'))
                     <a href="{{ route('admin.articles.index') }}" class="btn btn-ghost">Clear Filters</a>
                 @else

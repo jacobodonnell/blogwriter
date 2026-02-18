@@ -5,7 +5,7 @@
     {{-- Public Pages --}}
     <li>
         <a href="{{ route('home') }}"
-           class="{{ request()->is('/') ? 'active' : '' }}"
+           class="{{ request()->is('/') ? 'menu-active' : '' }}"
            :class="!expanded && isDesktop && 'justify-center'"
            @mouseenter="showTooltip($event, 'Home')"
            @mouseleave="hideTooltip()">
@@ -16,7 +16,7 @@
 
     <li>
         <a href="{{ route('articles.index') }}"
-           class="{{ request()->is('articles*') && !request()->is('admin*') ? 'active' : '' }}"
+           class="{{ request()->is('articles*') && !request()->is('admin*') ? 'menu-active' : '' }}"
            :class="!expanded && isDesktop && 'justify-center'"
            @mouseenter="showTooltip($event, 'Articles')"
            @mouseleave="hideTooltip()">
@@ -27,7 +27,7 @@
 
     <li>
         <a href="{{ route('photos.index') }}"
-           class="{{ request()->is('photos') && !request()->is('admin*') ? 'active' : '' }}"
+           class="{{ request()->is('photos') && !request()->is('admin*') ? 'menu-active' : '' }}"
            :class="!expanded && isDesktop && 'justify-center'"
            @mouseenter="showTooltip($event, 'Photos')"
            @mouseleave="hideTooltip()">
@@ -38,7 +38,7 @@
 
     <li>
         <a href="{{ route('about') }}"
-           class="{{ request()->is('about') ? 'active' : '' }}"
+           class="{{ request()->is('about') ? 'menu-active' : '' }}"
            :class="!expanded && isDesktop && 'justify-center'"
            @mouseenter="showTooltip($event, 'About')"
            @mouseleave="hideTooltip()">
@@ -52,7 +52,7 @@
     {{-- Admin Pages --}}
     <li>
         <a href="{{ route('admin.dashboard') }}"
-           class="{{ request()->is('admin') ? 'active' : '' }}"
+           class="{{ request()->is('admin') ? 'menu-active' : '' }}"
            :class="!expanded && isDesktop && 'justify-center'"
            @mouseenter="showTooltip($event, 'Dashboard')"
            @mouseleave="hideTooltip()">
@@ -63,7 +63,7 @@
 
     <li>
         <a href="{{ route('admin.articles.index') }}"
-           class="{{ request()->is('admin/articles*') ? 'active' : '' }}"
+           class="{{ request()->is('admin/articles*') ? 'menu-active' : '' }}"
            :class="!expanded && isDesktop && 'justify-center'"
            @mouseenter="showTooltip($event, 'Manage Articles')"
            @mouseleave="hideTooltip()">
@@ -74,7 +74,7 @@
 
     <li>
         <a href="{{ route('admin.photos.index') }}"
-           class="{{ request()->is('admin/photos*') ? 'active' : '' }}"
+           class="{{ request()->is('admin/photos*') ? 'menu-active' : '' }}"
            :class="!expanded && isDesktop && 'justify-center'"
            @mouseenter="showTooltip($event, 'Manage Photos')"
            @mouseleave="hideTooltip()">
@@ -85,7 +85,7 @@
 
     <li>
         <a href="{{ route('admin.categories.index') }}"
-           class="{{ request()->is('admin/categories*') ? 'active' : '' }}"
+           class="{{ request()->is('admin/categories*') ? 'menu-active' : '' }}"
            :class="!expanded && isDesktop && 'justify-center'"
            @mouseenter="showTooltip($event, 'Categories')"
            @mouseleave="hideTooltip()">
@@ -96,7 +96,7 @@
 
     <li>
         <a href="{{ route('admin.settings') }}"
-           class="{{ request()->is('admin/settings*') ? 'active' : '' }}"
+           class="{{ request()->is('admin/settings*') ? 'menu-active' : '' }}"
            :class="!expanded && isDesktop && 'justify-center'"
            @mouseenter="showTooltip($event, 'Settings')"
            @mouseleave="hideTooltip()">

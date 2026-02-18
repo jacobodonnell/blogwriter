@@ -5,7 +5,7 @@
         {{-- Header --}}
         <div>
             <h1 class="text-3xl font-bold">Categories</h1>
-            <p class="text-gray-600 dark:text-gray-400 mt-1">Manage article categories.</p>
+            <p class="text-base-content/70 mt-1">Manage article categories.</p>
         </div>
 
         {{-- Add Category Form --}}

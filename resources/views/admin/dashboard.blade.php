@@ -5,7 +5,7 @@
         {{-- Header --}}
         <div>
             <h1 class="text-3xl font-bold">Dashboard</h1>
-            <p class="text-gray-600 dark:text-gray-400 mt-1">Welcome to your BlogWriter admin panel.</p>
+            <p class="text-base-content/70 mt-1">Welcome to your BlogWriter admin panel.</p>
         </div>
 
         {{-- Stats Grid --}}
@@ -86,7 +86,7 @@
                                 <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg">
                                     <div class="flex-1 min-w-0">
                                         <h3 class="font-semibold truncate">{{ $article->title }}</h3>
-                                        <div class="flex items-center gap-2 mt-1 text-sm text-gray-500">
+                                        <div class="flex items-center gap-2 mt-1 text-sm text-base-content/60">
                                             <span @class([
                                                 'badge badge-sm',
                                                 'badge-success' => $article->status->value === 'published',
@@ -109,7 +109,7 @@
                             @endforeach
                         </div>
                     @else
-                        <div class="text-center py-8 text-gray-500">
+                        <div class="text-center py-8 text-base-content/60">
                             <p>No articles yet.</p>
                             <a href="{{ route('admin.articles.create') }}" class="btn btn-primary mt-4">Create First Article</a>
                         </div>
@@ -141,12 +141,12 @@
                                             >
                                         @else
                                             <div class="w-12 h-12 rounded-lg bg-base-300 flex items-center justify-center shrink-0">
-                                                <i class="ph ph-image text-xl text-gray-400"></i>
+                                                <i class="ph ph-image text-xl text-base-content/40"></i>
                                             </div>
                                         @endif
                                         <div class="min-w-0">
                                             <h3 class="font-semibold truncate">{{ $photo->caption ?? 'Untitled Photo' }}</h3>
-                                            <div class="flex items-center gap-2 mt-1 text-sm text-gray-500">
+                                            <div class="flex items-center gap-2 mt-1 text-sm text-base-content/60">
                                                 <span @class([
                                                     'badge badge-sm',
                                                     'badge-success' => $photo->status->value === 'published',
@@ -170,7 +170,7 @@
                             @endforeach
                         </div>
                     @else
-                        <div class="text-center py-8 text-gray-500">
+                        <div class="text-center py-8 text-base-content/60">
                             <p>No photos yet.</p>
                             <a href="{{ route('admin.photos.create') }}" class="btn btn-primary mt-4">Upload First Photo</a>
                         </div>

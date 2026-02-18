@@ -6,7 +6,7 @@
         <div class="flex justify-between items-center">
             <div>
                 <h1 class="text-3xl font-bold">Edit Category</h1>
-                <p class="text-gray-600 dark:text-gray-400 mt-1">Update category details.</p>
+                <p class="text-base-content/70 mt-1">Update category details.</p>
             </div>
             <a href="{{ route('admin.categories.index') }}" class="btn btn-ghost">
                 Back to Categories

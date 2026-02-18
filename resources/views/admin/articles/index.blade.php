@@ -26,7 +26,7 @@
         <div class="flex flex-wrap justify-between items-center gap-2">
             <div>
                 <h1 class="text-3xl font-bold">Articles</h1>
-                <p class="text-gray-600 dark:text-gray-400 mt-1">Manage your blog articles.</p>
+                <p class="text-base-content/70 mt-1">Manage your blog articles.</p>
             </div>
             <div class="flex gap-2">
                 {{-- Mobile Filters Toggle --}}

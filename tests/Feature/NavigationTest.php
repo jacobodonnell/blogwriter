@@ -29,6 +29,38 @@ it('renders customizer for new article without DB write', function (): void {
         ->assertViewIs('admin.articles.customizer');
 });
 
+it('shows menu-active on admin sidebar for current route', function (string $route, string $activeText): void {
+    $this->actingAs($this->user)
+        ->get($route)
+        ->assertOk()
+        ->assertSee('menu-active', false);
+})->with([
+    'dashboard' => fn () => [route('admin.dashboard'), 'Dashboard'],
+    'articles' => fn () => [route('admin.articles.index'), 'Manage Articles'],
+    'categories' => fn () => [route('admin.categories.index'), 'Categories'],
+    'settings' => fn () => [route('admin.settings'), 'Settings'],
+]);
+
+it('shows menu-active on guest desktop nav for current route', function (string $url): void {
+    $this->get($url)
+        ->assertOk()
+        ->assertSee('menu-active', false);
+})->with([
+    'home' => fn () => route('home'),
+    'articles' => fn () => route('articles.index'),
+    'about' => fn () => route('about'),
+]);
+
+it('shows menu-active on guest mobile drawer for current route', function (string $url): void {
+    $this->get($url)
+        ->assertOk()
+        ->assertSee('menu-active', false);
+})->with([
+    'home' => fn () => route('home'),
+    'articles' => fn () => route('articles.index'),
+    'about' => fn () => route('about'),
+]);
+
 it('has no broken links in public pages smoke test', function (): void {
     $article = \App\Models\Article::factory()->published()->create();
     $category = \App\Models\Category::factory()->create();

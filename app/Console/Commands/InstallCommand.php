@@ -69,7 +69,7 @@ class InstallCommand extends Command
             foreach ($requirements['requirements'] as $req) {
                 $status = $req['passed'] ? '✓' : '✗';
                 $method = $req['passed'] ? 'info' : 'error';
-                $method("  {$status} {$req['name']}: {$req['value']}");
+                $method(sprintf('  %s %s: %s', $status, $req['name'], $req['value']));
             }
 
             $this->newLine();

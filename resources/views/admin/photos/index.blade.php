@@ -6,7 +6,7 @@
         <div class="flex justify-between items-center">
             <div>
                 <h1 class="text-3xl font-bold">Photos</h1>
-                <p class="text-gray-600 dark:text-gray-400 mt-1">Manage your photo library.</p>
+                <p class="text-base-content/70 mt-1">Manage your photo library.</p>
             </div>
             <div class="flex gap-2">
                 <a href="{{ route('photos.index') }}" class="btn btn-ghost">
@@ -72,13 +72,13 @@
                             </h3>
 
                             @if($photo->caption)
-                                <p class="text-sm text-gray-500 line-clamp-2">
+                                <p class="text-sm text-base-content/60 line-clamp-2">
                                     {{ Str::limit(strip_tags(Str::markdown($photo->caption)), 80) }}
                                 </p>
                             @endif
 
                             {{-- Metadata --}}
-                            <div class="text-sm text-gray-500 mt-2">
+                            <div class="text-sm text-base-content/60 mt-2">
                                 <div class="flex items-center gap-2">
                                     <i class="ph ph-calendar-blank"></i>
                                     {{ $photo->published_at?->format('M j, Y') ?? 'Not published' }}
@@ -132,7 +132,7 @@
         @else
             <div class="text-center py-12 card bg-base-100 shadow">
                 <div class="card-body">
-                    <p class="text-gray-500 mb-4">No photos found.</p>
+                    <p class="text-base-content/60 mb-4">No photos found.</p>
                     @if(request('status'))
                         <a href="{{ route('admin.photos.index') }}" class="btn btn-ghost">Clear Filters</a>
                     @else

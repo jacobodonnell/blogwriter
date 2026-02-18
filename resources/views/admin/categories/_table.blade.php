@@ -66,10 +66,10 @@
                                         </div>
                                     </div>
                                     @if($category->description)
-                                        <div class="text-sm text-gray-500">{{ Str::limit($category->description, 50) }}</div>
+                                        <div class="text-sm text-base-content/60">{{ Str::limit($category->description, 50) }}</div>
                                     @endif
                                 </td>
-                                <td class="text-sm text-gray-500">
+                                <td class="text-sm text-base-content/60">
                                     {{ $category->slug }}
                                 </td>
                                 <td>
@@ -79,7 +79,7 @@
                                     @if($category->children_count > 0)
                                         <span class="badge badge-sm badge-outline">{{ $category->children_count }}</span>
                                     @else
-                                        <span class="text-gray-400 text-sm">—</span>
+                                        <span class="text-base-content/40 text-sm">—</span>
                                     @endif
                                 </td>
                                 <td class="text-right">
@@ -110,9 +110,9 @@
         @else
             <div class="text-center py-12">
                 @if($parent)
-                    <p class="text-gray-500">No subcategories in {{ $parent->name }}.</p>
+                    <p class="text-base-content/60">No subcategories in {{ $parent->name }}.</p>
                 @else
-                    <p class="text-gray-500">No categories yet.</p>
+                    <p class="text-base-content/60">No categories yet.</p>
                 @endif
             </div>
         @endif

@@ -24,15 +24,9 @@
        }"
        @keydown.escape.window="closeMobile()">
 
-    {{-- Sidebar Header --}}
-    <div class="flex items-center h-16 px-4 border-b border-base-300 shrink-0"
-         :class="!expanded && isDesktop ? 'justify-center' : 'justify-between'">
-        <a href="{{ route('home') }}" class="flex items-center gap-2 text-lg font-semibold overflow-hidden">
-            <i class="ph ph-pen-nib text-xl shrink-0"></i>
-            <span x-show="expanded || !isDesktop" x-cloak class="whitespace-nowrap">{{ config('app.name', 'BlogWriter') }}</span>
-        </a>
-        {{-- Mobile close button --}}
-        <button @click="closeMobile()" class="btn btn-ghost btn-sm btn-circle lg:hidden">
+    {{-- Mobile close button --}}
+    <div class="flex items-center justify-end h-16 px-4 border-b border-base-300 shrink-0 lg:hidden">
+        <button @click="closeMobile()" class="btn btn-ghost btn-sm btn-circle">
             <i class="ph ph-x text-lg"></i>
         </button>
     </div>
