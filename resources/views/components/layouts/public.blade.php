@@ -47,6 +47,9 @@
                     @include('components.layouts.partials.public-footer')
                 </div>
             </div>
+
+            {{-- Filter modals (top layer, outside content flow) --}}
+            {{ $filters ?? '' }}
         </div>
 
     @else
@@ -137,6 +140,9 @@
 
             {{-- Footer --}}
             @include('components.layouts.partials.public-footer')
+
+            {{-- Filter modals (top layer, outside content flow) --}}
+            {{ $filters ?? '' }}
         </div>
     @endauth
 

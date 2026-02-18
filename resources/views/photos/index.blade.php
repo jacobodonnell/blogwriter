@@ -11,8 +11,16 @@
                     <p class="text-base-content/60">{{ $subtitle }}</p>
                 @endif
             </div>
-            @auth
-                <div class="flex shrink-0 gap-2">
+            <div class="flex shrink-0 gap-2">
+                <button class="btn btn-ghost btn-sm gap-1"
+                        onclick="document.getElementById('photo-filter-modal').showModal()">
+                    <i class="ph ph-funnel text-lg"></i>
+                    Filters
+                    @if(request('search') || request('category') || request('status'))
+                        <span class="badge badge-xs badge-primary"></span>
+                    @endif
+                </button>
+                @auth
                     <a href="{{ route('admin.photos.index') }}" class="btn btn-ghost btn-sm gap-1">
                         <i class="ph ph-gear text-lg"></i>
                         Manage
@@ -22,44 +30,9 @@
                         <i class="ph ph-upload-simple"></i>
                         Upload
                     </button>
-                </div>
-            @endauth
+                @endauth
+            </div>
         </header>
-
-        {{-- Filters --}}
-        <form method="GET" action="{{ route('photos.index') }}"
-              x-data="{
-                  search: $persist('{{ request('search') }}').as('photos_filter_search'),
-                  category: $persist('{{ request('category') }}').as('photos_filter_category'),
-                  status: $persist('{{ request('status') }}').as('photos_filter_status'),
-              }"
-              class="flex flex-wrap gap-3 mb-6 items-end">
-
-            <input type="text" name="search" x-model="search"
-                   placeholder="Search photos..."
-                   class="input input-bordered flex-1 min-w-48"
-                   @input.debounce.400ms="$el.form.requestSubmit()">
-
-            <x-category-select :categories="$categories"
-                name="category" emptyLabel="All Categories"
-                :selected="request('category')"
-                x-model="category"
-                onchange="this.form.requestSubmit()" />
-
-            @auth
-                <select name="status" x-model="status"
-                        class="select select-bordered"
-                        onchange="this.form.requestSubmit()">
-                    <option value="">All Status</option>
-                    <option value="published" @selected(request('status') === 'published')>Published</option>
-                    <option value="draft" @selected(request('status') === 'draft')>Draft</option>
-                </select>
-            @endauth
-
-            @if(request('search') || request('category') || request('status'))
-                <a href="{{ route('photos.index') }}" class="btn btn-ghost btn-sm">Clear</a>
-            @endif
-        </form>
 
         {{-- IG-Style Grid --}}
         @if($photos->count() > 0)
@@ -107,7 +80,14 @@
                 @if(request('search') || request('category') || request('status'))
                     <h2 class="text-2xl font-bold mb-2">No photos found</h2>
                     <p class="text-base-content/60 mb-6">Try adjusting your filters.</p>
-                    <a href="{{ route('photos.index') }}" class="btn btn-ghost">Clear Filters</a>
+                    <a href="{{ route('photos.index') }}" class="btn btn-ghost"
+                       x-data
+                       @click.prevent="
+                           localStorage.removeItem('_x_photos_filter_search');
+                           localStorage.removeItem('_x_photos_filter_category');
+                           localStorage.removeItem('_x_photos_filter_status');
+                           window.location = '{{ route('photos.index') }}';
+                       ">Clear Filters</a>
                 @else
                     <h2 class="text-2xl font-bold mb-2">No photos yet</h2>
                     <p class="text-base-content/60">Check back soon for new photos.</p>
@@ -177,5 +157,46 @@
             </x-editor-modal>
         @endauth
     </div>
+
+    {{-- Filter Modal --}}
+    <x-slot:filters>
+        <x-filter-modal id="photo-filter-modal" title="Filter Photos"
+            :action="route('photos.index')" :clearRoute="route('photos.index')"
+            x-data="{
+                search: $persist('{{ request('search') }}').as('photos_filter_search'),
+                category: $persist('{{ request('category') }}').as('photos_filter_category'),
+                status: $persist('{{ request('status') }}').as('photos_filter_status'),
+            }">
+
+            {{-- Search: half width on sm+ --}}
+            <div class="sm:col-span-2">
+                <label class="label"><span class="label-text">Search</span></label>
+                <input type="text" name="search" x-model="search"
+                       placeholder="Search photos..."
+                       class="input input-bordered w-full">
+            </div>
+
+            {{-- Category --}}
+            <div class="@auth sm:col-span-1 @else sm:col-span-2 @endauth">
+                <label class="label"><span class="label-text">Category</span></label>
+                <x-category-select :categories="$categories"
+                    name="category" emptyLabel="All Categories"
+                    :selected="request('category')"
+                    x-model="category" />
+            </div>
+
+            {{-- Status: auth only --}}
+            @auth
+                <div class="sm:col-span-1">
+                    <label class="label"><span class="label-text">Status</span></label>
+                    <select name="status" x-model="status" class="select select-bordered w-full">
+                        <option value="">All Status</option>
+                        <option value="published" @selected(request('status') === 'published')>Published</option>
+                        <option value="draft" @selected(request('status') === 'draft')>Draft</option>
+                    </select>
+                </div>
+            @endauth
+        </x-filter-modal>
+    </x-slot:filters>
 
 </x-layouts.public>

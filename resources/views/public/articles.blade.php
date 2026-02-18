@@ -15,8 +15,16 @@
                     <p class="text-base-content/60">{{ $subtitle }}</p>
                 @endif
             </div>
-            @auth
-                <div class="flex shrink-0 gap-2">
+            <div class="flex shrink-0 gap-2">
+                <button class="btn btn-ghost btn-sm gap-1"
+                        onclick="document.getElementById('article-filter-modal').showModal()">
+                    <i class="ph ph-funnel text-lg"></i>
+                    Filters
+                    @if(request('search') || request('category') || request('status'))
+                        <span class="badge badge-xs badge-primary"></span>
+                    @endif
+                </button>
+                @auth
                     <a href="{{ route('admin.articles.index') }}" class="btn btn-ghost btn-sm gap-1">
                         <i class="ph ph-gear text-lg"></i>
                         Manage
@@ -25,44 +33,9 @@
                         <i class="ph ph-plus"></i>
                         New Article
                     </a>
-                </div>
-            @endauth
+                @endauth
+            </div>
         </header>
-
-        {{-- Filters --}}
-        <form method="GET" action="{{ route('articles.index') }}"
-              x-data="{
-                  search: $persist('{{ request('search') }}').as('articles_filter_search'),
-                  category: $persist('{{ request('category') }}').as('articles_filter_category'),
-                  status: $persist('{{ request('status') }}').as('articles_filter_status'),
-              }"
-              class="flex flex-wrap gap-3 mb-6 items-end">
-
-            <input type="text" name="search" x-model="search"
-                   placeholder="Search articles..."
-                   class="input input-bordered flex-1 min-w-48"
-                   @input.debounce.400ms="$el.form.requestSubmit()">
-
-            <x-category-select :categories="$categories"
-                name="category" emptyLabel="All Categories"
-                :selected="request('category')"
-                x-model="category"
-                onchange="this.form.requestSubmit()" />
-
-            @auth
-                <select name="status" x-model="status"
-                        class="select select-bordered"
-                        onchange="this.form.requestSubmit()">
-                    <option value="">All Status</option>
-                    <option value="published" @selected(request('status') === 'published')>Published</option>
-                    <option value="draft" @selected(request('status') === 'draft')>Draft</option>
-                </select>
-            @endauth
-
-            @if(request('search') || request('category') || request('status'))
-                <a href="{{ route('articles.index') }}" class="btn btn-ghost btn-sm">Clear</a>
-            @endif
-        </form>
 
         {{-- Alternating Article Cards --}}
         @if($articles->count() > 0)
@@ -161,7 +134,14 @@
                 @if(request('search') || request('category') || request('status'))
                     <h2 class="text-2xl font-bold mb-2">No articles found</h2>
                     <p class="text-base-content/60 mb-6">Try adjusting your filters.</p>
-                    <a href="{{ route('articles.index') }}" class="btn btn-ghost">Clear Filters</a>
+                    <a href="{{ route('articles.index') }}" class="btn btn-ghost"
+                       x-data
+                       @click.prevent="
+                           localStorage.removeItem('_x_articles_filter_search');
+                           localStorage.removeItem('_x_articles_filter_category');
+                           localStorage.removeItem('_x_articles_filter_status');
+                           window.location = '{{ route('articles.index') }}';
+                       ">Clear Filters</a>
                 @else
                     <h2 class="text-2xl font-bold mb-2">No articles yet</h2>
                     <p class="text-base-content/60 mb-6">Check back soon for new articles.</p>
@@ -175,5 +155,46 @@
             </div>
         @endif
     </div>
+
+    {{-- Filter Modal --}}
+    <x-slot:filters>
+        <x-filter-modal id="article-filter-modal" title="Filter Articles"
+            :action="route('articles.index')" :clearRoute="route('articles.index')"
+            x-data="{
+                search: $persist('{{ request('search') }}').as('articles_filter_search'),
+                category: $persist('{{ request('category') }}').as('articles_filter_category'),
+                status: $persist('{{ request('status') }}').as('articles_filter_status'),
+            }">
+
+            {{-- Search: half width on sm+ --}}
+            <div class="sm:col-span-2">
+                <label class="label"><span class="label-text">Search</span></label>
+                <input type="text" name="search" x-model="search"
+                       placeholder="Search articles..."
+                       class="input input-bordered w-full">
+            </div>
+
+            {{-- Category --}}
+            <div class="@auth sm:col-span-1 @else sm:col-span-2 @endauth">
+                <label class="label"><span class="label-text">Category</span></label>
+                <x-category-select :categories="$categories"
+                    name="category" emptyLabel="All Categories"
+                    :selected="request('category')"
+                    x-model="category" />
+            </div>
+
+            {{-- Status: auth only --}}
+            @auth
+                <div class="sm:col-span-1">
+                    <label class="label"><span class="label-text">Status</span></label>
+                    <select name="status" x-model="status" class="select select-bordered w-full">
+                        <option value="">All Status</option>
+                        <option value="published" @selected(request('status') === 'published')>Published</option>
+                        <option value="draft" @selected(request('status') === 'draft')>Draft</option>
+                    </select>
+                </div>
+            @endauth
+        </x-filter-modal>
+    </x-slot:filters>
 
 </x-layouts.public>
