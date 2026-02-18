@@ -18,7 +18,9 @@ class PhotoController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        $categories = Category::whereNull('parent_id')->with('children')->orderBy('name')->get();
+        $categories = auth()->check()
+            ? Category::whereNull('parent_id')->with('children')->orderBy('name')->get()
+            : collect();
 
         return view('photos.index', [
             'photos' => $photos,
