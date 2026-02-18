@@ -80,6 +80,7 @@
             :childrenLabel="$childrenLabel"
             :parentUrl="$parentUrl"
             :parentLabel="$parentLabel"
+            :category="$category"
         />
 
     </div>

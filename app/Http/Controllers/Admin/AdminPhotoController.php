@@ -49,7 +49,7 @@ class AdminPhotoController extends Controller
     public function create(): View
     {
         return view('admin.photos.create', [
-            'photo' => new Photo,
+            'photo' => new Photo(['category_id' => request('category_id')]),
             'categories' => $this->categoryTree(),
         ]);
     }

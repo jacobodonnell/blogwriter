@@ -32,6 +32,7 @@ class CreateArticleController extends Controller
             'content' => '',
             'summary' => '',
             'status' => Status::Draft,
+            'category_id' => request('category_id'),
         ]);
 
         return view('admin.articles.customizer', [

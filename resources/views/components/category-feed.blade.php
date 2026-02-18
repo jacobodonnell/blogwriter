@@ -10,6 +10,7 @@
     'childrenLabel' => 'Subcategories',
     'parentUrl' => null,
     'parentLabel' => null,
+    'category' => null,
 ])
 
 @php
@@ -227,14 +228,42 @@
         @if(request('search') || request('status') || request('type'))
             <h2 class="text-xl font-bold mb-2">No content found</h2>
             <p class="text-base-content/60 mb-6">Try adjusting your filters.</p>
-            <a href="{{ $feedUrl }}" x-target.push="category-content" class="btn btn-ghost">Clear Filters</a>
+            <div class="flex flex-wrap items-center justify-center gap-2">
+                <a href="{{ $feedUrl }}" x-target.push="category-content" class="btn btn-ghost">Clear Filters</a>
+                @auth
+                    @if($currentType !== 'photos')
+                        <a href="{{ route('admin.articles.create', ['category_id' => $category?->id]) }}" class="btn btn-primary gap-1">
+                            <i class="ph ph-plus"></i>
+                            Write Article
+                        </a>
+                    @endif
+                    @if($currentType !== 'articles')
+                        <a href="{{ route('admin.photos.create', ['category_id' => $category?->id]) }}" class="btn {{ $currentType === 'photos' ? 'btn-primary' : 'btn-ghost' }} gap-1">
+                            <i class="ph ph-upload"></i>
+                            Upload Photo
+                        </a>
+                    @endif
+                @endauth
+            </div>
         @else
             <h2 class="text-xl font-bold mb-2">No content yet</h2>
             <p class="text-base-content/60 mb-6">No articles or photos to show here yet.</p>
-            <a href="{{ route('home') }}" class="btn btn-primary">
-                <i class="ph ph-house"></i>
-                Back to Home
-            </a>
+            <div class="flex flex-wrap items-center justify-center gap-2">
+                <a href="{{ route('home') }}" class="btn @auth btn-ghost @else btn-primary @endauth">
+                    <i class="ph ph-house"></i>
+                    Back to Home
+                </a>
+                @auth
+                    <a href="{{ route('admin.articles.create', ['category_id' => $category?->id]) }}" class="btn btn-primary gap-1">
+                        <i class="ph ph-plus"></i>
+                        Write Article
+                    </a>
+                    <a href="{{ route('admin.photos.create', ['category_id' => $category?->id]) }}" class="btn btn-ghost gap-1">
+                        <i class="ph ph-upload"></i>
+                        Upload Photo
+                    </a>
+                @endauth
+            </div>
         @endif
     </div>
 @endif
