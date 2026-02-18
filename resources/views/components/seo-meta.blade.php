@@ -96,7 +96,7 @@
         '@type' => 'ImageObject',
         'name' => $photo->alt_text,
         'contentUrl' => $photo->image_url,
-        'datePublished' => $photo->published_at->toIso8601String(),
+        'datePublished' => $photo->published_at?->toIso8601String(),
         'author' => [
             '@type' => 'Person',
             'name' => $authorName,

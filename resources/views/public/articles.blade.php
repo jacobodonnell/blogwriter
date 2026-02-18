@@ -51,14 +51,19 @@
                             {{-- Content --}}
                             <div class="card-body {{ $articleImage ? 'md:w-3/5' : 'w-full' }}">
                                 {{-- Category --}}
-                                @if($article->category)
-                                    <div class="flex flex-wrap gap-2">
+                                <div class="flex flex-wrap gap-2">
+                                    @if($article->category)
                                         <a href="{{ $article->category->permalink() }}"
                                            class="badge badge-primary badge-sm">
                                             {{ $article->category->name }}
                                         </a>
-                                    </div>
-                                @endif
+                                    @endif
+                                    @auth
+                                        @if($article->status === \App\Enums\Status::Draft)
+                                            <span class="badge badge-warning badge-sm">Draft</span>
+                                        @endif
+                                    @endauth
+                                </div>
 
                                 {{-- Title (p-name) --}}
                                 <h2 class="p-name card-title text-xl">

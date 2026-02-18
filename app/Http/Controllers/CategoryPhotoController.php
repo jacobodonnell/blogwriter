@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Article;
 use App\Models\Category;
 use App\Models\Photo;
 use Illuminate\View\View;
 
-class CategoryArticleController extends Controller
+class CategoryPhotoController extends Controller
 {
     /**
-     * Display articles and photos by category (including subcategories).
+     * Display photos by category (including subcategory photos).
      */
     public function index(string $path): View
     {
@@ -27,14 +26,6 @@ class CategoryArticleController extends Controller
 
         $categoryIds = array_merge([$category->id], $category->descendantIds());
 
-        $articleQuery = auth()->check()
-            ? Article::whereIn('category_id', $categoryIds)
-            : Article::published()->whereIn('category_id', $categoryIds);
-
-        $articles = $articleQuery->with('category')
-            ->orderBy('published_at', 'desc')
-            ->paginate(10, ['*'], 'articles_page');
-
         $photoQuery = auth()->check()
             ? Photo::whereIn('category_id', $categoryIds)
             : Photo::published()->whereIn('category_id', $categoryIds);
@@ -46,7 +37,6 @@ class CategoryArticleController extends Controller
 
         return view('public.category', [
             'category' => $category,
-            'articles' => $articles,
             'photos' => $photos,
             'children' => $children,
         ]);

@@ -13,8 +13,11 @@ class ArticleController extends Controller
      */
     public function index(): View
     {
-        $articles = Article::published()
-            ->with('category')
+        $articleQuery = auth()->check()
+            ? Article::query()
+            : Article::published();
+
+        $articles = $articleQuery->with('category')
             ->orderBy('published_at', 'desc')
             ->paginate(10);
 
@@ -29,8 +32,12 @@ class ArticleController extends Controller
      */
     public function show(string $slug): View|RedirectResponse
     {
-        $article = Article::published()
-            ->where('slug', $slug)
+        // Auth users can view any article, guests only published
+        $baseQuery = auth()->check()
+            ? Article::query()
+            : Article::published();
+
+        $article = $baseQuery->where('slug', $slug)
             ->with('category')
             ->first();
 
@@ -41,8 +48,11 @@ class ArticleController extends Controller
         }
 
         // Check past slugs for 301 redirect
-        $article = Article::published()
-            ->whereJsonContains('past_slugs', $slug)
+        $redirectQuery = auth()->check()
+            ? Article::query()
+            : Article::published();
+
+        $article = $redirectQuery->whereJsonContains('past_slugs', $slug)
             ->first();
 
         if ($article) {

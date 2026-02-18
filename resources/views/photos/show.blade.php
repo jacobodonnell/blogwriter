@@ -18,6 +18,9 @@
                     <i class="ph ph-pencil-simple"></i>
                     Edit
                 </a>
+                @if($photo->status === \App\Enums\Status::Draft)
+                    <span class="badge badge-warning">Draft</span>
+                @endif
             </div>
         @endauth
 
@@ -58,8 +61,8 @@
         <div class="flex flex-wrap items-center gap-4 text-sm text-base-content/60 mb-8 pb-8 border-b border-base-200">
             <div class="flex items-center gap-2">
                 <i class="ph ph-calendar-blank"></i>
-                <time class="dt-published" datetime="{{ $photo->published_at->toIso8601String() }}">
-                    {{ $photo->published_at->format('F j, Y') }}
+                <time class="dt-published" datetime="{{ $photo->published_at?->toIso8601String() }}">
+                    {{ $photo->published_at?->format('F j, Y') }}
                 </time>
             </div>
 

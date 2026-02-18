@@ -9,12 +9,15 @@ use Illuminate\View\View;
 class PhotoController extends Controller
 {
     /**
-     * Display a listing of published photos.
+     * Display a listing of photos.
      */
     public function index(): View
     {
-        $photos = Photo::published()
-            ->orderBy('published_at', 'desc')
+        $photoQuery = auth()->check()
+            ? Photo::query()
+            : Photo::published();
+
+        $photos = $photoQuery->orderBy('published_at', 'desc')
             ->paginate(12)
             ->withQueryString();
 
@@ -34,8 +37,8 @@ class PhotoController extends Controller
      */
     public function show(Photo $photo): View
     {
-        // Return 404 if photo is not public
-        if (! $photo->isPublic()) {
+        // Auth users can view any photo, guests only public
+        if (! auth()->check() && ! $photo->isPublic()) {
             abort(404);
         }
 

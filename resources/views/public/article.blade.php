@@ -18,6 +18,9 @@
                     <i class="ph ph-pencil-simple"></i>
                     Edit
                 </a>
+                @if($article->status === \App\Enums\Status::Draft)
+                    <span class="badge badge-warning">Draft</span>
+                @endif
             </div>
         @endauth
 
