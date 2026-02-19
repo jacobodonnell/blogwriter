@@ -4,12 +4,20 @@ import collapse from '@alpinejs/collapse';
 import morph from '@alpinejs/morph';
 import persist from '@alpinejs/persist';
 import sidebar from './components/sidebar';
+import customizerLayout from './components/customizer-layout';
+import articleCustomizer from './components/article-customizer';
+import featuredImage from './components/featured-image';
+import uploadPhotoModal from './components/upload-photo-modal';
 
 Alpine.plugin(morph);
 Alpine.plugin(ajax);
 Alpine.plugin(collapse);
 Alpine.plugin(persist);
 Alpine.data('sidebar', sidebar);
+Alpine.data('customizerLayout', customizerLayout);
+Alpine.data('articleCustomizer', articleCustomizer);
+Alpine.data('featuredImage', featuredImage);
+Alpine.data('uploadPhotoModal', uploadPhotoModal);
 
 window.Alpine = Alpine;
 Alpine.start();

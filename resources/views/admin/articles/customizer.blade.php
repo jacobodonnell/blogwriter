@@ -4,126 +4,22 @@
         @include('admin.articles.preview')
     </x-slot:preview>
 
-    <div x-data="{
+    <div x-data="articleCustomizer({
             title: @js(old('title', $article->title ?? '')),
             slug: @js(old('slug', $article->slug ?? '')),
             content: @js(old('content', $article->content ?? '')),
             summary: @js(old('summary', $article->summary ?? '')),
             selectedPhotoId: @js(old('photo_id', $article->photo_id ?? '')),
-            uploadedPhotoUrl: null,
-            uploading: false,
             featuredImageUrl: @js(old('featured_image', $article->meta['featured_image_url'] ?? '')),
             showUrlField: @js(!empty(old('featured_image', $article->meta['featured_image_url'] ?? ''))),
             featuredImageCaption: @js(old('meta.featured_image_caption', $article->meta['featured_image_caption'] ?? '')),
             usePhotoCaption: @js(old('meta.use_photo_caption', !empty($article->meta['use_photo_caption']))),
-            easyMDE: null,
             initialStatus: @js($article->status->value),
             currentStatus: @js($article->status->value),
             wasEverPublished: @js($article->published_at !== null),
             originalPublishedAt: @js($article->published_at?->format('F j, Y')),
-            contentError: false,
-
-            get isPlaceholderSlug() {
-                return /^untitled-[a-z0-9]{8}$/.test(this.slug);
-            },
-
-            get displaySlug() {
-                return this.isPlaceholderSlug ? '' : this.slug;
-            },
-            set displaySlug(v) {
-                this.slug = v;
-            },
-
-            generateSlug() {
-                if (this.title && (!this.slug || this.slug.match(/^untitled-[a-z0-9]{8}$/))) {
-                    this.slug = this.title.toLowerCase()
-                        .replace(/[^a-z0-9]+/g, '-')
-                        .replace(/^-+|-+$/g, '');
-                }
-            },
-
-            hasNewPhoto: false,
-
-            get buttonAction() {
-                if (this.currentStatus === 'published' && this.initialStatus === 'draft' && !this.wasEverPublished) return 'publish';
-                if (this.currentStatus === 'published' && this.initialStatus === 'draft' && this.wasEverPublished) return 'republish';
-                if (this.currentStatus === 'draft' && this.initialStatus === 'published') return 'unpublish';
-                return 'save';
-            },
-            get buttonLabel() {
-                const a = this.buttonAction;
-                const p = this.hasNewPhoto;
-                if (a === 'publish') return p ? 'Upload Photo & Publish' : 'Publish Article';
-                if (a === 'republish') return p ? 'Upload Photo & Republish' : 'Republish Article';
-                if (a === 'unpublish') return 'Unpublish Article';
-                if (this.initialStatus === 'published') return p ? 'Upload Photo & Save Changes' : 'Save Changes';
-                return p ? 'Upload Photo & Save Draft' : 'Save Draft';
-            },
-            get buttonIcon() {
-                if (this.hasNewPhoto) return 'ph-upload-simple';
-                if (this.buttonAction === 'publish' || this.buttonAction === 'republish') return 'ph-rocket-launch';
-                if (this.buttonAction === 'unpublish') return 'ph-arrow-u-up-left';
-                return 'ph-floppy-disk';
-            },
-            get buttonClass() {
-                if (this.hasNewPhoto) return 'btn-success';
-                if (this.buttonAction === 'publish' || this.buttonAction === 'republish') return 'btn-success';
-                if (this.buttonAction === 'unpublish') return 'btn-error btn-outline';
-                return 'btn-primary';
-            },
-
-            init() {
-                this.$nextTick(() => {
-                    const ta = document.getElementById('content-editor');
-                    if (!ta) return;
-
-                    this.easyMDE = new EasyMDE({
-                        element: ta,
-                        forceSync: true,
-                        spellChecker: false,
-                        status: false,
-                        placeholder: '## Write your article here...',
-                        toolbar: [
-                            'bold', 'italic', 'heading-2', 'heading-3', '|',
-                            'quote', 'unordered-list', 'ordered-list', '|',
-                            'link', 'image', 'code', 'horizontal-rule', '|',
-                            'guide'
-                        ],
-                        initialValue: this.content,
-                    });
-
-                    this.easyMDE.codemirror.on('change', () => {
-                        this.content = this.easyMDE.value();
-                        this.contentError = false;
-                        document.getElementById('customizer-form').dispatchEvent(
-                            new Event('input', { bubbles: true })
-                        );
-                    });
-                });
-            },
-
-            submitFullSave() {
-                if (this.easyMDE) {
-                    this.content = this.easyMDE.value();
-                }
-                if (!this.content || !this.content.trim()) {
-                    this.contentError = true;
-                    if (this.easyMDE) {
-                        this.easyMDE.codemirror.focus();
-                    }
-                    return;
-                }
-                let form = document.getElementById('customizer-form');
-                form.removeAttribute('x-target');
-                @if($isNew ?? false)
-                    form.action = '{{ route("admin.articles.store") }}';
-                @else
-                    form.action = '{{ route("admin.articles.update", $article) }}';
-                @endif
-                form.submit();
-            },
-
-         }">
+            saveRoute: @js(($isNew ?? false) ? route('admin.articles.store') : route('admin.articles.update', $article)),
+         })">
 
         <form id="customizer-form"
               method="POST"
@@ -334,7 +230,7 @@
 
         {{-- Upload Photo Modal — stages file client-side, submits with main form --}}
         <x-editor-modal id="upload-photo-modal" title="Upload Featured Image" maxWidth="max-w-xl">
-            <div x-data="{ uploadPreview: null }">
+            <div x-data="uploadPhotoModal()">
                 <div class="space-y-3">
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">Image</legend>
@@ -371,27 +267,7 @@
 
             <x-slot:actions>
                 <button type="button" class="btn btn-primary" data-test="attach-photo"
-                        @click="
-                            const picker = document.getElementById('photo-file-picker');
-                            const altInput = document.getElementById('photo-alt-text-input');
-                            if (!picker.files[0] || !altInput.value.trim()) return;
-
-                            // Transfer file to hidden input on main form
-                            const dt = new DataTransfer();
-                            dt.items.add(picker.files[0]);
-                            document.getElementById('featured-image-file-input').files = dt.files;
-                            document.getElementById('featured-image-alt-input').value = altInput.value.trim();
-                            document.getElementById('featured-image-caption-input').value = document.getElementById('photo-caption-input').value;
-
-                            // Update Alpine state for preview + button text
-                            uploadedPhotoUrl = URL.createObjectURL(picker.files[0]);
-                            selectedPhotoId = '';
-                            featuredImageUrl = '';
-                            showUrlField = false;
-                            hasNewPhoto = true;
-
-                            document.getElementById('upload-photo-modal').close();
-                        ">
+                        @click="attachPhoto()">
                     Attach Photo
                 </button>
             </x-slot:actions>

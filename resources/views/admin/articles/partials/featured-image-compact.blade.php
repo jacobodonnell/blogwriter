@@ -4,15 +4,7 @@
     $captionMap = $photos->mapWithKeys(fn ($p) => [$p->id => $p->caption])->toArray();
 @endphp
 
-<div x-data="{
-        photoUrls: @js($photoMap),
-        photoCaptions: @js($captionMap),
-        get previewUrl() {
-            if (this.uploadedPhotoUrl) return this.uploadedPhotoUrl;
-            if (this.selectedPhotoId && this.photoUrls[this.selectedPhotoId]) return this.photoUrls[this.selectedPhotoId];
-            return null;
-        }
-     }">
+<div x-data="featuredImage({ photoUrls: @js($photoMap), photoCaptions: @js($captionMap) })">
     <input type="hidden" name="photo_id" :value="selectedPhotoId">
 
     {{-- Photo Select --}}
