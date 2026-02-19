@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Actions\NormalizeCaptionMetaAction;
-use App\Actions\Photos\HandleArticlePhotoUploadAction;
+use App\Actions\ApplyArticleFeaturedImageAction;
 use App\Enums\Status;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreArticleRequest;
@@ -18,8 +17,7 @@ use Illuminate\View\View;
 class CreateArticleController extends Controller
 {
     public function __construct(
-        private readonly HandleArticlePhotoUploadAction $handlePhotoUpload,
-        private readonly NormalizeCaptionMetaAction $normalizeCaptionMeta,
+        private readonly ApplyArticleFeaturedImageAction $applyFeaturedImage,
     ) {}
 
     /**
@@ -51,26 +49,10 @@ class CreateArticleController extends Controller
     {
         $data = $request->validated();
 
-        $photoId = null;
-        $meta = $data['meta'] ?? [];
-
-        if ($request->hasFile('featured_image_file')) {
-            $result = $this->handlePhotoUpload->handle(
-                $request->file('featured_image_file'),
-                array_merge($data, $request->only('featured_image_alt', 'featured_image_caption')),
-            );
-            if ($result instanceof RedirectResponse) {
-                return $result;
-            }
-
-            $photoId = $result;
-        } elseif ($request->filled('featured_image') && filter_var($request->featured_image, FILTER_VALIDATE_URL)) {
-            $meta['featured_image_url'] = $request->featured_image;
-        } elseif ($request->filled('photo_id')) {
-            $photoId = $data['photo_id'];
+        $imageResult = $this->applyFeaturedImage->handle($request, $data);
+        if ($imageResult instanceof RedirectResponse) {
+            return $imageResult;
         }
-
-        $meta = $this->normalizeCaptionMeta->handle($meta, $photoId, $meta['featured_image_url'] ?? null);
 
         $article = Article::create([
             'user_id' => auth()->id(),
@@ -80,8 +62,8 @@ class CreateArticleController extends Controller
             'summary' => $data['summary'] ?? null,
             'status' => $data['status'] ?? 'draft',
             'published_at' => $data['published_at'] ?? null,
-            'meta' => $meta,
-            'photo_id' => $photoId,
+            'meta' => $imageResult['meta'],
+            'photo_id' => $imageResult['photo_id'],
             'category_id' => $data['category_id'] ?? null,
         ]);
 

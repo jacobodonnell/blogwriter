@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Actions\NormalizeCaptionMetaAction;
-use App\Actions\Photos\HandleArticlePhotoUploadAction;
+use App\Actions\ApplyArticleFeaturedImageAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateArticleRequest;
 use App\Models\Article;
@@ -16,8 +15,7 @@ use Illuminate\View\View;
 class ArticleController extends Controller
 {
     public function __construct(
-        private readonly HandleArticlePhotoUploadAction $handlePhotoUpload,
-        private readonly NormalizeCaptionMetaAction $normalizeCaptionMeta,
+        private readonly ApplyArticleFeaturedImageAction $applyFeaturedImage,
     ) {}
 
     /**
@@ -126,39 +124,11 @@ class ArticleController extends Controller
     public function update(UpdateArticleRequest $request, Article $article): RedirectResponse
     {
         $data = $request->validated();
-        $meta = $data['meta'] ?? [];
 
-        // Handle featured image removal
-        if ($request->boolean('remove_featured_image')) {
-            $data['photo_id'] = null;
-            unset($meta['featured_image_url'], $meta['featured_image_caption'], $meta['use_photo_caption']);
-        } elseif ($request->hasFile('featured_image_file')) {
-            $result = $this->handlePhotoUpload->handle(
-                $request->file('featured_image_file'),
-                array_merge($data, $request->only('featured_image_alt', 'featured_image_caption')),
-                $article->id,
-            );
-            if ($result instanceof RedirectResponse) {
-                return $result;
-            }
-
-            $data['photo_id'] = $result;
-            unset($meta['featured_image_url']);
-        } elseif ($request->filled('featured_image') && filter_var($request->featured_image, FILTER_VALIDATE_URL)) {
-            $meta['featured_image_url'] = $request->featured_image;
-            $data['photo_id'] = null;
-        } elseif ($request->filled('photo_id')) {
-            unset($meta['featured_image_url']);
-        } else {
-            $data['photo_id'] = $article->photo_id;
-            // Preserve existing meta featured_image_url if present
-            $existingMeta = $article->meta ?? [];
-            if (isset($existingMeta['featured_image_url']) && ! isset($meta['featured_image_url'])) {
-                $meta['featured_image_url'] = $existingMeta['featured_image_url'];
-            }
+        $imageResult = $this->applyFeaturedImage->handle($request, $data, $article);
+        if ($imageResult instanceof RedirectResponse) {
+            return $imageResult;
         }
-
-        $meta = $this->normalizeCaptionMeta->handle($meta, $data['photo_id'] ?? null, $meta['featured_image_url'] ?? null);
 
         $article->update([
             'title' => $data['title'],
@@ -167,8 +137,8 @@ class ArticleController extends Controller
             'summary' => $data['summary'] ?? null,
             'status' => $data['status'],
             'published_at' => $data['published_at'] ?? $article->published_at,
-            'meta' => $meta,
-            'photo_id' => $data['photo_id'],
+            'meta' => $imageResult['meta'],
+            'photo_id' => $imageResult['photo_id'],
             'category_id' => $data['category_id'] ?? null,
         ]);
 
