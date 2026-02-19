@@ -10,7 +10,11 @@
            @mouseenter="showTooltip($event, 'Home')"
            @mouseleave="hideTooltip()">
             <i class="ph ph-house text-lg"></i>
-            <span x-show="expanded || !isDesktop" x-cloak>Home</span>
+            <span
+                class="whitespace-nowrap overflow-hidden transition-opacity"
+                :class="(expanded || !isDesktop) ? 'opacity-100 duration-150' : 'opacity-0 duration-75 w-0 pointer-events-none'"
+                :style="(expanded && isDesktop) ? 'transition-delay: 250ms' : 'transition-delay: 0ms'"
+            >Home</span>
         </a>
     </li>
 
@@ -21,7 +25,11 @@
            @mouseenter="showTooltip($event, 'Articles')"
            @mouseleave="hideTooltip()">
             <i class="ph ph-article text-lg"></i>
-            <span x-show="expanded || !isDesktop" x-cloak>Articles</span>
+            <span
+                class="whitespace-nowrap overflow-hidden transition-opacity"
+                :class="(expanded || !isDesktop) ? 'opacity-100 duration-150' : 'opacity-0 duration-75 w-0 pointer-events-none'"
+                :style="(expanded && isDesktop) ? 'transition-delay: 250ms' : 'transition-delay: 0ms'"
+            >Articles</span>
         </a>
     </li>
 
@@ -32,7 +40,11 @@
            @mouseenter="showTooltip($event, 'Photos')"
            @mouseleave="hideTooltip()">
             <i class="ph ph-image text-lg"></i>
-            <span x-show="expanded || !isDesktop" x-cloak>Photos</span>
+            <span
+                class="whitespace-nowrap overflow-hidden transition-opacity"
+                :class="(expanded || !isDesktop) ? 'opacity-100 duration-150' : 'opacity-0 duration-75 w-0 pointer-events-none'"
+                :style="(expanded && isDesktop) ? 'transition-delay: 250ms' : 'transition-delay: 0ms'"
+            >Photos</span>
         </a>
     </li>
 
@@ -43,7 +55,11 @@
            @mouseenter="showTooltip($event, 'Categories')"
            @mouseleave="hideTooltip()">
             <i class="ph ph-folder-open text-lg"></i>
-            <span x-show="expanded || !isDesktop" x-cloak>Categories</span>
+            <span
+                class="whitespace-nowrap overflow-hidden transition-opacity"
+                :class="(expanded || !isDesktop) ? 'opacity-100 duration-150' : 'opacity-0 duration-75 w-0 pointer-events-none'"
+                :style="(expanded && isDesktop) ? 'transition-delay: 250ms' : 'transition-delay: 0ms'"
+            >Categories</span>
         </a>
     </li>
 
@@ -54,7 +70,11 @@
            @mouseenter="showTooltip($event, 'About')"
            @mouseleave="hideTooltip()">
             <i class="ph ph-user text-lg"></i>
-            <span x-show="expanded || !isDesktop" x-cloak>About</span>
+            <span
+                class="whitespace-nowrap overflow-hidden transition-opacity"
+                :class="(expanded || !isDesktop) ? 'opacity-100 duration-150' : 'opacity-0 duration-75 w-0 pointer-events-none'"
+                :style="(expanded && isDesktop) ? 'transition-delay: 250ms' : 'transition-delay: 0ms'"
+            >About</span>
         </a>
     </li>
 
@@ -68,7 +88,11 @@
            @mouseenter="showTooltip($event, 'Dashboard')"
            @mouseleave="hideTooltip()">
             <i class="ph ph-gauge text-lg"></i>
-            <span x-show="expanded || !isDesktop" x-cloak>Dashboard</span>
+            <span
+                class="whitespace-nowrap overflow-hidden transition-opacity"
+                :class="(expanded || !isDesktop) ? 'opacity-100 duration-150' : 'opacity-0 duration-75 w-0 pointer-events-none'"
+                :style="(expanded && isDesktop) ? 'transition-delay: 250ms' : 'transition-delay: 0ms'"
+            >Dashboard</span>
         </a>
     </li>
 
@@ -79,7 +103,11 @@
            @mouseenter="showTooltip($event, 'Manage Articles')"
            @mouseleave="hideTooltip()">
             <i class="ph ph-note-pencil text-lg"></i>
-            <span x-show="expanded || !isDesktop" x-cloak>Manage Articles</span>
+            <span
+                class="whitespace-nowrap overflow-hidden transition-opacity"
+                :class="(expanded || !isDesktop) ? 'opacity-100 duration-150' : 'opacity-0 duration-75 w-0 pointer-events-none'"
+                :style="(expanded && isDesktop) ? 'transition-delay: 250ms' : 'transition-delay: 0ms'"
+            >Manage Articles</span>
         </a>
     </li>
 
@@ -90,7 +118,11 @@
            @mouseenter="showTooltip($event, 'Manage Photos')"
            @mouseleave="hideTooltip()">
             <i class="ph ph-images text-lg"></i>
-            <span x-show="expanded || !isDesktop" x-cloak>Manage Photos</span>
+            <span
+                class="whitespace-nowrap overflow-hidden transition-opacity"
+                :class="(expanded || !isDesktop) ? 'opacity-100 duration-150' : 'opacity-0 duration-75 w-0 pointer-events-none'"
+                :style="(expanded && isDesktop) ? 'transition-delay: 250ms' : 'transition-delay: 0ms'"
+            >Manage Photos</span>
         </a>
     </li>
 
@@ -101,7 +133,11 @@
            @mouseenter="showTooltip($event, 'Categories')"
            @mouseleave="hideTooltip()">
             <i class="ph ph-folder text-lg"></i>
-            <span x-show="expanded || !isDesktop" x-cloak>Categories</span>
+            <span
+                class="whitespace-nowrap overflow-hidden transition-opacity"
+                :class="(expanded || !isDesktop) ? 'opacity-100 duration-150' : 'opacity-0 duration-75 w-0 pointer-events-none'"
+                :style="(expanded && isDesktop) ? 'transition-delay: 250ms' : 'transition-delay: 0ms'"
+            >Categories</span>
         </a>
     </li>
 
@@ -112,7 +148,11 @@
            @mouseenter="showTooltip($event, 'Settings')"
            @mouseleave="hideTooltip()">
             <i class="ph ph-gear text-lg"></i>
-            <span x-show="expanded || !isDesktop" x-cloak>Settings</span>
+            <span
+                class="whitespace-nowrap overflow-hidden transition-opacity"
+                :class="(expanded || !isDesktop) ? 'opacity-100 duration-150' : 'opacity-0 duration-75 w-0 pointer-events-none'"
+                :style="(expanded && isDesktop) ? 'transition-delay: 250ms' : 'transition-delay: 0ms'"
+            >Settings</span>
         </a>
     </li>
 </ul>
