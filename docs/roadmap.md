@@ -62,11 +62,15 @@ BlogWriter is in pre-alpha. This roadmap shows what's built and what's planned.
 
 - Pest 4 test suite with factories
 - Laravel Pint code formatting
-- Artisan commands: install, create-user, seed, diagnose, profile, bundle, check-image-health
+- Artisan commands: install, create-user, seed, diagnose, profile, check-image-health
 
 ---
 
 ## Planned
+
+### Installation
+
+- Shared hosting installers (Softaculous, Installatron, shell script for SSH)
 
 ### Content Types
 

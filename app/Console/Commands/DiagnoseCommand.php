@@ -39,7 +39,7 @@ class DiagnoseCommand extends Command
         }, 'Database tables missing - run php artisan migrate');
 
         // Check 4: Controllers exist
-        $this->check('Controllers exist', fn (): bool => file_exists(app_path('Http/Controllers/Admin/SettingsController.php')), 'SettingsController.php is missing - re-install from fresh bundle');
+        $this->check('Controllers exist', fn (): bool => file_exists(app_path('Http/Controllers/Admin/SettingsController.php')), 'SettingsController.php is missing - try re-installing BlogWriter');
 
         // Check 5: Routes registered
         $this->check('Routes cached', function () {

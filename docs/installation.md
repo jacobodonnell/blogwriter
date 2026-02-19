@@ -22,7 +22,7 @@ Get BlogWriter running on your server in a few minutes.
 BlogWriter works on most modern web hosting. You need:
 
 - **PHP 8.4 or newer** — Most hosts support this now
-- **A web server** — Shared hosting, VPS, or cloud hosting all work
+- **A web server** — VPS or cloud hosting (shared hosting support is planned)
 - **About 100 MB of disk space** — For the application and your content
 
 That's it. No separate database server to set up. No Redis. No Node.js. BlogWriter uses SQLite, which means your
@@ -30,6 +30,11 @@ database is just a simple file on your server.
 
 BlogWriter does not send or receive email out of the box — no mail server needed. Your email address is used as your
 login credential and public identity (h-card), not for sending mail.
+
+<x-callout type="warning" title="Shared Hosting">
+  Shared hosting support (Softaculous, Installatron, one-click installers) is a planned goal.
+  BlogWriter is currently tested on VPS and cloud hosting via SSH and Laravel Forge.
+</x-callout>
 
 <x-callout type="info" title="Technical Note" collapsible>
   BlogWriter requires PHP 8.4+ with the SQLite and PDO extensions enabled, plus write permissions on

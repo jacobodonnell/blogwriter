@@ -85,7 +85,6 @@ blogwriter/
 │   │       ├── InstallCommand.php          # php artisan blogwriter:install
 │   │       ├── CreateUserCommand.php
 │   │       ├── SeedCommand.php
-│   │       ├── BundleCommand.php
 │   │       ├── CheckImageHealth.php
 │   │       ├── DiagnoseCommand.php
 │   │       └── ProfileCommand.php

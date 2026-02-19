@@ -16,7 +16,7 @@ Set up BlogWriter on your local machine before deploying to production.
 
 Developers who want to:
 
-- Run BlogWriter locally before deploying to Laravel Forge or shared hosting
+- Run BlogWriter locally before deploying to Laravel Forge
 - Contribute to BlogWriter development
 - Test themes, plugins, or customizations locally
 
@@ -136,28 +136,7 @@ npm run build
   or run `npm run build` to compile assets.
 </x-callout>
 
-## Building for Deployment
-
-BlogWriter includes a bundle command that packages everything for deployment:
-
-```bash
-php artisan blogwriter:bundle
-```
-
-This creates a ZIP file containing:
-
-- All application code
-- Compiled frontend assets (`npm run build` runs automatically)
-- Composer dependencies (production only)
-- `.env.example` template
-
-### Deploying to Shared Hosting
-
-1. Upload and extract the ZIP to your web host
-2. Point your domain's document root to the `public/` directory
-3. SSH into your server and run `php artisan blogwriter:install`
-
-### Deploying to Laravel Forge
+## Deploying to Laravel Forge
 
 1. Create a new site on Forge pointing to your repository
 2. Set the web root to `/public`
