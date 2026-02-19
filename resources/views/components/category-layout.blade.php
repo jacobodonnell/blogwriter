@@ -15,8 +15,16 @@
     $title = $isRoot ? 'Categories' : $category->name;
     $pageTitle = $title . ' - ' . config('app.name');
     $childrenLabel = $isRoot ? 'Categories' : 'Subcategories';
-    $parentUrl = $isRoot ? null : ($category->parent ? $category->parent->permalink() : route('categories.index'));
-    $parentLabel = $isRoot ? null : ($category->parent ? $category->parent->name : 'All Categories');
+    $parentUrl = match (true) {
+        $isRoot => null,
+        $category->parent !== null => $category->parent->permalink(),
+        default => route('categories.index'),
+    };
+    $parentLabel = match (true) {
+        $isRoot => null,
+        $category->parent !== null => $category->parent->name,
+        default => 'All Categories',
+    };
 @endphp
 
 {{-- h-feed for IndieWeb --}}
@@ -26,25 +34,22 @@
     <div id="category-content" x-merge="morph" data-page-title="{{ $pageTitle }}">
 
         {{-- Breadcrumbs --}}
-        <nav class="text-sm breadcrumbs mb-4">
-            <ul>
-                <li><a href="{{ route('home') }}" class="link link-hover">Home</a></li>
-                @if($isRoot)
-                    <li class="text-base-content/60">Categories</li>
-                @else
-                    <li><a href="{{ route('categories.index') }}" x-target.push="category-content" class="link link-hover">Categories</a></li>
-                    @foreach($category->ancestors() as $ancestor)
-                        <li><a href="{{ $ancestor->permalink() }}" x-target.push="category-content" class="link link-hover">{{ $ancestor->name }}</a></li>
-                    @endforeach
-                    <li class="text-base-content/60">{{ $category->name }}</li>
-                @endif
-            </ul>
-        </nav>
+        @if($isRoot)
+            <x-breadcrumb :items="[['label' => 'Categories']]" />
+        @else
+            <x-breadcrumb>
+                <li><a href="{{ route('categories.index') }}" x-target.push="category-content" class="link link-hover">Categories</a></li>
+                @foreach($category->ancestors() as $ancestor)
+                    <li><a href="{{ $ancestor->permalink() }}" x-target.push="category-content" class="link link-hover">{{ $ancestor->name }}</a></li>
+                @endforeach
+                <li class="text-base-content/60">{{ $category->name }}</li>
+            </x-breadcrumb>
+        @endif
 
         {{-- Header --}}
         <header class="flex flex-wrap items-center justify-between gap-4 mb-8">
             <div>
-                <h1 class="text-3xl font-bold">
+                <h1 class="text-3xl font-bold leading-tight">
                     <i class="ph ph-{{ $isRoot ? 'folders' : 'folder' }} text-primary mr-2"></i>
                     {{ $title }}
                 </h1>

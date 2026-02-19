@@ -8,20 +8,12 @@
     <div class="h-feed max-w-5xl mx-auto">
 
         {{-- Breadcrumbs --}}
-        <nav class="text-sm breadcrumbs mb-4">
-            <ul>
-                <li><a href="{{ route('home') }}" class="link link-hover">Home</a></li>
-                <li class="text-base-content/60">Articles</li>
-            </ul>
-        </nav>
+        <x-breadcrumb :items="[['label' => 'Articles']]" />
 
         {{-- Header --}}
         <header class="flex flex-wrap items-center justify-between gap-4 mb-8">
             <div class="min-w-0">
-                <h1 class="text-3xl font-bold mb-2">Articles</h1>
-                @if($subtitle)
-                    <p class="text-base-content/60">{{ $subtitle }}</p>
-                @endif
+                <x-page-heading title="Articles" :subtitle="$subtitle" class="mb-2" />
             </div>
             <div class="flex shrink-0 gap-2">
                 @auth
@@ -63,7 +55,7 @@
                     </div>
                 @endauth
             </x-filter-banner>
-            @if($articles->count() > 0)
+            @if($articles->isNotEmpty())
                 @php $placeholderUrl = placeholder_image_url(); @endphp
                 <div class="flex flex-col gap-6">
                     @foreach($articles as $article)

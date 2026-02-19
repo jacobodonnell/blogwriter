@@ -4,7 +4,11 @@
         <x-seo-meta title="Home - {{ config('app.name', 'BlogWriter') }}" />
     </x-slot:seo>
 
-    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[1fr_18rem] xl:grid-cols-[1fr_20rem] gap-8">
+    <div class="max-w-6xl mx-auto">
+
+    <x-breadcrumb />
+
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_18rem] xl:grid-cols-[1fr_20rem] gap-8">
 
         {{-- Main: Articles h-feed --}}
         <div class="h-feed">
@@ -12,10 +16,7 @@
             {{-- Feed Header --}}
             <header class="flex flex-wrap items-center justify-between gap-4 mb-8">
                 <div class="min-w-0">
-                    <h1 class="text-3xl font-bold mb-2">Recent Articles</h1>
-                    @if($subtitle)
-                        <p class="text-base-content/60">{{ $subtitle }}</p>
-                    @endif
+                    <x-page-heading title="Recent Articles" :subtitle="$subtitle" class="mb-2" />
                 </div>
                 <div class="flex shrink-0 gap-2">
                     <a href="{{ route('articles.index') }}" class="btn btn-ghost btn-sm gap-1">
@@ -32,7 +33,7 @@
             </header>
 
             {{-- Articles Bento Grid --}}
-            @if($articles->count() > 0)
+            @if($articles->isNotEmpty())
                 @php $placeholderUrl = placeholder_image_url(); @endphp
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     @foreach($articles as $index => $article)
@@ -150,7 +151,7 @@
                 </header>
 
                 {{-- 3x3 Photo Grid --}}
-                @if($photos->count() > 0)
+                @if($photos->isNotEmpty())
                     <div class="flex flex-col gap-1 rounded-lg overflow-hidden">
                         @foreach($photos as $photo)
                             <article class="h-entry">
@@ -178,6 +179,8 @@
                 @endif
             </div>
         </aside>
+
+    </div>
 
     </div>
 

@@ -7,12 +7,7 @@
     <div class="max-w-3xl mx-auto">
 
         {{-- Breadcrumbs --}}
-        <nav class="text-sm breadcrumbs mb-6">
-            <ul>
-                <li><a href="{{ route('home') }}" class="link link-hover">Home</a></li>
-                <li class="text-base-content/60">About</li>
-            </ul>
-        </nav>
+        <x-breadcrumb :items="[['label' => 'About']]" class="mb-6" />
 
         @auth
             <div class="flex items-center gap-2 mb-6">
@@ -35,9 +30,7 @@
                 @endif
 
                 <div class="text-center md:text-left">
-                    <h1 class="p-name text-4xl font-bold mb-4">
-                        {{ $user->name ?? 'Author' }}
-                    </h1>
+                    <x-page-heading :title="$user->name ?? 'Author'" large class="p-name mb-4" />
 
                     @if(setting('profile_bio'))
                         <p class="p-note text-xl text-base-content/70 leading-relaxed">

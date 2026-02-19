@@ -1,31 +1,64 @@
 <?php
 
-it('articles index has breadcrumbs', function (): void {
-    $response = $this->get(route('articles.index'));
+use App\Models\Article;
+use App\Models\Photo;
 
-    $response->assertOk();
-    $content = $response->getContent();
-    expect($content)->toContain('breadcrumbs');
-    expect($content)->toContain('Home');
-    expect($content)->toContain('Articles');
+it('home page has breadcrumbs', function (): void {
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertSee('breadcrumbs', escape: false)
+        ->assertSee('Home');
+});
+
+it('articles index has breadcrumbs', function (): void {
+    $this->get(route('articles.index'))
+        ->assertOk()
+        ->assertSee('breadcrumbs', escape: false)
+        ->assertSee('Home')
+        ->assertSee('Articles');
+});
+
+it('article show has breadcrumbs', function (): void {
+    $article = Article::factory()->published()->create();
+
+    $this->get(route('articles.show', $article->slug))
+        ->assertOk()
+        ->assertSee('breadcrumbs', escape: false)
+        ->assertSee('Home')
+        ->assertSee('Articles')
+        ->assertSee($article->title);
 });
 
 it('photos index has breadcrumbs', function (): void {
-    $response = $this->get(route('photos.index'));
+    $this->get(route('photos.index'))
+        ->assertOk()
+        ->assertSee('breadcrumbs', escape: false)
+        ->assertSee('Home')
+        ->assertSee('Photos');
+});
 
-    $response->assertOk();
-    $content = $response->getContent();
-    expect($content)->toContain('breadcrumbs');
-    expect($content)->toContain('Home');
-    expect($content)->toContain('Photos');
+it('photo show has breadcrumbs', function (): void {
+    $photo = Photo::factory()->published()->create();
+
+    $this->get(route('photos.show', $photo->slug))
+        ->assertOk()
+        ->assertSee('breadcrumbs', escape: false)
+        ->assertSee('Home')
+        ->assertSee('Photos');
 });
 
 it('categories index has breadcrumbs', function (): void {
-    $response = $this->get(route('categories.index'));
+    $this->get(route('categories.index'))
+        ->assertOk()
+        ->assertSee('breadcrumbs', escape: false)
+        ->assertSee('Home')
+        ->assertSee('Categories');
+});
 
-    $response->assertOk();
-    $content = $response->getContent();
-    expect($content)->toContain('breadcrumbs');
-    expect($content)->toContain('Home');
-    expect($content)->toContain('Categories');
+it('about page has breadcrumbs', function (): void {
+    $this->get(route('about'))
+        ->assertOk()
+        ->assertSee('breadcrumbs', escape: false)
+        ->assertSee('Home')
+        ->assertSee('About');
 });

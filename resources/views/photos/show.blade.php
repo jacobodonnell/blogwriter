@@ -25,13 +25,10 @@
         @endauth
 
         {{-- Breadcrumbs --}}
-        <nav class="text-sm breadcrumbs mb-6">
-            <ul>
-                <li><a href="{{ route('home') }}" class="link link-hover">Home</a></li>
-                <li><a href="{{ route('photos.index') }}" class="link link-hover">Photos</a></li>
-                <li class="text-base-content/60 truncate max-w-xs">{{ Str::limit($photo->alt_text, 40) }}</li>
-            </ul>
-        </nav>
+        <x-breadcrumb :items="[
+            ['label' => 'Photos', 'url' => route('photos.index')],
+            ['label' => Str::limit($photo->alt_text, 40)],
+        ]" class="mb-6" />
 
         {{-- Photo --}}
         <figure class="mb-8">

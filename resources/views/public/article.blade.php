@@ -25,13 +25,10 @@
         @endauth
 
         {{-- Breadcrumbs --}}
-        <nav class="text-sm breadcrumbs overflow-x-auto mb-6">
-            <ul>
-                <li><a href="{{ route('home') }}" class="link link-hover">Home</a></li>
-                <li><a href="{{ route('articles.index') }}" class="link link-hover">Articles</a></li>
-                <li class="text-base-content/60">{{ $article->title }}</li>
-            </ul>
-        </nav>
+        <x-breadcrumb :items="[
+            ['label' => 'Articles', 'url' => route('articles.index')],
+            ['label' => $article->title],
+        ]" class="overflow-x-auto mb-6" />
 
         {{-- Category --}}
         @if($article->category)
@@ -44,9 +41,7 @@
         @endif
 
         {{-- Title (p-name) --}}
-        <h1 class="p-name text-4xl md:text-5xl font-bold mb-4 leading-tight">
-            {{ $article->title }}
-        </h1>
+        <x-page-heading :title="$article->title" large class="p-name mb-4" />
 
         {{-- Meta Bar --}}
         <div class="flex flex-wrap items-center gap-4 text-sm text-base-content/60 mb-8 pb-8 border-b border-base-200">
