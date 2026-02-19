@@ -66,7 +66,7 @@
             <p class="text-xs font-medium mb-1" x-text="uploadedPhotoUrl ? 'New upload:' : 'Preview:'"></p>
             <img :src="previewUrl || featuredImageUrl"
                  alt="Featured image preview"
-                 class="w-full max-h-32 object-cover rounded-lg opacity-0 transition-opacity duration-300"
+                 class="w-full max-h-32 object-contain rounded-lg opacity-0 transition-opacity duration-300"
                  @load="$el.classList.remove('opacity-0')">
         </div>
     </template>
@@ -77,7 +77,7 @@
             <p class="text-xs font-medium mb-1">Current:</p>
             <img src="{{ $article->featured_image_url }}"
                  alt="{{ $featuredPhoto?->alt_text ?? 'Featured image' }}"
-                 class="w-full max-h-32 object-cover rounded-lg">
+                 class="w-full max-h-32 object-contain rounded-lg">
         </div>
     @endif
 

@@ -343,7 +343,7 @@
                                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                                @change="if ($event.target.files[0]) { uploadPreview = URL.createObjectURL($event.target.files[0]); }">
                         <img x-show="uploadPreview" :src="uploadPreview"
-                             class="w-full max-h-40 object-cover rounded-lg mt-2"
+                             class="w-full max-h-40 object-contain rounded-lg mt-2"
                              alt="Upload preview"
                              x-cloak>
                     </fieldset>

@@ -66,8 +66,8 @@
         @if($article->featured_image_url)
             <figure class="mb-8">
                 <img src="{{ $article->featured_image_url }}"
-                     alt="{{ $article->title }}"
-                     class="u-photo w-full h-auto rounded-lg shadow-md object-cover max-h-96">
+                     alt="{{ $article->featured_image_alt }}"
+                     class="u-photo w-full h-auto rounded-lg object-contain max-h-[32rem]">
             </figure>
         @endif
 
