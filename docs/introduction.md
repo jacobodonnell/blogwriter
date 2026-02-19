@@ -41,7 +41,7 @@ You'll need basic comfort with a terminal — copying and pasting a few commands
 
 - Dashboard with article and photo stats
 - Sortable, filterable articles table with column toggles and per-page pagination
-- WordPress-style customizer with resizable split-pane preview
+- Statamic-inspired live preview customizer with resizable split-pane editor
 - AJAX auto-save while editing
 
 **IndieWeb markup:**

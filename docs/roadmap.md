@@ -15,7 +15,7 @@ BlogWriter is in pre-alpha. This roadmap shows what's built and what's planned.
 ### Content
 
 - Article CRUD with EasyMDE Markdown editor
-- WordPress-style customizer with resizable split-pane live preview
+- Statamic-inspired live preview customizer with resizable split-pane editor
 - AJAX auto-save while editing
 - Draft/published workflow with timestamps
 - Featured images (upload or external URL)

@@ -35,7 +35,7 @@ Articles are long-form posts with titles. Blog posts, essays, tutorials.
 
 ### The Customizer
 
-The Customizer is BlogWriter's article editor — a WordPress-style split-pane view with editing controls in a drawer on the left and a live preview on the right. The preview pane is resizable.
+The Customizer is BlogWriter's article editor — a Statamic-inspired split-pane layout with editing controls on the left and a live preview of your article on the right. The preview updates as you type and the pane is resizable.
 
 As you type, your changes auto-save in the background via AJAX and the preview updates. The editor uses **EasyMDE**, a Markdown editor with toolbar formatting buttons and live Markdown preview.
 

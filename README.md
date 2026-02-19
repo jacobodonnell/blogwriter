@@ -21,7 +21,7 @@ BlogWriter is a personal blogging platform you install on your own server. No pl
 
 - Dashboard with content stats
 - Sortable, filterable articles table with column toggles and per-page pagination
-- WordPress-style customizer with resizable split-pane preview and AJAX auto-save
+- Statamic-inspired live preview customizer with resizable split-pane editor and AJAX auto-save
 
 **IndieWeb:**
 
