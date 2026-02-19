@@ -10,7 +10,6 @@ use App\Http\Requests\Admin\StorePhotoRequest;
 use App\Http\Requests\Admin\UpdatePhotoRequest;
 use App\Models\Category;
 use App\Models\Photo;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -50,7 +49,7 @@ class AdminPhotoController extends Controller
     {
         return view('admin.photos.create', [
             'photo' => new Photo(['category_id' => request('category_id')]),
-            'categories' => $this->categoryTree(),
+            'categories' => Category::tree()->get(),
         ]);
     }
 
@@ -115,7 +114,7 @@ class AdminPhotoController extends Controller
         return view('admin.photos.edit', [
             'photo' => $photo,
             'articleCount' => $photo->articles()->count(),
-            'categories' => $this->categoryTree(),
+            'categories' => Category::tree()->get(),
         ]);
     }
 
@@ -192,13 +191,5 @@ class AdminPhotoController extends Controller
             return redirect()->back()
                 ->withErrors(['photo' => 'Failed to delete photo. Please try again.']);
         }
-    }
-
-    /**
-     * @return Collection<int, Category>
-     */
-    private function categoryTree(): Collection
-    {
-        return Category::whereNull('parent_id')->with('children')->orderBy('name')->get();
     }
 }

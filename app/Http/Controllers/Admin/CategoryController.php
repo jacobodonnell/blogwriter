@@ -27,11 +27,7 @@ class CategoryController extends Controller
 
         $breadcrumbs = $parent ? $parent->ancestors()->push($parent) : collect();
 
-        $allCategories = Category::query()
-            ->with('children')
-            ->whereNull('parent_id')
-            ->orderBy('name')
-            ->get();
+        $allCategories = Category::tree()->get();
 
         $viewData = [
             'categories' => $categories,

@@ -38,7 +38,7 @@ class CreateArticleController extends Controller
 
         return view('admin.articles.customizer', [
             'article' => $article,
-            'categories' => Category::query()->with('children')->whereNull('parent_id')->orderBy('name')->get(),
+            'categories' => Category::tree()->get(),
             'photos' => Photo::published()->latest()->limit(50)->get(),
             'isNew' => true,
         ]);

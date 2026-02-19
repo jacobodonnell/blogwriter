@@ -74,11 +74,7 @@ class ArticleController extends Controller
             : 20;
 
         $articles = $query->paginate($perPage)->withQueryString();
-        $categories = Category::query()
-            ->with('children')
-            ->whereNull('parent_id')
-            ->orderBy('name')
-            ->get();
+        $categories = Category::tree()->get();
 
         $viewData = [
             'articles' => $articles,
@@ -113,11 +109,7 @@ class ArticleController extends Controller
     public function edit(Article $article): View
     {
         $article->load('category');
-        $categories = Category::query()
-            ->with('children')
-            ->whereNull('parent_id')
-            ->orderBy('name')
-            ->get();
+        $categories = Category::tree()->get();
         $photos = Photo::published()->latest()->limit(50)->get();
 
         return view('admin.articles.customizer', [

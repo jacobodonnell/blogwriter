@@ -81,9 +81,7 @@ class CategoryController extends Controller
             ? Photo::count()
             : Photo::published()->count();
 
-        $children = Category::whereNull('parent_id')
-            ->orderBy('name')
-            ->get();
+        $children = Category::tree()->get();
 
         return view('public.categories', [
             'children' => $children,
