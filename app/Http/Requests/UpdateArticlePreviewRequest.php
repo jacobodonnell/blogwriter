@@ -12,7 +12,7 @@ class UpdateArticlePreviewRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return true; // Authorization handled by middleware
     }
 
     /**
