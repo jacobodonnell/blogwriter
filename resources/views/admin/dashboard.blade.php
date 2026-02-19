@@ -10,60 +10,88 @@
 
         {{-- Stats Grid --}}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <a href="{{ route('admin.articles.index') }}" class="stat bg-base-100 shadow rounded-lg hover:shadow-md hover:bg-base-200 transition">
-                <div class="stat-figure text-primary">
-                    <i class="ph ph-article text-3xl"></i>
+            <a href="{{ route('admin.articles.index') }}" class="card bg-base-100 shadow hover:shadow-md hover:bg-base-200 transition">
+                <div class="card-body">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-base-content/60">Total Articles</p>
+                            <p class="text-3xl font-bold">{{ $stats['total_articles'] }}</p>
+                        </div>
+                        <i class="ph ph-article text-3xl text-primary"></i>
+                    </div>
                 </div>
-                <div class="stat-title">Total Articles</div>
-                <div class="stat-value">{{ $stats['total_articles'] }}</div>
             </a>
 
-            <a href="{{ route('admin.articles.index', ['status' => 'published']) }}" class="stat bg-base-100 shadow rounded-lg hover:shadow-md hover:bg-base-200 transition">
-                <div class="stat-figure text-success">
-                    <i class="ph ph-check-circle text-3xl"></i>
+            <a href="{{ route('admin.articles.index', ['status' => 'published']) }}" class="card bg-base-100 shadow hover:shadow-md hover:bg-base-200 transition">
+                <div class="card-body">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-base-content/60">Published Articles</p>
+                            <p class="text-3xl font-bold text-success">{{ $stats['published_articles'] }}</p>
+                        </div>
+                        <i class="ph ph-check-circle text-3xl text-success"></i>
+                    </div>
                 </div>
-                <div class="stat-title">Published Articles</div>
-                <div class="stat-value text-success">{{ $stats['published_articles'] }}</div>
             </a>
 
-            <a href="{{ route('admin.articles.index', ['status' => 'draft']) }}" class="stat bg-base-100 shadow rounded-lg hover:shadow-md hover:bg-base-200 transition">
-                <div class="stat-figure text-warning">
-                    <i class="ph ph-pencil-line text-3xl"></i>
+            <a href="{{ route('admin.articles.index', ['status' => 'draft']) }}" class="card bg-base-100 shadow hover:shadow-md hover:bg-base-200 transition">
+                <div class="card-body">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-base-content/60">Draft Articles</p>
+                            <p class="text-3xl font-bold text-warning">{{ $stats['draft_articles'] }}</p>
+                        </div>
+                        <i class="ph ph-pencil-line text-3xl text-warning"></i>
+                    </div>
                 </div>
-                <div class="stat-title">Draft Articles</div>
-                <div class="stat-value text-warning">{{ $stats['draft_articles'] }}</div>
             </a>
 
-            <a href="{{ route('admin.categories.index') }}" class="stat bg-base-100 shadow rounded-lg hover:shadow-md hover:bg-base-200 transition">
-                <div class="stat-figure text-secondary">
-                    <i class="ph ph-folder text-3xl"></i>
+            <a href="{{ route('admin.categories.index') }}" class="card bg-base-100 shadow hover:shadow-md hover:bg-base-200 transition">
+                <div class="card-body">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-base-content/60">Categories</p>
+                            <p class="text-3xl font-bold">{{ $stats['categories'] }}</p>
+                        </div>
+                        <i class="ph ph-folder text-3xl text-secondary"></i>
+                    </div>
                 </div>
-                <div class="stat-title">Categories</div>
-                <div class="stat-value">{{ $stats['categories'] }}</div>
             </a>
 
-            <a href="{{ route('admin.photos.index') }}" class="stat bg-base-100 shadow rounded-lg hover:shadow-md hover:bg-base-200 transition">
-                <div class="stat-figure text-info">
-                    <i class="ph ph-image text-3xl"></i>
+            <a href="{{ route('admin.photos.index') }}" class="card bg-base-100 shadow hover:shadow-md hover:bg-base-200 transition">
+                <div class="card-body">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-base-content/60">Total Photos</p>
+                            <p class="text-3xl font-bold">{{ $stats['total_photos'] }}</p>
+                        </div>
+                        <i class="ph ph-image text-3xl text-info"></i>
+                    </div>
                 </div>
-                <div class="stat-title">Total Photos</div>
-                <div class="stat-value">{{ $stats['total_photos'] }}</div>
             </a>
 
-            <a href="{{ route('admin.photos.index', ['status' => 'published']) }}" class="stat bg-base-100 shadow rounded-lg hover:shadow-md hover:bg-base-200 transition">
-                <div class="stat-figure text-success">
-                    <i class="ph ph-image-square text-3xl"></i>
+            <a href="{{ route('admin.photos.index', ['status' => 'published']) }}" class="card bg-base-100 shadow hover:shadow-md hover:bg-base-200 transition">
+                <div class="card-body">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-base-content/60">Published Photos</p>
+                            <p class="text-3xl font-bold text-success">{{ $stats['published_photos'] }}</p>
+                        </div>
+                        <i class="ph ph-image-square text-3xl text-success"></i>
+                    </div>
                 </div>
-                <div class="stat-title">Published Photos</div>
-                <div class="stat-value text-success">{{ $stats['published_photos'] }}</div>
             </a>
 
-            <a href="{{ route('admin.photos.index', ['status' => 'draft']) }}" class="stat bg-base-100 shadow rounded-lg hover:shadow-md hover:bg-base-200 transition">
-                <div class="stat-figure text-warning">
-                    <i class="ph ph-image-broken text-3xl"></i>
+            <a href="{{ route('admin.photos.index', ['status' => 'draft']) }}" class="card bg-base-100 shadow hover:shadow-md hover:bg-base-200 transition">
+                <div class="card-body">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-base-content/60">Draft Photos</p>
+                            <p class="text-3xl font-bold text-warning">{{ $stats['draft_photos'] }}</p>
+                        </div>
+                        <i class="ph ph-image-broken text-3xl text-warning"></i>
+                    </div>
                 </div>
-                <div class="stat-title">Draft Photos</div>
-                <div class="stat-value text-warning">{{ $stats['draft_photos'] }}</div>
             </a>
         </div>
 
