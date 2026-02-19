@@ -118,6 +118,28 @@ class Photo extends Model implements HasMedia
     }
 
     /**
+     * Get the photo's thumbnail URL from MediaLibrary.
+     */
+    protected function thumbnailUrl(): Attribute
+    {
+        return Attribute::make(
+            get: function (): ?string {
+                $media = $this->getFirstMedia('image');
+
+                if (! $media instanceof \Spatie\MediaLibrary\MediaCollections\Models\Media) {
+                    return null;
+                }
+
+                if ($media->disk === 'private') {
+                    return route('admin.media.show', ['media' => $media->id, 'conversion' => 'thumbnail']);
+                }
+
+                return $media->getUrl('thumbnail');
+            }
+        );
+    }
+
+    /**
      * Scope for published photos.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query

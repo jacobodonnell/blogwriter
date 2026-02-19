@@ -13,6 +13,12 @@
                 <p class="text-base-content/70 mt-1">Photo details</p>
             </div>
             <div class="flex gap-2">
+                @if($photo->isPublic())
+                    <a href="{{ route('photos.show', $photo->slug) }}" class="btn btn-ghost btn-sm gap-2">
+                        <i class="ph ph-eye text-lg"></i>
+                        View on Site
+                    </a>
+                @endif
                 <a href="{{ route('admin.photos.edit', $photo) }}" class="btn btn-primary btn-sm gap-2">
                     <i class="ph ph-pencil-simple text-lg"></i>
                     Edit

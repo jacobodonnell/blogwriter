@@ -133,9 +133,9 @@
                             @foreach($recentPhotos as $photo)
                                 <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg">
                                     <div class="flex items-center gap-4 flex-1 min-w-0">
-                                        @if($photo->getFirstMediaUrl('image', 'thumbnail'))
+                                        @if($photo->thumbnail_url)
                                             <img
-                                                src="{{ $photo->getFirstMediaUrl('image', 'thumbnail') }}"
+                                                src="{{ $photo->thumbnail_url }}"
                                                 alt="{{ $photo->caption ?? 'Photo' }}"
                                                 class="w-12 h-12 rounded-lg object-cover shrink-0"
                                             >
@@ -162,9 +162,11 @@
                                         <a href="{{ route('admin.photos.edit', $photo) }}" class="btn btn-sm btn-ghost" title="Edit">
                                             <i class="ph ph-pencil-simple text-lg"></i>
                                         </a>
-                                        <a href="{{ route('admin.photos.show', $photo) }}" class="btn btn-sm btn-ghost" title="View">
-                                            <i class="ph ph-eye text-lg"></i>
-                                        </a>
+                                        @if($photo->isPublic())
+                                            <a href="{{ route('photos.show', $photo->slug) }}" class="btn btn-sm btn-ghost" title="View on Site">
+                                                <i class="ph ph-eye text-lg"></i>
+                                            </a>
+                                        @endif
                                     </div>
                                 </div>
                             @endforeach

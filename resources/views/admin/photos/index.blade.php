@@ -101,6 +101,12 @@
                                     <i class="ph ph-pencil-simple text-lg"></i>
                                 </a>
 
+                                <a href="{{ route('admin.photos.show', $photo) }}"
+                                   class="btn btn-sm btn-ghost"
+                                   title="View details">
+                                    <i class="ph ph-info text-lg"></i>
+                                </a>
+
                                 @if($photo->isPublic())
                                     <a href="{{ route('photos.show', $photo->slug) }}"
                                        class="btn btn-sm btn-ghost"
