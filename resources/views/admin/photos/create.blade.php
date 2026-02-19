@@ -1,5 +1,9 @@
 <x-layouts.admin>
     <x-slot:title>New Photo</x-slot:title>
+    <x-slot:breadcrumb>
+        <li><a href="{{ route('admin.photos.index') }}">Photos</a></li>
+        <li>New Photo</li>
+    </x-slot:breadcrumb>
 
     <div class="space-y-6">
         {{-- Header --}}

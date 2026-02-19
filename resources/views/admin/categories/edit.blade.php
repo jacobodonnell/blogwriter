@@ -1,4 +1,8 @@
 <x-layouts.admin title="Edit Category">
+    <x-slot:breadcrumb>
+        <li><a href="{{ route('admin.categories.index') }}">Categories</a></li>
+        <li>Edit: {{ $category->name }}</li>
+    </x-slot:breadcrumb>
 
     <div class="space-y-6">
         {{-- Header --}}

@@ -1,4 +1,7 @@
 <x-layouts.admin title="Categories">
+    <x-slot:breadcrumb>
+        <li>Categories</li>
+    </x-slot:breadcrumb>
 
     <div class="space-y-6" x-data="{ currentParent: @js((string) ($parent?->id ?? '')) }">
         {{-- Header --}}

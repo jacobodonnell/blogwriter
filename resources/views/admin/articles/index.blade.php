@@ -1,4 +1,7 @@
 <x-layouts.admin title="Articles">
+    <x-slot:breadcrumb>
+        <li>Articles</li>
+    </x-slot:breadcrumb>
 
     @php
         $activeFilterCount = collect([request('search'), request('category'), request('status')])->filter()->count();

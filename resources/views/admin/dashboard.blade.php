@@ -1,4 +1,5 @@
 <x-layouts.admin title="Dashboard">
+    <x-slot:breadcrumb></x-slot:breadcrumb>
 
     <div class="space-y-6">
         {{-- Header --}}

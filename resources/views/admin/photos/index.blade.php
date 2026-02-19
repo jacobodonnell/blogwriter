@@ -1,4 +1,7 @@
 <x-layouts.admin title="Photos">
+    <x-slot:breadcrumb>
+        <li>Photos</li>
+    </x-slot:breadcrumb>
 
     <div class="space-y-6">
         {{-- Header --}}
