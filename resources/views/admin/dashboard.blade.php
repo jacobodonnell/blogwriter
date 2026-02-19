@@ -182,16 +182,16 @@
         </div>
 
         {{-- Quick Actions --}}
-        <div class="flex gap-4">
-            <a href="{{ route('admin.articles.create') }}" class="btn btn-primary">
+        <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
+            <a href="{{ route('admin.articles.create') }}" class="btn btn-primary btn-block sm:w-auto">
                 <i class="ph ph-plus text-xl mr-2"></i>
                 New Article
             </a>
-            <a href="{{ route('admin.photos.create') }}" class="btn btn-primary">
+            <a href="{{ route('admin.photos.create') }}" class="btn btn-primary btn-block sm:w-auto">
                 <i class="ph ph-camera text-xl mr-2"></i>
                 Upload Photo
             </a>
-            <a href="{{ route('admin.categories.index') }}" class="btn btn-secondary">
+            <a href="{{ route('admin.categories.index') }}" class="btn btn-secondary btn-block sm:w-auto">
                 <i class="ph ph-folder text-xl mr-2"></i>
                 Manage Categories
             </a>
