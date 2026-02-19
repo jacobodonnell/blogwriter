@@ -6,7 +6,6 @@
             savedLight: '{{ $currentLight }}',
             savedDark: '{{ $currentDark }}',
             savedFont: '{{ $currentFont }}',
-            fontSizeScales: {{ Js::from($fontSizeScales) }},
             lightOpen: false,
             darkOpen: false,
             fontOpen: false,
@@ -18,10 +17,6 @@
                 if (mode === 'dark') return this.darkTheme;
                 if (mode === 'light') return this.lightTheme;
                 return systemDark ? this.darkTheme : this.lightTheme;
-            },
-
-            scaleForFont(key) {
-                return this.fontSizeScales[key] ?? 1;
             },
 
             previewTheme(theme) {
@@ -49,13 +44,11 @@
             previewFont(key) {
                 this.previewing = true;
                 document.documentElement.style.setProperty('--font-sans', 'var(--font-' + key + ')');
-                document.documentElement.style.setProperty('--font-size-scale', this.scaleForFont(key));
             },
 
             revertFont() {
                 this.previewing = false;
                 document.documentElement.style.setProperty('--font-sans', 'var(--font-' + this.font + ')');
-                document.documentElement.style.setProperty('--font-size-scale', this.scaleForFont(this.font));
             },
 
             selectFont(key) {
