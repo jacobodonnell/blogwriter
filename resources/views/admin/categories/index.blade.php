@@ -67,7 +67,7 @@
                 name="parent"
                 empty-label="Root Categories"
                 x-model="currentParent"
-                onchange="this.form.requestSubmit()"
+                @change="$el.form.requestSubmit()"
                 class="select select-bordered select-sm"
             />
         </form>

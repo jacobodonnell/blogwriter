@@ -30,7 +30,7 @@
                         <label class="label">
                             <span class="label-text">Status</span>
                         </label>
-                        <select name="status" class="select select-bordered" onchange="this.form.submit()">
+                        <select name="status" class="select select-bordered" @change="$el.form.requestSubmit()">
                             <option value="">All Status</option>
                             <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Published</option>
                             <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>

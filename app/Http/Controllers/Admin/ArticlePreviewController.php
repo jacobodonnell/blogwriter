@@ -17,9 +17,11 @@ class ArticlePreviewController extends Controller
     {
         $data = $request->validated();
 
-        $updateData = [
-            'status' => $data['status'],
-        ];
+        $updateData = [];
+
+        if (isset($data['status'])) {
+            $updateData['status'] = $data['status'];
+        }
 
         if (isset($data['title'])) {
             $updateData['title'] = $data['title'];

@@ -129,7 +129,7 @@
                         <label class="label shrink-0">
                             <span class="label-text">Category</span>
                         </label>
-                        <select name="category" class="select select-bordered w-full md:w-auto" onchange="this.form.requestSubmit()">
+                        <select name="category" class="select select-bordered w-full md:w-auto" @change="$el.form.requestSubmit()">
                             <option value="">All Categories</option>
                             @foreach($categories as $rootCat)
                                 <option value="{{ $rootCat->slug }}" {{ request('category') == $rootCat->slug ? 'selected' : '' }}>
@@ -148,7 +148,7 @@
                         <label class="label shrink-0">
                             <span class="label-text">Status</span>
                         </label>
-                        <select name="status" class="select select-bordered w-full md:w-auto" onchange="this.form.requestSubmit()">
+                        <select name="status" class="select select-bordered w-full md:w-auto" @change="$el.form.requestSubmit()">
                             <option value="">All Status</option>
                             <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Published</option>
                             <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>
@@ -159,7 +159,7 @@
                         <label class="label shrink-0">
                             <span class="label-text">Per Page</span>
                         </label>
-                        <select name="perPage" class="select select-bordered w-full md:w-auto" onchange="this.form.requestSubmit()">
+                        <select name="perPage" class="select select-bordered w-full md:w-auto" @change="$el.form.requestSubmit()">
                             @foreach([10, 20, 50, 100] as $option)
                                 <option value="{{ $option }}" {{ $perPage == $option ? 'selected' : '' }}>{{ $option }}</option>
                             @endforeach

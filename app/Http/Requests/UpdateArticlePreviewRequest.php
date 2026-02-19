@@ -27,7 +27,7 @@ class UpdateArticlePreviewRequest extends FormRequest
             'slug' => ['nullable', 'string', 'max:255'],
             'content' => ['nullable', 'string'],
             'summary' => ['nullable', 'string', 'max:500'],
-            'status' => ['required', 'in:draft,published'],
+            'status' => ['nullable', 'in:draft,published'],
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],
             'meta' => ['nullable', 'array'],
             'meta.meta_title' => ['nullable', 'string', 'max:255'],
