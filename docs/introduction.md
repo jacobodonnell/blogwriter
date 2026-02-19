@@ -29,12 +29,12 @@ You'll need basic comfort with a terminal — copying and pasting a few commands
 **Two ways to publish:**
 
 - **Articles** — Long-form posts with a Markdown editor (EasyMDE), live preview customizer, categories, featured images, and permalink redirects
-- **Photos** — Image posts with captions, alt text, EXIF display, and automatic image conversions via Spatie MediaLibrary
+- **Photos** — Your own media library, stored on your server. Upload images with captions, alt text, and EXIF display. Draft photos stay private until you publish; published photos are served directly from your server. Automatic image conversions (thumbnail, medium, large) via Spatie MediaLibrary.
 
 **Appearance customization:**
 
 - 35 built-in DaisyUI themes (21 light, 14 dark) with hover-to-preview
-- 11 fonts across 4 categories (sans-serif, admin UI, monospace, pixel/retro)
+- 11 fonts across 4 categories (sans-serif, serif, admin UI, monospace)
 - Three-way theme cycling: light, dark, and system preference
 
 **Admin panel:**

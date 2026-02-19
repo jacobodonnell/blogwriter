@@ -53,6 +53,13 @@ Hover over any theme in the settings to preview it before committing.
 - Poppins
 - Work Sans
 
+### Serif
+
+- Lora
+- Merriweather
+- Playfair Display
+- Source Serif 4
+
 ### Admin UI
 
 - Instrument Sans
@@ -60,13 +67,6 @@ Hover over any theme in the settings to preview it before committing.
 ### Monospace
 
 - JetBrains Mono
-
-### Pixel / Retro
-
-- Press Start 2P
-- Pixelify Sans
-- VT323
-- Silkscreen
 
 ## Configuration
 
