@@ -96,11 +96,9 @@ See the full [Roadmap](docs/roadmap.md).
 
 ## Contributing
 
-Contributions are welcome. Before submitting a PR:
+Pull requests are disabled on this repository. If you'd like to use the code, feel free to fork the project.
 
-1. Run tests: `php artisan test`
-2. Run formatter: `vendor/bin/pint`
-3. Read the [Architecture](docs/architecture.md) doc
+If you find a bug or have a suggestion, [open an issue](https://github.com/jacobodonnell/blogwriter/issues) and I'll look it over.
 
 **Philosophy:** Simple over clever. Explicit over magical. Standards over custom protocols. Less code over more features.
 
