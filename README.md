@@ -114,6 +114,8 @@ BlogWriter exists because of the open-source community:
 - **[Spatie](https://spatie.be)** --- The Spatie team for MediaLibrary and many other packages
 - **[DaisyUI](https://daisyui.com)** --- Pouya Saadeghi
 
+A personal note: I learned Laravel through [Jeffrey Way's](https://laracasts.com) teaching at Laracasts — specifically [Laravel From Scratch](https://laracasts.com/series/laravel-from-scratch-2026), the longest-running Laravel introductory series in the world. The AI-driven development workflow used to build this project was shaped by his [Leveraging AI for Laravel Development](https://laracasts.com/series/leveraging-ai-for-laravel-development) series. If you're learning Laravel, start there.
+
 ## License
 
 BlogWriter is open-source software licensed under the [MIT License](LICENSE).
