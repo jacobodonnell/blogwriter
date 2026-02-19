@@ -47,7 +47,7 @@
     <style>[x-cloak] { display: none !important; }</style>
 
     <!-- Font override from appearance settings -->
-    <style>:root { --font-sans: var(--font-{{ $themeFont }}); --font-size-scale: {{ $fontSizeScale }}; }</style>
+    <style>:root { --font-sans: var(--font-{{ $themeFont }}); }</style>
 
     @if($darkMode)
     <!-- Instant theme application to prevent FOUC -->

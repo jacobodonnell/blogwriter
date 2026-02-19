@@ -139,7 +139,7 @@ it('accepts every configured font', function (): void {
     }
 });
 
-it('renders font categories and font size scales on appearance page', function (): void {
+it('renders font categories on appearance page', function (): void {
     $response = $this->actingAs($this->user)
         ->get(route('admin.settings.appearance'))
         ->assertSuccessful();
@@ -147,9 +147,6 @@ it('renders font categories and font size scales on appearance page', function (
     foreach (array_keys(config('appearance.font_categories')) as $category) {
         $response->assertSee($category);
     }
-
-    $response->assertSee('fontSizeScales', false);
-    $response->assertSee('--font-size-scale:', false);
 });
 
 it('rejects a light theme in the dark theme field', function (): void {

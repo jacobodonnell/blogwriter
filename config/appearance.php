@@ -85,10 +85,6 @@ return [
         // Monospace
         'jetbrains-mono' => 'JetBrains Mono',
 
-        // Pixel / Retro
-        'jersey-15' => 'Jersey 15',
-        'pixelify-sans' => 'Pixelify Sans',
-        'silkscreen' => 'Silkscreen',
     ],
 
     'font_categories' => [
@@ -96,14 +92,9 @@ return [
         'Serif' => ['lora', 'merriweather', 'playfair-display', 'source-serif-4'],
         'Admin UI' => ['instrument-sans'],
         'Monospace' => ['jetbrains-mono'],
-        'Pixel / Retro' => ['jersey-15', 'pixelify-sans', 'silkscreen'],
     ],
 
     'monospace_fonts' => ['jetbrains-mono'],
-
-    'pixel_fonts' => ['jersey-15', 'pixelify-sans', 'silkscreen'],
-
-    'font_size_scales' => [],
 
     /*
     |--------------------------------------------------------------------------

@@ -73,20 +73,6 @@
 @import '@fontsource/source-serif-4/600.css';
 @import '@fontsource/source-serif-4/700.css';
 
-/* --- Pixel / Retro ------------------------------------------------------ */
-
-/* Jersey 15 */
-@import '@fontsource/jersey-15/400.css';
-
-/* Pixelify Sans */
-@import '@fontsource/pixelify-sans/400.css';
-@import '@fontsource/pixelify-sans/500.css';
-@import '@fontsource/pixelify-sans/600.css';
-@import '@fontsource/pixelify-sans/700.css';
-
-/* Silkscreen */
-@import '@fontsource/silkscreen/400.css';
-
 /* ==========================================================================
    Font CSS variables
    ========================================================================== */
@@ -103,7 +89,4 @@
     --font-merriweather: 'Merriweather', Georgia, serif;
     --font-playfair-display: 'Playfair Display', Georgia, serif;
     --font-source-serif-4: 'Source Serif 4', Georgia, serif;
-    --font-jersey-15: 'Jersey 15', cursive;
-    --font-pixelify-sans: 'Pixelify Sans', cursive;
-    --font-silkscreen: 'Silkscreen', cursive;
 }
