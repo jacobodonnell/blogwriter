@@ -237,7 +237,7 @@
                         <input type="file" id="photo-file-picker" data-test="photo-file-picker"
                                class="file-input file-input-bordered w-full"
                                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                               @change="if ($event.target.files[0]) { uploadPreview = URL.createObjectURL($event.target.files[0]); }">
+                               @change="handleFileChange($event)">
                         <img x-show="uploadPreview" :src="uploadPreview"
                              class="w-full max-h-40 object-contain rounded-lg mt-2"
                              alt="Upload preview"
