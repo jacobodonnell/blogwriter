@@ -10,7 +10,7 @@ use Illuminate\View\View;
 
 class AppearanceController extends Controller
 {
-    public function index(): View
+    public function edit(): View
     {
         return view('admin.settings.appearance', [
             'lightThemes' => config('appearance.themes_light'),

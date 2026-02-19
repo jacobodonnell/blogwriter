@@ -10,7 +10,7 @@ class AboutController extends Controller
     public function __invoke(): View
     {
         return view('public.about', [
-            'user' => User::first(),
+            'user' => User::firstOrFail(),
         ]);
     }
 }

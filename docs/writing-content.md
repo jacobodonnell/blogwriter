@@ -48,7 +48,7 @@ As you type, your changes auto-save in the background via AJAX and the preview u
   1. Select an existing photo from the dropdown
   2. Upload a new photo directly from the customizer via a modal — the photo is created and associated automatically
   - Featured images can also be set via an external URL
-- **Categories** — Assign one or more categories. Create new categories on the fly from the editor.
+- **Categories** — Assign a category. Create new categories on the fly from the editor.
 
 ### Content Storage
 
@@ -88,9 +88,9 @@ Upload an image using the file picker. BlogWriter accepts common image formats (
 
 MediaLibrary automatically generates three conversions:
 
-- **thumbnail** (150x150) — For gallery views
-- **medium** (800x600) — For content display
-- **large** (1600x1200) — For full-size viewing
+- **thumbnail** (300×300) — For gallery views
+- **medium** (768×768) — For content display
+- **large** (1536×1536) — For full-size viewing
 
 ### Fields
 
@@ -116,16 +116,16 @@ Draft photos are stored on a private disk and served through a controller with a
 ### Where Photos Live
 
 ```
-yourdomain.com/photos/42
+yourdomain.com/photos/your-photo-slug
 ```
 
-Photos use a numeric ID in their URL.
+Photos use a slug in their URL.
 
 ---
 
 ## Categories
 
-Categories organize your articles into broad topics. An article can belong to multiple categories.
+Categories organize your articles into broad topics. An article belongs to one category.
 
 ### Managing Categories
 

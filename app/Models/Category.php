@@ -15,10 +15,8 @@ class Category extends Model
     /** @use HasFactory<\Database\Factories\CategoryFactory> */
     use HasFactory;
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         static::saving(function ($category): void {
             if (empty($category->slug)) {
                 $category->slug = Str::slug($category->name);

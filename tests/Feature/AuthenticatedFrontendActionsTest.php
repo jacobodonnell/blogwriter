@@ -146,6 +146,8 @@ it('shows manage categories link on category page for auth users', function (): 
 // --- About Page Auth Links ---
 
 it('does not show edit profile link on about page for guests', function (): void {
+    User::factory()->create();
+
     $this->get(route('about'))
         ->assertSuccessful()
         ->assertDontSee('Edit Profile');

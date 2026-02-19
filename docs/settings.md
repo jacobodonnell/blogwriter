@@ -31,30 +31,9 @@ Customize your blog's visual style:
 
 See the [Appearance](/docs/customization/appearance) guide for details on available themes and fonts.
 
-## Site Configuration
+## Site Settings
 
-Site-level settings (site name, tagline, domain, author info) are configured during installation and stored in the `.env` file.
-
-To change these values after installation, edit `.env` directly:
-
-```env
-SITE_NAME="My Blog"
-SITE_DOMAIN="https://blog.example.com"
-SITE_TAGLINE="Thoughts on tech and life"
-
-AUTHOR_NAME="Jane Smith"
-AUTHOR_BIO="Writer and developer"
-AUTHOR_EMAIL="jane@example.com"
-```
-
-These values are accessible in Blade templates via helper functions:
-
-```blade
-{{ site('name') }}
-{{ site('domain') }}
-{{ author('name') }}
-{{ author('bio') }}
-```
+Site-level settings (site name, tagline, domain, and author info) are managed via the **Site Settings** tab in the admin settings panel. These values are stored in the `settings` database table via the `Setting` model.
 
 ## Developer Settings
 

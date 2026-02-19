@@ -53,7 +53,7 @@ Authentication uses Laravel Fortify for the backend, with a custom login UI buil
 
 ### Single-Author Only
 
-One admin account. One blog. Registration is disabled after the first user is created. A `SingleUserViolationException` is thrown if additional user creation is attempted through Fortify's registration action.
+One admin account. One blog. Registration is disabled after the first user is created. A `SingleUserViolationException` is thrown if additional user creation is attempted. Enforcement is via a `booted()` model event on `User` that runs before any save.
 
 ### EasyMDE Editor
 
@@ -77,7 +77,7 @@ blogwriter/
 │   ├── Actions/
 │   │   ├── Fortify/                        # Fortify auth actions
 │   │   ├── Photos/                         # Photo-related actions
-│   │   ├── GenerateArticleSummaryAction.php
+│   │   ├── NormalizeCaptionMetaAction.php
 │   │   ├── GenerateUniqueSlugAction.php
 │   │   └── UpdatePublishedStatusAction.php
 │   ├── Console/
@@ -93,9 +93,11 @@ blogwriter/
 │   │   └── SingleUserViolationException.php
 │   ├── Http/
 │   │   ├── Controllers/
+│   │   │   ├── AboutController.php         # Public about page
 │   │   │   ├── ArticleController.php       # Public article display
 │   │   │   ├── PhotoController.php         # Public photo display
-│   │   │   ├── CategoryArticleController.php
+│   │   │   ├── CategoryController.php
+│   │   │   ├── CategoryContentController.php
 │   │   │   ├── HomeController.php          # Public homepage
 │   │   │   ├── InstallController.php       # Install page (shows CLI instructions)
 │   │   │   └── Admin/
@@ -106,7 +108,9 @@ blogwriter/
 │   │   │       ├── AdminPhotoController.php
 │   │   │       ├── CategoryController.php
 │   │   │       ├── DashboardController.php
-│   │   │       ├── SettingsController.php
+│   │   │       ├── PlaceholderImageController.php
+│   │   │       ├── ProfileSettingsController.php
+│   │   │       ├── SiteSettingsController.php
 │   │   │       ├── AppearanceController.php
 │   │   │       └── MediaController.php     # Serves draft media from private disk
 │   │   └── Requests/
@@ -121,7 +125,6 @@ blogwriter/
 │   │   ├── Category.php
 │   │   ├── User.php
 │   │   ├── Setting.php
-│   │   └── SystemEvent.php
 │   └── View/
 │       └── Components/
 ├── config/
@@ -175,7 +178,7 @@ blogwriter/
 ### Article
 
 - `title`, `slug`, `past_slugs` (JSON), `summary`, `content` (Markdown), `status`, `published_at`, `last_edited_at`, `meta` (JSON)
-- `belongsTo(User)`, `belongsToMany(Category)`, `belongsTo(Photo, 'photo_id')` for featured image
+- `belongsTo(User)`, `belongsTo(Category)`, `belongsTo(Photo, 'photo_id')` for featured image
 - `content_html` accessor renders Markdown to HTML
 - `past_slugs` enables 301 redirects when slugs change
 
@@ -184,12 +187,12 @@ blogwriter/
 - `filename`, `slug`, `caption` (Markdown), `alt_text`, `status`, `published_at`, `taken_at`, `meta` (JSON for EXIF)
 - `belongsTo(User)`
 - Uses Spatie MediaLibrary: `HasMedia` interface, `InteractsWithMedia` trait
-- Conversions: thumbnail (150x150), medium (800x600), large (1600x1200)
+- Conversions: thumbnail (300×300), medium (768×768), large (1536×1536)
 
 ### Category
 
 - `name`, `slug`, `description`
-- `belongsToMany(Article)`
+- `hasMany(Article)`
 - Slug auto-generated from name
 
 ### User
@@ -200,10 +203,6 @@ blogwriter/
 ### Setting
 
 - Key-value store for application settings (appearance preferences, etc.)
-
-### SystemEvent
-
-- Tracks system-level events (installation, etc.)
 
 ---
 

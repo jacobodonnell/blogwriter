@@ -28,15 +28,19 @@ class Article extends Model
     }
 
     /**
-     * Set the published_at attribute, stripping microseconds for database consistency.
+     * Strip microseconds from published_at for database consistency.
      */
-    public function setPublishedAtAttribute($value): void
+    protected function publishedAt(): Attribute
     {
-        if ($value !== null) {
-            $value = \Carbon\Carbon::parse($value)->startOfSecond();
-        }
+        return Attribute::make(
+            set: function (mixed $value): mixed {
+                if ($value !== null) {
+                    return \Carbon\Carbon::parse($value)->startOfSecond();
+                }
 
-        $this->attributes['published_at'] = $value;
+                return $value;
+            },
+        );
     }
 
     /**
@@ -93,10 +97,8 @@ class Article extends Model
         return implode('', $parts);
     }
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         static::saving(function ($article): void {
             if (empty($article->slug)) {
                 $article->slug = Str::slug($article->title);
@@ -158,46 +160,56 @@ class Article extends Model
     /**
      * Get the featured image URL — meta URL first, then Photo relationship.
      */
-    public function getFeaturedImageUrlAttribute(): ?string
+    protected function featuredImageUrl(): Attribute
     {
-        return Arr::get($this->meta ?? [], 'featured_image_url')
-            ?? $this->featuredPhoto?->image_url;
+        return Attribute::make(
+            get: fn (): ?string => Arr::get($this->meta ?? [], 'featured_image_url')
+                ?? $this->featuredPhoto?->image_url,
+        );
     }
 
     /**
      * Get the featured image caption — custom meta caption, or Photo's native caption if toggled.
      */
-    public function getFeaturedImageCaptionAttribute(): ?string
+    protected function featuredImageCaption(): Attribute
     {
-        $meta = $this->meta ?? [];
+        return Attribute::make(
+            get: function (): ?string {
+                $meta = $this->meta ?? [];
 
-        if (! empty($meta['featured_image_caption'])) {
-            return $meta['featured_image_caption'];
-        }
+                if (! empty($meta['featured_image_caption'])) {
+                    return $meta['featured_image_caption'];
+                }
 
-        if (! empty($meta['use_photo_caption']) && $this->photo_id) {
-            return $this->featuredPhoto?->caption;
-        }
+                if (! empty($meta['use_photo_caption']) && $this->photo_id) {
+                    return $this->featuredPhoto?->caption;
+                }
 
-        return null;
+                return null;
+            },
+        );
     }
 
     /**
      * Get the featured image alt text — meta override, then Photo alt_text, then article title.
      */
-    public function getFeaturedImageAltAttribute(): string
+    protected function featuredImageAlt(): Attribute
     {
-        $meta = $this->meta ?? [];
+        return Attribute::make(
+            get: function (): string {
+                $meta = $this->meta ?? [];
 
-        if (! empty($meta['featured_image_alt'])) {
-            return $meta['featured_image_alt'];
-        }
+                if (! empty($meta['featured_image_alt'])) {
+                    return $meta['featured_image_alt'];
+                }
 
-        if ($this->photo_id && $this->featuredPhoto?->alt_text) {
-            return $this->featuredPhoto->alt_text;
-        }
+                if ($this->photo_id && $this->featuredPhoto?->alt_text) {
+                    return $this->featuredPhoto->alt_text;
+                }
 
-        return $this->title;
+                return $this->title;
+            },
+        );
     }
 
     /**
@@ -228,55 +240,71 @@ class Article extends Model
     /**
      * Get the HTML content rendered from markdown with XSS protection.
      */
-    public function getContentHtmlAttribute(): string
+    protected function contentHtml(): Attribute
     {
-        return Markdown::render($this->attributes['content'] ?? '');
+        return Attribute::make(
+            get: fn (): string => Markdown::render($this->attributes['content'] ?? ''),
+        );
     }
 
     /**
      * Get the excerpt - either summary or first 255 chars of content.
      */
-    public function getExcerptAttribute(): string
+    protected function excerpt(): Attribute
     {
-        if (! empty($this->summary)) {
-            return $this->summary;
-        }
+        return Attribute::make(
+            get: function (): string {
+                if (! empty($this->summary)) {
+                    return $this->summary;
+                }
 
-        return Str::limit(Markdown::toPlainText($this->attributes['content'] ?? ''), 255);
+                return Str::limit(Markdown::toPlainText($this->attributes['content'] ?? ''), 255);
+            },
+        );
     }
 
     /**
      * Get the estimated reading time in minutes (200 wpm).
      */
-    public function getReadingTimeAttribute(): int
+    protected function readingTime(): Attribute
     {
-        $wordCount = str_word_count(strip_tags($this->attributes['content'] ?? ''));
+        return Attribute::make(
+            get: function (): int {
+                $wordCount = str_word_count(strip_tags($this->attributes['content'] ?? ''));
 
-        return max(1, (int) ceil($wordCount / 200));
+                return max(1, (int) ceil($wordCount / 200));
+            },
+        );
     }
 
     /**
      * Get the meta title or fallback to article title.
      */
-    public function getMetaTitleAttribute(): string
+    protected function metaTitle(): Attribute
     {
-        return $this->meta['meta_title'] ?? $this->title;
+        return Attribute::make(
+            get: fn (): string => $this->meta['meta_title'] ?? $this->title,
+        );
     }
 
     /**
      * Get the meta description or fallback to excerpt.
      */
-    public function getMetaDescriptionAttribute(): string
+    protected function metaDescription(): Attribute
     {
-        return $this->meta['meta_description'] ?? $this->excerpt;
+        return Attribute::make(
+            get: fn (): string => $this->meta['meta_description'] ?? $this->excerpt,
+        );
     }
 
     /**
      * Get the Open Graph image or fallback to featured image.
      */
-    public function getOgImageAttribute(): ?string
+    protected function ogImage(): Attribute
     {
-        return $this->meta['og_image'] ?? $this->featured_image_url;
+        return Attribute::make(
+            get: fn (): ?string => $this->meta['og_image'] ?? $this->featured_image_url,
+        );
     }
 
     /**

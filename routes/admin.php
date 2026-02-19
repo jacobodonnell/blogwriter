@@ -60,7 +60,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function (): v
     Route::put('/settings/site/image', [PlaceholderImageController::class, 'update'])->name('settings.site.image.update');
 
     // Appearance
-    Route::get('/settings/appearance', [AppearanceController::class, 'index'])->name('settings.appearance');
+    Route::get('/settings/appearance', [AppearanceController::class, 'edit'])->name('settings.appearance');
     Route::put('/settings/appearance', [AppearanceController::class, 'update'])->name('settings.appearance.update');
 
     // Private media file serving

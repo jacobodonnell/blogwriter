@@ -56,6 +56,8 @@ it('categories index has breadcrumbs', function (): void {
 });
 
 it('about page has breadcrumbs', function (): void {
+    \App\Models\User::factory()->create();
+
     $this->get(route('about'))
         ->assertOk()
         ->assertSee('breadcrumbs', escape: false)

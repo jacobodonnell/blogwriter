@@ -11,6 +11,7 @@ use App\Models\Article;
 use App\Models\Category;
 use App\Models\Photo;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -24,7 +25,7 @@ class CreateArticleController extends Controller
     /**
      * Show the customizer for a new (unsaved) article.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
         $article = new Article([
             'title' => 'Untitled Article',
@@ -32,7 +33,7 @@ class CreateArticleController extends Controller
             'content' => '',
             'summary' => '',
             'status' => Status::Draft,
-            'category_id' => request('category_id'),
+            'category_id' => $request->input('category_id'),
         ]);
 
         return view('admin.articles.customizer', [
