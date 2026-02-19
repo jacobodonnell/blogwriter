@@ -3,16 +3,13 @@
 <x-layouts.base
     :title="$title . ' - ' . config('app.name', 'BlogWriter')"
     :dark-mode="true"
-    icon-weight="regular">
+    icon-weight="regular"
+    js-entry="resources/js/app-admin.js">
 
     <x-slot:head>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.20.0/dist/easymde.min.css">
         <script src="https://cdn.jsdelivr.net/npm/easymde@2.20.0/dist/easymde.min.js"></script>
         <style>
-            [x-cloak] {
-                display: none !important;
-            }
-
             .EasyMDEContainer .CodeMirror {
                 border: 1px solid color-mix(in oklch, var(--color-base-content) 20%, transparent);
                 border-radius: var(--radius-field, 0.5rem);

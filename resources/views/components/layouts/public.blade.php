@@ -1,7 +1,8 @@
 <x-layouts.base
     :title="$title ?? config('app.name', 'BlogWriter')"
     :dark-mode="true"
-    icon-weight="regular">
+    icon-weight="regular"
+    :js-entry="auth()->check() ? 'resources/js/app-admin.js' : 'resources/js/app-guest.js'">
 
     <x-slot:head>
         {{ $seo ?? '' }}

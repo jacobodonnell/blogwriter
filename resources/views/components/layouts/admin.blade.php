@@ -7,7 +7,8 @@
 <x-layouts.base
     :title="$title ? $title . ' - ' . config('app.name', 'BlogWriter') : config('app.name', 'BlogWriter')"
     :dark-mode="true"
-    icon-weight="regular">
+    icon-weight="regular"
+    js-entry="resources/js/app-admin.js">
 
     <div x-cloak x-data="sidebar"
         class="flex flex-col min-h-screen">
