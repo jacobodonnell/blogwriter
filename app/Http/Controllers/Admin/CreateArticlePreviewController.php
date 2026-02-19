@@ -22,7 +22,7 @@ class CreateArticlePreviewController extends Controller
         session()->put('draft_article', $data);
 
         $slug = $data['slug'] ?? 'untitled-'.Str::lower(Str::random(8));
-        if (preg_match('/^untitled-[a-z0-9]{8}$/', (string) $slug) && ! empty($data['title'])) {
+        if (Article::isPlaceholderSlug((string) $slug) && ! empty($data['title'])) {
             $slug = Str::slug($data['title']) ?: $slug;
         }
 

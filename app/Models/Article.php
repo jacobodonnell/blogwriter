@@ -97,6 +97,14 @@ class Article extends Model
         return implode('', $parts);
     }
 
+    /**
+     * Check if a slug matches the auto-generated placeholder pattern (e.g. "untitled-a1b2c3d4").
+     */
+    public static function isPlaceholderSlug(string $slug): bool
+    {
+        return (bool) preg_match('/^untitled-[a-z0-9]{8}$/', $slug);
+    }
+
     protected static function booted(): void
     {
         static::saving(function ($article): void {

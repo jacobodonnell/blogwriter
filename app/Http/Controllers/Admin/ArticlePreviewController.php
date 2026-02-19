@@ -29,7 +29,7 @@ class ArticlePreviewController extends Controller
 
         if (isset($data['slug']) && $data['slug'] !== '') {
             // Auto-generate slug from title if slug is a placeholder
-            $newSlug = preg_match('/^untitled-[a-z0-9]{8}$/', (string) $data['slug']) && isset($data['title']) && $data['title'] !== ''
+            $newSlug = Article::isPlaceholderSlug((string) $data['slug']) && isset($data['title']) && $data['title'] !== ''
                 ? Str::slug($data['title'])
                 : $data['slug'];
 
