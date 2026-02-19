@@ -33,9 +33,9 @@
                     <x-page-heading :title="$user->name ?? 'Author'" large class="p-name mb-4" />
 
                     @if(setting('profile_bio'))
-                        <p class="p-note text-xl text-base-content/70 leading-relaxed">
-                            {{ setting('profile_bio') }}
-                        </p>
+                        <div class="p-note text-xl text-base-content/70 leading-relaxed prose prose-xl max-w-none">
+                            {!! \App\Support\Markdown::render(setting('profile_bio')) !!}
+                        </div>
                     @endif
                 </div>
             </header>

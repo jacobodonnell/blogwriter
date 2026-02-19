@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Rules\NoH1Heading;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateProfileRequest extends FormRequest
@@ -21,7 +22,7 @@ class UpdateProfileRequest extends FormRequest
     {
         return [
             'profile_name' => 'required|string|max:255',
-            'profile_bio' => 'nullable|string|max:1000',
+            'profile_bio' => ['nullable', 'string', 'max:1000', new NoH1Heading],
             'profile_avatar' => 'nullable|url|max:2048',
             'profile_github' => 'nullable|url|max:2048',
             'profile_mastodon' => 'nullable|url|max:2048',
