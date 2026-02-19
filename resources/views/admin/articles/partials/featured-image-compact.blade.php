@@ -9,7 +9,7 @@
 
     {{-- Photo Select --}}
     <select x-model="selectedPhotoId" data-test="photo-select"
-            @change="if (selectedPhotoId) { featuredImageUrl = ''; uploadedPhotoUrl = null; hasNewPhoto = false; usePhotoCaption = false; featuredImageCaption = ''; const fi = document.getElementById('featured-image-file-input'); if (fi) fi.value = ''; }"
+            @change="selectPhoto()"
             class="select select-bordered select-sm w-full">
         <option value="">No featured image</option>
         @foreach($photos as $photo)
@@ -32,6 +32,7 @@
         {{-- External URL Toggle --}}
         <button type="button"
                 @click="showUrlField = !showUrlField; if (showUrlField) $nextTick(() => $refs.urlField.focus())"
+                data-test="url-toggle"
                 class="btn btn-ghost btn-sm flex-1 gap-2"
                 :class="{ 'btn-active': featuredImageUrl }">
             <i class="ph ph-link"></i>
@@ -46,9 +47,10 @@
          x-cloak>
         <input x-ref="urlField" type="url" name="featured_image"
                x-model="featuredImageUrl"
+               data-test="featured-image-url"
                class="input input-bordered input-sm w-full"
                placeholder="https://example.com/image.jpg"
-               @input="if (featuredImageUrl) { selectedPhotoId = ''; uploadedPhotoUrl = null; hasNewPhoto = false; usePhotoCaption = false; const fi = document.getElementById('featured-image-file-input'); if (fi) fi.value = ''; }">
+               @input="setExternalUrl()">
         <p class="text-xs text-base-content/50 mt-1">External URL overrides photo selection.</p>
     </div>
 
