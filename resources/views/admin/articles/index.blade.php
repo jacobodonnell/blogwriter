@@ -46,48 +46,26 @@
                         <span class="hidden sm:inline">Columns</span>
                     </div>
                     <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-56">
-                        <li>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" class="checkbox checkbox-sm" :checked="columns.featuredImage" @change="toggle('featuredImage')" />
-                                <span>Featured Image</span>
-                            </label>
-                        </li>
-                        <li>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" class="checkbox checkbox-sm" :checked="columns.title" @change="toggle('title')" />
-                                <span>Title</span>
-                            </label>
-                        </li>
-                        <li>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" class="checkbox checkbox-sm" :checked="columns.status" @change="toggle('status')" />
-                                <span>Status</span>
-                            </label>
-                        </li>
-                        <li>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" class="checkbox checkbox-sm" :checked="columns.categories" @change="toggle('categories')" />
-                                <span>Category</span>
-                            </label>
-                        </li>
-                        <li>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" class="checkbox checkbox-sm" :checked="columns.publishedAt" @change="toggle('publishedAt')" />
-                                <span>Published At</span>
-                            </label>
-                        </li>
-                        <li>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" class="checkbox checkbox-sm" :checked="columns.createdAt" @change="toggle('createdAt')" />
-                                <span>Created At</span>
-                            </label>
-                        </li>
-                        <li>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" class="checkbox checkbox-sm" :checked="columns.updatedAt" @change="toggle('updatedAt')" />
-                                <span>Updated At</span>
-                            </label>
-                        </li>
+                        @php
+                            $columnToggles = [
+                                ['key' => 'featuredImage', 'label' => 'Featured Image'],
+                                ['key' => 'title', 'label' => 'Title'],
+                                ['key' => 'status', 'label' => 'Status'],
+                                ['key' => 'categories', 'label' => 'Category'],
+                                ['key' => 'publishedAt', 'label' => 'Published At'],
+                                ['key' => 'createdAt', 'label' => 'Created At'],
+                                ['key' => 'updatedAt', 'label' => 'Updated At'],
+                            ];
+                        @endphp
+
+                        @foreach ($columnToggles as $col)
+                            <li>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" class="checkbox checkbox-sm" :checked="columns.{{ $col['key'] }}" @change="toggle('{{ $col['key'] }}')" />
+                                    <span>{{ $col['label'] }}</span>
+                                </label>
+                            </li>
+                        @endforeach
                     </ul>
                 </div>
 
