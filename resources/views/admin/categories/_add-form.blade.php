@@ -55,7 +55,7 @@
             </fieldset>
 
             <div class="flex justify-end gap-2 pt-2">
-                <button type="button" class="btn btn-ghost" @click="$el.closest('dialog').close()">Cancel</button>
+                <button type="button" class="btn btn-ghost" @click="$dispatch('modal:close')">Cancel</button>
                 <button type="submit" class="btn btn-primary">
                     {{ $parent ? 'Add Subcategory' : 'Add Category' }}
                 </button>

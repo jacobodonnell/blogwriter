@@ -53,6 +53,7 @@
         id="add-category-modal"
         x-init
         @category:created.window="$el.close()"
+        @modal:close.window="$el.close()"
         :title="$parent ? 'Add Subcategory in ' . $parent->name : 'Add New Category'">
         <div id="add-category-form">
             @include('admin.categories._add-form')
