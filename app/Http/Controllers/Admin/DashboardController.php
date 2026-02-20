@@ -28,14 +28,26 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        $articleCounts = Article::query()
+            ->toBase()
+            ->selectRaw('status, count(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status');
+
+        $photoCounts = Photo::query()
+            ->toBase()
+            ->selectRaw('status, count(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status');
+
         $stats = [
-            'total_articles' => Article::count(),
-            'published_articles' => Article::where('status', Status::Published)->count(),
-            'draft_articles' => Article::where('status', Status::Draft)->count(),
+            'total_articles' => $articleCounts->sum(),
+            'published_articles' => $articleCounts->get(Status::Published->value, 0),
+            'draft_articles' => $articleCounts->get(Status::Draft->value, 0),
             'categories' => Category::count(),
-            'total_photos' => Photo::count(),
-            'published_photos' => Photo::where('status', Status::Published)->count(),
-            'draft_photos' => Photo::where('status', Status::Draft)->count(),
+            'total_photos' => $photoCounts->sum(),
+            'published_photos' => $photoCounts->get(Status::Published->value, 0),
+            'draft_photos' => $photoCounts->get(Status::Draft->value, 0),
         ];
 
         return view('admin.dashboard', [
