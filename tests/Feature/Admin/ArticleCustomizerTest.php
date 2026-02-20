@@ -154,7 +154,7 @@ it('preview update auto-generates slug from title when placeholder', function ()
     expect($article->fresh()->slug)->toBe('my-great-post');
 });
 
-it('preview update skips slug when it conflicts with another article', function (): void {
+it('preview update uniquifies slug when it conflicts with another article', function (): void {
     Article::factory()->published()->for($this->user)->create([
         'slug' => 'there',
     ]);
@@ -171,8 +171,8 @@ it('preview update skips slug when it conflicts with another article', function 
     ])->assertOk();
 
     $article->refresh();
-    // Slug should remain unchanged since "there" is taken
-    expect($article->slug)->toBe('untitled-abcd1234')
+    // Slug should be uniquified since "there" is taken
+    expect($article->slug)->toBe('there-1')
         ->and($article->title)->toBe('There');
 });
 

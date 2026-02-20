@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Actions\GenerateUniqueSlugAction;
 use App\Enums\Status;
 use App\Support\Markdown;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -109,7 +110,8 @@ class Article extends Model
     {
         static::saving(function ($article): void {
             if (empty($article->slug)) {
-                $article->slug = Str::slug($article->title);
+                $article->slug = app(GenerateUniqueSlugAction::class)
+                    ->handle($article->title, Article::class, $article->id);
             }
 
             if ($article->isDirty('slug') && ! empty($article->getOriginal('slug'))) {

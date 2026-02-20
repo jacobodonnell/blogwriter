@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class Category extends Model
 {
@@ -21,7 +20,8 @@ class Category extends Model
     {
         static::saving(function ($category): void {
             if (empty($category->slug)) {
-                $category->slug = Str::slug($category->name);
+                $category->slug = app(\App\Actions\GenerateUniqueSlugAction::class)
+                    ->handle($category->name, Category::class, $category->id);
             }
         });
     }

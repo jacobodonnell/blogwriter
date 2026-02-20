@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\GenerateUniqueSlugAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateArticlePreviewRequest;
 use App\Models\Article;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class ArticlePreviewController extends Controller
@@ -28,21 +28,15 @@ class ArticlePreviewController extends Controller
         }
 
         if (isset($data['slug']) && $data['slug'] !== '') {
-            // Auto-generate slug from title if slug is a placeholder
-            $newSlug = Article::isPlaceholderSlug((string) $data['slug']) && isset($data['title']) && $data['title'] !== ''
-                ? Str::slug($data['title'])
+            $baseSlug = Article::isPlaceholderSlug((string) $data['slug']) && isset($data['title']) && $data['title'] !== ''
+                ? $data['title']
                 : $data['slug'];
 
-            // Only update slug if it's unique (excluding this article)
-            if ($newSlug && $newSlug !== $article->slug) {
-                $slugExists = Article::query()
-                    ->where('slug', $newSlug)
-                    ->where('id', '!=', $article->id)
-                    ->exists();
+            $newSlug = app(GenerateUniqueSlugAction::class)
+                ->handle($baseSlug, Article::class, $article->id);
 
-                if (! $slugExists) {
-                    $updateData['slug'] = $newSlug;
-                }
+            if ($newSlug !== $article->slug) {
+                $updateData['slug'] = $newSlug;
             }
         }
 

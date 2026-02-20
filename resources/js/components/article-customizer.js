@@ -33,6 +33,7 @@ export default function articleCustomizer(config) {
         generateSlug() {
             if (this.title && (!this.slug || this.slug.match(/^untitled-[a-z0-9]{8}$/))) {
                 this.slug = this.title.toLowerCase()
+                    .replace(/[''`\u2018\u2019\u2032\u02BC]/g, '')
                     .replace(/[^a-z0-9]+/g, '-')
                     .replace(/^-+|-+$/g, '');
             }
