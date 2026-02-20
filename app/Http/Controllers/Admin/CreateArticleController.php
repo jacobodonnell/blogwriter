@@ -60,7 +60,7 @@ class CreateArticleController extends Controller
             'slug' => $data['slug'] ?? 'untitled-'.Str::lower(Str::random(8)),
             'content' => $data['content'] ?? '',
             'summary' => $data['summary'] ?? null,
-            'status' => $data['status'] ?? 'draft',
+            'status' => $data['status'] ?? Status::Draft,
             'published_at' => $data['published_at'] ?? null,
             'meta' => $imageResult['meta'],
             'photo_id' => $imageResult['photo_id'],

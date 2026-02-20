@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Photo;
 use App\Models\User;
@@ -35,7 +36,7 @@ it('updates photo metadata', function (): void {
         'slug' => $photo->slug,
         'alt_text' => 'Updated alt text',
         'caption' => 'Updated caption',
-        'status' => 'published',
+        'status' => Status::Published->value,
     ]);
 
     $response->assertRedirect(route('admin.photos.edit', $photo));
@@ -64,7 +65,7 @@ it('requires unique slugs', function (): void {
         'filename' => 'test.jpg',
         'slug' => 'unique-photo',
         'alt_text' => 'Test',
-        'status' => 'published',
+        'status' => Status::Published->value,
         'image' => $file,
     ]);
 
@@ -79,7 +80,7 @@ it('detaches photo from articles when switching to draft', function (): void {
 
     $this->put(route('admin.photos.update', $photo), [
         'alt_text' => $photo->alt_text,
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ]);
 
     expect($article1->fresh()->photo_id)->toBeNull();
@@ -92,7 +93,7 @@ it('does not detach articles when photo stays published', function (): void {
 
     $this->put(route('admin.photos.update', $photo), [
         'alt_text' => 'Updated alt text',
-        'status' => 'published',
+        'status' => Status::Published->value,
     ]);
 
     expect($article->fresh()->photo_id)->toBe($photo->id);
@@ -104,7 +105,7 @@ it('does not detach articles when publishing a draft photo', function (): void {
 
     $this->put(route('admin.photos.update', $photo), [
         'alt_text' => $photo->alt_text,
-        'status' => 'published',
+        'status' => Status::Published->value,
     ]);
 
     expect($article->fresh()->photo_id)->toBe($photo->id);

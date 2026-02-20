@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Status;
 use App\Models\Article;
 use App\Models\User;
 
@@ -58,7 +59,7 @@ it('returns preview partial for ajax preview update', function (): void {
         'title' => 'Updated Title',
         'slug' => $article->slug,
         'content' => 'Updated content here',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])
         ->assertOk()
         ->assertViewIs('admin.articles.preview')
@@ -72,7 +73,7 @@ it('redirects normally for full save update requests', function (): void {
         'title' => 'Updated Title',
         'slug' => $article->slug,
         'content' => 'Updated content',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])
         ->assertRedirect(route('admin.articles.edit', $article))
         ->assertSessionHas('success');
@@ -92,7 +93,7 @@ it('stores new article on first explicit save', function (): void {
         'title' => 'My First Article',
         'slug' => 'my-first-article',
         'content' => 'Hello world',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])->assertRedirect();
 
     $article = Article::first();
@@ -110,7 +111,7 @@ it('rejects update with empty content', function (): void {
         'title' => 'Updated Title',
         'slug' => $article->slug,
         'content' => '',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])->assertSessionHasErrors('content');
 });
 
@@ -120,7 +121,7 @@ it('rejects update with missing content', function (): void {
     put(route('admin.articles.update', $article), [
         'title' => 'Updated Title',
         'slug' => $article->slug,
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])->assertSessionHasErrors('content');
 });
 
@@ -133,7 +134,7 @@ it('preview update accepts relaxed validation', function (): void {
     put(route('admin.articles.preview.update', $article), [
         'title' => 'Hi',
         'slug' => 'untitled-abcd1234',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])
         ->assertOk()
         ->assertViewIs('admin.articles.preview');
@@ -148,7 +149,7 @@ it('preview update auto-generates slug from title when placeholder', function ()
     put(route('admin.articles.preview.update', $article), [
         'title' => 'My Great Post',
         'slug' => 'untitled-abcd1234',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])->assertOk();
 
     expect($article->fresh()->slug)->toBe('my-great-post');
@@ -167,7 +168,7 @@ it('preview update uniquifies slug when it conflicts with another article', func
     put(route('admin.articles.preview.update', $article), [
         'title' => 'There',
         'slug' => 'untitled-abcd1234',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])->assertOk();
 
     $article->refresh();
@@ -185,7 +186,7 @@ it('full save preserves existing featured image', function (): void {
         'title' => 'Updated Title',
         'slug' => $article->slug,
         'content' => 'Updated content',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])->assertRedirect();
 
     expect($article->fresh()->meta['featured_image_url'])->toBe('https://example.com/image.jpg');
@@ -210,7 +211,7 @@ it('accepts POST with _method PUT for ajax preview update', function (): void {
         'title' => 'Updated Title',
         'slug' => $article->slug,
         'content' => 'Updated content',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])
         ->assertOk()
         ->assertViewIs('admin.articles.preview');

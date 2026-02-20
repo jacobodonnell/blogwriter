@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Status;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -15,7 +16,7 @@ it('rejects content with H1 heading', function (): void {
         'title' => 'Test Article',
         'slug' => 'test-article',
         'content' => "# This is H1\n\nSome text",
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])->assertSessionHasErrors('content');
 });
 
@@ -24,7 +25,7 @@ it('allows content with H2 heading', function (): void {
         'title' => 'Test Article H2',
         'slug' => 'test-article-h2',
         'content' => "## This is H2\n\nSome text",
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])->assertSessionDoesntHaveErrors('content');
 });
 
@@ -33,7 +34,7 @@ it('allows content with H3 heading', function (): void {
         'title' => 'Test Article H3',
         'slug' => 'test-article-h3',
         'content' => "### This is H3\n\nSome text",
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])->assertSessionDoesntHaveErrors('content');
 });
 
@@ -42,7 +43,7 @@ it('allows hashtag without space (not a heading)', function (): void {
         'title' => 'Test Hashtag',
         'slug' => 'test-hashtag',
         'content' => '#hashtag is fine',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])->assertSessionDoesntHaveErrors('content');
 });
 
@@ -51,7 +52,7 @@ it('rejects null content as required', function (): void {
         'title' => 'Test Null',
         'slug' => 'test-null',
         'content' => null,
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])->assertSessionHasErrors('content');
 });
 
@@ -60,6 +61,6 @@ it('detects multiple H1 lines', function (): void {
         'title' => 'Test Multi H1',
         'slug' => 'test-multi-h1',
         'content' => "## Valid\n\n# Bad Heading\n\nText\n\n# Another Bad",
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])->assertSessionHasErrors('content');
 });

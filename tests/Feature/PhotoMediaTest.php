@@ -1,6 +1,7 @@
 <?php
 
 use App\Actions\Photos\CreatePhotoFromUploadAction;
+use App\Enums\Status;
 use App\Models\Photo;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -24,7 +25,7 @@ it('creates a spatie media entry when image is attached', function (): void {
     $photo = $action->handle($file, [
         'user_id' => $this->user->id,
         'alt_text' => 'Test image',
-        'status' => 'published',
+        'status' => Status::Published,
     ]);
 
     expect($photo->getFirstMedia('image'))->not->toBeNull()
@@ -38,7 +39,7 @@ it('generates thumbnail, medium, and large conversions', function (): void {
     $photo = $action->handle($file, [
         'user_id' => $this->user->id,
         'alt_text' => 'Test image',
-        'status' => 'published',
+        'status' => Status::Published,
     ]);
 
     $media = $photo->getFirstMedia('image');
@@ -55,7 +56,7 @@ it('stores published photos on public disk', function (): void {
     $photo = $action->handle($file, [
         'user_id' => $this->user->id,
         'alt_text' => 'Test image',
-        'status' => 'published',
+        'status' => Status::Published,
     ]);
 
     expect($photo->getFirstMedia('image')->disk)->toBe('public');
@@ -68,7 +69,7 @@ it('stores draft photos on private disk', function (): void {
     $photo = $action->handle($file, [
         'user_id' => $this->user->id,
         'alt_text' => 'Test image',
-        'status' => 'draft',
+        'status' => Status::Draft,
     ]);
 
     expect($photo->getFirstMedia('image')->disk)->toBe('private');

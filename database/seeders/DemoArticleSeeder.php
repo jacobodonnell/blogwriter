@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\Photo;
@@ -28,7 +29,7 @@ class DemoArticleSeeder extends Seeder
         $imageCounter = 0;
 
         foreach ($articles as $data) {
-            $status = $data['status'] === 'published' ? 'published' : 'draft';
+            $status = $data['status'] === 'published' ? Status::Published : Status::Draft;
 
             // Handle photo creation — only local demo images, external URLs go to meta
             $photoId = null;
@@ -45,7 +46,7 @@ class DemoArticleSeeder extends Seeder
                         ->state([
                             'user_id' => $user->id,
                             'status' => $status,
-                            'published_at' => $status === 'published' ? now()->subDays(random_int(1, 30)) : null,
+                            'published_at' => $status === Status::Published ? now()->subDays(random_int(1, 30)) : null,
                         ])
                         ->withDemoImage($demoImageNum)
                         ->create([
@@ -70,7 +71,7 @@ class DemoArticleSeeder extends Seeder
                     'content' => $data['content'],
                     'summary' => $data['summary'] ?? null,
                     'status' => $status,
-                    'published_at' => $status === 'published' ? now()->subDays(random_int(1, 30)) : null,
+                    'published_at' => $status === Status::Published ? now()->subDays(random_int(1, 30)) : null,
                     'photo_id' => $photoId,
                     'meta' => $meta ?: null,
                     'category_id' => $categoryId,

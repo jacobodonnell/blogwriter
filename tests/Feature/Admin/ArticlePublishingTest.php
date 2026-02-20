@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Status;
 use App\Models\Article;
 use App\Models\User;
 
@@ -17,7 +18,7 @@ it('creates article with published status and auto-sets published_at', function 
         'title' => 'Test Published Article',
         'slug' => 'test-published-article',
         'content' => 'This is the article content.',
-        'status' => 'published',
+        'status' => Status::Published->value,
     ]);
 
     $response->assertRedirect();
@@ -33,7 +34,7 @@ it('creates article with draft status and keeps published_at null', function ():
         'title' => 'Test Draft Article',
         'slug' => 'test-draft-article',
         'content' => 'This is the draft content.',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ]);
 
     $response->assertRedirect();
@@ -54,7 +55,7 @@ it('updates draft to published and auto-sets published_at', function (): void {
         'title' => 'Draft Article',
         'slug' => 'draft-to-published',
         'content' => 'Updated content.',
-        'status' => 'published',
+        'status' => Status::Published->value,
     ]);
 
     $response->assertRedirect();
@@ -77,7 +78,7 @@ it('sets last_edited_at when re-publishing already published article', function 
         'title' => 'Published Article Updated',
         'slug' => $article->slug,
         'content' => 'Updated content.',
-        'status' => 'published',
+        'status' => Status::Published->value,
     ]);
 
     $response->assertRedirect();
@@ -92,7 +93,7 @@ it('correctly handles published to draft to published flow', function (): void {
         'title' => 'Flow Test Article',
         'slug' => 'flow-test-article',
         'content' => 'Original content.',
-        'status' => 'published',
+        'status' => Status::Published->value,
     ]);
 
     $article = Article::where('slug', 'flow-test-article')->first();
@@ -104,7 +105,7 @@ it('correctly handles published to draft to published flow', function (): void {
         'title' => 'Flow Test Article',
         'slug' => 'flow-test-article',
         'content' => 'Original content.',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ]);
 
     $article->refresh();
@@ -116,7 +117,7 @@ it('correctly handles published to draft to published flow', function (): void {
         'title' => 'Flow Test Article Updated',
         'slug' => 'flow-test-article',
         'content' => 'Updated content.',
-        'status' => 'published',
+        'status' => Status::Published->value,
     ]);
 
     $article->refresh();

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\Photo;
@@ -30,8 +31,8 @@ class FullArticleSeeder extends Seeder
         foreach ($articles as $data) {
             // Convert hidden status to draft (hidden status removed in refactoring)
             $status = match ($data['status']) {
-                'published' => 'published',
-                default => 'draft',
+                'published' => Status::Published,
+                default => Status::Draft,
             };
 
             // Handle photo creation — only local demo images, external URLs go to meta
@@ -49,7 +50,7 @@ class FullArticleSeeder extends Seeder
                         ->state([
                             'user_id' => $user->id,
                             'status' => $status,
-                            'published_at' => $status === 'published' ? now()->subDays(random_int(1, 30)) : null,
+                            'published_at' => $status === Status::Published ? now()->subDays(random_int(1, 30)) : null,
                         ])
                         ->withDemoImage($demoImageNum)
                         ->create([
@@ -74,7 +75,7 @@ class FullArticleSeeder extends Seeder
                     'content' => $data['content'],
                     'summary' => $data['summary'] ?? null,
                     'status' => $status,
-                    'published_at' => $status === 'published' ? now()->subDays(random_int(1, 30)) : null,
+                    'published_at' => $status === Status::Published ? now()->subDays(random_int(1, 30)) : null,
                     'photo_id' => $photoId,
                     'meta' => $meta ?: null,
                     'category_id' => $categoryId,

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Photo;
 use App\Models\User;
@@ -20,7 +21,7 @@ it('isPublic returns false for draft photo', function (): void {
 
 it('isPublic returns false for published photo with future date', function (): void {
     $photo = Photo::factory()->create([
-        'status' => 'published',
+        'status' => Status::Published,
         'published_at' => now()->addDay(),
     ]);
 

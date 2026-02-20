@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\Photo;
@@ -99,7 +100,7 @@ it('allows auth user to upload a photo via AJAX', function (): void {
         ->postJson(route('admin.photos.store'), [
             'image_file' => UploadedFile::fake()->image('test-photo.jpg', 800, 600),
             'alt_text' => 'A beautiful sunset',
-            'status' => 'published',
+            'status' => Status::Published->value,
         ]);
 
     $response->assertSuccessful();
@@ -119,7 +120,7 @@ it('prevents guests from uploading photos', function (): void {
     $this->postJson(route('admin.photos.store'), [
         'image_file' => UploadedFile::fake()->image('test-photo.jpg'),
         'alt_text' => 'Test',
-        'status' => 'published',
+        'status' => Status::Published->value,
     ])->assertUnauthorized();
 });
 
@@ -186,7 +187,7 @@ it('allows auth user to upload a photo with category via AJAX', function (): voi
         ->postJson(route('admin.photos.store'), [
             'image_file' => UploadedFile::fake()->image('categorized.jpg', 800, 600),
             'alt_text' => 'Categorized photo',
-            'status' => 'published',
+            'status' => Status::Published->value,
             'category_id' => $category->id,
         ]);
 
@@ -215,7 +216,7 @@ it('allows updating photo category', function (): void {
     $this->actingAs($user)
         ->put(route('admin.photos.update', $photo), [
             'alt_text' => $photo->alt_text,
-            'status' => 'published',
+            'status' => Status::Published->value,
             'category_id' => $category->id,
         ]);
 

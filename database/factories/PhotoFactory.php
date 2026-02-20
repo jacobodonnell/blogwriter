@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\Status;
 use App\Models\Category;
 use App\Models\User;
 use Database\Factories\Concerns\AttachesFeaturedImages;
@@ -27,7 +28,7 @@ class PhotoFactory extends Factory
             'slug' => fake()->unique()->slug(),
             'caption' => fake()->optional(0.7)->paragraph(),
             'alt_text' => fake()->sentence(),
-            'status' => 'published',
+            'status' => Status::Published,
             'published_at' => now(),
             'taken_at' => fake()->optional(0.5)->dateTimeBetween('-1 year'),
             'meta' => [],
@@ -39,7 +40,7 @@ class PhotoFactory extends Factory
      */
     public function published(): static
     {
-        return $this->state(['status' => 'published', 'published_at' => now()]);
+        return $this->state(['status' => Status::Published, 'published_at' => now()]);
     }
 
     /**
@@ -47,7 +48,7 @@ class PhotoFactory extends Factory
      */
     public function draft(): static
     {
-        return $this->state(['status' => 'draft', 'published_at' => null]);
+        return $this->state(['status' => Status::Draft, 'published_at' => null]);
     }
 
     /**

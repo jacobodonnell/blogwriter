@@ -114,13 +114,13 @@ class ArticleFactory extends Factory
     /**
      * Get status with weighted probability (80% published, 20% draft).
      */
-    protected function getWeightedStatus(): string
+    protected function getWeightedStatus(): Status
     {
         $rand = fake()->randomFloat(2, 0, 1);
 
         return match (true) {
-            $rand <= 0.8 => 'published',
-            default => 'draft',
+            $rand <= 0.8 => Status::Published,
+            default => Status::Draft,
         };
     }
 
@@ -212,12 +212,11 @@ class ArticleFactory extends Factory
     /**
      * Get published_at based on status.
      */
-    protected function getPublishedAtForStatus(string $status): ?\DateTime
+    protected function getPublishedAtForStatus(Status $status): ?\DateTime
     {
         return match ($status) {
-            'published' => fake()->dateTimeBetween('-1 year', 'now'),
-            'draft' => fake()->optional(0.3)->dateTimeBetween('-6 months', '+6 months'),
-            default => null,
+            Status::Published => fake()->dateTimeBetween('-1 year', 'now'),
+            Status::Draft => fake()->optional(0.3)->dateTimeBetween('-6 months', '+6 months'),
         };
     }
 
@@ -245,7 +244,7 @@ class ArticleFactory extends Factory
     public function published(): static
     {
         return $this->state(fn (array $attributes): array => [
-            'status' => 'published',
+            'status' => Status::Published,
             'published_at' => now()->startOfSecond(),
         ]);
     }
@@ -256,7 +255,7 @@ class ArticleFactory extends Factory
     public function draft(): static
     {
         return $this->state(fn (array $attributes): array => [
-            'status' => 'draft',
+            'status' => Status::Draft,
             'published_at' => fake()->optional(0.3)->dateTimeBetween('-6 months', '+6 months'),
         ]);
     }

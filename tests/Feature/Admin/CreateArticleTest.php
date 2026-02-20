@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\User;
@@ -27,7 +28,7 @@ it('preview stores data in session without persisting to database', function ():
         'title' => 'Preview Title',
         'slug' => 'preview-title',
         'content' => 'Some preview content',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])
         ->assertOk()
         ->assertViewIs('admin.articles.preview')
@@ -42,7 +43,7 @@ it('stores article on first explicit save and redirects to edit', function (): v
         'slug' => 'my-new-article',
         'content' => 'Article content here',
         'summary' => 'A summary',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])->assertRedirect();
 
     $article = Article::first();
@@ -61,7 +62,7 @@ it('clears session draft after storing', function (): void {
         'title' => 'Saved Article',
         'slug' => 'saved-article',
         'content' => 'Content',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])->assertRedirect();
 
     expect(session()->has('draft_article'))->toBeFalse();
@@ -74,7 +75,7 @@ it('assigns category when storing new article', function (): void {
         'title' => 'Categorized Article',
         'slug' => 'categorized-article',
         'content' => 'Content',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
         'category_id' => $category->id,
     ])->assertRedirect();
 
@@ -89,7 +90,7 @@ it('stores article with published status', function (): void {
         'title' => 'Published Article',
         'slug' => 'published-article',
         'content' => 'Published content',
-        'status' => 'published',
+        'status' => Status::Published->value,
     ])->assertRedirect();
 
     $article = Article::first();
@@ -102,7 +103,7 @@ it('preview auto-generates slug from title when placeholder', function (): void 
     post(route('admin.articles.preview.store'), [
         'title' => 'My Great Post',
         'slug' => 'untitled-abcd1234',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])
         ->assertOk()
         ->assertSee('My Great Post');
@@ -115,7 +116,7 @@ it('stores featured image URL in meta', function (): void {
         'title' => 'Article With Image',
         'slug' => 'article-with-image',
         'content' => 'Content',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
         'featured_image' => 'https://example.com/photo.jpg',
     ])->assertRedirect();
 
@@ -129,7 +130,7 @@ it('rejects storing article with empty content', function (): void {
         'title' => 'No Content Article',
         'slug' => 'no-content-article',
         'content' => '',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])->assertSessionHasErrors('content');
 
     expect(Article::count())->toBe(0);
@@ -139,7 +140,7 @@ it('rejects storing article with missing content', function (): void {
     post(route('admin.articles.store'), [
         'title' => 'No Content Article',
         'slug' => 'no-content-article',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])->assertSessionHasErrors('content');
 
     expect(Article::count())->toBe(0);
@@ -151,7 +152,7 @@ it('stores null summary when summary is empty', function (): void {
         'slug' => 'no-summary-article',
         'content' => 'Some content here',
         'summary' => '',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])->assertRedirect();
 
     $article = Article::where('slug', 'no-summary-article')->first();
@@ -165,7 +166,7 @@ it('stores null summary when summary is not provided', function (): void {
         'title' => 'Missing Summary Article',
         'slug' => 'missing-summary-article',
         'content' => 'Some content here',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])->assertRedirect();
 
     $article = Article::where('slug', 'missing-summary-article')->first();
@@ -190,7 +191,7 @@ it('preserves user-provided summary on save', function (): void {
         'slug' => 'has-summary',
         'content' => 'Some content',
         'summary' => 'My custom summary',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])->assertRedirect();
 
     $article = Article::where('slug', 'has-summary')->first();
@@ -212,7 +213,7 @@ it('requires auth for store', function (): void {
         'title' => 'Unauthorized',
         'slug' => 'unauthorized',
         'content' => 'Content',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])->assertRedirect();
 
     expect(Article::count())->toBe(0);

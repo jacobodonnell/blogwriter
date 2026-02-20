@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Photo;
 use App\Models\User;
@@ -18,7 +19,7 @@ it('saves custom caption in meta on store', function (): void {
     post(route('admin.articles.store'), [
         'title' => 'Caption Test Article',
         'content' => '## Some content here',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
         'meta' => [
             'featured_image_caption' => 'My custom caption',
         ],
@@ -36,7 +37,7 @@ it('saves custom caption in meta on update', function (): void {
         'title' => $article->title,
         'slug' => $article->slug,
         'content' => '## Updated content',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
         'meta' => [
             'featured_image_caption' => 'Updated caption',
         ],
@@ -60,7 +61,7 @@ it('saves use_photo_caption flag and clears featured_image_caption', function ()
         'title' => $article->title,
         'slug' => $article->slug,
         'content' => '## Content here',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
         'photo_id' => $photo->id,
         'meta' => [
             'use_photo_caption' => '1',
@@ -116,7 +117,7 @@ it('clears caption meta when featured image removed', function (): void {
         'title' => $article->title,
         'slug' => $article->slug,
         'content' => '## Content',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
         'remove_featured_image' => true,
     ])->assertRedirect();
 

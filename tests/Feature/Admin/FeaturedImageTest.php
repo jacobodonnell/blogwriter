@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Photo;
 use App\Models\User;
@@ -18,7 +19,7 @@ it('stores external URL in article meta instead of creating a photo', function (
         'title' => 'Test Article',
         'slug' => 'test-article',
         'content' => 'Test content',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
         'featured_image' => 'https://example.com/image.jpg',
     ])->assertRedirect();
 
@@ -36,7 +37,7 @@ it('creates photo from file upload and links to article', function (): void {
         'title' => 'Test Article',
         'slug' => 'test-article',
         'content' => 'Test content',
-        'status' => 'published',
+        'status' => Status::Published->value,
         'featured_image_file' => $file,
     ])->assertRedirect();
 
@@ -56,7 +57,7 @@ it('creates a published photo even when article status is draft', function (): v
         'title' => 'Draft Article With Image',
         'slug' => 'draft-article-with-image',
         'content' => 'Draft content',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
         'featured_image_file' => $file,
     ])->assertRedirect();
 
@@ -79,7 +80,7 @@ it('preserves featured photo when changing published article to draft', function
         'title' => $article->title,
         'slug' => $article->slug,
         'content' => $article->content,
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])->assertRedirect();
 
     $article->refresh();
@@ -97,7 +98,7 @@ it('links existing photo to article', function (): void {
         'title' => 'Test Article',
         'slug' => 'test-article',
         'content' => 'Test content',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
         'photo_id' => $photo->id,
     ])->assertRedirect();
 
@@ -130,7 +131,7 @@ it('allows creating article without featured photo', function (): void {
         'title' => 'Test Article',
         'slug' => 'test-article',
         'content' => 'Test content',
-        'status' => 'draft',
+        'status' => Status::Draft->value,
     ])->assertRedirect();
 
     $article = Article::first();

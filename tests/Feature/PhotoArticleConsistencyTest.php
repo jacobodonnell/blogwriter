@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Photo;
 use App\Models\User;
@@ -16,7 +17,7 @@ it('rejects a draft photo when storing an article', function (): void {
             'title' => 'Test Article',
             'slug' => 'test-article',
             'content' => 'Some content',
-            'status' => 'draft',
+            'status' => Status::Draft->value,
             'photo_id' => $draftPhoto->id,
         ]);
 
@@ -32,7 +33,7 @@ it('rejects a draft photo when updating an article', function (): void {
             'title' => $article->title,
             'slug' => $article->slug,
             'content' => $article->content,
-            'status' => 'draft',
+            'status' => Status::Draft->value,
             'photo_id' => $draftPhoto->id,
         ]);
 
@@ -47,7 +48,7 @@ it('accepts a published photo when storing an article', function (): void {
             'title' => 'Test Article',
             'slug' => 'test-article',
             'content' => 'Some content',
-            'status' => 'draft',
+            'status' => Status::Draft->value,
             'photo_id' => $publishedPhoto->id,
         ]);
 
@@ -63,7 +64,7 @@ it('accepts a published photo when updating an article', function (): void {
             'title' => $article->title,
             'slug' => $article->slug,
             'content' => $article->content,
-            'status' => 'draft',
+            'status' => Status::Draft->value,
             'photo_id' => $publishedPhoto->id,
         ]);
 
@@ -91,12 +92,12 @@ it('allows re-attaching a photo after publish → draft → republish cycle', fu
     ]);
 
     // Photo goes to draft — observer detaches it
-    $photo->update(['status' => 'draft', 'published_at' => null]);
+    $photo->update(['status' => Status::Draft, 'published_at' => null]);
     $article->refresh();
     expect($article->photo_id)->toBeNull();
 
     // Republish the photo
-    $photo->update(['status' => 'published', 'published_at' => now()]);
+    $photo->update(['status' => Status::Published, 'published_at' => now()]);
 
     // Re-attach via update
     $response = $this->actingAs($this->user)
@@ -104,7 +105,7 @@ it('allows re-attaching a photo after publish → draft → republish cycle', fu
             'title' => $article->title,
             'slug' => $article->slug,
             'content' => $article->content,
-            'status' => 'published',
+            'status' => Status::Published->value,
             'photo_id' => $photo->id,
         ]);
 
