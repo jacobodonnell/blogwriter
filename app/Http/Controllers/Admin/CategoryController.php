@@ -47,7 +47,10 @@ class CategoryController extends Controller
         Category::create($data);
 
         if ($request->header('X-Alpine-Target')) {
-            return response(view('admin.categories._store-success'));
+            $parentId = $data['parent_id'] ?? null;
+            $parent = $parentId ? Category::find($parentId) : null;
+
+            return response(view('admin.categories._store-success', compact('parent')));
         }
 
         return redirect($this->categoryRedirectUrl($data['parent_id'] ?? null))

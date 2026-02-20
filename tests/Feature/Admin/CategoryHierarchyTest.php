@@ -191,7 +191,22 @@ it('store returns partial response for ajax request', function (): void {
 
     $response->assertOk();
     $response->assertSee('category:created');
+    $response->assertSee('id="add-category-form"', false);
+    $response->assertSee('action="'.route('admin.categories.store').'"', false);
     expect(Category::where('name', 'Technology')->exists())->toBeTrue();
+});
+
+it('store success partial includes parent context for subcategory', function (): void {
+    $parent = Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
+
+    $response = $this->post(
+        route('admin.categories.store'),
+        ['name' => 'PHP', 'slug' => 'php', 'parent_id' => $parent->id],
+        ['X-Alpine-Target' => 'add-category-form']
+    );
+
+    $response->assertOk();
+    $response->assertSee('Add Subcategory');
 });
 
 it('store redirects for non-ajax request', function (): void {
