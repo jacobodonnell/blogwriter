@@ -46,28 +46,28 @@
                     <h2 class="text-2xl font-bold mb-4">Connect</h2>
                     <div class="flex flex-wrap gap-3">
                         @if(setting('profile_github'))
-                            <a href="{{ setting('profile_github') }}" rel="me" class="u-url btn btn-outline gap-2">
+                            <a href="{{ setting('profile_github') }}" rel="me noopener" target="_blank" class="u-url btn btn-outline gap-2">
                                 <i class="ph ph-github-logo text-xl"></i>
                                 GitHub
                             </a>
                         @endif
 
                         @if(setting('profile_mastodon'))
-                            <a href="{{ setting('profile_mastodon') }}" rel="me" class="u-url btn btn-outline gap-2">
+                            <a href="{{ setting('profile_mastodon') }}" rel="me noopener" target="_blank" class="u-url btn btn-outline gap-2">
                                 <i class="ph ph-mastodon-logo text-xl"></i>
                                 Mastodon
                             </a>
                         @endif
 
                         @if(setting('profile_bluesky'))
-                            <a href="{{ setting('profile_bluesky') }}" rel="me" class="u-url btn btn-outline gap-2">
+                            <a href="{{ setting('profile_bluesky') }}" rel="me noopener" target="_blank" class="u-url btn btn-outline gap-2">
                                 <i class="ph ph-butterfly text-xl"></i>
                                 Bluesky
                             </a>
                         @endif
 
                         @if(setting('profile_email'))
-                            <a href="mailto:{{ setting('profile_email') }}" rel="me" class="u-url btn btn-outline gap-2">
+                            <a href="mailto:{{ setting('profile_email') }}" rel="me noopener" target="_blank" class="u-url btn btn-outline gap-2">
                                 <i class="ph ph-envelope text-xl"></i>
                                 Email
                             </a>

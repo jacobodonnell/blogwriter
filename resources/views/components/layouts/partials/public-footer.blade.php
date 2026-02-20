@@ -29,7 +29,8 @@
             <div class="flex gap-2">
                 @foreach($socialLinks as $link)
                     <a href="{{ $link['key'] === 'profile_email' ? 'mailto:' . setting($link['key']) : setting($link['key']) }}"
-                       rel="me"
+                       rel="me noopener"
+                       target="_blank"
                        class="u-url btn btn-ghost btn-xs btn-circle"
                        title="{{ $link['label'] }}">
                         <i class="ph ph-{{ $link['icon'] }} text-base"></i>
@@ -45,7 +46,7 @@
             © {{ date('Y') }} {{ config('app.name', 'BlogWriter') }}
         </p>
         <p class="text-xs text-base-content/40">
-            Powered by <a href="https://blogwriter.tech" class="link" target="_blank">BlogWriter</a>
+            Powered by <a href="https://blogwriter.tech" class="link" target="_blank" rel="noopener">BlogWriter</a>
         </p>
     </div>
 </footer>
