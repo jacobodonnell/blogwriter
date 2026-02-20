@@ -236,12 +236,13 @@ it('shows validation errors in form when duplicate slug submitted via ajax', fun
 it('does not create category when slug is duplicate', function (): void {
     Category::factory()->create(['slug' => 'tech']);
 
-    $this->post(
+    $response = $this->post(
         route('admin.categories.store'),
         ['name' => 'Technology', 'slug' => 'tech'],
         ['X-Alpine-Target' => 'add-category-form']
     );
 
+    $response->assertUnprocessable();
     expect(Category::where('name', 'Technology')->exists())->toBeFalse();
 });
 
