@@ -22,7 +22,9 @@ class AdminCategoryChildrenController extends Controller
         $breadcrumbs = $parent->ancestors()->push($parent);
         $slugPrefix = $breadcrumbs->pluck('slug')->implode('/');
 
-        $viewData = compact('categories', 'parent', 'breadcrumbs', 'slugPrefix');
+        $allCategories = Category::flatTree();
+
+        $viewData = ['categories' => $categories, 'parent' => $parent, 'breadcrumbs' => $breadcrumbs, 'slugPrefix' => $slugPrefix, 'allCategories' => $allCategories];
 
         if ($request->header('X-Alpine-Target')) {
             return view('admin.categories._table', $viewData);

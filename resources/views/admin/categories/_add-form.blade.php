@@ -14,9 +14,22 @@
           action="{{ route('admin.categories.store') }}"
           x-target="add-category-form">
         @csrf
-        <input type="hidden" name="parent_id" value="{{ $parent?->id ?? '' }}">
 
         <div class="space-y-4">
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend">Parent Category</legend>
+                <select name="parent_id"
+                        class="select select-bordered w-full">
+                    <option value="">None (Root)</option>
+                    @foreach ($allCategories as $cat)
+                        <option value="{{ $cat->id }}"
+                            {{ old('parent_id', $parent?->id) == $cat->id ? 'selected' : '' }}>
+                            {{ str_repeat('— ', $cat->depth) }}{{ $cat->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </fieldset>
+
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Name</legend>
                 <input type="text"

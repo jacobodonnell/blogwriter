@@ -255,3 +255,50 @@ it('category drill-down links are standard navigation without ajax target', func
     $response->assertSuccessful();
     $response->assertDontSee('x-target.push', false);
 });
+
+it('add form shows parent category dropdown on index page', function (): void {
+    $root = Category::factory()->create(['name' => 'Programming']);
+
+    $response = $this->get(route('admin.categories.index'));
+
+    $response->assertSuccessful();
+    $response->assertSee('Parent Category');
+    $response->assertSee('None (Root)');
+    $response->assertSee('Programming');
+});
+
+it('add form pre-selects parent when viewing children', function (): void {
+    $root = Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
+    Category::factory()->withParent($root)->create(['name' => 'PHP']);
+
+    $response = $this->get(route('admin.categories.children', 'programming'));
+
+    $response->assertSuccessful();
+    $response->assertSee('value="'.$root->id.'"', false);
+});
+
+it('add form shows all categories in parent dropdown including leaf categories', function (): void {
+    $root = Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
+    $leaf = Category::factory()->withParent($root)->create(['name' => 'PHP', 'slug' => 'php']);
+
+    $response = $this->get(route('admin.categories.index'));
+
+    $response->assertSuccessful();
+    $response->assertSee('value="'.$root->id.'"', false);
+    $response->assertSee('value="'.$leaf->id.'"', false);
+});
+
+it('creates subcategory under leaf category selected from parent dropdown', function (): void {
+    $leaf = Category::factory()->create(['name' => 'Design', 'slug' => 'design']);
+
+    $this->post(route('admin.categories.store'), [
+        'name' => 'UI Design',
+        'slug' => 'ui-design',
+        'parent_id' => $leaf->id,
+    ])->assertRedirect();
+
+    $child = Category::where('slug', 'ui-design')->first();
+
+    expect($child)->not->toBeNull()
+        ->and($child->parent_id)->toBe($leaf->id);
+});

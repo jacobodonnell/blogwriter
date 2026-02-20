@@ -113,6 +113,33 @@ class Category extends Model
     }
 
     /**
+     * Get all categories as a flat collection with depth for use in select dropdowns.
+     *
+     * @return Collection<int, Category>
+     */
+    public static function flatTree(): Collection
+    {
+        $rows = DB::select(<<<'SQL'
+            WITH RECURSIVE category_tree AS (
+                SELECT *, 0 AS depth, name AS sort_path FROM categories WHERE parent_id IS NULL
+                UNION ALL
+                SELECT c.*, ct.depth + 1, ct.sort_path || '/' || c.name FROM categories c
+                INNER JOIN category_tree ct ON c.parent_id = ct.id
+            )
+            SELECT * FROM category_tree ORDER BY sort_path
+        SQL);
+
+        $categories = self::hydrate($rows);
+
+        // Attach depth as an attribute for display purposes
+        foreach ($categories as $i => $category) {
+            $category->depth = $rows[$i]->depth;
+        }
+
+        return $categories;
+    }
+
+    /**
      * Get the permalink for this category using full ancestor path.
      */
     public function permalink(): string

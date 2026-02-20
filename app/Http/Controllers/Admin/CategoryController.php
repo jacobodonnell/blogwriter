@@ -29,6 +29,7 @@ class CategoryController extends Controller
             'parent' => null,
             'breadcrumbs' => collect(),
             'slugPrefix' => '',
+            'allCategories' => Category::flatTree(),
         ];
 
         if ($request->header('X-Alpine-Target')) {
@@ -52,9 +53,10 @@ class CategoryController extends Controller
 
         if ($validator->fails()) {
             if ($isAjax) {
-                $formHtml = view('admin.categories._add-form', ['parent' => $parent])
-                    ->withErrors($validator)
-                    ->render();
+                $formHtml = view('admin.categories._add-form', [
+                    'parent' => $parent,
+                    'allCategories' => Category::flatTree(),
+                ])->withErrors($validator)->render();
 
                 return response('<div id="add-category-form">'.$formHtml.'</div>', 422);
             }
@@ -67,7 +69,9 @@ class CategoryController extends Controller
         Category::create($data);
 
         if ($isAjax) {
-            return response(view('admin.categories._store-success', compact('parent')));
+            $allCategories = Category::flatTree();
+
+            return response(view('admin.categories._store-success', ['parent' => $parent, 'allCategories' => $allCategories]));
         }
 
         return redirect($this->categoryRedirectUrl($parentId ? (int) $parentId : null))
