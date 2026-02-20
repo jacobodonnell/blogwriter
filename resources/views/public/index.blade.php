@@ -87,7 +87,7 @@
                                 @endif
 
                                 {{-- Card Actions --}}
-                                <div class="card-actions justify-end mt-4 items-center">
+                                <div class="card-actions justify-end mt-auto items-center">
                                     @auth
                                         <a href="{{ route('admin.articles.edit', $article) }}"
                                            class="btn btn-ghost btn-xs gap-1">
