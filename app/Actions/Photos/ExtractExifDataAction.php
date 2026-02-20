@@ -12,6 +12,12 @@ final readonly class ExtractExifDataAction
             return [];
         }
 
+        $supportedTypes = ['image/jpeg', 'image/tiff'];
+
+        if (! in_array($file->getMimeType(), $supportedTypes, true)) {
+            return [];
+        }
+
         $exif = @exif_read_data($file->getPathname());
 
         if (! $exif) {
