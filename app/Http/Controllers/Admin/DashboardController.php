@@ -25,7 +25,7 @@ class DashboardController extends Controller
         $recentPhotos = Photo::query()
             ->with('media')
             ->orderBy('updated_at', 'desc')
-            ->limit(5)
+            ->limit(4)
             ->get();
 
         $stats = [

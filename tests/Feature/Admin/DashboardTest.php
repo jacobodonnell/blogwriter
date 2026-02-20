@@ -76,11 +76,11 @@ it('caps recent articles at 5', function (): void {
     $response->assertViewHas('recentArticles', fn ($articles) => $articles->count() === 5);
 });
 
-it('caps recent photos at 5', function (): void {
+it('caps recent photos at 4', function (): void {
     Photo::factory()->count(8)->create();
 
     $response = $this->get(route('admin.dashboard'));
 
     $response->assertSuccessful();
-    $response->assertViewHas('recentPhotos', fn ($photos) => $photos->count() === 5);
+    $response->assertViewHas('recentPhotos', fn ($photos) => $photos->count() === 4);
 });

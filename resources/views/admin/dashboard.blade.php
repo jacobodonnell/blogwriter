@@ -99,44 +99,50 @@
                     </div>
 
                     @if($recentPhotos->count() > 0)
-                        <div class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             @foreach($recentPhotos as $photo)
-                                <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg">
-                                    <div class="flex items-center gap-4 flex-1 min-w-0">
-                                        @if($photo->thumbnail_url)
+                                <div class="card bg-base-200">
+                                    @if($photo->thumbnail_url)
+                                        <figure class="px-4 pt-4">
                                             <img
                                                 src="{{ $photo->thumbnail_url }}"
                                                 alt="{{ $photo->caption ?? 'Photo' }}"
-                                                class="w-12 h-12 rounded-lg object-cover shrink-0"
+                                                class="rounded-lg w-full h-48 object-contain bg-base-300"
                                             >
-                                        @else
-                                            <div class="w-12 h-12 rounded-lg bg-base-300 flex items-center justify-center shrink-0">
-                                                <i class="ph ph-image text-xl text-base-content/40"></i>
+                                        </figure>
+                                    @else
+                                        <figure class="px-4 pt-4">
+                                            <div class="rounded-lg w-full h-48 bg-base-300 flex items-center justify-center">
+                                                <i class="ph ph-image text-4xl text-base-content/40"></i>
                                             </div>
-                                        @endif
-                                        <div class="min-w-0">
-                                            <h3 class="font-semibold truncate">{{ $photo->caption ?? 'Untitled Photo' }}</h3>
-                                            <div class="flex items-center gap-2 mt-1 text-sm text-base-content/60">
-                                                <span @class([
-                                                    'badge badge-sm',
-                                                    'badge-success' => $photo->status->value === 'published',
-                                                    'badge-warning' => $photo->status->value === 'draft',
-                                                ])>
-                                                    {{ $photo->status->label() }}
-                                                </span>
-                                                <span>{{ $photo->updated_at->diffForHumans() }}</span>
-                                            </div>
+                                        </figure>
+                                    @endif
+                                    <div class="card-body p-4">
+                                        <h3 class="card-title text-sm truncate">{{ $photo->caption ?? 'Untitled Photo' }}</h3>
+                                        <div class="flex items-center gap-2 text-sm text-base-content/60">
+                                            <span @class([
+                                                'badge badge-sm',
+                                                'badge-success' => $photo->status->value === 'published',
+                                                'badge-warning' => $photo->status->value === 'draft',
+                                            ])>
+                                                {{ $photo->status->label() }}
+                                            </span>
+                                            <span>{{ $photo->updated_at->diffForHumans() }}</span>
                                         </div>
-                                    </div>
-                                    <div class="flex items-center gap-2 ml-4">
-                                        <a href="{{ route('admin.photos.edit', $photo) }}" class="btn btn-sm btn-ghost" title="Edit">
-                                            <i class="ph ph-pencil-simple text-lg"></i>
-                                        </a>
-                                        @if($photo->isPublic())
-                                            <a href="{{ route('photos.show', $photo->slug) }}" class="btn btn-sm btn-ghost" title="View on Site">
-                                                <i class="ph ph-eye text-lg"></i>
-                                            </a>
-                                        @endif
+                                        <div class="card-actions justify-end mt-2">
+                                            <div class="tooltip" data-tip="Edit">
+                                                <a href="{{ route('admin.photos.edit', $photo) }}" class="btn btn-sm btn-ghost">
+                                                    <i class="ph ph-pencil-simple text-lg"></i>
+                                                </a>
+                                            </div>
+                                            @if($photo->isPublic())
+                                                <div class="tooltip" data-tip="View on Site">
+                                                    <a href="{{ route('photos.show', $photo->slug) }}" class="btn btn-sm btn-ghost">
+                                                        <i class="ph ph-eye text-lg"></i>
+                                                    </a>
+                                                </div>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                             @endforeach
