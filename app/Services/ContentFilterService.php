@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Enums\Status;
@@ -88,7 +90,7 @@ final readonly class ContentFilterService
      */
     public function countArticles(?Category $category = null): int
     {
-        $query = $category instanceof \App\Models\Category ? $category->articles() : Article::query();
+        $query = $category instanceof Category ? $category->articles() : Article::query();
 
         return auth()->check()
             ? $query->count()
@@ -100,7 +102,7 @@ final readonly class ContentFilterService
      */
     public function countPhotos(?Category $category = null): int
     {
-        $query = $category instanceof \App\Models\Category ? $category->photos() : Photo::query();
+        $query = $category instanceof Category ? $category->photos() : Photo::query();
 
         return auth()->check()
             ? $query->count()

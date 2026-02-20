@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Actions\GenerateUniqueSlugAction;
@@ -12,10 +14,116 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
-class Article extends Model
+final class Article extends Model
 {
     /** @use HasFactory<\Database\Factories\ArticleFactory> */
     use HasFactory;
+
+    /**
+     * Check if a slug matches the auto-generated placeholder pattern (e.g. "untitled-a1b2c3d4").
+     */
+    public static function isPlaceholderSlug(string $slug): bool
+    {
+        return (bool) preg_match('/^untitled-[a-z0-9]{8}$/', $slug);
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the featured photo for this article.
+     *
+     * @return BelongsTo<Photo, $this>
+     */
+    public function featuredPhoto(): BelongsTo
+    {
+        return $this->belongsTo(Photo::class, 'photo_id');
+    }
+
+    /**
+     * @return BelongsTo<Category, $this>
+     */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * Get the permalink for this article.
+     */
+    public function permalink(): string
+    {
+        return route('articles.show', $this->slug);
+    }
+
+    /**
+     * Check if the article has been edited after initial publish.
+     */
+    public function wasEdited(): bool
+    {
+        return ! is_null($this->last_edited_at);
+    }
+
+    /**
+     * Check if the article is published.
+     */
+    public function isPublished(): bool
+    {
+        return $this->status === Status::Published && $this->published_at !== null && $this->published_at <= now();
+    }
+
+    /**
+     * Add a slug to the past_slugs array.
+     */
+    public function addPastSlug(string $slug): void
+    {
+        $pastSlugs = $this->past_slugs ?? [];
+
+        if (! in_array($slug, $pastSlugs)) {
+            $pastSlugs[] = $slug;
+            $this->past_slugs = $pastSlugs;
+        }
+    }
+
+    protected static function booted(): void
+    {
+        self::saving(function ($article): void {
+            if (empty($article->slug)) {
+                $article->slug = app(GenerateUniqueSlugAction::class)
+                    ->handle($article->title, Article::class, $article->id);
+            }
+
+            if ($article->isDirty('slug') && ! empty($article->getOriginal('slug'))) {
+                $article->addPastSlug($article->getOriginal('slug'));
+            }
+
+            // Set published_at when first published
+            $newStatus = $article->status;
+
+            if ($article->isDirty('status') && $newStatus === Status::Published && is_null($article->published_at)) {
+                $article->published_at = now()->startOfSecond();
+            }
+
+            // Mutual exclusion: photo_id and meta.featured_image_url
+            $meta = $article->meta ?? [];
+            if ($article->photo_id && Arr::has($meta, 'featured_image_url')) {
+                Arr::forget($meta, 'featured_image_url');
+                $article->meta = $meta;
+            }
+
+            // Track edit time for previously-published articles
+            if ($newStatus === Status::Published
+                && ! is_null($article->getOriginal('published_at'))
+                && is_null($article->last_edited_at)) {
+                $article->last_edited_at = now()->startOfSecond();
+            }
+        });
+    }
 
     protected function casts(): array
     {
@@ -80,91 +188,6 @@ class Article extends Model
                 });
             },
         );
-    }
-
-    /**
-     * Apply a callback to text segments outside of fenced code blocks.
-     */
-    private function processOutsideCodeBlocks(string $text, callable $callback): string
-    {
-        $parts = preg_split('/(```[\s\S]*?```)/m', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
-
-        foreach ($parts as $i => &$part) {
-            if ($i % 2 === 0) {
-                $part = $callback($part);
-            }
-        }
-
-        return implode('', $parts);
-    }
-
-    /**
-     * Check if a slug matches the auto-generated placeholder pattern (e.g. "untitled-a1b2c3d4").
-     */
-    public static function isPlaceholderSlug(string $slug): bool
-    {
-        return (bool) preg_match('/^untitled-[a-z0-9]{8}$/', $slug);
-    }
-
-    protected static function booted(): void
-    {
-        static::saving(function ($article): void {
-            if (empty($article->slug)) {
-                $article->slug = app(GenerateUniqueSlugAction::class)
-                    ->handle($article->title, Article::class, $article->id);
-            }
-
-            if ($article->isDirty('slug') && ! empty($article->getOriginal('slug'))) {
-                $article->addPastSlug($article->getOriginal('slug'));
-            }
-
-            // Set published_at when first published
-            $newStatus = $article->status;
-
-            if ($article->isDirty('status') && $newStatus === Status::Published && is_null($article->published_at)) {
-                $article->published_at = now()->startOfSecond();
-            }
-
-            // Mutual exclusion: photo_id and meta.featured_image_url
-            $meta = $article->meta ?? [];
-            if ($article->photo_id && Arr::has($meta, 'featured_image_url')) {
-                Arr::forget($meta, 'featured_image_url');
-                $article->meta = $meta;
-            }
-
-            // Track edit time for previously-published articles
-            if ($newStatus === Status::Published
-                && ! is_null($article->getOriginal('published_at'))
-                && is_null($article->last_edited_at)) {
-                $article->last_edited_at = now()->startOfSecond();
-            }
-        });
-    }
-
-    /**
-     * @return BelongsTo<User, $this>
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    /**
-     * Get the featured photo for this article.
-     *
-     * @return BelongsTo<Photo, $this>
-     */
-    public function featuredPhoto(): BelongsTo
-    {
-        return $this->belongsTo(Photo::class, 'photo_id');
-    }
-
-    /**
-     * @return BelongsTo<Category, $this>
-     */
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(Category::class);
     }
 
     /**
@@ -320,39 +343,18 @@ class Article extends Model
     }
 
     /**
-     * Get the permalink for this article.
+     * Apply a callback to text segments outside of fenced code blocks.
      */
-    public function permalink(): string
+    private function processOutsideCodeBlocks(string $text, callable $callback): string
     {
-        return route('articles.show', $this->slug);
-    }
+        $parts = preg_split('/(```[\s\S]*?```)/m', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
 
-    /**
-     * Check if the article has been edited after initial publish.
-     */
-    public function wasEdited(): bool
-    {
-        return ! is_null($this->last_edited_at);
-    }
-
-    /**
-     * Check if the article is published.
-     */
-    public function isPublished(): bool
-    {
-        return $this->status === Status::Published && $this->published_at !== null && $this->published_at <= now();
-    }
-
-    /**
-     * Add a slug to the past_slugs array.
-     */
-    public function addPastSlug(string $slug): void
-    {
-        $pastSlugs = $this->past_slugs ?? [];
-
-        if (! in_array($slug, $pastSlugs)) {
-            $pastSlugs[] = $slug;
-            $this->past_slugs = $pastSlugs;
+        foreach ($parts as $i => &$part) {
+            if ($i % 2 === 0) {
+                $part = $callback($part);
+            }
         }
+
+        return implode('', $parts);
     }
 }

@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
-class PasswordGenerator
+final class PasswordGenerator
 {
     private static ?array $wordlist = null;
 
@@ -17,7 +19,7 @@ class PasswordGenerator
             $words[] = self::$wordlist[array_rand(self::$wordlist)];
         }
 
-        $number = str_pad((string) random_int(0, 99), 2, '0', STR_PAD_LEFT);
+        $number = mb_str_pad((string) random_int(0, 99), 2, '0', STR_PAD_LEFT);
 
         return implode('-', $words).'-'.$number;
     }

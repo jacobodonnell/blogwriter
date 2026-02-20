@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Photos\ExtractExifDataAction;
 use Illuminate\Http\UploadedFile;
 

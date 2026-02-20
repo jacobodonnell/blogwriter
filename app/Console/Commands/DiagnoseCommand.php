@@ -1,12 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 
-class DiagnoseCommand extends Command
+final class DiagnoseCommand extends Command
 {
     protected $signature = 'blogwriter:diagnose';
 
@@ -31,7 +34,7 @@ class DiagnoseCommand extends Command
         $this->check('Database has tables', function (): bool {
             try {
                 return Schema::hasTable('users');
-            } catch (\Exception) {
+            } catch (Exception) {
                 return false;
             }
         }, 'Database tables missing - run php artisan migrate');
@@ -45,7 +48,7 @@ class DiagnoseCommand extends Command
                 Route::getRoutes()->refreshNameLookups();
 
                 return Route::has('admin.settings');
-            } catch (\Exception) {
+            } catch (Exception) {
                 return false;
             }
         }, 'Routes not properly registered - run php artisan route:clear');
@@ -73,7 +76,7 @@ class DiagnoseCommand extends Command
             $lines = array_slice(file($logPath), -20);
             foreach ($lines as $line) {
                 if (str_contains((string) $line, 'ERROR')) {
-                    $this->error(trim((string) $line));
+                    $this->error(mb_trim((string) $line));
                 }
             }
         }
@@ -81,7 +84,7 @@ class DiagnoseCommand extends Command
         return self::SUCCESS;
     }
 
-    protected function check(string $name, callable $test, string $fix): void
+    private function check(string $name, callable $test, string $fix): void
     {
         try {
             $result = $test();
@@ -91,7 +94,7 @@ class DiagnoseCommand extends Command
                 $this->error('✗ '.$name);
                 $this->warn('  Fix: '.$fix);
             }
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->error(sprintf('✗ %s - Exception: ', $name).$exception->getMessage());
             $this->warn('  Fix: '.$fix);
         }

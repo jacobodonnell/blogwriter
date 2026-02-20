@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Console\Commands\Concerns\PromptsForPassword;
@@ -8,7 +10,7 @@ use App\Services\PasswordRules;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
 
-class ResetPasswordCommand extends Command
+final class ResetPasswordCommand extends Command
 {
     use PromptsForPassword;
 

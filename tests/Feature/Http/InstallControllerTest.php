@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 afterEach(function (): void {
     @unlink(storage_path('installed.lock'));
 });

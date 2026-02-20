@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\Photo;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
-class PhotoSeeder extends Seeder
+final class PhotoSeeder extends Seeder
 {
     /**
      * Seed demo photos (5 photos with demo images).

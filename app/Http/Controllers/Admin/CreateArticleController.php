@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Actions\ApplyArticleFeaturedImageAction;
@@ -14,7 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
-class CreateArticleController extends Controller
+final class CreateArticleController extends Controller
 {
     public function __construct(
         private readonly ApplyArticleFeaturedImageAction $applyFeaturedImage,

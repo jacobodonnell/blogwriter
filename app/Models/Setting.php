@@ -1,19 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
-class Setting extends Model
+final class Setting extends Model
 {
-    protected function casts(): array
-    {
-        return [
-            'is_public' => 'boolean',
-        ];
-    }
-
     /**
      * Get a setting value by key.
      */
@@ -25,7 +20,7 @@ class Setting extends Model
             return Cache::get($cacheKey);
         }
 
-        $value = static::query()->where('key', $key)->value('value');
+        $value = self::query()->where('key', $key)->value('value');
 
         if ($value !== null) {
             Cache::put($cacheKey, $value, now()->addHour());
@@ -39,11 +34,18 @@ class Setting extends Model
      */
     public static function set(string $key, mixed $value): void
     {
-        static::query()->updateOrCreate(
+        self::query()->updateOrCreate(
             ['key' => $key],
             ['value' => $value],
         );
 
         Cache::forget('setting.'.$key);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'is_public' => 'boolean',
+        ];
     }
 }

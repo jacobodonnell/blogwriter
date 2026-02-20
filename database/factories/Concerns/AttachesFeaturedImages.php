@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories\Concerns;
 
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 
@@ -33,7 +36,7 @@ trait AttachesFeaturedImages
             $model->addMedia($imagePath)
                 ->preservingOriginal()
                 ->toMediaCollection($collection, $disk);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             Log::warning('Failed to attach demo image to model', [
                 'model_class' => $model::class,
                 'model_id' => $model->id,

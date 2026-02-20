@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Console\Commands\Concerns\PromptsForPassword;
@@ -13,6 +15,8 @@ use Illuminate\Database\Console\Migrations\FreshCommand;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
+use ReflectionClass;
 
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\error;
@@ -22,7 +26,7 @@ use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 use function Laravel\Prompts\warning;
 
-class InstallCommand extends Command
+final class InstallCommand extends Command
 {
     use PromptsForPassword;
     use ValidatesInput;
@@ -39,7 +43,7 @@ class InstallCommand extends Command
 
     protected $description = 'Interactive installer for BlogWriter (supports non-interactive mode with flags)';
 
-    public function __construct(protected InstallService $installService)
+    public function __construct(private InstallService $installService)
     {
         parent::__construct();
     }
@@ -81,7 +85,7 @@ class InstallCommand extends Command
         }
 
         // Check current prohibition state using reflection
-        $reflection = new \ReflectionClass(FreshCommand::class);
+        $reflection = new ReflectionClass(FreshCommand::class);
         $property = $reflection->getProperty('prohibitedFromRunning');
         $wasProhibited = $property->getValue();
 
@@ -96,7 +100,7 @@ class InstallCommand extends Command
         }
     }
 
-    protected function runInstallation(): int
+    private function runInstallation(): int
     {
         $this->welcome();
         $didFreshInstall = false;
@@ -168,7 +172,7 @@ class InstallCommand extends Command
         return self::SUCCESS;
     }
 
-    protected function welcome(): void
+    private function welcome(): void
     {
         info('╔════════════════════════════════════════╗');
         info('║     Welcome to BlogWriter Installer    ║');
@@ -177,7 +181,7 @@ class InstallCommand extends Command
         $this->newLine();
     }
 
-    protected function gatherConfiguration(): array
+    private function gatherConfiguration(): array
     {
         if ($this->isNonInteractive()) {
             return $this->gatherNonInteractiveConfiguration();
@@ -186,7 +190,7 @@ class InstallCommand extends Command
         return $this->gatherInteractiveConfiguration();
     }
 
-    protected function isNonInteractive(): bool
+    private function isNonInteractive(): bool
     {
         return $this->option('site-name')
             && $this->option('site-url')
@@ -195,7 +199,7 @@ class InstallCommand extends Command
             && $this->option('admin-password');
     }
 
-    protected function gatherNonInteractiveConfiguration(): array
+    private function gatherNonInteractiveConfiguration(): array
     {
         $siteName = $this->option('site-name');
         $siteUrl = $this->option('site-url');
@@ -204,15 +208,15 @@ class InstallCommand extends Command
         $password = $this->option('admin-password');
 
         if ($error = $this->validateUrl($siteUrl)) {
-            throw new \InvalidArgumentException('Invalid site URL: '.$error);
+            throw new InvalidArgumentException('Invalid site URL: '.$error);
         }
 
         if ($error = $this->validateEmail($email)) {
-            throw new \InvalidArgumentException('Invalid admin email: '.$error);
+            throw new InvalidArgumentException('Invalid admin email: '.$error);
         }
 
         if ($error = $this->validatePassword($password)) {
-            throw new \InvalidArgumentException('Invalid admin password: '.$error);
+            throw new InvalidArgumentException('Invalid admin password: '.$error);
         }
 
         $seed = $this->determineSeedOption();
@@ -227,7 +231,7 @@ class InstallCommand extends Command
         ];
     }
 
-    protected function gatherInteractiveConfiguration(): array
+    private function gatherInteractiveConfiguration(): array
     {
         info('Step 1: Site Configuration');
         $this->newLine();
@@ -282,7 +286,7 @@ class InstallCommand extends Command
         ];
     }
 
-    protected function install(array $config): void
+    private function install(array $config): void
     {
         $this->newLine();
         info('Installing BlogWriter...');
@@ -311,7 +315,7 @@ class InstallCommand extends Command
         $this->postMigrationSetup($config);
     }
 
-    protected function postMigrationSetup(array $config): void
+    private function postMigrationSetup(array $config): void
     {
         info('Creating admin user...');
         $user = $this->installService->createUser($config);
@@ -345,7 +349,7 @@ class InstallCommand extends Command
         $this->displaySuccess($config, $user);
     }
 
-    protected function displaySuccess(array $config, User $user): void
+    private function displaySuccess(array $config, User $user): void
     {
         info('╔════════════════════════════════════════════════╗');
         info('║        Installation Complete! 🎉               ║');
@@ -368,14 +372,14 @@ class InstallCommand extends Command
         $this->newLine();
         info('Next steps:');
         note('  • Visit your site: '.$config['site_url']);
-        note('  • Admin panel: '.rtrim((string) $config['site_url'], '/').'/admin');
+        note('  • Admin panel: '.mb_rtrim((string) $config['site_url'], '/').'/admin');
         note('  • Login with: '.$user->email);
         $this->newLine();
 
         info('Happy blogging! Remember: own your content, own your domain.');
     }
 
-    protected function seedPlaceholderImage(): void
+    private function seedPlaceholderImage(): void
     {
         $source = storage_path('app/blogwriter/blogwriter-placeholder.jpg');
         $destination = 'blogwriter/blogwriter-placeholder.jpg';
@@ -391,7 +395,7 @@ class InstallCommand extends Command
         }
     }
 
-    protected function isComposerAvailable(): bool
+    private function isComposerAvailable(): bool
     {
         $command = PHP_OS_FAMILY === 'Windows' ? 'where composer' : 'which composer';
         $output = shell_exec($command);
@@ -399,7 +403,7 @@ class InstallCommand extends Command
         return ! in_array($output, [null, '', false], true);
     }
 
-    protected function determineSeedOption(): bool
+    private function determineSeedOption(): bool
     {
         if ($this->option('seed')) {
             return true;
@@ -420,12 +424,12 @@ class InstallCommand extends Command
         return true;
     }
 
-    protected function hasVendorDirectory(): bool
+    private function hasVendorDirectory(): bool
     {
         return is_dir(base_path('vendor'));
     }
 
-    protected function runComposerInstall(): bool
+    private function runComposerInstall(): bool
     {
         info('Installing Composer dependencies...');
 
@@ -444,7 +448,7 @@ class InstallCommand extends Command
         return false;
     }
 
-    protected function verifyDemoImages(): bool
+    private function verifyDemoImages(): bool
     {
         $demoImagesPath = database_path('seeders/demo-images');
         $requiredImages = [

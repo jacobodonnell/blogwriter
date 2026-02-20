@@ -1,27 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Enums\Status;
 use App\Models\User;
+use DateTimeImmutable;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Article>
  */
-class ArticleFactory extends Factory
+final class ArticleFactory extends Factory
 {
     /**
      * Sequence counter for unique slugs.
      */
-    protected static int $sequence = 0;
+    private static int $sequence = 0;
 
     /**
      * Blog post title templates for realistic data.
      *
      * @var array<string>
      */
-    protected array $titleTemplates = [
+    private array $titleTemplates = [
         'How I Learned to {verb} in {timeframe}',
         'The Ultimate Guide to {topic}',
         'Why {thing} Changed My {noun} Forever',
@@ -38,6 +41,14 @@ class ArticleFactory extends Factory
         'Reflections on {timeframe} of {thing}',
         'How {thing} Helped Me {outcome}',
     ];
+
+    /**
+     * Reset the sequence counter (useful for tests).
+     */
+    public static function resetSequence(): void
+    {
+        self::$sequence = 0;
+    }
 
     /**
      * Define the model's default state.
@@ -78,11 +89,25 @@ class ArticleFactory extends Factory
     }
 
     /**
-     * Reset the sequence counter (useful for tests).
+     * State for published articles.
      */
-    public static function resetSequence(): void
+    public function published(): static
     {
-        self::$sequence = 0;
+        return $this->state(fn (array $attributes): array => [
+            'status' => Status::Published,
+            'published_at' => now()->startOfSecond(),
+        ]);
+    }
+
+    /**
+     * State for draft articles.
+     */
+    public function draft(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'status' => Status::Draft,
+            'published_at' => fake()->optional(0.3)->dateTimeBetween('-6 months', '+6 months'),
+        ]);
     }
 
     /**
@@ -212,12 +237,18 @@ class ArticleFactory extends Factory
     /**
      * Get published_at based on status.
      */
-    protected function getPublishedAtForStatus(Status $status): ?\DateTime
+    protected function getPublishedAtForStatus(Status $status): ?DateTimeImmutable
     {
-        return match ($status) {
+        $date = match ($status) {
             Status::Published => fake()->dateTimeBetween('-1 year', 'now'),
-            Status::Draft => fake()->optional(0.3)->dateTimeBetween('-6 months', '+6 months'),
+            Status::Draft => fake()->optional(0.3)?->dateTimeBetween('-6 months', '+6 months'),
         };
+
+        if ($date === null) {
+            return null;
+        }
+
+        return DateTimeImmutable::createFromMutable($date);
     }
 
     /**
@@ -236,27 +267,5 @@ class ArticleFactory extends Factory
             'meta_description' => fake()->optional(0.6)->sentence(12),
             'og_image' => fake()->optional(0.7)->url(),
         ];
-    }
-
-    /**
-     * State for published articles.
-     */
-    public function published(): static
-    {
-        return $this->state(fn (array $attributes): array => [
-            'status' => Status::Published,
-            'published_at' => now()->startOfSecond(),
-        ]);
-    }
-
-    /**
-     * State for draft articles.
-     */
-    public function draft(): static
-    {
-        return $this->state(fn (array $attributes): array => [
-            'status' => Status::Draft,
-            'published_at' => fake()->optional(0.3)->dateTimeBetween('-6 months', '+6 months'),
-        ]);
     }
 }

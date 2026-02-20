@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Http\Requests\Concerns\ArticleRules;
@@ -7,7 +9,7 @@ use App\Http\Requests\Concerns\ValidatesFeaturedImage;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateArticleRequest extends FormRequest
+final class UpdateArticleRequest extends FormRequest
 {
     use ArticleRules;
     use ValidatesFeaturedImage;

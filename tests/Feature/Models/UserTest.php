@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Exceptions\SingleUserViolationException;
 use App\Models\User;
 

@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\Article;
 use App\Models\Photo;
 use Illuminate\View\View;
 
-class HomeController extends Controller
+final class HomeController extends Controller
 {
     /**
      * Display the homepage with recent articles and photos sidebar.

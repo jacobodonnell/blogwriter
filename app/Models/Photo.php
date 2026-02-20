@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Enums\Status;
@@ -12,7 +14,7 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class Photo extends Model implements HasMedia
+final class Photo extends Model implements HasMedia
 {
     /** @use HasFactory<\Database\Factories\PhotoFactory> */
     use HasFactory;
@@ -27,16 +29,6 @@ class Photo extends Model implements HasMedia
     protected $hidden = [
         'articles',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'status' => Status::class,
-            'published_at' => 'immutable_datetime',
-            'taken_at' => 'immutable_datetime',
-            'meta' => 'array',
-        ];
-    }
 
     /**
      * Register MediaLibrary collections for photos.
@@ -96,6 +88,26 @@ class Photo extends Model implements HasMedia
     }
 
     /**
+     * Check if photo is visible to public.
+     */
+    public function isPublic(): bool
+    {
+        return $this->status === Status::Published
+            && $this->published_at !== null
+            && $this->published_at <= now();
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'status' => Status::class,
+            'published_at' => 'immutable_datetime',
+            'taken_at' => 'immutable_datetime',
+            'meta' => 'array',
+        ];
+    }
+
+    /**
      * Get the photo's image URL from MediaLibrary.
      */
     protected function imageUrl(): Attribute
@@ -113,24 +125,6 @@ class Photo extends Model implements HasMedia
         return Attribute::make(
             get: fn (): ?string => $this->getMediaUrl('thumbnail'),
         );
-    }
-
-    /**
-     * Get a media conversion URL, handling private disk routing.
-     */
-    private function getMediaUrl(string $conversion): ?string
-    {
-        $media = $this->getFirstMedia('image');
-
-        if (! $media instanceof \Spatie\MediaLibrary\MediaCollections\Models\Media) {
-            return null;
-        }
-
-        if ($media->disk === 'private') {
-            return route('admin.media.show', ['media' => $media->id, 'conversion' => $conversion]);
-        }
-
-        return $media->getUrl($conversion);
     }
 
     /**
@@ -160,12 +154,20 @@ class Photo extends Model implements HasMedia
     }
 
     /**
-     * Check if photo is visible to public.
+     * Get a media conversion URL, handling private disk routing.
      */
-    public function isPublic(): bool
+    private function getMediaUrl(string $conversion): ?string
     {
-        return $this->status === Status::Published
-            && $this->published_at !== null
-            && $this->published_at <= now();
+        $media = $this->getFirstMedia('image');
+
+        if (! $media instanceof Media) {
+            return null;
+        }
+
+        if ($media->disk === 'private') {
+            return route('admin.media.show', ['media' => $media->id, 'conversion' => $conversion]);
+        }
+
+        return $media->getUrl($conversion);
     }
 }

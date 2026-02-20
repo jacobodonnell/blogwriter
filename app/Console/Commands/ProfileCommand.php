@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Console\Commands\Concerns\ValidatesInput;
@@ -12,7 +14,7 @@ use function Laravel\Prompts\note;
 use function Laravel\Prompts\text;
 use function Laravel\Prompts\textarea;
 
-class ProfileCommand extends Command
+final class ProfileCommand extends Command
 {
     use ValidatesInput;
 
@@ -35,7 +37,7 @@ class ProfileCommand extends Command
         return $this->handleInteractive();
     }
 
-    protected function handleNonInteractive(): int
+    private function handleNonInteractive(): int
     {
         $user = User::first();
         $settings = [];
@@ -106,7 +108,7 @@ class ProfileCommand extends Command
         return $this->saveAndDisplay($settings);
     }
 
-    protected function handleInteractive(): int
+    private function handleInteractive(): int
     {
         $user = User::first();
 
@@ -181,7 +183,7 @@ class ProfileCommand extends Command
         return $this->saveAndDisplay($settings);
     }
 
-    protected function saveAndDisplay(array $settings): int
+    private function saveAndDisplay(array $settings): int
     {
         foreach ($settings as $key => $value) {
             if (str_starts_with((string) $key, 'profile_')) {
@@ -203,7 +205,7 @@ class ProfileCommand extends Command
         return self::SUCCESS;
     }
 
-    protected function hasAnyOption(): bool
+    private function hasAnyOption(): bool
     {
         return collect(['name', 'bio', 'github', 'mastodon', 'bluesky', 'email'])
             ->contains(fn (string $option): bool => $this->option($option) !== null);

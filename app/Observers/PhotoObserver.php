@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Observers;
 
 use App\Models\Photo;
 
-class PhotoObserver
+final class PhotoObserver
 {
     /**
      * Handle the Photo "updated" event.

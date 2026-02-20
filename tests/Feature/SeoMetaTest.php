@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Article;
 use App\Models\Photo;
 use App\Models\Setting;
@@ -141,7 +143,7 @@ it('shows placeholder in admin articles table when no featured image', function 
 it('uploads a new placeholder image', function (): void {
     Storage::fake('public');
 
-    $file = \Illuminate\Http\UploadedFile::fake()->image('new-placeholder.jpg', 400, 300);
+    $file = Illuminate\Http\UploadedFile::fake()->image('new-placeholder.jpg', 400, 300);
 
     $this->actingAs($this->user)
         ->put(route('admin.settings.site.image.update'), [
@@ -156,7 +158,7 @@ it('uploads a new placeholder image', function (): void {
 it('rejects non-image files for placeholder upload', function (): void {
     Storage::fake('public');
 
-    $file = \Illuminate\Http\UploadedFile::fake()->create('document.pdf', 100);
+    $file = Illuminate\Http\UploadedFile::fake()->create('document.pdf', 100);
 
     $this->actingAs($this->user)
         ->put(route('admin.settings.site.image.update'), [

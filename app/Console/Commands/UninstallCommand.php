@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Services\ResetService;
 use Illuminate\Console\Command;
 
-class UninstallCommand extends Command
+final class UninstallCommand extends Command
 {
     protected $signature = 'blogwriter:uninstall {--force : Skip confirmation}';
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\Status;
@@ -11,7 +13,7 @@ use App\Models\Photo;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
-class CreateArticlePreviewController extends Controller
+final class CreateArticlePreviewController extends Controller
 {
     /**
      * Auto-save preview for new articles — session only, no DB write.

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 it('does not define down methods in migrations', function () {
     $migrations = glob(database_path('migrations/*.php'));
 

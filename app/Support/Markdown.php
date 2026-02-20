@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Support;
 
 use Illuminate\Support\Str;
 use League\CommonMark\Extension\ExternalLink\ExternalLinkExtension;
 
-class Markdown
+final class Markdown
 {
     /**
      * Convert markdown to plain text by rendering to HTML then stripping tags.
@@ -17,7 +19,7 @@ class Markdown
 
         $text = html_entity_decode(strip_tags((string) $html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-        return trim((string) preg_replace('/\s+/', ' ', $text));
+        return mb_trim((string) preg_replace('/\s+/', ' ', $text));
     }
 
     /**

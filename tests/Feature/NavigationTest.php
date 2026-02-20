@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\User;
 
 beforeEach(function (): void {
@@ -76,8 +78,8 @@ it('renders custom 404 page', function (): void {
 });
 
 it('has no broken links in public pages smoke test', function (): void {
-    $article = \App\Models\Article::factory()->published()->create();
-    $category = \App\Models\Category::factory()->create();
+    $article = App\Models\Article::factory()->published()->create();
+    $category = App\Models\Category::factory()->create();
 
     $pages = [
         route('home'),

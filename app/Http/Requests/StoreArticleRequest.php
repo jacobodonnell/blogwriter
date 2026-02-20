@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Http\Requests\Concerns\ArticleRules;
 use App\Http\Requests\Concerns\ValidatesFeaturedImage;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreArticleRequest extends FormRequest
+final class StoreArticleRequest extends FormRequest
 {
     use ArticleRules;
     use ValidatesFeaturedImage;

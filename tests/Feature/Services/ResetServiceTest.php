@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Services\ResetService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
@@ -11,13 +13,13 @@ describe('ResetService', function (): void {
             unlink($lockPath);
         }
 
-        $this->command = \Mockery::mock(Command::class);
+        $this->command = Mockery::mock(Command::class);
         $this->command->shouldReceive('newLine')->atLeast()->once();
 
-        \DB::shouldReceive('prohibitDestructiveCommands')->andReturn(null);
-        \DB::shouldReceive('disconnect')->andReturn(null);
-        \DB::shouldReceive('purge')->andReturn(null);
-        \DB::shouldReceive('reconnect')->andReturn(null);
+        DB::shouldReceive('prohibitDestructiveCommands')->andReturn(null);
+        DB::shouldReceive('disconnect')->andReturn(null);
+        DB::shouldReceive('purge')->andReturn(null);
+        DB::shouldReceive('reconnect')->andReturn(null);
     });
 
     it('removes installation lock file when it exists', function (): void {
@@ -76,7 +78,7 @@ describe('ResetService', function (): void {
     });
 
     it('returns failure exit code when exception occurs', function (): void {
-        Storage::shouldReceive('disk')->andThrow(new \RuntimeException('Storage failure'));
+        Storage::shouldReceive('disk')->andThrow(new RuntimeException('Storage failure'));
 
         $service = new ResetService;
         $exitCode = $service->reset($this->command);

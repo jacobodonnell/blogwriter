@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -7,7 +9,7 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-class AdminCategoryChildrenController extends Controller
+final class AdminCategoryChildrenController extends Controller
 {
     public function index(Request $request, string $path): View
     {

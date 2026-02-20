@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use Illuminate\Validation\Rules\Password;
 
-class PasswordRules
+final class PasswordRules
 {
     public static function rules(): Password
     {

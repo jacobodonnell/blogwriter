@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdatePageSettingsRequest extends FormRequest
+final class UpdatePageSettingsRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

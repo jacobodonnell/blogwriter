@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Actions\ApplyArticleFeaturedImageAction;
@@ -12,12 +14,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-class ArticleController extends Controller
+final class ArticleController extends Controller
 {
-    public function __construct(
-        private readonly ApplyArticleFeaturedImageAction $applyFeaturedImage,
-    ) {}
-
     /**
      * Allowed sort columns for the articles index.
      *
@@ -31,6 +29,10 @@ class ArticleController extends Controller
      * @var array<int>
      */
     private const ALLOWED_PER_PAGE = [10, 20, 50, 100];
+
+    public function __construct(
+        private readonly ApplyArticleFeaturedImageAction $applyFeaturedImage,
+    ) {}
 
     /**
      * Display a listing of articles.

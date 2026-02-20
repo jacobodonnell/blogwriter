@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Category;
 
 it('categories listing contains morph target with correct id and attributes', function (): void {

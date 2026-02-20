@@ -1,15 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\warning;
 
-class ResetService
+final class ResetService
 {
     public function reset(Command $command): int
     {
@@ -59,7 +63,7 @@ class ResetService
                         continue;
                     }
 
-                    throw new \RuntimeException(sprintf('Failed to delete file: %s. File may be locked.', $file));
+                    throw new RuntimeException(sprintf('Failed to delete file: %s. File may be locked.', $file));
                 }
 
                 // Create fresh empty database
@@ -71,7 +75,7 @@ class ResetService
             exec('php artisan migrate --force --no-interaction 2>&1', $output, $returnCode);
 
             if ($returnCode !== 0) {
-                throw new \RuntimeException('Migration failed: '.implode("\n", $output));
+                throw new RuntimeException('Migration failed: '.implode("\n", $output));
             }
 
             info('  ✓ Database reset');
@@ -105,7 +109,7 @@ class ResetService
 
             return Command::SUCCESS;
 
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $command->newLine();
             warning('❌ Reset failed: '.$exception->getMessage());
 

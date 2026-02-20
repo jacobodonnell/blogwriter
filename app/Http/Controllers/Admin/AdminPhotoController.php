@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Actions\Photos\CreatePhotoFromUploadAction;
@@ -11,13 +13,14 @@ use App\Http\Requests\Admin\StorePhotoRequest;
 use App\Http\Requests\Admin\UpdatePhotoRequest;
 use App\Models\Category;
 use App\Models\Photo;
+use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
-class AdminPhotoController extends Controller
+final class AdminPhotoController extends Controller
 {
     public function __construct(
         private readonly CreatePhotoFromUploadAction $createPhotoFromUpload,
@@ -83,7 +86,7 @@ class AdminPhotoController extends Controller
 
             return redirect()->route('admin.photos.edit', $photo)
                 ->with('success', 'Photo created successfully.');
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             Log::error('Failed to create photo', [
                 'error' => $exception->getMessage(),
             ]);
@@ -140,7 +143,7 @@ class AdminPhotoController extends Controller
                 $exif = $this->extractExif->handle($request->file('image_file'));
                 $photo->meta = array_merge($photo->meta ?? [], $exif);
                 $photo->filename = $request->file('image_file')->getClientOriginalName();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::error('Failed to update photo in MediaLibrary', [
                     'photo_id' => $photo->id,
                     'error' => $e->getMessage(),
@@ -186,7 +189,7 @@ class AdminPhotoController extends Controller
 
             return redirect()->route('admin.photos.index')
                 ->with('success', 'Photo deleted successfully.');
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             Log::error('Failed to delete photo', [
                 'photo_id' => $photo->id,
                 'error' => $exception->getMessage(),

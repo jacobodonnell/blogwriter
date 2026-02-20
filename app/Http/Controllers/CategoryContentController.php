@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\Category;
@@ -8,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
 
-class CategoryContentController extends Controller
+final class CategoryContentController extends Controller
 {
     public function __construct(
         private readonly ContentFilterService $contentFilter,

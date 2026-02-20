@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Article;
 
 it('isPlaceholderSlug returns true for placeholder slugs', function (): void {

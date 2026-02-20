@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\UpdatePublishedStatusAction;
 use App\Enums\Status;
 use App\Models\Article;

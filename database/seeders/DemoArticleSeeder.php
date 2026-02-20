@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Enums\Status;
@@ -10,7 +12,7 @@ use App\Models\User;
 use Database\Seeders\Concerns\ChecksExternalUrls;
 use Illuminate\Database\Seeder;
 
-class DemoArticleSeeder extends Seeder
+final class DemoArticleSeeder extends Seeder
 {
     use ChecksExternalUrls;
 

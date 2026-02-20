@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
-class SettingSeeder extends Seeder
+final class SettingSeeder extends Seeder
 {
     /**
      * Seed default profile settings from existing user data.

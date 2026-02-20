@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Article;
 
 it('shows a published article at its current slug', function (): void {

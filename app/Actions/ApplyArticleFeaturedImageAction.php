@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions;
 
 use App\Actions\Photos\HandleArticlePhotoUploadAction;
@@ -46,7 +48,7 @@ final readonly class ApplyArticleFeaturedImageAction
         } elseif ($request->filled('photo_id')) {
             $photoId = $data['photo_id'];
             unset($meta['featured_image_url']);
-        } elseif ($article instanceof \App\Models\Article) {
+        } elseif ($article instanceof Article) {
             // Preserve existing meta featured_image_url if present
             $existingMeta = $article->meta ?? [];
             if (isset($existingMeta['featured_image_url']) && ! isset($meta['featured_image_url'])) {

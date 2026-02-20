@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\User;
 
 it('redirects /admin/settings to /admin/settings/profile', function (): void {

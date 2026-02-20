@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Article;
 use App\Models\Photo;
 
@@ -56,7 +58,7 @@ it('categories index has breadcrumbs', function (): void {
 });
 
 it('about page has breadcrumbs', function (): void {
-    \App\Models\User::factory()->create();
+    App\Models\User::factory()->create();
 
     $this->get(route('about'))
         ->assertOk()

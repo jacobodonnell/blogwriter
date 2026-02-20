@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\User;
 
 function installArgs(array $overrides = []): array
@@ -58,34 +60,34 @@ describe('non-interactive installation (arguments/flags)', function (): void {
         ]))->assertSuccessful();
 
         // Verify demo content was seeded
-        expect(\App\Models\Category::count())->toBeGreaterThan(0);
-        expect(\App\Models\Article::count())->toBeGreaterThan(0);
+        expect(App\Models\Category::count())->toBeGreaterThan(0);
+        expect(App\Models\Article::count())->toBeGreaterThan(0);
     })->group('slow');
 
     it('skips seeding when --no-seed flag is provided', function (): void {
         $this->artisan('blogwriter:install', installArgs())->assertSuccessful();
 
         // Verify no demo content exists
-        expect(\App\Models\Category::count())->toBe(0);
-        expect(\App\Models\Article::count())->toBe(0);
+        expect(App\Models\Category::count())->toBe(0);
+        expect(App\Models\Article::count())->toBe(0);
     });
 
     it('validates site URL format', function (): void {
         expect(fn () => $this->artisan('blogwriter:install', installArgs([
             '--site-url' => 'not-a-valid-url',
-        ]))->run())->toThrow(\InvalidArgumentException::class, 'Invalid site URL');
+        ]))->run())->toThrow(InvalidArgumentException::class, 'Invalid site URL');
     });
 
     it('validates admin email format', function (): void {
         expect(fn () => $this->artisan('blogwriter:install', installArgs([
             '--admin-email' => 'invalid-email',
-        ]))->run())->toThrow(\InvalidArgumentException::class, 'Invalid admin email');
+        ]))->run())->toThrow(InvalidArgumentException::class, 'Invalid admin email');
     });
 
     it('validates admin password requirements', function (): void {
         expect(fn () => $this->artisan('blogwriter:install', installArgs([
             '--admin-password' => 'short',
-        ]))->run())->toThrow(\InvalidArgumentException::class, 'Invalid admin password');
+        ]))->run())->toThrow(InvalidArgumentException::class, 'Invalid admin password');
     });
 
     it('bypasses already-installed check with --force flag', function (): void {
@@ -236,8 +238,8 @@ describe('interactive installation (prompts)', function (): void {
             ->assertSuccessful();
 
         // Verify demo content was seeded
-        expect(\App\Models\Category::count())->toBeGreaterThan(0);
-        expect(\App\Models\Article::count())->toBeGreaterThan(0);
+        expect(App\Models\Category::count())->toBeGreaterThan(0);
+        expect(App\Models\Article::count())->toBeGreaterThan(0);
     })->group('slow');
 
     it('skips seeding when declined via prompt', function (): void {
@@ -253,8 +255,8 @@ describe('interactive installation (prompts)', function (): void {
             ->assertSuccessful();
 
         // Verify no demo content exists
-        expect(\App\Models\Category::count())->toBe(0);
-        expect(\App\Models\Article::count())->toBe(0);
+        expect(App\Models\Category::count())->toBe(0);
+        expect(App\Models\Article::count())->toBe(0);
     });
 
     it('displays helpful next steps after installation', function (): void {
@@ -351,7 +353,7 @@ describe('environment configuration', function (): void {
 
         try {
             expect(fn () => $this->artisan('blogwriter:install', installArgs())->run()
-            )->toThrow(\RuntimeException::class, 'Cannot create .env file');
+            )->toThrow(RuntimeException::class, 'Cannot create .env file');
         } finally {
             if ($hasExample && file_exists($envExampleBackupPath)) {
                 rename($envExampleBackupPath, $envExamplePath);

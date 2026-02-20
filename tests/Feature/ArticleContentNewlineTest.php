@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Article;
 
 it('expands single newlines to double newlines on save', function (): void {

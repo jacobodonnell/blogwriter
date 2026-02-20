@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Console\Command;
+use InvalidArgumentException;
 
-class SeedCommand extends Command
+final class SeedCommand extends Command
 {
     protected $signature = 'blogwriter:seed
                             {--state=demo : The seeding state (empty, minimal, demo, full)}
@@ -40,7 +43,7 @@ class SeedCommand extends Command
         if ($user) {
             $parts = explode(',', $user);
             if (count($parts) === 3) {
-                $seeder->asUser(trim($parts[0]), trim($parts[1]), trim($parts[2]));
+                $seeder->asUser(mb_trim($parts[0]), mb_trim($parts[1]), mb_trim($parts[2]));
             } else {
                 $this->warn('User option format invalid. Expected: "Name,email,password"');
             }
@@ -49,7 +52,7 @@ class SeedCommand extends Command
         // Set state
         try {
             $seeder->withState($state);
-        } catch (\InvalidArgumentException) {
+        } catch (InvalidArgumentException) {
             $this->error('Invalid state: '.$state);
             $this->error('Valid states: empty, minimal, demo, full');
 

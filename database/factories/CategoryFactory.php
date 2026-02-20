@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\Category;
@@ -8,14 +10,14 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Category>
  */
-class CategoryFactory extends Factory
+final class CategoryFactory extends Factory
 {
     /**
      * Blog category names for realistic data.
      *
      * @var array<string>
      */
-    protected array $categoryNames = [
+    private array $categoryNames = [
         'Technology',
         'Life',
         'Travel',

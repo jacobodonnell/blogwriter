@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Actions\GenerateUniqueSlugAction;
@@ -8,7 +10,7 @@ use App\Http\Requests\UpdateArticlePreviewRequest;
 use App\Models\Article;
 use Illuminate\View\View;
 
-class ArticlePreviewController extends Controller
+final class ArticlePreviewController extends Controller
 {
     /**
      * Update article for live preview (AJAX auto-save).

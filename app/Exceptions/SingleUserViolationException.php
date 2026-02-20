@@ -1,8 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Exceptions;
 
-class SingleUserViolationException extends \RuntimeException
+use RuntimeException;
+
+final class SingleUserViolationException extends RuntimeException
 {
     public function __construct()
     {

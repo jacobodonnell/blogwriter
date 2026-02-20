@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Concerns;
 
 use Illuminate\Support\Str;
@@ -24,7 +26,7 @@ trait ValidatesFeaturedImage
         $featuredImage = $this->input('featured_image');
         if ($this->filled('featured_image') && Str::isUrl($featuredImage)) {
             $path = parse_url($featuredImage, PHP_URL_PATH) ?? '';
-            $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+            $extension = mb_strtolower(pathinfo($path, PATHINFO_EXTENSION));
 
             // If an extension is present, validate it's an image format
             // If no extension, allow it (CDN URLs without extensions)

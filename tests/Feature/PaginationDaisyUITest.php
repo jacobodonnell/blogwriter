@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Article;
 
 it('renders pagination with DaisyUI join and btn classes', function (): void {

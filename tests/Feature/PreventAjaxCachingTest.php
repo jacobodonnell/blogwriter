@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\User;
 
 it('adds no-store cache header to Alpine AJAX responses', function (): void {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Support\Markdown;
 
 it('strips bold and italic', function (): void {

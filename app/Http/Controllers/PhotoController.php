@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Enums\Status;
@@ -8,7 +10,7 @@ use App\Models\Photo;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-class PhotoController extends Controller
+final class PhotoController extends Controller
 {
     /**
      * Display a listing of photos.

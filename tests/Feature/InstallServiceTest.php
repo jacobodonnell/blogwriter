@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\User;
 use App\Services\InstallService;
 
@@ -70,7 +72,7 @@ it('replaces existing user when creating a new one', function (): void {
 });
 
 it('generates a passphrase string', function (): void {
-    $passphrase = \App\Services\PasswordGenerator::generate();
+    $passphrase = App\Services\PasswordGenerator::generate();
 
     expect($passphrase)->toBeString()->not->toBeEmpty();
 });

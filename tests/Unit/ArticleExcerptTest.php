@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Article;
 
 it('strips markdown from excerpt when summary is null', function (): void {

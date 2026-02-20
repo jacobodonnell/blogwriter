@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\Status;
@@ -9,7 +11,7 @@ use App\Models\Category;
 use App\Models\Photo;
 use Illuminate\View\View;
 
-class DashboardController extends Controller
+final class DashboardController extends Controller
 {
     /**
      * Display the admin dashboard.

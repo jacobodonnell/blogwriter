@@ -1,11 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Facades\Artisan;
+use RuntimeException;
 
-class InstallService
+final class InstallService
 {
     /**
      * Check if BlogWriter is already installed.
@@ -22,7 +26,7 @@ class InstallService
 
                 return true;
             }
-        } catch (\Exception) {
+        } catch (Exception) {
             return false;
         }
 
@@ -97,10 +101,10 @@ class InstallService
 
             if (! is_dir($path)) {
                 if (! mkdir($path, 0755, true)) {
-                    throw new \RuntimeException(sprintf('Failed to create directory: %s. Check file permissions.', $dir));
+                    throw new RuntimeException(sprintf('Failed to create directory: %s. Check file permissions.', $dir));
                 }
             } elseif (! is_writable($path)) {
-                throw new \RuntimeException(sprintf('Directory not writable: %s. Check file permissions.', $dir));
+                throw new RuntimeException(sprintf('Directory not writable: %s. Check file permissions.', $dir));
             }
         }
     }
@@ -142,7 +146,7 @@ class InstallService
             return;
         }
 
-        throw new \RuntimeException(
+        throw new RuntimeException(
             'Cannot create .env file. .env.example not found. '.
             'Please ensure the BlogWriter distribution includes this template file.'
         );

@@ -1,19 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use InvalidArgumentException;
 
-class DatabaseSeeder extends Seeder
+final class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
     /**
      * User configuration for single-user setup
      */
-    protected array $userConfig = [
+    private array $userConfig = [
         'name' => 'Jacob',
         'email' => 'demo@example.com',
         'password' => 'password',
@@ -22,12 +25,12 @@ class DatabaseSeeder extends Seeder
     /**
      * Current state to seed
      */
-    protected string $currentState = 'demo';
+    private string $currentState = 'demo';
 
     /**
      * Available states
      */
-    protected array $validStates = ['empty', 'minimal', 'demo', 'full'];
+    private array $validStates = ['empty', 'minimal', 'demo', 'full'];
 
     /**
      * Main entry point - called by artisan db:seed
@@ -68,7 +71,7 @@ class DatabaseSeeder extends Seeder
     public function withState(string $state): self
     {
         if (! in_array($state, $this->validStates)) {
-            throw new \InvalidArgumentException(sprintf('Invalid state: %s. Valid states: ', $state).implode(', ', $this->validStates));
+            throw new InvalidArgumentException(sprintf('Invalid state: %s. Valid states: ', $state).implode(', ', $this->validStates));
         }
 
         $this->currentState = $state;
@@ -92,7 +95,7 @@ class DatabaseSeeder extends Seeder
     /**
      * Seed specific state
      */
-    protected function seedState(string $state): void
+    private function seedState(string $state): void
     {
         // Always seed categories first (shared across all states)
         $this->call(CategorySeeder::class);
@@ -127,7 +130,7 @@ class DatabaseSeeder extends Seeder
     /**
      * Seed single user with configured credentials
      */
-    protected function seedUser(): void
+    private function seedUser(): void
     {
         $this->command?->info('Seeding user...');
 
@@ -145,14 +148,14 @@ class DatabaseSeeder extends Seeder
      * Parse user option from command line
      * Format: --user="Name,email,password"
      */
-    protected function parseUserOption(string $userOption): void
+    private function parseUserOption(string $userOption): void
     {
         $parts = explode(',', $userOption);
 
         if (count($parts) !== 3) {
-            throw new \InvalidArgumentException('User option must be in format: "Name,email,password"');
+            throw new InvalidArgumentException('User option must be in format: "Name,email,password"');
         }
 
-        $this->asUser(trim($parts[0]), trim($parts[1]), trim($parts[2]));
+        $this->asUser(mb_trim($parts[0]), mb_trim($parts[1]), mb_trim($parts[2]));
     }
 }

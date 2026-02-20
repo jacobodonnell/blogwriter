@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
 
-class EnsureInstalled
+final class EnsureInstalled
 {
     public function handle(Request $request, Closure $next): mixed
     {
