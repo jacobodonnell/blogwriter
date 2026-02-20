@@ -18,6 +18,7 @@
         "developing-with-fortify",
         "medialibrary-development",
         "alpine-development",
-        "blogwriter-docs"
+        "blogwriter-docs",
+        "daisyui-development"
     ]
 }
