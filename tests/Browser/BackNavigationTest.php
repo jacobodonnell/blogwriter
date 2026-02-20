@@ -40,7 +40,7 @@ it('renders styled page after browser back following AJAX table refresh', functi
     $page->assertSee('Back Nav Test Category');
 
     // Click the eye icon to navigate to the public category page
-    $page->click('a[title="View category"]')
+    $page->click('@view-category')
         ->wait(1);
 
     // Go back (simulates browser back button)
