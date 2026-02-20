@@ -83,14 +83,15 @@
          class="flex flex-col h-screen">
 
         {{-- Top Navbar --}}
-        <header class="navbar bg-base-100 border-b border-base-300 px-4 shrink-0 z-30">
-            <div class="flex-1 gap-2">
+        <header class="navbar flex-nowrap bg-base-100 border-b border-base-300 px-4 shrink-0 z-30">
+            <div class="flex flex-1 items-center gap-2">
                 {{-- Drawer Toggle (left side) --}}
-                <button @click="drawerOpen = !drawerOpen" class="btn btn-ghost btn-sm gap-1"
+                <button @click="drawerOpen = !drawerOpen"
+                        class="btn btn-ghost btn-sm btn-square tooltip tooltip-right"
                         :class="{ 'btn-active': drawerOpen }"
+                        :data-tip="drawerOpen ? 'Close editor' : 'Open editor'"
                         aria-label="Toggle editor">
                     <i class="ph ph-sidebar-simple text-lg"></i>
-                    <span class="hidden sm:inline">Editor</span>
                 </button>
 
                 <div class="divider divider-horizontal mx-0 hidden sm:flex"></div>
@@ -102,7 +103,17 @@
                 <span
                     class="text-sm text-base-content/60 truncate max-w-xs hidden sm:inline">{{ $article->title }}</span>
             </div>
-            <div class="flex-none gap-1">
+            <div class="flex items-center gap-1">
+                {{-- Compact save button (desktop) --}}
+                <button x-show="$store.saveButton.ready"
+                        @click="window.dispatchEvent(new CustomEvent('save-article'))"
+                        class="btn btn-sm btn-square hidden sm:inline-flex tooltip tooltip-bottom"
+                        :class="$store.saveButton.cssClass"
+                        :data-tip="$store.saveButton.label"
+                        x-cloak>
+                    <i class="ph text-lg" :class="$store.saveButton.icon"></i>
+                </button>
+
                 {{-- Viewport Presets --}}
                 <div class="join hidden sm:flex">
                     <button @click="setPreset(375)" class="btn btn-ghost btn-xs join-item"
@@ -244,6 +255,22 @@
                 </div>
             </div>
         </div>
+
+        {{-- Floating save button (mobile, when drawer closed) --}}
+        <button x-show="!drawerOpen && $store.saveButton.ready"
+                @click="window.dispatchEvent(new CustomEvent('save-article'))"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 translate-y-4"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 translate-y-0"
+                x-transition:leave-end="opacity-0 translate-y-4"
+                class="fixed bottom-4 right-4 z-40 btn gap-2 shadow-lg sm:hidden"
+                :class="$store.saveButton.cssClass"
+                x-cloak>
+            <i class="ph" :class="$store.saveButton.icon"></i>
+            <span x-text="$store.saveButton.label"></span>
+        </button>
     </div>
 
 </x-layouts.base>

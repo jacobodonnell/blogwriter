@@ -95,6 +95,25 @@ export default function articleCustomizer(config) {
                     );
                 });
             });
+
+            const store = Alpine.store('saveButton');
+            store.label = this.buttonLabel;
+            store.icon = this.buttonIcon;
+            store.cssClass = this.buttonClass;
+            store.action = this.buttonAction;
+            store.ready = true;
+
+            this.$watch('buttonLabel', v => store.label = v);
+            this.$watch('buttonIcon', v => store.icon = v);
+            this.$watch('buttonClass', v => store.cssClass = v);
+            this.$watch('buttonAction', v => store.action = v);
+
+            window.addEventListener('save-article', () => {
+                if (this.buttonAction === 'publish') { document.getElementById('publish-modal').showModal(); return; }
+                if (this.buttonAction === 'republish') { document.getElementById('republish-modal').showModal(); return; }
+                if (this.buttonAction === 'unpublish') { document.getElementById('unpublish-modal').showModal(); return; }
+                this.submitFullSave();
+            });
         },
 
         attachPhoto() {

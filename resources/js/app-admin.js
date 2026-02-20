@@ -7,6 +7,14 @@ import articleCustomizer from './components/article-customizer';
 import featuredImage from './components/featured-image';
 import uploadPhotoModal from './components/upload-photo-modal';
 
+Alpine.store('saveButton', {
+    label: 'Save',
+    icon: 'ph-floppy-disk',
+    cssClass: 'btn-primary',
+    action: 'save',
+    ready: false,
+});
+
 Alpine.data('appearanceSettings', appearanceSettings);
 Alpine.data('sidebar', sidebar);
 Alpine.data('customizerLayout', customizerLayout);
