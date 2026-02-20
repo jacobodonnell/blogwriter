@@ -320,13 +320,7 @@ class Article extends Model
      */
     public function permalink(): string
     {
-        // Check if public route exists, otherwise return preview URL
-        if (\Illuminate\Support\Facades\Route::has('articles.show')) {
-            return route('articles.show', $this->slug);
-        }
-
-        // Return admin preview URL if public route doesn't exist yet
-        return url('/articles/'.$this->slug);
+        return route('articles.show', $this->slug);
     }
 
     /**

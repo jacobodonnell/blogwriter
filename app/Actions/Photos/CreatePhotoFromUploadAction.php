@@ -3,6 +3,7 @@
 namespace App\Actions\Photos;
 
 use App\Actions\GenerateUniqueSlugAction;
+use App\Enums\Status;
 use App\Models\Photo;
 use Illuminate\Http\UploadedFile;
 
@@ -25,8 +26,8 @@ final readonly class CreatePhotoFromUploadAction
             'slug' => $this->generateSlug->handle($baseSlug, Photo::class),
             'alt_text' => $attributes['alt_text'] ?? null,
             'caption' => $attributes['caption'] ?? null,
-            'status' => $attributes['status'] ?? 'draft',
-            'published_at' => ($attributes['status'] ?? 'draft') === 'published' ? now() : null,
+            'status' => $attributes['status'] ?? Status::Draft,
+            'published_at' => ($attributes['status'] ?? Status::Draft) === Status::Published ? now() : null,
             'taken_at' => $attributes['taken_at'] ?? null,
             'category_id' => $attributes['category_id'] ?? null,
             'meta' => $exifData,

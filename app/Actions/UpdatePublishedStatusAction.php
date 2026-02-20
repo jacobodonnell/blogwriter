@@ -2,15 +2,16 @@
 
 namespace App\Actions;
 
+use App\Enums\Status;
 use Illuminate\Database\Eloquent\Model;
 
 final readonly class UpdatePublishedStatusAction
 {
-    public function handle(Model $model, string $status): void
+    public function handle(Model $model, Status $status): void
     {
-        if ($status === 'published' && $model->published_at === null) {
+        if ($status === Status::Published && $model->published_at === null) {
             $model->published_at = now();
-        } elseif ($status !== 'published') {
+        } elseif ($status !== Status::Published) {
             $model->published_at = null;
         }
     }

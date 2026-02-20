@@ -7,7 +7,7 @@ use App\Models\User;
 
 beforeEach(function (): void {
     $this->user = User::factory()->create();
-    $this->appName = config('app.name', 'BlogWriter');
+    $this->appName = e(config('app.name', 'BlogWriter'));
 });
 
 it('renders admin dashboard with correct title tag', function (): void {

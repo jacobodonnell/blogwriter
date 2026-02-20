@@ -41,7 +41,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#ffffff">
 
-    <title>{!! $title ?: config('app.name', 'BlogWriter') !!}</title>
+    <title>{{ $title ?: config('app.name', 'BlogWriter') }}</title>
 
     <!-- Prevent x-cloak elements from flashing before Alpine -->
     <style>[x-cloak] { display: none !important; }</style>

@@ -101,19 +101,7 @@ class Photo extends Model implements HasMedia
     protected function imageUrl(): Attribute
     {
         return Attribute::make(
-            get: function (): ?string {
-                $media = $this->getFirstMedia('image');
-
-                if (! $media instanceof \Spatie\MediaLibrary\MediaCollections\Models\Media) {
-                    return null;
-                }
-
-                if ($media->disk === 'private') {
-                    return route('admin.media.show', ['media' => $media->id, 'conversion' => 'large']);
-                }
-
-                return $media->getUrl('large');
-            }
+            get: fn (): ?string => $this->getMediaUrl('large'),
         );
     }
 
@@ -123,20 +111,26 @@ class Photo extends Model implements HasMedia
     protected function thumbnailUrl(): Attribute
     {
         return Attribute::make(
-            get: function (): ?string {
-                $media = $this->getFirstMedia('image');
-
-                if (! $media instanceof \Spatie\MediaLibrary\MediaCollections\Models\Media) {
-                    return null;
-                }
-
-                if ($media->disk === 'private') {
-                    return route('admin.media.show', ['media' => $media->id, 'conversion' => 'thumbnail']);
-                }
-
-                return $media->getUrl('thumbnail');
-            }
+            get: fn (): ?string => $this->getMediaUrl('thumbnail'),
         );
+    }
+
+    /**
+     * Get a media conversion URL, handling private disk routing.
+     */
+    private function getMediaUrl(string $conversion): ?string
+    {
+        $media = $this->getFirstMedia('image');
+
+        if (! $media instanceof \Spatie\MediaLibrary\MediaCollections\Models\Media) {
+            return null;
+        }
+
+        if ($media->disk === 'private') {
+            return route('admin.media.show', ['media' => $media->id, 'conversion' => $conversion]);
+        }
+
+        return $media->getUrl($conversion);
     }
 
     /**

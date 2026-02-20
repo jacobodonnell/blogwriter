@@ -2,6 +2,7 @@
 
 namespace App\Actions\Photos;
 
+use App\Enums\Status;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
@@ -22,7 +23,7 @@ final readonly class HandleArticlePhotoUploadAction
                 'slug' => $data['slug'] ?? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
                 'alt_text' => $data['featured_image_alt'] ?? $data['title'] ?? 'Featured image',
                 'caption' => $data['featured_image_caption'] ?? null,
-                'status' => 'published',
+                'status' => Status::Published,
             ]);
 
             return $photo->id;

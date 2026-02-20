@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Photo;
 use App\Models\User;
 use App\Observers\PhotoObserver;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -33,7 +34,11 @@ class AppServiceProvider extends ServiceProvider
             'components.category-feed',
             'components.category-layout',
         ], function ($view): void {
-            $view->with('authorName', User::first()?->name ?? 'Author');
+            $view->with('authorName', Cache::remember(
+                'author_name',
+                now()->addHour(),
+                fn () => User::first()?->name ?? 'Author',
+            ));
         });
     }
 }

@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\Status;
-use App\Models\Article;
 use App\Models\Category;
-use App\Models\Photo;
+use App\Services\ContentFilterService;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
 
 class CategoryContentController extends Controller
 {
+    public function __construct(
+        private readonly ContentFilterService $contentFilter,
+    ) {}
+
     /**
      * Display articles and photos by category (including subcategories).
      */
@@ -29,7 +31,6 @@ class CategoryContentController extends Controller
         }
 
         $categoryIds = array_merge([$category->id], $category->descendantIds());
-        $isAuth = auth()->check();
 
         $type = $request->query('type', 'all');
 
@@ -37,72 +38,25 @@ class CategoryContentController extends Controller
             $type = 'all';
         }
 
-        $search = $request->query('search');
-        $status = $isAuth && $request->filled('status')
-            ? Status::from($request->input('status'))
-            : null;
-
         $articles = new LengthAwarePaginator([], 0, 10);
         $photos = new LengthAwarePaginator([], 0, 12);
 
         if ($type === 'all' || $type === 'articles') {
-            $articleQuery = $isAuth
-                ? Article::whereIn('category_id', $categoryIds)
-                : Article::published()->whereIn('category_id', $categoryIds);
-
-            if ($search) {
-                $articleQuery->where('title', 'like', sprintf('%%%s%%', $search));
-            }
-
-            if ($status) {
-                $articleQuery->where('status', $status);
-            }
-
-            $articles = $articleQuery->with('category')
-                ->orderBy('published_at', 'desc')
-                ->paginate(10, ['*'], 'articles_page')
-                ->withQueryString();
+            $articles = $this->contentFilter->filterArticles($request, $categoryIds);
         }
 
         if ($type === 'all' || $type === 'photos') {
-            $photoQuery = $isAuth
-                ? Photo::whereIn('category_id', $categoryIds)
-                : Photo::published()->whereIn('category_id', $categoryIds);
-
-            if ($search) {
-                $photoQuery->where(function ($q) use ($search): void {
-                    $q->where('alt_text', 'like', sprintf('%%%s%%', $search))
-                        ->orWhere('caption', 'like', sprintf('%%%s%%', $search));
-                });
-            }
-
-            if ($status) {
-                $photoQuery->where('status', $status);
-            }
-
-            $photos = $photoQuery->orderBy('published_at', 'desc')
-                ->paginate(12, ['*'], 'photos_page')
-                ->withQueryString();
+            $photos = $this->contentFilter->filterPhotos($request, $categoryIds);
         }
-
-        $articleCount = $isAuth
-            ? $category->articles()->count()
-            : $category->articles()->published()->count();
-
-        $photoCount = $isAuth
-            ? $category->photos()->count()
-            : $category->photos()->published()->count();
-
-        $children = $category->children()->orderBy('name')->get();
 
         return view('public.category', [
             'category' => $category,
             'articles' => $articles,
             'photos' => $photos,
-            'children' => $children,
+            'children' => $category->children()->orderBy('name')->get(),
             'currentType' => $type,
-            'articleCount' => $articleCount,
-            'photoCount' => $photoCount,
+            'articleCount' => $this->contentFilter->countArticles($category),
+            'photoCount' => $this->contentFilter->countPhotos($category),
         ]);
     }
 }

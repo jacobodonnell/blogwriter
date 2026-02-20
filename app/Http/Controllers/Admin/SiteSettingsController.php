@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdatePageSettingsRequest;
 use App\Models\Setting;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class SiteSettingsController extends Controller
@@ -20,6 +21,7 @@ class SiteSettingsController extends Controller
         foreach ($request->validated() as $key => $value) {
             if (blank($value)) {
                 Setting::query()->where('key', $key)->delete();
+                Cache::forget('setting.'.$key);
             } else {
                 Setting::set($key, $value);
             }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class Setting extends Model
 {
@@ -18,7 +19,11 @@ class Setting extends Model
      */
     public static function get(string $key, mixed $default = null): mixed
     {
-        return static::query()->where('key', $key)->value('value') ?? $default;
+        return Cache::remember(
+            'setting.'.$key,
+            now()->addHour(),
+            fn () => static::query()->where('key', $key)->value('value'),
+        ) ?? $default;
     }
 
     /**
@@ -30,5 +35,7 @@ class Setting extends Model
             ['key' => $key],
             ['value' => $value],
         );
+
+        Cache::forget('setting.'.$key);
     }
 }

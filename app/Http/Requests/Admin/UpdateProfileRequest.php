@@ -21,13 +21,13 @@ class UpdateProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'profile_name' => 'required|string|max:255',
+            'profile_name' => ['required', 'string', 'max:255'],
             'profile_bio' => ['nullable', 'string', 'max:1000', new NoH1Heading],
-            'profile_avatar' => 'nullable|url|max:2048',
-            'profile_github' => 'nullable|url|max:2048',
-            'profile_mastodon' => 'nullable|url|max:2048',
-            'profile_bluesky' => 'nullable|url|max:2048',
-            'profile_email' => 'nullable|email|max:255',
+            'profile_avatar' => ['nullable', 'url', 'max:2048'],
+            'profile_github' => ['nullable', 'url', 'max:2048'],
+            'profile_mastodon' => ['nullable', 'url', 'max:2048'],
+            'profile_bluesky' => ['nullable', 'url', 'max:2048'],
+            'profile_email' => ['nullable', 'email', 'max:255'],
         ];
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateProfileRequest;
 use App\Models\Setting;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class ProfileSettingsController extends Controller
@@ -23,10 +24,12 @@ class ProfileSettingsController extends Controller
         $name = $validated['profile_name'];
         unset($validated['profile_name']);
         $request->user()->update(['name' => $name]);
+        Cache::forget('author_name');
 
         foreach ($validated as $key => $value) {
             if (blank($value)) {
                 Setting::query()->where('key', $key)->delete();
+                Cache::forget('setting.'.$key);
             } else {
                 Setting::set($key, $value);
             }
