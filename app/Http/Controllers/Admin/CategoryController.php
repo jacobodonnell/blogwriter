@@ -8,6 +8,7 @@ use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
 class CategoryController extends Controller
@@ -40,20 +41,36 @@ class CategoryController extends Controller
     /**
      * Store a newly created category.
      */
-    public function store(CategoryRequest $request): Response|RedirectResponse
+    public function store(Request $request): Response|RedirectResponse
     {
-        $data = $request->validated();
+        $parentId = $request->input('parent_id');
+        $parent = $parentId ? Category::find((int) $parentId) : null;
+        $isAjax = (bool) $request->header('X-Alpine-Target');
+
+        $categoryRequest = new CategoryRequest;
+        $validator = Validator::make($request->all(), $categoryRequest->rules(), $categoryRequest->messages());
+
+        if ($validator->fails()) {
+            if ($isAjax) {
+                $formHtml = view('admin.categories._add-form', ['parent' => $parent])
+                    ->withErrors($validator)
+                    ->render();
+
+                return response('<div id="add-category-form">'.$formHtml.'</div>', 422);
+            }
+
+            return back()->withErrors($validator)->withInput();
+        }
+
+        $data = $validator->validated();
 
         Category::create($data);
 
-        if ($request->header('X-Alpine-Target')) {
-            $parentId = $data['parent_id'] ?? null;
-            $parent = $parentId ? Category::find($parentId) : null;
-
+        if ($isAjax) {
             return response(view('admin.categories._store-success', compact('parent')));
         }
 
-        return redirect($this->categoryRedirectUrl($data['parent_id'] ?? null))
+        return redirect($this->categoryRedirectUrl($parentId ? (int) $parentId : null))
             ->with('success', 'Category created successfully.');
     }
 

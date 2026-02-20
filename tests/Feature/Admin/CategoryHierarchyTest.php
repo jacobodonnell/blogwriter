@@ -219,6 +219,32 @@ it('store redirects for non-ajax request', function (): void {
     $response->assertSessionHas('success');
 });
 
+it('shows validation errors in form when duplicate slug submitted via ajax', function (): void {
+    Category::factory()->create(['name' => 'Tech', 'slug' => 'tech']);
+
+    $response = $this->post(
+        route('admin.categories.store'),
+        ['name' => 'Technology', 'slug' => 'tech'],
+        ['X-Alpine-Target' => 'add-category-form']
+    );
+
+    $response->assertStatus(422);
+    $response->assertSee('id="add-category-form"', false);
+    $response->assertSee('slug', false);
+});
+
+it('does not create category when slug is duplicate', function (): void {
+    Category::factory()->create(['slug' => 'tech']);
+
+    $this->post(
+        route('admin.categories.store'),
+        ['name' => 'Technology', 'slug' => 'tech'],
+        ['X-Alpine-Target' => 'add-category-form']
+    );
+
+    expect(Category::where('name', 'Technology')->exists())->toBeFalse();
+});
+
 it('category drill-down links are standard navigation without ajax target', function (): void {
     $root = Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
     Category::factory()->withParent($root)->create(['name' => 'PHP']);
