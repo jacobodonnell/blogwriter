@@ -19,11 +19,19 @@ class Setting extends Model
      */
     public static function get(string $key, mixed $default = null): mixed
     {
-        return Cache::remember(
-            'setting.'.$key,
-            now()->addHour(),
-            fn () => static::query()->where('key', $key)->value('value'),
-        ) ?? $default;
+        $cacheKey = 'setting.'.$key;
+
+        if (Cache::has($cacheKey)) {
+            return Cache::get($cacheKey);
+        }
+
+        $value = static::query()->where('key', $key)->value('value');
+
+        if ($value !== null) {
+            Cache::put($cacheKey, $value, now()->addHour());
+        }
+
+        return $value ?? $default;
     }
 
     /**
