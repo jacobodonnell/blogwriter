@@ -13,6 +13,7 @@ use App\Models\Category;
 use App\Models\Photo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
@@ -151,14 +152,16 @@ class AdminPhotoController extends Controller
             }
         }
 
-        $photo->save();
+        DB::transaction(function () use ($request, $photo): void {
+            $photo->save();
 
-        if ($request->hasFile('image_file')) {
-            $disk = $photo->status->isPublic() ? 'public' : 'private';
+            if ($request->hasFile('image_file')) {
+                $disk = $photo->status->isPublic() ? 'public' : 'private';
 
-            $photo->addMedia($request->file('image_file'))
-                ->toMediaCollection('image', $disk);
-        }
+                $photo->addMedia($request->file('image_file'))
+                    ->toMediaCollection('image', $disk);
+            }
+        });
 
         return redirect()->route('admin.photos.edit', $photo)
             ->with('success', 'Photo updated successfully.');
