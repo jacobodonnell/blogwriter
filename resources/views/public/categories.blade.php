@@ -1,4 +1,4 @@
-<x-layouts.public title="Categories - {{ config('app.name') }}">
+<x-layouts.public :title="'Categories - ' . config('app.name')">
 
     <x-slot:seo>
         <x-seo-meta :title="'Categories - ' . config('app.name')" description="Browse all categories" />
