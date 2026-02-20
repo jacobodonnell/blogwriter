@@ -39,8 +39,16 @@ class ArticleController extends Controller
             $articleQuery->where('status', Status::from($request->input('status')));
         }
 
+        $sortMap = [
+            'oldest' => ['published_at', 'asc'],
+            'title_asc' => ['title', 'asc'],
+            'title_desc' => ['title', 'desc'],
+        ];
+        $sortKey = $request->input('sort', '');
+        [$sortColumn, $sortDirection] = $sortMap[$sortKey] ?? ['published_at', 'desc'];
+
         $articles = $articleQuery->with('category')
-            ->orderBy('published_at', 'desc')
+            ->orderBy($sortColumn, $sortDirection)
             ->paginate(10)
             ->withQueryString();
 

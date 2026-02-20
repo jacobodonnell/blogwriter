@@ -18,7 +18,7 @@
                 createdAt: $persist(false).as('articles_col_createdAt'),
                 updatedAt: $persist(true).as('articles_col_updatedAt'),
             },
-            filtersOpen: false,
+            filtersOpen: $persist(true).as('admin_articles_filters_open'),
             toggle(col) {
                 this.columns[col] = !this.columns[col];
             }
@@ -30,13 +30,14 @@
                 <p class="text-base-content/70 mt-1">Manage your blog articles.</p>
             </div>
             <div class="flex gap-2">
-                {{-- Mobile Filters Toggle --}}
-                <button class="btn btn-ghost md:hidden" @click="filtersOpen = !filtersOpen">
+                {{-- Filters Toggle --}}
+                <button class="btn btn-ghost" @click="filtersOpen = !filtersOpen">
                     <i class="ph ph-funnel text-xl"></i>
                     Filters
                     @if($activeFilterCount > 0)
                         <span class="badge badge-sm badge-primary">{{ $activeFilterCount }}</span>
                     @endif
+                    <i class="ph ph-caret-down text-sm transition-transform duration-200" :class="filtersOpen && 'rotate-180'"></i>
                 </button>
 
                 {{-- Columns Toggle --}}
@@ -80,8 +81,8 @@
             </div>
         </div>
 
-        {{-- Filters: always visible on md+, toggle on mobile --}}
-        <div class="card bg-base-100 shadow hidden md:block" :class="filtersOpen && '!block'">
+        {{-- Collapsible Filters --}}
+        <div x-show="filtersOpen" x-collapse x-cloak class="card bg-base-100 shadow">
             <div class="card-body">
                 <form method="GET" action="{{ route('admin.articles.index') }}"
                       x-target="articles-table"

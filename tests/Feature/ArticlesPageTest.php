@@ -40,14 +40,14 @@ it('shows admin buttons for authenticated users', function (): void {
     $this->actingAs($user)
         ->get('/articles')
         ->assertSuccessful()
-        ->assertSee('Manage')
+        ->assertSee('Manage Articles')
         ->assertSee('New Article');
 });
 
 it('hides admin buttons for guests', function (): void {
     $this->get('/articles')
         ->assertSuccessful()
-        ->assertDontSee('Manage')
+        ->assertDontSee('Manage Articles')
         ->assertDontSee('New Article');
 });
 
@@ -145,4 +145,77 @@ it('combines multiple filters', function (): void {
         ->assertSee('Laravel Code Tips')
         ->assertDontSee('Laravel Other Tips')
         ->assertDontSee('Laravel Code Draft');
+});
+
+it('defaults to newest first', function (): void {
+    $old = Article::factory()->published()->create([
+        'title' => 'Old Article',
+        'published_at' => now()->subDays(10),
+    ]);
+    $new = Article::factory()->published()->create([
+        'title' => 'New Article',
+        'published_at' => now(),
+    ]);
+
+    $this->get('/articles')
+        ->assertSuccessful()
+        ->assertSeeInOrder(['New Article', 'Old Article']);
+});
+
+it('sorts articles by oldest first', function (): void {
+    $old = Article::factory()->published()->create([
+        'title' => 'Old Article',
+        'published_at' => now()->subDays(10),
+    ]);
+    $new = Article::factory()->published()->create([
+        'title' => 'New Article',
+        'published_at' => now(),
+    ]);
+
+    $this->get('/articles?sort=oldest')
+        ->assertSuccessful()
+        ->assertSeeInOrder(['Old Article', 'New Article']);
+});
+
+it('sorts articles by title ascending', function (): void {
+    Article::factory()->published()->create(['title' => 'Zebra Article', 'published_at' => now()]);
+    Article::factory()->published()->create(['title' => 'Alpha Article', 'published_at' => now()]);
+
+    $this->get('/articles?sort=title_asc')
+        ->assertSuccessful()
+        ->assertSeeInOrder(['Alpha Article', 'Zebra Article']);
+});
+
+it('sorts articles by title descending', function (): void {
+    Article::factory()->published()->create(['title' => 'Zebra Article', 'published_at' => now()]);
+    Article::factory()->published()->create(['title' => 'Alpha Article', 'published_at' => now()]);
+
+    $this->get('/articles?sort=title_desc')
+        ->assertSuccessful()
+        ->assertSeeInOrder(['Zebra Article', 'Alpha Article']);
+});
+
+it('defaults to newest first when sort is invalid', function (): void {
+    $old = Article::factory()->published()->create([
+        'title' => 'Old Article',
+        'published_at' => now()->subDays(10),
+    ]);
+    $new = Article::factory()->published()->create([
+        'title' => 'New Article',
+        'published_at' => now(),
+    ]);
+
+    $this->get('/articles?sort=bogus')
+        ->assertSuccessful()
+        ->assertSeeInOrder(['New Article', 'Old Article']);
+});
+
+it('preserves sort in pagination query string', function (): void {
+    Article::factory()->published()->count(15)
+        ->sequence(fn ($seq) => ['title' => 'Sorted Article '.$seq->index])
+        ->create();
+
+    $this->get('/articles?sort=oldest')
+        ->assertSuccessful()
+        ->assertSee('sort=oldest');
 });

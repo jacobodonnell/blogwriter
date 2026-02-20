@@ -11,34 +11,37 @@
         <x-breadcrumb :items="[['label' => 'Articles']]" />
 
         {{-- Header --}}
-        <header class="flex flex-wrap items-center justify-between gap-4 mb-8">
-            <div class="min-w-0">
-                <x-page-heading title="Articles" :subtitle="$subtitle" class="mb-2" />
-            </div>
-            <div class="flex shrink-0 gap-2">
-                @auth
-                    <a href="{{ route('admin.articles.index') }}" class="btn btn-ghost btn-sm gap-1">
-                        <i class="ph ph-gear text-lg"></i>
-                        Manage
-                    </a>
-                    <a href="{{ route('admin.articles.create') }}" class="btn btn-primary btn-sm gap-1">
-                        <i class="ph ph-plus"></i>
-                        New Article
-                    </a>
-                @endauth
-            </div>
+        <header class="mb-8">
+            <x-page-heading title="Articles" :subtitle="$subtitle" class="mb-2" />
         </header>
 
         {{-- Filter banner + Results (Alpine AJAX target) --}}
         <div id="article-results" x-merge="morph">
-            <x-filter-banner :action="route('articles.index')" target="article-results" :clearRoute="route('articles.index')">
-                <div class="sm:col-span-2">
+            <x-filter-banner :action="route('articles.index')" target="article-results" :clearRoute="route('articles.index')" persistKey="articles_filters_open">
+                <x-slot:toolbar>
+                    @auth
+                        <a href="{{ route('admin.articles.index') }}" class="btn btn-ghost btn-sm gap-1">
+                            <i class="ph ph-gear text-lg"></i>
+                            Manage Articles
+                        </a>
+                        <a href="{{ route('admin.articles.create') }}" class="btn btn-primary btn-sm gap-1">
+                            <i class="ph ph-plus"></i>
+                            New Article
+                        </a>
+                    @endauth
+                </x-slot:toolbar>
+
+                @guest
+                    <div class="sm:col-span-2">
+                @else
+                    <div class="sm:col-span-1">
+                @endguest
                     <input type="text" name="search" value="{{ request('search') }}"
                            placeholder="Search articles..."
                            class="input input-bordered w-full"
                            @input.debounce.400ms="$el.form.requestSubmit()">
                 </div>
-                <div class="@auth sm:col-span-1 @else sm:col-span-2 @endauth">
+                <div class="sm:col-span-1">
                     <x-category-select :categories="$categories"
                         name="category" emptyLabel="All Categories"
                         :selected="request('category')" :useSlug="true"
@@ -54,6 +57,15 @@
                         </select>
                     </div>
                 @endauth
+                <div class="sm:col-span-1">
+                    <select name="sort" class="select select-bordered w-full"
+                            @change="$el.form.requestSubmit()">
+                        <option value="" @selected(!request('sort'))>Newest First</option>
+                        <option value="oldest" @selected(request('sort') === 'oldest')>Oldest First</option>
+                        <option value="title_asc" @selected(request('sort') === 'title_asc')>Title A–Z</option>
+                        <option value="title_desc" @selected(request('sort') === 'title_desc')>Title Z–A</option>
+                    </select>
+                </div>
             </x-filter-banner>
             @if($articles->isNotEmpty())
                 @php $placeholderUrl = placeholder_image_url(); @endphp
@@ -148,7 +160,7 @@
             @else
                 <div class="text-center py-16">
                     <div class="text-6xl mb-4"><i class="ph ph-note-blank text-base-content/30"></i></div>
-                    @if(request('search') || request('category') || request('status'))
+                    @if(request('search') || request('category') || request('status') || request('sort'))
                         <h2 class="text-2xl font-bold mb-2">No articles found</h2>
                         <p class="text-base-content/60 mb-6">Try adjusting your filters.</p>
                         <a href="{{ route('articles.index') }}" class="btn btn-ghost">Clear Filters</a>
