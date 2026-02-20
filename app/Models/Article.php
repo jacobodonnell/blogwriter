@@ -313,7 +313,9 @@ class Article extends Model
     protected function ogImage(): Attribute
     {
         return Attribute::make(
-            get: fn (): ?string => $this->meta['og_image'] ?? $this->featured_image_url,
+            get: fn (): ?string => $this->meta['og_image']
+                ?? $this->featured_image_url
+                ?? placeholder_image_url(),
         );
     }
 
