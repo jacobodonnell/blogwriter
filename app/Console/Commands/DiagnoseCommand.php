@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 
 class DiagnoseCommand extends Command
 {
@@ -30,9 +30,7 @@ class DiagnoseCommand extends Command
         // Check 3: Database has tables
         $this->check('Database has tables', function (): bool {
             try {
-                DB::select('SELECT 1 FROM users LIMIT 1');
-
-                return true;
+                return Schema::hasTable('users');
             } catch (\Exception) {
                 return false;
             }
