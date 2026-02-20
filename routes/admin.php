@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminCategoryChildrenController;
 use App\Http\Controllers\Admin\AdminPhotoController;
 use App\Http\Controllers\Admin\AppearanceController;
 use App\Http\Controllers\Admin\ArticleController;
@@ -46,6 +47,11 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function (): v
     Route::get('/categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
     Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+
+    // Category children — slug-path index (must be last among category GET routes)
+    Route::get('/categories/{path}', [AdminCategoryChildrenController::class, 'index'])
+        ->where('path', '.*')
+        ->name('categories.children');
 
     // Settings — redirect index to first tab
     Route::redirect('/settings', '/admin/settings/profile')->name('settings');

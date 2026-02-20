@@ -21,20 +21,20 @@ it('shows root categories by default', function (): void {
 });
 
 it('drills down to show children when parent is specified', function (): void {
-    $root = Category::factory()->create(['name' => 'Programming']);
+    $root = Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
     $child = Category::factory()->withParent($root)->create(['name' => 'PHP']);
 
-    $response = $this->get(route('admin.categories.index', ['parent' => $root->id]));
+    $response = $this->get(route('admin.categories.children', $root->slug));
 
     $response->assertSuccessful();
     $response->assertSee('PHP');
 });
 
 it('returns table partial for AJAX requests', function (): void {
-    $root = Category::factory()->create(['name' => 'Programming']);
+    $root = Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
 
     $response = $this->get(
-        route('admin.categories.index', ['parent' => $root->id]),
+        route('admin.categories.children', $root->slug),
         ['X-Alpine-Target' => 'categories-table']
     );
 
@@ -91,11 +91,11 @@ it('allows deletion when category has no children or articles', function (): voi
 });
 
 it('builds correct breadcrumbs for nested category', function (): void {
-    $root = Category::factory()->create(['name' => 'Programming']);
-    $child = Category::factory()->withParent($root)->create(['name' => 'PHP']);
-    $grandchild = Category::factory()->withParent($child)->create(['name' => 'Laravel']);
+    $root = Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
+    $child = Category::factory()->withParent($root)->create(['name' => 'PHP', 'slug' => 'php']);
+    $grandchild = Category::factory()->withParent($child)->create(['name' => 'Laravel', 'slug' => 'laravel']);
 
-    $response = $this->get(route('admin.categories.index', ['parent' => $grandchild->id]));
+    $response = $this->get(route('admin.categories.children', 'programming/php/laravel'));
 
     $response->assertSuccessful();
     $response->assertSeeInOrder(['Root', 'Programming', 'PHP', 'Laravel']);
@@ -125,7 +125,7 @@ it('auto-generates slug when slug is not provided', function (): void {
 });
 
 it('redirects to parent context after creating child category', function (): void {
-    $parent = Category::factory()->create(['name' => 'Programming']);
+    $parent = Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
 
     $response = $this->post(route('admin.categories.store'), [
         'name' => 'PHP',
@@ -133,5 +133,51 @@ it('redirects to parent context after creating child category', function (): voi
         'parent_id' => $parent->id,
     ]);
 
-    $response->assertRedirect(route('admin.categories.index').'?parent='.$parent->id);
+    $response->assertRedirect(route('admin.categories.children', $parent->slug));
+});
+
+it('resolves nested slug path to correct category', function (): void {
+    $root = Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
+    $child = Category::factory()->withParent($root)->create(['name' => 'PHP', 'slug' => 'php']);
+
+    $response = $this->get(route('admin.categories.children', 'programming/php'));
+
+    $response->assertSuccessful();
+    $response->assertSee('PHP');
+    $response->assertSee('Programming');
+});
+
+it('returns 404 for invalid slug path', function (): void {
+    Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
+
+    $this->get(route('admin.categories.children', 'programming/nonexistent'))
+        ->assertNotFound();
+});
+
+it('store redirects to slug path URL after creating child', function (): void {
+    $parent = Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
+
+    $response = $this->post(route('admin.categories.store'), [
+        'name' => 'JavaScript',
+        'slug' => 'javascript',
+        'parent_id' => $parent->id,
+    ]);
+
+    $response->assertRedirect(route('admin.categories.children', 'programming'));
+});
+
+it('add category modal is present on index page', function (): void {
+    $response = $this->get(route('admin.categories.index'));
+
+    $response->assertSuccessful();
+    $response->assertSee('add-category-modal', false);
+    $response->assertSee('Add Category');
+});
+
+it('modal shows validation errors on empty name', function (): void {
+    $response = $this->post(route('admin.categories.store'), [
+        'name' => '',
+    ]);
+
+    $response->assertSessionHasErrors('name');
 });

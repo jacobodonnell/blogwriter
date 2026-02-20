@@ -3,76 +3,57 @@
         <li>Categories</li>
     </x-slot:breadcrumb>
 
-    <div class="space-y-6" x-data="{ currentParent: @js((string) ($parent?->id ?? '')) }">
+    <div class="space-y-6">
         {{-- Header --}}
-        <div>
-            <h1 class="text-3xl font-bold">Categories</h1>
-            <p class="text-base-content/70 mt-1">Manage article categories.</p>
-        </div>
-
-        {{-- Add Category Form --}}
-        <div class="card bg-base-100 shadow">
-            <div class="card-body">
-                <h2 class="card-title text-lg">Add New Category</h2>
-                <form method="POST"
-                      action="{{ route('admin.categories.store') }}"
-                      x-target="categories-table"
-                      x-data="{ name: '', slug: '' }"
-                      class="flex flex-wrap gap-4 items-end">
-                    @csrf
-                    <input type="hidden" name="parent_id" :value="currentParent">
-                    <div class="form-control flex-1 min-w-[150px]">
-                        <label class="label">
-                            <span class="label-text">Name</span>
-                        </label>
-                        <input type="text"
-                               name="name"
-                               x-model="name"
-                               @blur="if (!slug) { slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') }"
-                               class="input input-bordered"
-                               placeholder="Category name"
-                               required>
-                    </div>
-                    <div class="form-control flex-1 min-w-[150px]">
-                        <label class="label">
-                            <span class="label-text">Slug (optional)</span>
-                        </label>
-                        <input type="text"
-                               name="slug"
-                               x-model="slug"
-                               class="input input-bordered"
-                               placeholder="auto-generated">
-                    </div>
-                    <div class="form-control flex-[2] min-w-[200px]">
-                        <label class="label">
-                            <span class="label-text">Description</span>
-                        </label>
-                        <input type="text" name="description" class="input input-bordered" placeholder="Brief description">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Add Category</button>
-                </form>
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-bold">{{ $parent ? $parent->name : 'Categories' }}</h1>
+                @if($breadcrumbs->isNotEmpty())
+                    <nav class="text-sm breadcrumbs mt-1">
+                        <ul>
+                            <li>
+                                <a href="{{ route('admin.categories.index') }}" class="link link-hover">
+                                    Categories
+                                </a>
+                            </li>
+                            @foreach($breadcrumbs as $crumb)
+                                @if(!$loop->last)
+                                    @php
+                                        $crumbPath = $breadcrumbs->slice(0, $loop->index + 1)->pluck('slug')->implode('/');
+                                    @endphp
+                                    <li>
+                                        <a href="{{ route('admin.categories.children', $crumbPath) }}" class="link link-hover">
+                                            {{ $crumb->name }}
+                                        </a>
+                                    </li>
+                                @else
+                                    <li class="text-base-content/60">{{ $crumb->name }}</li>
+                                @endif
+                            @endforeach
+                        </ul>
+                    </nav>
+                @else
+                    <p class="text-base-content/70 mt-1">Manage article categories.</p>
+                @endif
             </div>
+            <button
+                class="btn btn-primary btn-sm shrink-0"
+                onclick="document.getElementById('add-category-modal').showModal()">
+                <i class="ph ph-plus text-base"></i>
+                {{ $parent ? 'Add Subcategory' : 'Add Category' }}
+            </button>
         </div>
-
-        {{-- Parent Filter --}}
-        <form method="GET"
-              action="{{ route('admin.categories.index') }}"
-              x-target.push="categories-table"
-              class="flex items-center gap-3">
-            <label class="label">
-                <span class="label-text font-medium">Viewing:</span>
-            </label>
-            <x-category-select
-                :categories="$allCategories"
-                name="parent"
-                empty-label="Root Categories"
-                x-model="currentParent"
-                @change="$el.form.requestSubmit()"
-                class="select select-bordered select-sm"
-            />
-        </form>
 
         {{-- Categories List --}}
         @include('admin.categories._table')
     </div>
+
+    {{-- Add Category Modal --}}
+    <x-editor-modal
+        id="add-category-modal"
+        :title="$parent ? 'Add Subcategory in ' . $parent->name : 'Add New Category'">
+        <div id="add-category-form">
+            @include('admin.categories._add-form')
+        </div>
+    </x-editor-modal>
 </x-layouts.admin>

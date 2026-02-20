@@ -12,28 +12,21 @@ use Illuminate\View\View;
 class CategoryController extends Controller
 {
     /**
-     * Display a listing of categories, optionally scoped to a parent.
+     * Display a listing of root categories.
      */
     public function index(Request $request): View
     {
-        $parentId = $request->input('parent');
-        $parent = $parentId ? Category::findOrFail($parentId) : null;
-
         $categories = Category::query()
-            ->where('parent_id', $parent?->id)
+            ->whereNull('parent_id')
             ->withCount(['articles', 'children'])
             ->orderBy('name')
             ->get();
 
-        $breadcrumbs = $parent ? $parent->ancestors()->push($parent) : collect();
-
-        $allCategories = Category::tree()->get();
-
         $viewData = [
             'categories' => $categories,
-            'parent' => $parent,
-            'breadcrumbs' => $breadcrumbs,
-            'allCategories' => $allCategories,
+            'parent' => null,
+            'breadcrumbs' => collect(),
+            'slugPrefix' => '',
         ];
 
         if ($request->header('X-Alpine-Target')) {
@@ -112,12 +105,18 @@ class CategoryController extends Controller
 
     private function categoryRedirectUrl(?int $parentId): string
     {
-        $url = route('admin.categories.index');
-
-        if ($parentId) {
-            $url .= '?parent='.$parentId;
+        if (! $parentId) {
+            return route('admin.categories.index');
         }
 
-        return $url;
+        $parent = Category::find($parentId);
+
+        if (! $parent) {
+            return route('admin.categories.index');
+        }
+
+        $slugs = $parent->ancestors()->pluck('slug')->push($parent->slug)->implode('/');
+
+        return route('admin.categories.children', $slugs);
     }
 }

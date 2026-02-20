@@ -1,5 +1,5 @@
 {{-- Table card: targeted by Alpine AJAX via #categories-table --}}
-<div id="categories-table" class="card bg-base-100 shadow" x-init="currentParent = @js((string) ($parent?->id ?? ''))">
+<div id="categories-table" class="card bg-base-100 shadow">
     <div class="card-body p-0">
 
         {{-- Breadcrumb Navigation --}}
@@ -16,8 +16,11 @@
                         </li>
                         @foreach($breadcrumbs as $crumb)
                             @if(!$loop->last)
+                                @php
+                                    $crumbPath = $breadcrumbs->slice(0, $loop->index + 1)->pluck('slug')->implode('/');
+                                @endphp
                                 <li>
-                                    <a href="{{ route('admin.categories.index', ['parent' => $crumb->id]) }}"
+                                    <a href="{{ route('admin.categories.children', $crumbPath) }}"
                                        x-target.push="categories-table"
                                        class="link link-hover">
                                         {{ $crumb->name }}
@@ -46,12 +49,15 @@
                     </thead>
                     <tbody>
                         @foreach($categories as $category)
+                            @php
+                                $drillPath = ($slugPrefix ? $slugPrefix . '/' : '') . $category->slug;
+                            @endphp
                             <tr>
                                 <td>
                                     <div class="flex items-center gap-2">
                                         <div class="font-semibold">
                                             @if($category->children_count > 0)
-                                                <a href="{{ route('admin.categories.index', ['parent' => $category->id]) }}"
+                                                <a href="{{ route('admin.categories.children', $drillPath) }}"
                                                    x-target.push="categories-table"
                                                    class="link link-hover inline-flex items-center gap-1">
                                                     {{ $category->name }}
