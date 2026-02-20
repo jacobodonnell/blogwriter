@@ -3,7 +3,7 @@
 
 <header class="navbar bg-base-100 sticky top-0 z-30 shadow-sm h-16">
     <div class="flex-none">
-        <button @click="toggle()" class="btn btn-square btn-ghost">
+        <button @click="toggle()" class="btn btn-square btn-ghost" aria-label="Toggle sidebar">
             <i x-show="!mobileDrawerOpen || isDesktop" class="ph ph-sidebar-simple text-xl" x-cloak></i>
             <i x-show="mobileDrawerOpen && !isDesktop" class="ph ph-x text-xl" x-cloak></i>
         </button>

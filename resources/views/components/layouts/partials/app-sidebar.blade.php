@@ -26,7 +26,7 @@
 
     {{-- Mobile close button --}}
     <div class="flex items-center justify-end h-16 px-4 border-b border-base-300 shrink-0 lg:hidden">
-        <button @click="closeMobile()" class="btn btn-ghost btn-sm btn-circle">
+        <button @click="closeMobile()" class="btn btn-ghost btn-sm btn-circle" aria-label="Close sidebar">
             <i class="ph ph-x text-lg"></i>
         </button>
     </div>

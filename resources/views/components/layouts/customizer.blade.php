@@ -87,7 +87,8 @@
             <div class="flex-1 gap-2">
                 {{-- Drawer Toggle (left side) --}}
                 <button @click="drawerOpen = !drawerOpen" class="btn btn-ghost btn-sm gap-1"
-                        :class="{ 'btn-active': drawerOpen }">
+                        :class="{ 'btn-active': drawerOpen }"
+                        aria-label="Toggle editor">
                     <i class="ph ph-sidebar-simple text-lg"></i>
                     <span class="hidden sm:inline">Editor</span>
                 </button>
@@ -160,6 +161,7 @@
                     @click="drawerOpen = true"
                     class="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-base-300 hover:bg-primary/20 rounded-r-lg px-1 py-6 transition-colors"
                     title="Open editor"
+                    aria-label="Open editor"
                     x-cloak>
                 <i class="ph ph-caret-right text-sm"></i>
             </button>
@@ -179,7 +181,7 @@
                 {{-- Mobile close button --}}
                 <div class="sm:hidden flex justify-between items-center p-4 pb-0">
                     <span class="font-medium text-sm">Editor</span>
-                    <button @click="drawerOpen = false" class="btn btn-ghost btn-xs btn-circle">
+                    <button @click="drawerOpen = false" class="btn btn-ghost btn-xs btn-circle" aria-label="Close editor">
                         <i class="ph ph-x text-lg"></i>
                     </button>
                 </div>
