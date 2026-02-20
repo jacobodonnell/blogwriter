@@ -218,3 +218,13 @@ it('store redirects for non-ajax request', function (): void {
     $response->assertRedirect();
     $response->assertSessionHas('success');
 });
+
+it('category drill-down links are standard navigation without ajax target', function (): void {
+    $root = Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
+    Category::factory()->withParent($root)->create(['name' => 'PHP']);
+
+    $response = $this->get(route('admin.categories.children', 'programming'));
+
+    $response->assertSuccessful();
+    $response->assertDontSee('x-target.push', false);
+});

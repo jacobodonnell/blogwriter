@@ -12,7 +12,6 @@
                     <ul class="flex-wrap">
                         <li>
                             <a href="{{ route('admin.categories.index') }}"
-                               x-target.push="categories-table"
                                class="link link-hover">
                                 <i class="ph ph-house mr-1"></i> Root
                             </a>
@@ -24,7 +23,6 @@
                                 @endphp
                                 <li>
                                     <a href="{{ route('admin.categories.children', $crumbPath) }}"
-                                       x-target.push="categories-table"
                                        class="link link-hover">
                                         {{ $crumb->name }}
                                     </a>
@@ -61,7 +59,6 @@
                                         <div class="font-semibold">
                                             @if($category->children_count > 0)
                                                 <a href="{{ route('admin.categories.children', $drillPath) }}"
-                                                   x-target.push="categories-table"
                                                    class="link link-hover inline-flex items-center gap-1">
                                                     {{ $category->name }}
                                                     <i class="ph ph-caret-right text-xs"></i>
