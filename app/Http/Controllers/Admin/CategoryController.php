@@ -7,6 +7,7 @@ use App\Http\Requests\CategoryRequest;
 use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 class CategoryController extends Controller
@@ -39,11 +40,15 @@ class CategoryController extends Controller
     /**
      * Store a newly created category.
      */
-    public function store(CategoryRequest $request): RedirectResponse
+    public function store(CategoryRequest $request): Response|RedirectResponse
     {
         $data = $request->validated();
 
         Category::create($data);
+
+        if ($request->header('X-Alpine-Target')) {
+            return response(view('admin.categories._store-success'));
+        }
 
         return redirect($this->categoryRedirectUrl($data['parent_id'] ?? null))
             ->with('success', 'Category created successfully.');

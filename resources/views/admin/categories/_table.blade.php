@@ -1,5 +1,8 @@
 {{-- Table card: targeted by Alpine AJAX via #categories-table --}}
-<div id="categories-table" class="card bg-base-100 shadow">
+<div id="categories-table"
+     class="card bg-base-100 shadow"
+     x-init
+     @category:created.window="$ajax(window.location.href)">
     <div class="card-body p-0">
 
         {{-- Breadcrumb Navigation --}}

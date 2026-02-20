@@ -181,3 +181,25 @@ it('modal shows validation errors on empty name', function (): void {
 
     $response->assertSessionHasErrors('name');
 });
+
+it('store returns partial response for ajax request', function (): void {
+    $response = $this->post(
+        route('admin.categories.store'),
+        ['name' => 'Technology', 'slug' => 'technology'],
+        ['X-Alpine-Target' => 'add-category-form']
+    );
+
+    $response->assertOk();
+    $response->assertSee('category:created');
+    expect(Category::where('name', 'Technology')->exists())->toBeTrue();
+});
+
+it('store redirects for non-ajax request', function (): void {
+    $response = $this->post(route('admin.categories.store'), [
+        'name' => 'Technology',
+        'slug' => 'technology',
+    ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHas('success');
+});

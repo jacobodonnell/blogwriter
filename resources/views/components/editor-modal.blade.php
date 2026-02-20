@@ -1,6 +1,6 @@
-@props(['id', 'title', 'maxWidth' => 'max-w-lg'])
+@props(['title', 'maxWidth' => 'max-w-lg'])
 
-<dialog id="{{ $id }}" class="modal">
+<dialog {{ $attributes->merge(['class' => 'modal']) }}>
     <div class="modal-box {{ $maxWidth }}">
         <h3 class="font-bold text-lg">{{ $title }}</h3>
         <div class="py-4">

@@ -12,8 +12,7 @@
 
     <form method="POST"
           action="{{ route('admin.categories.store') }}"
-          x-target="add-category-form"
-          x-target.away="_top">
+          x-target="add-category-form">
         @csrf
         <input type="hidden" name="parent_id" value="{{ $parent?->id ?? '' }}">
 
