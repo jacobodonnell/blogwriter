@@ -107,19 +107,11 @@
                         <label class="label shrink-0">
                             <span class="label-text">Category</span>
                         </label>
-                        <select name="category" class="select select-bordered w-full md:w-auto" @change="$el.form.requestSubmit()">
-                            <option value="">All Categories</option>
-                            @foreach($categories as $rootCat)
-                                <option value="{{ $rootCat->slug }}" {{ request('category') == $rootCat->slug ? 'selected' : '' }}>
-                                    {{ $rootCat->name }}
-                                </option>
-                                @foreach($rootCat->children as $childCat)
-                                    <option value="{{ $childCat->slug }}" {{ request('category') == $childCat->slug ? 'selected' : '' }}>
-                                        &nbsp;&nbsp;└ {{ $childCat->name }}
-                                    </option>
-                                @endforeach
-                            @endforeach
-                        </select>
+                        <x-category-select :categories="$categories"
+                            name="category" emptyLabel="All Categories"
+                            :selected="request('category')" :useSlug="true"
+                            @change="$el.form.requestSubmit()"
+                            class="select select-bordered w-full md:w-auto" />
                     </div>
 
                     <div class="flex items-center justify-between gap-4 md:block">
