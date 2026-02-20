@@ -66,9 +66,11 @@
                                             @else
                                                 {{ $category->name }}
                                             @endif
-                                            <a href="{{ $category->permalink() }}" class="inline-block align-middle ml-1 opacity-50 hover:opacity-100" title="View category">
-                                                <i class="ph ph-eye text-sm"></i>
-                                            </a>
+                                            <div class="tooltip inline-block align-middle ml-1" data-tip="View category">
+                                                <a href="{{ $category->permalink() }}" class="opacity-50 hover:opacity-100">
+                                                    <i class="ph ph-eye text-sm"></i>
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                     @if($category->description)
@@ -90,9 +92,7 @@
                                 </td>
                                 <td class="text-right">
                                     <div class="flex justify-end gap-2">
-                                        <a href="{{ route('admin.categories.edit', $category) }}" class="btn btn-sm btn-ghost">
-                                            <i class="ph ph-pencil-simple text-base"></i>
-                                        </a>
+                                        <x-admin.icon-button tooltip="Edit" href="{{ route('admin.categories.edit', $category) }}" icon="pencil-simple" />
                                         @if($category->articles_count === 0 && $category->children_count === 0)
                                             <form method="POST"
                                                   action="{{ route('admin.categories.destroy', $category) }}"
@@ -101,9 +101,7 @@
                                                   onsubmit="return confirm('Delete this category?');">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-ghost text-error">
-                                                    <i class="ph ph-trash text-base"></i>
-                                                </button>
+                                                <x-admin.icon-button-submit tooltip="Delete" icon="trash" class="text-error" />
                                             </form>
                                         @endif
                                     </div>

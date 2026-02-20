@@ -95,24 +95,11 @@
 
                             {{-- Actions --}}
                             <div class="card-actions justify-end mt-4">
-                                <a href="{{ route('admin.photos.edit', $photo) }}"
-                                   class="btn btn-sm btn-ghost"
-                                   title="Edit">
-                                    <i class="ph ph-pencil-simple text-lg"></i>
-                                </a>
-
-                                <a href="{{ route('admin.photos.show', $photo) }}"
-                                   class="btn btn-sm btn-ghost"
-                                   title="View details">
-                                    <i class="ph ph-info text-lg"></i>
-                                </a>
+                                <x-admin.icon-button tooltip="Edit" href="{{ route('admin.photos.edit', $photo) }}" icon="pencil-simple" />
+                                <x-admin.icon-button tooltip="View details" href="{{ route('admin.photos.show', $photo) }}" icon="info" />
 
                                 @if($photo->isPublic())
-                                    <a href="{{ route('photos.show', $photo->slug) }}"
-                                       class="btn btn-sm btn-ghost"
-                                       title="View">
-                                        <i class="ph ph-eye text-lg"></i>
-                                    </a>
+                                    <x-admin.icon-button tooltip="View" href="{{ route('photos.show', $photo->slug) }}" icon="eye" />
                                 @endif
 
                                 <form method="POST"
@@ -121,11 +108,7 @@
                                       onsubmit="return confirm('Are you sure you want to delete this photo?{{ $photo->articles()->count() > 0 ? ' This photo is used in ' . $photo->articles()->count() . ' article(s).' : '' }}');">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit"
-                                            class="btn btn-sm btn-ghost text-error"
-                                            title="Delete">
-                                        <i class="ph ph-trash text-lg"></i>
-                                    </button>
+                                    <x-admin.icon-button-submit tooltip="Delete" icon="trash" class="text-error" />
                                 </form>
                             </div>
                         </div>

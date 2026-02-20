@@ -68,12 +68,8 @@
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-2 ml-4">
-                                        <a href="{{ route('admin.articles.edit', $article) }}" class="btn btn-sm btn-ghost" title="Edit">
-                                            <i class="ph ph-pencil-simple text-lg"></i>
-                                        </a>
-                                        <a href="{{ $article->permalink() }}" class="btn btn-sm btn-ghost" title="View on Site">
-                                            <i class="ph ph-eye text-lg"></i>
-                                        </a>
+                                        <x-admin.icon-button tooltip="Edit" href="{{ route('admin.articles.edit', $article) }}" icon="pencil-simple" />
+                                        <x-admin.icon-button tooltip="View on Site" href="{{ $article->permalink() }}" icon="eye" />
                                     </div>
                                 </div>
                             @endforeach
@@ -130,17 +126,9 @@
                                             <span>{{ $photo->updated_at->diffForHumans() }}</span>
                                         </div>
                                         <div class="card-actions justify-end mt-2">
-                                            <div class="tooltip" data-tip="Edit">
-                                                <a href="{{ route('admin.photos.edit', $photo) }}" class="btn btn-sm btn-ghost">
-                                                    <i class="ph ph-pencil-simple text-lg"></i>
-                                                </a>
-                                            </div>
+                                            <x-admin.icon-button tooltip="Edit" href="{{ route('admin.photos.edit', $photo) }}" icon="pencil-simple" />
                                             @if($photo->isPublic())
-                                                <div class="tooltip" data-tip="View on Site">
-                                                    <a href="{{ route('photos.show', $photo->slug) }}" class="btn btn-sm btn-ghost">
-                                                        <i class="ph ph-eye text-lg"></i>
-                                                    </a>
-                                                </div>
+                                                <x-admin.icon-button tooltip="View on Site" href="{{ route('photos.show', $photo->slug) }}" icon="eye" />
                                             @endif
                                         </div>
                                     </div>

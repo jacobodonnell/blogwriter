@@ -38,7 +38,7 @@ it('does not open View Category links in a new tab', function (): void {
     $response->assertSuccessful();
     $content = $response->getContent();
 
-    preg_match('/<a[^>]*title="View category"[^>]*>/', $content, $matches);
+    preg_match('/<div[^>]*data-tip="View category"[^>]*>.*?<a[^>]*>/s', $content, $matches);
     expect($matches)->not->toBeEmpty();
     expect($matches[0])->not->toContain('target="_blank"');
 });
@@ -52,7 +52,7 @@ it('uses ph-eye icon instead of ph-arrow-square-out for internal view links', fu
 
     preg_match('/<a[^>]*>.*?View Articles.*?<\/a>/s', $articlesContent, $articlesMatch);
     preg_match('/<a[^>]*>.*?View Photos.*?<\/a>/s', $photosContent, $photosMatch);
-    preg_match('/<a[^>]*title="View category".*?<\/a>/s', $categoriesContent, $categoriesMatch);
+    preg_match('/<div[^>]*data-tip="View category".*?<\/a>/s', $categoriesContent, $categoriesMatch);
 
     expect($articlesMatch[0])->toContain('ph-eye')->not->toContain('ph-arrow-square-out');
     expect($photosMatch[0])->toContain('ph-eye')->not->toContain('ph-arrow-square-out');

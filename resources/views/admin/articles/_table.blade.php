@@ -86,24 +86,16 @@
                                 </td>
                                 <td class="text-right">
                                     <div class="flex justify-end gap-2">
-                                        <a href="{{ route('admin.articles.edit', $article) }}" class="btn btn-sm btn-ghost" title="Edit">
-                                            <i class="ph ph-pencil-simple text-lg"></i>
-                                        </a>
+                                        <x-admin.icon-button tooltip="Edit" href="{{ route('admin.articles.edit', $article) }}" icon="pencil-simple" />
                                         @if($article->isPublished())
-                                            <a href="{{ $article->permalink() }}" class="btn btn-sm btn-ghost" title="View Published">
-                                                <i class="ph ph-eye text-lg"></i>
-                                            </a>
+                                            <x-admin.icon-button tooltip="View Published" href="{{ $article->permalink() }}" icon="eye" />
                                         @else
-                                            <a href="{{ route('admin.articles.show', $article) }}" class="btn btn-sm btn-ghost" title="Preview Draft">
-                                                <i class="ph ph-eye text-lg"></i>
-                                            </a>
+                                            <x-admin.icon-button tooltip="Preview Draft" href="{{ route('admin.articles.show', $article) }}" icon="eye" />
                                         @endif
                                         <form method="POST" action="{{ route('admin.articles.destroy', $article) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this article?');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-ghost text-error" title="Delete">
-                                                <i class="ph ph-trash text-lg"></i>
-                                            </button>
+                                            <x-admin.icon-button-submit tooltip="Delete" icon="trash" class="text-error" />
                                         </form>
                                     </div>
                                 </td>

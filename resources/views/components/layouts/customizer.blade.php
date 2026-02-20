@@ -116,22 +116,30 @@
 
                 {{-- Viewport Presets --}}
                 <div class="join hidden sm:flex">
-                    <button @click="setPreset(375)" class="btn btn-ghost btn-xs join-item"
-                            :class="{ 'btn-active': previewWidth === 375 }" title="Phone (375px)">
-                        <i class="ph ph-device-mobile text-base"></i>
-                    </button>
-                    <button @click="setPreset(768)" class="btn btn-ghost btn-xs join-item"
-                            :class="{ 'btn-active': previewWidth === 768 }" title="Tablet (768px)">
-                        <i class="ph ph-device-tablet text-base"></i>
-                    </button>
-                    <button @click="setPreset(1024)" class="btn btn-ghost btn-xs join-item"
-                            :class="{ 'btn-active': previewWidth === 1024 }" title="Desktop (1024px)">
-                        <i class="ph ph-desktop text-base"></i>
-                    </button>
-                    <button @click="setPreset(0)" class="btn btn-ghost btn-xs join-item"
-                            :class="{ 'btn-active': previewWidth === 0 }" title="Fill available space">
-                        <i class="ph ph-arrows-out-simple text-base"></i>
-                    </button>
+                    <div class="tooltip tooltip-bottom" data-tip="Phone (375px)">
+                        <button @click="setPreset(375)" class="btn btn-ghost btn-xs join-item"
+                                :class="{ 'btn-active': previewWidth === 375 }">
+                            <i class="ph ph-device-mobile text-base"></i>
+                        </button>
+                    </div>
+                    <div class="tooltip tooltip-bottom" data-tip="Tablet (768px)">
+                        <button @click="setPreset(768)" class="btn btn-ghost btn-xs join-item"
+                                :class="{ 'btn-active': previewWidth === 768 }">
+                            <i class="ph ph-device-tablet text-base"></i>
+                        </button>
+                    </div>
+                    <div class="tooltip tooltip-bottom" data-tip="Desktop (1024px)">
+                        <button @click="setPreset(1024)" class="btn btn-ghost btn-xs join-item"
+                                :class="{ 'btn-active': previewWidth === 1024 }">
+                            <i class="ph ph-desktop text-base"></i>
+                        </button>
+                    </div>
+                    <div class="tooltip tooltip-left" data-tip="Fill available space">
+                        <button @click="setPreset(0)" class="btn btn-ghost btn-xs join-item"
+                                :class="{ 'btn-active': previewWidth === 0 }">
+                            <i class="ph ph-arrows-out-simple text-base"></i>
+                        </button>
+                    </div>
                 </div>
 
                 @if($article->exists)
@@ -165,17 +173,19 @@
         <div class="flex-1 overflow-hidden flex relative">
 
             {{-- Left-Edge Reopen Tab (visible when drawer closed) --}}
-            <button x-show="!drawerOpen"
-                    x-transition:enter="transition ease-out duration-200"
-                    x-transition:enter-start="opacity-0 -translate-x-full"
-                    x-transition:enter-end="opacity-100 translate-x-0"
-                    @click="drawerOpen = true"
-                    class="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-base-300 hover:bg-primary/20 rounded-r-lg px-1 py-6 transition-colors"
-                    title="Open editor"
-                    aria-label="Open editor"
-                    x-cloak>
-                <i class="ph ph-caret-right text-sm"></i>
-            </button>
+            <div class="tooltip tooltip-right absolute left-0 top-1/2 -translate-y-1/2 z-20"
+                 data-tip="Open editor"
+                 x-show="!drawerOpen"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 -translate-x-full"
+                 x-transition:enter-end="opacity-100 translate-x-0"
+                 x-cloak>
+                <button @click="drawerOpen = true"
+                        class="bg-base-300 hover:bg-primary/20 rounded-r-lg px-1 py-6 transition-colors"
+                        aria-label="Open editor">
+                    <i class="ph ph-caret-right text-sm"></i>
+                </button>
+            </div>
 
             {{-- Drawer (Form Panel) --}}
             <div x-show="drawerOpen"
