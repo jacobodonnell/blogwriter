@@ -24,20 +24,7 @@
 
                 {{-- Main Content --}}
                 <div class="flex-1 flex flex-col min-w-0 transition-all duration-300">
-                    {{-- Flash Messages --}}
-                    @if (session('success'))
-                        <div class="alert alert-success m-4">
-                            <i class="ph ph-check-circle text-xl"></i>
-                            <span>{{ session('success') }}</span>
-                        </div>
-                    @endif
-
-                    @if (session('error'))
-                        <div class="alert alert-error m-4">
-                            <i class="ph ph-x-circle text-xl"></i>
-                            <span>{{ session('error') }}</span>
-                        </div>
-                    @endif
+                    <x-flash-messages />
 
                     {{-- Main Content --}}
                     <main class="container mx-auto px-4 py-8 flex-1">
