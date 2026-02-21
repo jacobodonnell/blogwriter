@@ -69,11 +69,11 @@ final class FeedController extends Controller
                     'authors' => [['name' => $item->authorName]],
                 ];
 
-                if ($item->summary) {
+                if ($item->summary !== '' && $item->summary !== '0') {
                     $entry['summary'] = $item->summary;
                 }
 
-                if ($item->updatedAt) {
+                if ($item->updatedAt instanceof \Carbon\CarbonInterface) {
                     $entry['date_modified'] = $item->updatedAt->toRfc3339String();
                 }
 
