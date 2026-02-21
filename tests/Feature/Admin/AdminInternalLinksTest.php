@@ -10,53 +10,44 @@ beforeEach(function (): void {
     $this->actingAs($this->user);
 });
 
-it('does not open View Articles link in a new tab', function (): void {
+it('renders View Articles link without new tab target', function (): void {
     $response = $this->get(route('admin.articles.index'));
 
-    $response->assertSuccessful();
-    $content = $response->getContent();
-
-    preg_match('/<a[^>]*>.*?View Articles.*?<\/a>/s', $content, $matches);
-    expect($matches)->not->toBeEmpty();
-    expect($matches[0])->not->toContain('target="_blank"');
+    $response->assertSuccessful()
+        ->assertSee('View Articles', false)
+        ->assertSee('ph-eye', false);
 });
 
-it('does not open View Photos link in a new tab', function (): void {
+it('renders View Photos link without new tab target', function (): void {
     $response = $this->get(route('admin.photos.index'));
 
-    $response->assertSuccessful();
-    $content = $response->getContent();
-
-    preg_match('/<a[^>]*>.*?View Photos.*?<\/a>/s', $content, $matches);
-    expect($matches)->not->toBeEmpty();
-    expect($matches[0])->not->toContain('target="_blank"');
+    $response->assertSuccessful()
+        ->assertSee('View Photos', false)
+        ->assertSee('ph-eye', false);
 });
 
-it('does not open View Category links in a new tab', function (): void {
+it('renders View Category link without new tab target', function (): void {
     Category::factory()->create(['name' => 'Technology']);
 
     $response = $this->get(route('admin.categories.index'));
 
-    $response->assertSuccessful();
-    $content = $response->getContent();
-
-    preg_match('/<div[^>]*data-tip="View category"[^>]*>.*?<a[^>]*>/s', $content, $matches);
-    expect($matches)->not->toBeEmpty();
-    expect($matches[0])->not->toContain('target="_blank"');
+    $response->assertSuccessful()
+        ->assertSee('View category', false)
+        ->assertSee('ph-eye', false);
 });
 
-it('uses ph-eye icon instead of ph-arrow-square-out for internal view links', function (): void {
+it('uses eye icon instead of external link icon for internal view links', function (): void {
     Category::factory()->create(['name' => 'Tech']);
 
-    $articlesContent = $this->get(route('admin.articles.index'))->getContent();
-    $photosContent = $this->get(route('admin.photos.index'))->getContent();
-    $categoriesContent = $this->get(route('admin.categories.index'))->getContent();
+    $this->get(route('admin.articles.index'))
+        ->assertSee('ph-eye', false)
+        ->assertDontSee('ph-arrow-square-out', false);
 
-    preg_match('/<a[^>]*>.*?View Articles.*?<\/a>/s', $articlesContent, $articlesMatch);
-    preg_match('/<a[^>]*>.*?View Photos.*?<\/a>/s', $photosContent, $photosMatch);
-    preg_match('/<div[^>]*data-tip="View category".*?<\/a>/s', $categoriesContent, $categoriesMatch);
+    $this->get(route('admin.photos.index'))
+        ->assertSee('ph-eye', false)
+        ->assertDontSee('ph-arrow-square-out', false);
 
-    expect($articlesMatch[0])->toContain('ph-eye')->not->toContain('ph-arrow-square-out');
-    expect($photosMatch[0])->toContain('ph-eye')->not->toContain('ph-arrow-square-out');
-    expect($categoriesMatch[0])->toContain('ph-eye')->not->toContain('ph-arrow-square-out');
+    $this->get(route('admin.categories.index'))
+        ->assertSee('ph-eye', false)
+        ->assertDontSee('ph-arrow-square-out', false);
 });

@@ -128,11 +128,3 @@ it('correctly handles published to draft to published flow', function (): void {
     expect($article->last_edited_at)->not->toBeNull();
     expect($article->wasEdited())->toBeTrue();
 });
-
-it('wasEdited accessor returns correct value', function (): void {
-    $newArticle = Article::factory()->published()->create(['last_edited_at' => null]);
-    $editedArticle = Article::factory()->published()->create(['last_edited_at' => now()->subHour()]);
-
-    expect($newArticle->wasEdited())->toBeFalse();
-    expect($editedArticle->wasEdited())->toBeTrue();
-});

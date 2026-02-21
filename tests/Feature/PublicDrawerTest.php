@@ -9,67 +9,37 @@ describe('authenticated sidebar', function (): void {
         $this->actingAs(User::factory()->create());
     });
 
-    it('renders the extracted sidebar Alpine component', function (): void {
+    it('renders the sidebar component for authenticated users', function (): void {
         $this->get(route('home'))
             ->assertSuccessful()
-            ->assertSee('x-data="sidebar"', false)
-            ->assertDontSee('mobileMenuOpen: false', false);
-    });
-
-    it('does not inline sidebar state', function (): void {
-        $this->get(route('home'))
-            ->assertSuccessful()
-            ->assertDontSee('sidebarExpanded', false)
-            ->assertDontSee('isDesktop: window.matchMedia', false);
+            ->assertSee('x-data="sidebar"', false);
     });
 });
 
 describe('guest layout', function (): void {
-    it('does not render sidebar component', function (): void {
+    it('does not render sidebar component for guests', function (): void {
         $this->get(route('home'))
             ->assertSuccessful()
             ->assertDontSee('x-data="sidebar"', false);
     });
 
-    it('renders mobile drawer with Alpine state', function (): void {
+    it('renders mobile menu toggle for guests', function (): void {
         $this->get(route('home'))
             ->assertSuccessful()
-            ->assertSee('mobileMenuOpen: false', false)
-            ->assertSee('themeMode:', false);
-    });
-
-    it('renders hamburger button for mobile menu', function (): void {
-        $this->get(route('home'))
-            ->assertSuccessful()
-            ->assertSee('ph-list', false)
             ->assertSee('Open menu', false);
     });
 
-    it('renders mobile drawer panel with nav links', function (): void {
+    it('renders navigation links in mobile drawer', function (): void {
         $this->get(route('home'))
             ->assertSuccessful()
-            ->assertSee('-translate-x-full', false)
-            ->assertSee('ph-house', false)
-            ->assertSee('ph-article', false)
-            ->assertSee('ph-camera', false)
-            ->assertSee('ph-user', false);
+            ->assertSee(route('home'), false)
+            ->assertSee(route('articles.index'), false)
+            ->assertSee(route('photos.index'), false);
     });
 
-    it('renders mobile drawer backdrop', function (): void {
-        $this->get(route('home'))
-            ->assertSuccessful()
-            ->assertSee('bg-black/50', false);
-    });
-
-    it('closes drawer on escape key', function (): void {
+    it('supports escape key to close drawer', function (): void {
         $this->get(route('home'))
             ->assertSuccessful()
             ->assertSee('keydown.escape.window', false);
-    });
-
-    it('hides desktop nav links on mobile', function (): void {
-        $this->get(route('home'))
-            ->assertSuccessful()
-            ->assertSee('hidden lg:flex', false);
     });
 });

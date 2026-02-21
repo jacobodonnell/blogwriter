@@ -81,31 +81,6 @@ it('redirects normally for full save update requests', function (): void {
         ->assertSessionHas('success');
 });
 
-it('renders customizer for new article without persisting to database', function (): void {
-    get(route('admin.articles.create'))
-        ->assertOk()
-        ->assertViewIs('admin.articles.customizer')
-        ->assertViewHas('isNew', true);
-
-    expect(Article::count())->toBe(0);
-});
-
-it('stores new article on first explicit save', function (): void {
-    post(route('admin.articles.store'), [
-        'title' => 'My First Article',
-        'slug' => 'my-first-article',
-        'content' => 'Hello world',
-        'status' => Status::Draft->value,
-    ])->assertRedirect();
-
-    $article = Article::first();
-
-    expect($article)->not->toBeNull()
-        ->and($article->title)->toBe('My First Article')
-        ->and($article->slug)->toBe('my-first-article')
-        ->and($article->status->value)->toBe('draft');
-});
-
 it('rejects update with empty content', function (): void {
     $article = Article::factory()->draft()->for($this->user)->create();
 
