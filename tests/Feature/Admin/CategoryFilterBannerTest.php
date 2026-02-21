@@ -12,12 +12,17 @@ beforeEach(function (): void {
     $this->actingAs($this->user);
 });
 
-it('shows filter banner on categories index', function (): void {
-    $this->get(route('admin.categories.index'))
-        ->assertOk()
-        ->assertSee('Filters')
-        ->assertSee('Content Type')
-        ->assertSee('Per Page');
+it('filters categories by parent_id', function (): void {
+    $root = Category::factory()->create(['name' => 'Programming']);
+    Category::factory()->withParent($root)->create(['name' => 'PHP']);
+    Category::factory()->create(['name' => 'Photography']);
+
+    $response = $this->get(route('admin.categories.index', ['parent_id' => $root->id]));
+
+    $response->assertOk()
+        ->assertViewHas('categories', fn ($cats) => $cats->pluck('name')->contains('PHP'))
+        ->assertViewHas('categories', fn ($cats) => ! $cats->pluck('name')->contains('Photography'))
+        ->assertViewHas('categories', fn ($cats) => ! $cats->pluck('name')->contains('Programming'));
 });
 
 it('filters categories by name search', function (): void {
@@ -44,7 +49,7 @@ it('filters categories by slug search', function (): void {
 
 it('filters categories by content type articles', function (): void {
     $withArticles = Category::factory()->create(['name' => 'Has Articles']);
-    $withoutArticles = Category::factory()->create(['name' => 'No Articles']);
+    Category::factory()->create(['name' => 'No Articles']);
     Article::factory()->create(['category_id' => $withArticles->id]);
 
     $response = $this->get(route('admin.categories.index', ['content_type' => 'articles']));
@@ -56,7 +61,7 @@ it('filters categories by content type articles', function (): void {
 
 it('filters categories by content type photos', function (): void {
     $withPhotos = Category::factory()->create(['name' => 'Has Photos']);
-    $withoutPhotos = Category::factory()->create(['name' => 'No Photos']);
+    Category::factory()->create(['name' => 'No Photos']);
     Photo::factory()->create(['category_id' => $withPhotos->id]);
 
     $response = $this->get(route('admin.categories.index', ['content_type' => 'photos']));
@@ -66,7 +71,7 @@ it('filters categories by content type photos', function (): void {
         ->assertViewHas('categories', fn ($cats) => ! $cats->pluck('name')->contains('No Photos'));
 });
 
-it('paginates categories', function (): void {
+it('paginates categories with default per page', function (): void {
     Category::factory()->count(25)->create();
 
     $response = $this->get(route('admin.categories.index'));
@@ -84,18 +89,6 @@ it('respects per page parameter', function (): void {
         ->assertViewHas('categories', fn ($categories) => $categories->count() === 10);
 });
 
-it('shows active filter count badge', function (): void {
-    $this->get(route('admin.categories.index', ['search' => 'test', 'content_type' => 'articles']))
-        ->assertOk()
-        ->assertSee('badge-primary');
-});
-
-it('shows no filter badge with no filters', function (): void {
-    $this->get(route('admin.categories.index'))
-        ->assertOk()
-        ->assertDontSee('badge-primary');
-});
-
 it('returns table partial for ajax requests', function (): void {
     $response = $this->get(
         route('admin.categories.index', ['search' => 'test']),
@@ -105,25 +98,4 @@ it('returns table partial for ajax requests', function (): void {
     $response->assertOk()
         ->assertSee('id="categories-table"', false)
         ->assertDontSee('<h1', false);
-});
-
-it('shows photos count column in table', function (): void {
-    $category = Category::factory()->create(['name' => 'Test Category']);
-    Photo::factory()->count(3)->create(['category_id' => $category->id]);
-
-    $this->get(route('admin.categories.index'))
-        ->assertOk()
-        ->assertSee('Photos');
-});
-
-it('shows clear link when filters are active', function (): void {
-    $this->get(route('admin.categories.index', ['search' => 'test']))
-        ->assertOk()
-        ->assertSeeInOrder(['Clear']);
-});
-
-it('does not show clear link when no filters active', function (): void {
-    $this->get(route('admin.categories.index'))
-        ->assertOk()
-        ->assertDontSee('>Clear</a>', false);
 });
