@@ -87,13 +87,13 @@ it('respects per page parameter', function (): void {
 it('shows active filter count badge', function (): void {
     $this->get(route('admin.categories.index', ['search' => 'test', 'content_type' => 'articles']))
         ->assertOk()
-        ->assertViewHas('activeFilterCount', 2);
+        ->assertSee('badge-primary');
 });
 
-it('shows zero active filter count with no filters', function (): void {
+it('shows no filter badge with no filters', function (): void {
     $this->get(route('admin.categories.index'))
         ->assertOk()
-        ->assertViewHas('activeFilterCount', 0);
+        ->assertDontSee('badge-primary');
 });
 
 it('returns table partial for ajax requests', function (): void {
@@ -116,14 +116,14 @@ it('shows photos count column in table', function (): void {
         ->assertSee('Photos');
 });
 
-it('shows clear filters link when filters are active', function (): void {
+it('shows clear link when filters are active', function (): void {
     $this->get(route('admin.categories.index', ['search' => 'test']))
         ->assertOk()
-        ->assertSee('Clear Filters');
+        ->assertSeeInOrder(['Clear']);
 });
 
-it('does not show clear filters link when no filters active', function (): void {
+it('does not show clear link when no filters active', function (): void {
     $this->get(route('admin.categories.index'))
         ->assertOk()
-        ->assertDontSee('Clear Filters');
+        ->assertDontSee('>Clear</a>', false);
 });

@@ -62,16 +62,9 @@ final class AdminPhotoController extends Controller
 
         $categories = Category::tree()->get();
 
-        $activeFilterCount = collect([
-            $request->input('search'),
-            $request->input('category'),
-            $request->input('status'),
-        ])->filter()->count();
-
         $viewData = [
             'photos' => $photos,
             'categories' => $categories,
-            'activeFilterCount' => $activeFilterCount,
             'perPage' => $perPage,
         ];
 

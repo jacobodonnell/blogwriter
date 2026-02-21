@@ -1,15 +1,8 @@
-@props(['action', 'target', 'clearRoute', 'persistKey' => ''])
-
-@php
-    $hasFilters = request('search') || request('category') || request('type') || request('status') || request('sort');
-    $hasNavigation = isset($navigation) && trim((string) $navigation) !== '';
-@endphp
-
 <div x-data="{
     open: {{ $persistKey ? "\$persist(" . ($hasFilters ? 'true' : 'false') . ").as('" . $persistKey . "')" : ($hasFilters ? 'true' : 'false') }},
 }" class="mb-6">
     {{-- Always-visible navigation --}}
-    @if($hasNavigation)
+    @if(isset($navigation) && trim((string) $navigation) !== '')
         <div class="mb-3">
             {{ $navigation }}
         </div>
@@ -20,8 +13,8 @@
         <button @click="open = !open" class="btn btn-ghost btn-sm gap-1" type="button">
             <i class="ph ph-funnel text-lg"></i>
             Filters
-            @if($hasFilters)
-                <span class="badge badge-xs badge-primary"></span>
+            @if($activeFilterCount > 0)
+                <span class="badge badge-xs badge-primary">{{ $activeFilterCount }}</span>
             @endif
             <i class="ph ph-caret-down text-sm transition-transform duration-200" :class="open && 'rotate-180'"></i>
         </button>

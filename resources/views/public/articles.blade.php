@@ -31,12 +31,12 @@
                     @endauth
                 </x-slot:toolbar>
 
-                <x-filters.search placeholder="Search by title or slug..." :colspan="auth()->check() ? 1 : 2" />
-                <x-filters.category-select :categories="$categories" />
-                <x-filters.select name="status" label="Status"
+                <x-filter-banner.search placeholder="Search by title or slug..." :colspan="auth()->check() ? 1 : 2" />
+                <x-filter-banner.category-select :categories="$categories" />
+                <x-filter-banner.select name="status" label="Status"
                     :options="['published' => 'Published', 'draft' => 'Draft']"
                     emptyLabel="All Status" :auth="true" />
-                <x-filters.sort />
+                <x-filter-banner.sort />
             </x-filter-banner>
             @if($articles->isNotEmpty())
                 <div class="flex flex-col gap-6">

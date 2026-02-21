@@ -32,7 +32,6 @@ final class AdminCategoryChildrenController extends Controller
             'breadcrumbs' => $breadcrumbs,
             'slugPrefix' => $slugPrefix,
             'allCategories' => $allCategories,
-            'activeFilterCount' => 0,
             'perPage' => 20,
         ];
 

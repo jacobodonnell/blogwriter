@@ -38,13 +38,13 @@
         @endif
     </x-slot:navigation>
 
-    <x-filters.search :placeholder="$searchPlaceholder" :colspan="4" />
-    <x-filters.category-select :categories="$categories" />
-    <x-filters.select name="type" label="Content Type"
+    <x-filter-banner.search :placeholder="$searchPlaceholder" :colspan="4" />
+    <x-filter-banner.category-select :categories="$categories" />
+    <x-filter-banner.select name="type" label="Content Type"
         :options="['articles' => 'Articles', 'photos' => 'Photos']"
         emptyLabel="All Content" />
-    <x-filters.sort />
-    <x-filters.select name="status" label="Status"
+    <x-filter-banner.sort />
+    <x-filter-banner.select name="status" label="Status"
         :options="['published' => 'Published', 'draft' => 'Draft']"
         emptyLabel="All Status" :auth="true" />
 </x-filter-banner>

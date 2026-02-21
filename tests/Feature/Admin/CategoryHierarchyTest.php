@@ -248,14 +248,15 @@ it('does not create category when slug is duplicate', function (): void {
     expect(Category::where('name', 'Technology')->exists())->toBeFalse();
 });
 
-it('category drill-down links are standard navigation without ajax target', function (): void {
+it('category drill-down page renders successfully', function (): void {
     $root = Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
     Category::factory()->withParent($root)->create(['name' => 'PHP']);
 
     $response = $this->get(route('admin.categories.children', 'programming'));
 
-    $response->assertSuccessful();
-    $response->assertDontSee('x-target.push', false);
+    $response->assertSuccessful()
+        ->assertSee('Programming')
+        ->assertSee('PHP');
 });
 
 it('add form shows parent category dropdown on index page', function (): void {

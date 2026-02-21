@@ -3,10 +3,7 @@
         <li>Categories</li>
     </x-slot:breadcrumb>
 
-    <div class="space-y-6"
-         x-data="{
-            filtersOpen: $persist(true).as('admin_categories_filters_open'),
-         }">
+    <div class="space-y-6">
         {{-- Header --}}
         <div class="flex flex-wrap justify-between items-center gap-2">
             <div>
@@ -40,16 +37,6 @@
                 @endif
             </div>
             <div class="flex gap-2">
-                {{-- Filters Toggle --}}
-                <button class="btn btn-ghost" @click="filtersOpen = !filtersOpen">
-                    <i class="ph ph-funnel text-xl"></i>
-                    Filters
-                    @if($activeFilterCount > 0)
-                        <span class="badge badge-sm badge-primary">{{ $activeFilterCount }}</span>
-                    @endif
-                    <i class="ph ph-caret-down text-sm transition-transform duration-200" :class="filtersOpen && 'rotate-180'"></i>
-                </button>
-
                 <a href="{{ route('categories.index') }}" class="btn btn-ghost">
                     <i class="ph ph-eye text-xl"></i>
                     <span class="hidden sm:inline">View Categories</span>
@@ -63,15 +50,16 @@
             </div>
         </div>
 
-        {{-- Collapsible Filters --}}
-        <x-admin.filter-banner :action="route('admin.categories.index')" target="categories-table"
-            :clearRoute="route('admin.categories.index')" :activeFilterCount="$activeFilterCount">
-            <x-filters.search placeholder="Search by name or slug..." />
-            <x-filters.select name="content_type" label="Content Type"
+        {{-- Filters --}}
+        <x-filter-banner :action="route('admin.categories.index')" target="categories-table"
+            :clearRoute="route('admin.categories.index')" persistKey="admin_categories_filters_open"
+            :filterParams="['search', 'content_type']">
+            <x-filter-banner.search placeholder="Search by name or slug..." />
+            <x-filter-banner.select name="content_type" label="Content Type"
                 :options="['articles' => 'Articles', 'photos' => 'Photos']"
                 emptyLabel="All Types" />
-            <x-filters.per-page :options="[10, 20, 50, 100]" :default="$perPage" />
-        </x-admin.filter-banner>
+            <x-filter-banner.per-page :options="[10, 20, 50, 100]" :default="$perPage" />
+        </x-filter-banner>
 
         {{-- Categories List --}}
         @include('admin.categories._table')

@@ -45,18 +45,12 @@ final class CategoryController extends Controller
 
         $categories = $query->paginate($perPage)->withQueryString();
 
-        $activeFilterCount = collect([
-            $request->input('search'),
-            $request->input('content_type'),
-        ])->filter()->count();
-
         $viewData = [
             'categories' => $categories,
             'parent' => null,
             'breadcrumbs' => collect(),
             'slugPrefix' => '',
             'allCategories' => Category::flatTree(),
-            'activeFilterCount' => $activeFilterCount,
             'perPage' => $perPage,
         ];
 
