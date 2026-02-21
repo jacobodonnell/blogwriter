@@ -4,6 +4,18 @@
     </x-slot:breadcrumb>
 
     <div class="space-y-6">
+        {{-- View Switching Tabs --}}
+        <div class="flex items-center gap-2">
+            <a href="{{ route('admin.categories.index') }}" class="btn btn-ghost btn-sm btn-active gap-1">
+                <i class="ph ph-table text-lg"></i>
+                Table
+            </a>
+            <a href="{{ route('admin.categories.explore') }}" class="btn btn-ghost btn-sm gap-1">
+                <i class="ph ph-folders text-lg"></i>
+                Explore
+            </a>
+        </div>
+
         {{-- Header --}}
         <div class="flex flex-wrap justify-between items-center gap-2">
             <div>
@@ -44,18 +56,6 @@
                     <span class="hidden sm:inline">{{ $parent ? 'Add Subcategory' : 'Add Category' }}</span>
                 </button>
             </div>
-        </div>
-
-        {{-- View Switching Tabs --}}
-        <div class="flex items-center gap-2">
-            <a href="{{ route('admin.categories.index') }}" class="btn btn-ghost btn-sm btn-active gap-1">
-                <i class="ph ph-table text-lg"></i>
-                Table
-            </a>
-            <a href="{{ route('admin.categories.explore') }}" class="btn btn-ghost btn-sm gap-1">
-                <i class="ph ph-folders text-lg"></i>
-                Explore
-            </a>
         </div>
 
         {{-- Filters --}}

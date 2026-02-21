@@ -27,6 +27,8 @@
 
             @if($category?->description)
                 <p class="text-base-content/70 text-lg max-w-2xl mt-2">{{ $category->description }}</p>
+            @elseif($isRoot)
+                <p class="text-base-content/70 text-lg max-w-2xl mt-2">Browse all content by category.</p>
             @endif
 
             <p class="text-sm text-base-content/60 mt-2">
