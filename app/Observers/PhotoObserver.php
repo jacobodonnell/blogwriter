@@ -17,9 +17,15 @@ final class PhotoObserver
             return;
         }
 
-        // Auto-set published_at when publishing
+        // Auto-set published_at when publishing for the first time
         if ($photo->status->isPublic() && ! $photo->published_at) {
             $photo->published_at = now();
+            $photo->saveQuietly();
+        }
+
+        // Clear published_at when unpublishing
+        if ($photo->status->isPrivate() && $photo->published_at) {
+            $photo->published_at = null;
             $photo->saveQuietly();
         }
 

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Actions\Photos;
 
 use App\Enums\Status;
+use App\Exceptions\PhotoUploadFailedException;
 use Exception;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 
@@ -17,9 +17,11 @@ final readonly class HandleArticlePhotoUploadAction
     ) {}
 
     /**
-     * Handle photo upload and return photo ID or error redirect.
+     * Handle photo upload and return photo ID.
+     *
+     * @throws PhotoUploadFailedException
      */
-    public function handle(UploadedFile $file, array $data, ?int $articleId = null): int|RedirectResponse
+    public function handle(UploadedFile $file, array $data, ?int $articleId = null): int
     {
         try {
             $photo = $this->createPhotoFromUpload->handle($file, [
@@ -30,15 +32,13 @@ final readonly class HandleArticlePhotoUploadAction
             ]);
 
             return $photo->id;
-        } catch (Exception $exception) {
+        } catch (Exception $e) {
             Log::error('Failed to create photo from upload', [
                 'article_id' => $articleId,
-                'error' => $exception->getMessage(),
+                'error' => $e->getMessage(),
             ]);
 
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
+            throw new PhotoUploadFailedException($e->getMessage(), previous: $e);
         }
     }
 }

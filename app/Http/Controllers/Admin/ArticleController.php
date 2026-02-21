@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Actions\ApplyArticleFeaturedImageAction;
+use App\Exceptions\PhotoUploadFailedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateArticleRequest;
 use App\Models\Article;
@@ -12,6 +13,7 @@ use App\Models\Category;
 use App\Models\Photo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 final class ArticleController extends Controller
@@ -127,9 +129,14 @@ final class ArticleController extends Controller
     {
         $data = $request->validated();
 
-        $imageResult = $this->applyFeaturedImage->handle($request, $data, $article);
-        if ($imageResult instanceof RedirectResponse) {
-            return $imageResult;
+        try {
+            $imageResult = $this->applyFeaturedImage->handle($request, $data, $article);
+        } catch (PhotoUploadFailedException $e) {
+            Log::error('Failed to upload featured image', ['error' => $e->getMessage()]);
+
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
         }
 
         $article->update([

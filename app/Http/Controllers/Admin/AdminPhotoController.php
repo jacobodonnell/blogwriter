@@ -6,8 +6,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Actions\Photos\CreatePhotoFromUploadAction;
 use App\Actions\Photos\ExtractExifDataAction;
-use App\Actions\UpdatePublishedStatusAction;
-use App\Enums\Status;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StorePhotoRequest;
 use App\Http\Requests\Admin\UpdatePhotoRequest;
@@ -24,7 +22,6 @@ final class AdminPhotoController extends Controller
 {
     public function __construct(
         private readonly CreatePhotoFromUploadAction $createPhotoFromUpload,
-        private readonly UpdatePublishedStatusAction $updatePublishedStatus,
         private readonly ExtractExifDataAction $extractExif,
     ) {}
 
@@ -163,8 +160,6 @@ final class AdminPhotoController extends Controller
         $photo->status = $data['status'];
         $photo->taken_at = $data['taken_at'] ?? null;
         $photo->category_id = $data['category_id'] ?? null;
-
-        $this->updatePublishedStatus->handle($photo, Status::from($data['status']));
 
         if ($request->hasFile('image_file')) {
             try {
