@@ -21,10 +21,11 @@ it('returns valid RSS XML structure', function (): void {
     $response->assertSuccessful();
 
     $content = $response->getContent();
-    $this->assertStringContainsString('<?xml version="1.0"', $content);
-    $this->assertStringContainsString('<rss version="2.0"', $content);
-    $this->assertStringContainsString('<channel>', $content);
-    $this->assertStringContainsString('RSS Test Article', $content);
+    expect($content)
+        ->toContain('<?xml version="1.0"')
+        ->toContain('<rss version="2.0"')
+        ->toContain('<channel>')
+        ->toContain('RSS Test Article');
 });
 
 it('includes full content in RSS content:encoded', function (): void {
@@ -36,8 +37,9 @@ it('includes full content in RSS content:encoded', function (): void {
     $response = $this->get('/feed');
     $content = $response->getContent();
 
-    $this->assertStringContainsString('content:encoded', $content);
-    $this->assertStringContainsString('full', $content);
+    expect($content)
+        ->toContain('content:encoded')
+        ->toContain('full');
 });
 
 it('serves RSS feed at /rss alias', function (): void {
@@ -60,10 +62,11 @@ it('returns valid Atom XML structure', function (): void {
     $response = $this->get('/atom');
     $content = $response->getContent();
 
-    $this->assertStringContainsString('<?xml version="1.0"', $content);
-    $this->assertStringContainsString('<feed xmlns="http://www.w3.org/2005/Atom"', $content);
-    $this->assertStringContainsString('<entry>', $content);
-    $this->assertStringContainsString('Atom Test Article', $content);
+    expect($content)
+        ->toContain('<?xml version="1.0"')
+        ->toContain('<feed xmlns="http://www.w3.org/2005/Atom"')
+        ->toContain('<entry>')
+        ->toContain('Atom Test Article');
 });
 
 // JSON Feed
@@ -101,7 +104,7 @@ it('returns valid JSON Feed 1.1 structure', function (): void {
 // Published vs Draft filtering
 
 it('shows published articles in feeds', function (): void {
-    $article = Article::factory()->published()->create(['title' => 'Published Feed Article']);
+    Article::factory()->published()->create(['title' => 'Published Feed Article']);
 
     $this->get('/feed')->assertSee('Published Feed Article');
     $this->get('/atom')->assertSee('Published Feed Article');
@@ -121,7 +124,7 @@ it('excludes draft articles from feeds', function (): void {
 });
 
 it('shows published photos in feeds', function (): void {
-    $photo = Photo::factory()->published()->create([
+    Photo::factory()->published()->create([
         'alt_text' => 'Feed Photo Alt Text',
         'caption' => 'A beautiful sunset photo.',
     ]);
@@ -185,8 +188,9 @@ it('returns valid RSS with no items', function (): void {
     $response->assertSuccessful();
 
     $content = $response->getContent();
-    $this->assertStringContainsString('<rss version="2.0"', $content);
-    $this->assertStringContainsString('<channel>', $content);
+    expect($content)
+        ->toContain('<rss version="2.0"')
+        ->toContain('<channel>');
 });
 
 it('returns valid Atom with no items', function (): void {
@@ -194,7 +198,7 @@ it('returns valid Atom with no items', function (): void {
     $response->assertSuccessful();
 
     $content = $response->getContent();
-    $this->assertStringContainsString('<feed xmlns="http://www.w3.org/2005/Atom"', $content);
+    expect($content)->toContain('<feed xmlns="http://www.w3.org/2005/Atom"');
 });
 
 it('returns valid JSON Feed with no items', function (): void {
@@ -225,10 +229,10 @@ it('includes category in feed items', function (): void {
 // Feed discovery
 
 it('includes feed discovery links on public pages', function (): void {
-    $response = $this->get('/');
-    $content = $response->getContent();
+    $content = $this->get('/')->getContent();
 
-    $this->assertStringContainsString('application/rss+xml', $content);
-    $this->assertStringContainsString('application/atom+xml', $content);
-    $this->assertStringContainsString('application/feed+json', $content);
+    expect($content)
+        ->toContain('application/rss+xml')
+        ->toContain('application/atom+xml')
+        ->toContain('application/feed+json');
 });
