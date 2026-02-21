@@ -5,85 +5,52 @@
      @category:created.window="$ajax(window.location.href)">
     <div class="card-body p-0">
 
-        {{-- Breadcrumb Navigation --}}
-        @if($breadcrumbs->isNotEmpty())
-            <div class="px-4 pt-4 pb-2">
-                <nav class="text-sm breadcrumbs overflow-x-auto">
-                    <ul class="flex-wrap">
-                        <li>
-                            <a href="{{ route('admin.categories.index') }}"
-                               class="link link-hover">
-                                <i class="ph ph-house mr-1"></i> Root
-                            </a>
-                        </li>
-                        @foreach($breadcrumbs as $crumb)
-                            @if(!$loop->last)
-                                @php
-                                    $crumbPath = $breadcrumbs->slice(0, $loop->index + 1)->pluck('slug')->implode('/');
-                                @endphp
-                                <li>
-                                    <a href="{{ route('admin.categories.children', $crumbPath) }}"
-                                       class="link link-hover">
-                                        {{ $crumb->name }}
-                                    </a>
-                                </li>
-                            @else
-                                <li class="text-base-content/60">{{ $crumb->name }}</li>
-                            @endif
-                        @endforeach
-                    </ul>
-                </nav>
-            </div>
-        @endif
-
         @if($categories->count() > 0)
             <div class="overflow-x-auto">
                 <table class="table">
                     <thead>
                         <tr>
                             <th>Category</th>
-                            <th>Slug</th>
-                            <th>Articles</th>
-                            <th>Photos</th>
-                            <th>Subcategories</th>
+                            <th x-show="columns.description" x-cloak>Description</th>
+                            <th x-show="columns.slug" x-cloak>Slug</th>
+                            <th x-show="columns.parent" x-cloak>Parent</th>
+                            <th x-show="columns.articles" x-cloak>Articles</th>
+                            <th x-show="columns.photos" x-cloak>Photos</th>
+                            <th x-show="columns.subcategories" x-cloak>Subcategories</th>
                             <th class="text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($categories as $category)
-                            @php
-                                $drillPath = ($slugPrefix ? $slugPrefix . '/' : '') . $category->slug;
-                            @endphp
                             <tr>
                                 <td>
                                     <div class="flex items-center gap-2">
                                         <div class="font-semibold">
-                                            @if($category->children_count > 0)
-                                                <a href="{{ route('admin.categories.children', $drillPath) }}"
-                                                   class="link link-hover inline-flex items-center gap-1">
-                                                    {{ $category->name }}
-                                                    <i class="ph ph-caret-right text-xs"></i>
-                                                </a>
-                                            @else
-                                                {{ $category->name }}
-                                            @endif
+                                            {{ $category->name }}
                                             <x-admin.icon-button tooltip="View category" href="{{ $category->adminExploreUrl() }}" icon="eye" class="btn-xs opacity-50 hover:opacity-100" data-test="view-category" />
                                         </div>
                                     </div>
-                                    @if($category->description)
-                                        <div class="text-sm text-base-content/60">{{ Str::limit($category->description, 50) }}</div>
-                                    @endif
                                 </td>
-                                <td class="text-sm text-base-content/60">
+                                <td x-show="columns.description" x-cloak class="text-sm text-base-content/60">
+                                    {{ $category->description ? Str::limit($category->description, 60) : '—' }}
+                                </td>
+                                <td x-show="columns.slug" x-cloak class="text-sm text-base-content/60">
                                     {{ $category->slug }}
                                 </td>
-                                <td>
+                                <td x-show="columns.parent" x-cloak>
+                                    @if($category->parent)
+                                        <span class="badge badge-sm badge-outline">{{ $category->parent->name }}</span>
+                                    @else
+                                        <span class="text-base-content/40 text-sm">—</span>
+                                    @endif
+                                </td>
+                                <td x-show="columns.articles" x-cloak>
                                     <span class="badge badge-sm">{{ $category->articles_count }}</span>
                                 </td>
-                                <td>
+                                <td x-show="columns.photos" x-cloak>
                                     <span class="badge badge-sm">{{ $category->photos_count }}</span>
                                 </td>
-                                <td>
+                                <td x-show="columns.subcategories" x-cloak>
                                     @if($category->children_count > 0)
                                         <span class="badge badge-sm badge-outline">{{ $category->children_count }}</span>
                                     @else
@@ -120,11 +87,7 @@
             @endif
         @else
             <div class="text-center py-12">
-                @if($parent)
-                    <p class="text-base-content/60">No subcategories in {{ $parent->name }}.</p>
-                @else
-                    <p class="text-base-content/60">No categories yet.</p>
-                @endif
+                <p class="text-base-content/60">No categories yet.</p>
             </div>
         @endif
     </div>

@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Admin\AdminCategoryChildrenController;
 use App\Http\Controllers\Admin\AdminPhotoController;
 use App\Http\Controllers\Admin\AppearanceController;
 use App\Http\Controllers\Admin\ArticleController;
@@ -57,11 +56,6 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function (): v
     Route::get('/categories/explore/{path}', [CategoryExploreController::class, 'show'])
         ->where('path', '.*')
         ->name('categories.explore.show');
-
-    // Category children — slug-path index (must be last among category GET routes)
-    Route::get('/categories/{path}', [AdminCategoryChildrenController::class, 'index'])
-        ->where('path', '.*')
-        ->name('categories.children');
 
     // Settings — redirect index to first tab
     Route::redirect('/settings', '/admin/settings/profile')->name('settings');

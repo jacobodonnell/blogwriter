@@ -27,8 +27,8 @@ it('filters categories by name search', function (): void {
     $response = $this->get(route('admin.categories.index', ['search' => 'Program']));
 
     $response->assertOk()
-        ->assertSee('Programming')
-        ->assertDontSee('>Photography<', false);
+        ->assertViewHas('categories', fn ($cats) => $cats->pluck('name')->contains('Programming'))
+        ->assertViewHas('categories', fn ($cats) => ! $cats->pluck('name')->contains('Photography'));
 });
 
 it('filters categories by slug search', function (): void {
@@ -38,8 +38,8 @@ it('filters categories by slug search', function (): void {
     $response = $this->get(route('admin.categories.index', ['search' => 'web-dev']));
 
     $response->assertOk()
-        ->assertSee('Web Development')
-        ->assertDontSee('>Photography<', false);
+        ->assertViewHas('categories', fn ($cats) => $cats->pluck('name')->contains('Web Development'))
+        ->assertViewHas('categories', fn ($cats) => ! $cats->pluck('name')->contains('Photography'));
 });
 
 it('filters categories by content type articles', function (): void {
@@ -50,8 +50,8 @@ it('filters categories by content type articles', function (): void {
     $response = $this->get(route('admin.categories.index', ['content_type' => 'articles']));
 
     $response->assertOk()
-        ->assertSee('Has Articles')
-        ->assertDontSee('>No Articles<', false);
+        ->assertViewHas('categories', fn ($cats) => $cats->pluck('name')->contains('Has Articles'))
+        ->assertViewHas('categories', fn ($cats) => ! $cats->pluck('name')->contains('No Articles'));
 });
 
 it('filters categories by content type photos', function (): void {
@@ -62,8 +62,8 @@ it('filters categories by content type photos', function (): void {
     $response = $this->get(route('admin.categories.index', ['content_type' => 'photos']));
 
     $response->assertOk()
-        ->assertSee('Has Photos')
-        ->assertDontSee('>No Photos<', false);
+        ->assertViewHas('categories', fn ($cats) => $cats->pluck('name')->contains('Has Photos'))
+        ->assertViewHas('categories', fn ($cats) => ! $cats->pluck('name')->contains('No Photos'));
 });
 
 it('paginates categories', function (): void {

@@ -16,12 +16,12 @@ use Illuminate\View\View;
 final class CategoryController extends Controller
 {
     /**
-     * Display a listing of root categories.
+     * Display a flat listing of all categories.
      */
     public function index(Request $request): View
     {
         $query = Category::query()
-            ->whereNull('parent_id')
+            ->with('parent')
             ->withCount(['articles', 'photos', 'children'])
             ->orderBy('name');
 
@@ -41,15 +41,16 @@ final class CategoryController extends Controller
             };
         }
 
+        if ($request->filled('parent_id')) {
+            $query->where('parent_id', (int) $request->input('parent_id'));
+        }
+
         $perPage = in_array((int) $request->input('perPage'), [10, 20, 50, 100]) ? (int) $request->input('perPage') : 20;
 
         $categories = $query->paginate($perPage)->withQueryString();
 
         $viewData = [
             'categories' => $categories,
-            'parent' => null,
-            'breadcrumbs' => collect(),
-            'slugPrefix' => '',
             'allCategories' => Category::flatTree(),
             'perPage' => $perPage,
         ];
@@ -96,7 +97,7 @@ final class CategoryController extends Controller
             return response(view('admin.categories._store-success', ['parent' => $parent, 'allCategories' => $allCategories]));
         }
 
-        return redirect($this->categoryRedirectUrl($parentId ? (int) $parentId : null))
+        return redirect()->route('admin.categories.index')
             ->with('success', 'Category created successfully.');
     }
 
@@ -136,43 +137,24 @@ final class CategoryController extends Controller
      */
     public function destroy(Category $category): RedirectResponse
     {
-        $redirectUrl = $this->categoryRedirectUrl($category->parent_id);
-
         if ($category->children()->count() > 0) {
-            return redirect($redirectUrl)
+            return redirect()->route('admin.categories.index')
                 ->with('error', 'Cannot delete category with subcategories. Remove subcategories first.');
         }
 
         if ($category->articles()->count() > 0) {
-            return redirect($redirectUrl)
+            return redirect()->route('admin.categories.index')
                 ->with('error', 'Cannot delete category with articles. Remove articles first.');
         }
 
         if ($category->photos()->count() > 0) {
-            return redirect($redirectUrl)
+            return redirect()->route('admin.categories.index')
                 ->with('error', 'Cannot delete category with photos. Remove photos first.');
         }
 
         $category->delete();
 
-        return redirect($redirectUrl)
+        return redirect()->route('admin.categories.index')
             ->with('success', 'Category deleted successfully.');
-    }
-
-    private function categoryRedirectUrl(?int $parentId): string
-    {
-        if (! $parentId) {
-            return route('admin.categories.index');
-        }
-
-        $parent = Category::find($parentId);
-
-        if (! $parent) {
-            return route('admin.categories.index');
-        }
-
-        $slugs = $parent->ancestors()->pluck('slug')->push($parent->slug)->implode('/');
-
-        return route('admin.categories.children', $slugs);
     }
 }

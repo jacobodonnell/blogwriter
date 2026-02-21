@@ -5,13 +5,14 @@ declare(strict_types=1);
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\User;
+use Illuminate\Support\Facades\Route;
 
 beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->actingAs($this->user);
 });
 
-it('shows root categories by default', function (): void {
+it('shows all categories including subcategories in flat table', function (): void {
     $root = Category::factory()->create(['name' => 'Programming']);
     $child = Category::factory()->withParent($root)->create(['name' => 'PHP']);
 
@@ -19,30 +20,33 @@ it('shows root categories by default', function (): void {
 
     $response->assertSuccessful();
     $response->assertSee('Programming');
-    $response->assertDontSee('>PHP<', false);
-});
-
-it('drills down to show children when parent is specified', function (): void {
-    $root = Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
-    $child = Category::factory()->withParent($root)->create(['name' => 'PHP']);
-
-    $response = $this->get(route('admin.categories.children', $root->slug));
-
-    $response->assertSuccessful();
     $response->assertSee('PHP');
 });
 
-it('returns table partial for AJAX requests', function (): void {
-    $root = Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
+it('returns table partial for AJAX requests on index', function (): void {
+    Category::factory()->create(['name' => 'Programming']);
 
     $response = $this->get(
-        route('admin.categories.children', $root->slug),
+        route('admin.categories.index'),
         ['X-Alpine-Target' => 'categories-table']
     );
 
     $response->assertSuccessful();
     $response->assertSee('id="categories-table"', false);
     $response->assertDontSee('<h1', false);
+});
+
+it('filters categories by parent_id', function (): void {
+    $root = Category::factory()->create(['name' => 'Programming']);
+    $child = Category::factory()->withParent($root)->create(['name' => 'PHP']);
+    $other = Category::factory()->create(['name' => 'Photography']);
+
+    $response = $this->get(route('admin.categories.index', ['parent_id' => $root->id]));
+
+    $response->assertSuccessful();
+    $response->assertViewHas('categories', fn ($cats) => $cats->pluck('name')->contains('PHP'));
+    $response->assertViewHas('categories', fn ($cats) => ! $cats->pluck('name')->contains('Photography'));
+    $response->assertViewHas('categories', fn ($cats) => ! $cats->pluck('name')->contains('Programming'));
 });
 
 it('creates category with parent_id', function (): void {
@@ -86,21 +90,10 @@ it('allows deletion when category has no children or articles', function (): voi
     $category = Category::factory()->create(['name' => 'Empty']);
 
     $this->delete(route('admin.categories.destroy', $category))
-        ->assertRedirect()
+        ->assertRedirect(route('admin.categories.index'))
         ->assertSessionHas('success');
 
     expect(Category::find($category->id))->toBeNull();
-});
-
-it('builds correct breadcrumbs for nested category', function (): void {
-    $root = Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
-    $child = Category::factory()->withParent($root)->create(['name' => 'PHP', 'slug' => 'php']);
-    $grandchild = Category::factory()->withParent($child)->create(['name' => 'Laravel', 'slug' => 'laravel']);
-
-    $response = $this->get(route('admin.categories.children', 'programming/php/laravel'));
-
-    $response->assertSuccessful();
-    $response->assertSeeInOrder(['Root', 'Programming', 'PHP', 'Laravel']);
 });
 
 it('excludes self and descendants from parent dropdown on edit', function (): void {
@@ -126,7 +119,7 @@ it('auto-generates slug when slug is not provided', function (): void {
         ->and($category->slug)->toBe('my-new-category');
 });
 
-it('redirects to parent context after creating child category', function (): void {
+it('redirects to index after creating child category', function (): void {
     $parent = Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
 
     $response = $this->post(route('admin.categories.store'), [
@@ -135,37 +128,7 @@ it('redirects to parent context after creating child category', function (): voi
         'parent_id' => $parent->id,
     ]);
 
-    $response->assertRedirect(route('admin.categories.children', $parent->slug));
-});
-
-it('resolves nested slug path to correct category', function (): void {
-    $root = Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
-    $child = Category::factory()->withParent($root)->create(['name' => 'PHP', 'slug' => 'php']);
-
-    $response = $this->get(route('admin.categories.children', 'programming/php'));
-
-    $response->assertSuccessful();
-    $response->assertSee('PHP');
-    $response->assertSee('Programming');
-});
-
-it('returns 404 for invalid slug path', function (): void {
-    Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
-
-    $this->get(route('admin.categories.children', 'programming/nonexistent'))
-        ->assertNotFound();
-});
-
-it('store redirects to slug path URL after creating child', function (): void {
-    $parent = Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
-
-    $response = $this->post(route('admin.categories.store'), [
-        'name' => 'JavaScript',
-        'slug' => 'javascript',
-        'parent_id' => $parent->id,
-    ]);
-
-    $response->assertRedirect(route('admin.categories.children', 'programming'));
+    $response->assertRedirect(route('admin.categories.index'));
 });
 
 it('add category modal is present on index page', function (): void {
@@ -248,17 +211,6 @@ it('does not create category when slug is duplicate', function (): void {
     expect(Category::where('name', 'Technology')->exists())->toBeFalse();
 });
 
-it('category drill-down page renders successfully', function (): void {
-    $root = Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
-    Category::factory()->withParent($root)->create(['name' => 'PHP']);
-
-    $response = $this->get(route('admin.categories.children', 'programming'));
-
-    $response->assertSuccessful()
-        ->assertSee('Programming')
-        ->assertSee('PHP');
-});
-
 it('add form shows parent category dropdown on index page', function (): void {
     $root = Category::factory()->create(['name' => 'Programming']);
 
@@ -268,16 +220,6 @@ it('add form shows parent category dropdown on index page', function (): void {
     $response->assertSee('Parent Category');
     $response->assertSee('None (Root)');
     $response->assertSee('Programming');
-});
-
-it('add form pre-selects parent when viewing children', function (): void {
-    $root = Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
-    Category::factory()->withParent($root)->create(['name' => 'PHP']);
-
-    $response = $this->get(route('admin.categories.children', 'programming'));
-
-    $response->assertSuccessful();
-    $response->assertSee('value="'.$root->id.'"', false);
 });
 
 it('add form shows all categories in parent dropdown including leaf categories', function (): void {
@@ -304,4 +246,8 @@ it('creates subcategory under leaf category selected from parent dropdown', func
 
     expect($child)->not->toBeNull()
         ->and($child->parent_id)->toBe($leaf->id);
+});
+
+it('categories.children route no longer exists', function (): void {
+    expect(Route::has('admin.categories.children'))->toBeFalse();
 });
