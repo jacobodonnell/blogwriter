@@ -5,6 +5,7 @@
     :js-entry="auth()->check() ? 'resources/js/app-admin.js' : 'resources/js/app-guest.js'">
 
     <x-slot:head>
+        <x-feed-discovery />
         {{ $seo ?? '' }}
         @yield('head')
     </x-slot:head>

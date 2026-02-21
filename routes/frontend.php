@@ -6,6 +6,7 @@ use App\Http\Controllers\AboutController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CategoryContentController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\FeedController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PhotoController;
 use Illuminate\Support\Facades\Route;
@@ -29,3 +30,9 @@ Route::get('/photos/{photo:slug}', [PhotoController::class, 'show'])->name('phot
 
 // About
 Route::get('/about', AboutController::class)->name('about');
+
+// Feeds
+Route::get('/feed', [FeedController::class, 'rss'])->name('feed.rss');
+Route::get('/rss', [FeedController::class, 'rss'])->name('feed.rss.alias');
+Route::get('/atom', [FeedController::class, 'atom'])->name('feed.atom');
+Route::get('/feed.json', [FeedController::class, 'json'])->name('feed.json');
