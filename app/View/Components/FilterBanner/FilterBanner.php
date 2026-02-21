@@ -21,6 +21,7 @@ final class FilterBanner extends Component
         public string $target,
         public string $clearRoute,
         public string $persistKey = '',
+        public bool $defaultOpen = false,
         public array $filterParams = ['search', 'category', 'type', 'status', 'sort', 'content_type'],
     ) {
         $activeValues = collect($this->filterParams)
@@ -28,6 +29,7 @@ final class FilterBanner extends Component
 
         $this->activeFilterCount = $activeValues->count();
         $this->hasFilters = $this->activeFilterCount > 0;
+        $this->defaultOpen = $this->hasFilters || $this->defaultOpen;
     }
 
     public function render(): View

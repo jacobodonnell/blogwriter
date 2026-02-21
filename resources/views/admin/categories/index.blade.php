@@ -53,7 +53,7 @@
         {{-- Filters --}}
         <x-filter-banner :action="route('admin.categories.index')" target="categories-table"
             :clearRoute="route('admin.categories.index')" persistKey="admin_categories_filters_open"
-            :filterParams="['search', 'content_type']">
+            :defaultOpen="true" :filterParams="['search', 'content_type']">
             <x-filter-banner.search placeholder="Search by name or slug..." />
             <x-filter-banner.select name="content_type" label="Content Type"
                 :options="['articles' => 'Articles', 'photos' => 'Photos']"

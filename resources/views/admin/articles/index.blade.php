@@ -39,7 +39,7 @@
         {{-- Filters --}}
         <x-filter-banner :action="route('admin.articles.index')" target="articles-table"
             :clearRoute="route('admin.articles.index')" persistKey="admin_articles_filters_open"
-            :filterParams="['search', 'category', 'status']">
+            :defaultOpen="true" :filterParams="['search', 'category', 'status']">
             <x-slot:toolbar>
                 {{-- Columns Toggle --}}
                 <div class="dropdown md:dropdown-end">

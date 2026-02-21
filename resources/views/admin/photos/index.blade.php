@@ -25,7 +25,7 @@
         {{-- Filters --}}
         <x-filter-banner :action="route('admin.photos.index')" target="photos-grid"
             :clearRoute="route('admin.photos.index')" persistKey="admin_photos_filters_open"
-            :filterParams="['search', 'category', 'status']">
+            :defaultOpen="true" :filterParams="['search', 'category', 'status']">
             <x-filter-banner.search placeholder="Search by alt text, slug, or caption..." />
             <x-filter-banner.category-select :categories="$categories" />
             <x-filter-banner.select name="status" label="Status"

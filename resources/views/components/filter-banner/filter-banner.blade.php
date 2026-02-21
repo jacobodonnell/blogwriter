@@ -1,5 +1,5 @@
 <div x-data="{
-    open: {{ $persistKey ? "\$persist(" . ($hasFilters ? 'true' : 'false') . ").as('" . $persistKey . "')" : ($hasFilters ? 'true' : 'false') }},
+    open: {{ $persistKey ? "\$persist(" . ($defaultOpen ? 'true' : 'false') . ").as('" . $persistKey . "')" : ($defaultOpen ? 'true' : 'false') }},
 }" class="mb-6">
     {{-- Always-visible navigation --}}
     @if(isset($navigation) && trim((string) $navigation) !== '')
