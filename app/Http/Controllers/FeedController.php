@@ -11,7 +11,7 @@ use Illuminate\Http\Response;
 final class FeedController extends Controller
 {
     public function __construct(
-        private FeedService $feedService,
+        private readonly FeedService $feedService,
     ) {}
 
     /**
@@ -72,12 +72,15 @@ final class FeedController extends Controller
                 if ($item->summary) {
                     $entry['summary'] = $item->summary;
                 }
+
                 if ($item->updatedAt) {
                     $entry['date_modified'] = $item->updatedAt->toRfc3339String();
                 }
+
                 if ($item->imageUrl) {
                     $entry['image'] = $item->imageUrl;
                 }
+
                 if ($item->categoryName) {
                     $entry['tags'] = [$item->categoryName];
                 }

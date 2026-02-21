@@ -80,7 +80,7 @@ final class FeedService
             ? $items->reduce(function (?CarbonInterface $carry, FeedItem $item): CarbonInterface {
                 $date = $item->updatedAt ?? $item->publishedAt;
 
-                return $carry === null || $date->greaterThan($carry) ? $date : $carry;
+                return ! $carry instanceof CarbonInterface || $date->greaterThan($carry) ? $date : $carry;
             })
             : null;
     }
