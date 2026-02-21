@@ -20,11 +20,35 @@ final class CategoryController extends Controller
      */
     public function index(Request $request): View
     {
-        $categories = Category::query()
+        $query = Category::query()
             ->whereNull('parent_id')
-            ->withCount(['articles', 'children'])
-            ->orderBy('name')
-            ->get();
+            ->withCount(['articles', 'photos', 'children'])
+            ->orderBy('name');
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search): void {
+                $q->where('name', 'like', sprintf('%%%s%%', $search))
+                    ->orWhere('slug', 'like', sprintf('%%%s%%', $search));
+            });
+        }
+
+        if ($request->filled('content_type')) {
+            match ($request->input('content_type')) {
+                'articles' => $query->has('articles'),
+                'photos' => $query->has('photos'),
+                default => null,
+            };
+        }
+
+        $perPage = in_array((int) $request->input('perPage'), [10, 20, 50, 100]) ? (int) $request->input('perPage') : 20;
+
+        $categories = $query->paginate($perPage)->withQueryString();
+
+        $activeFilterCount = collect([
+            $request->input('search'),
+            $request->input('content_type'),
+        ])->filter()->count();
 
         $viewData = [
             'categories' => $categories,
@@ -32,6 +56,8 @@ final class CategoryController extends Controller
             'breadcrumbs' => collect(),
             'slugPrefix' => '',
             'allCategories' => Category::flatTree(),
+            'activeFilterCount' => $activeFilterCount,
+            'perPage' => $perPage,
         ];
 
         if ($request->header('X-Alpine-Target')) {

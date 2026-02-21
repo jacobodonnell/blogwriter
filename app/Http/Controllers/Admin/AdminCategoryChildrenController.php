@@ -17,7 +17,7 @@ final class AdminCategoryChildrenController extends Controller
 
         $categories = Category::query()
             ->where('parent_id', $parent->id)
-            ->withCount(['articles', 'children'])
+            ->withCount(['articles', 'photos', 'children'])
             ->orderBy('name')
             ->get();
 
@@ -26,7 +26,15 @@ final class AdminCategoryChildrenController extends Controller
 
         $allCategories = Category::flatTree();
 
-        $viewData = ['categories' => $categories, 'parent' => $parent, 'breadcrumbs' => $breadcrumbs, 'slugPrefix' => $slugPrefix, 'allCategories' => $allCategories];
+        $viewData = [
+            'categories' => $categories,
+            'parent' => $parent,
+            'breadcrumbs' => $breadcrumbs,
+            'slugPrefix' => $slugPrefix,
+            'allCategories' => $allCategories,
+            'activeFilterCount' => 0,
+            'perPage' => 20,
+        ];
 
         if ($request->header('X-Alpine-Target')) {
             return view('admin.categories._table', $viewData);

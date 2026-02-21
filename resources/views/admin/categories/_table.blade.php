@@ -44,6 +44,7 @@
                             <th>Category</th>
                             <th>Slug</th>
                             <th>Articles</th>
+                            <th>Photos</th>
                             <th>Subcategories</th>
                             <th class="text-right">Actions</th>
                         </tr>
@@ -80,6 +81,9 @@
                                     <span class="badge badge-sm">{{ $category->articles_count }}</span>
                                 </td>
                                 <td>
+                                    <span class="badge badge-sm">{{ $category->photos_count }}</span>
+                                </td>
+                                <td>
                                     @if($category->children_count > 0)
                                         <span class="badge badge-sm badge-outline">{{ $category->children_count }}</span>
                                     @else
@@ -107,6 +111,13 @@
                     </tbody>
                 </table>
             </div>
+
+            {{-- Pagination --}}
+            @if($categories instanceof \Illuminate\Pagination\AbstractPaginator && $categories->hasPages())
+                <div class="p-4 border-t border-base-300">
+                    {{ $categories->links() }}
+                </div>
+            @endif
         @else
             <div class="text-center py-12">
                 @if($parent)
