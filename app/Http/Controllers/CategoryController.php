@@ -38,8 +38,11 @@ final class CategoryController extends Controller
             $photos = $this->contentFilter->filterPhotos($request);
         }
 
+        $categoryTree = Category::tree()->get();
+
         return view('public.categories', [
-            'children' => Category::tree()->get(),
+            'children' => $categoryTree,
+            'categories' => $categoryTree,
             'articles' => $articles,
             'photos' => $photos,
             'currentType' => $type,

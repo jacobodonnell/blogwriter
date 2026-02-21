@@ -53,6 +53,7 @@ final class CategoryContentController extends Controller
 
         return view('public.category', [
             'category' => $category,
+            'categories' => Category::tree()->get(),
             'articles' => $articles,
             'photos' => $photos,
             'children' => $category->children()->orderBy('name')->get(),

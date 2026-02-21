@@ -6,6 +6,7 @@
 
     <x-category-layout
         :category="$category"
+        :categories="$categories"
         :children="$children"
         :articles="$articles"
         :photos="$photos"

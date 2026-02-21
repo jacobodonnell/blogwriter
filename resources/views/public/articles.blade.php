@@ -31,41 +31,12 @@
                     @endauth
                 </x-slot:toolbar>
 
-                @guest
-                    <div class="sm:col-span-2">
-                @else
-                    <div class="sm:col-span-1">
-                @endguest
-                    <input type="text" name="search" value="{{ request('search') }}"
-                           placeholder="Search articles..."
-                           class="input input-bordered w-full"
-                           @input.debounce.400ms="$el.form.requestSubmit()">
-                </div>
-                <div class="sm:col-span-1">
-                    <x-category-select :categories="$categories"
-                        name="category" emptyLabel="All Categories"
-                        :selected="request('category')" :useSlug="true"
-                        @change="$el.form.requestSubmit()" />
-                </div>
-                @auth
-                    <div class="sm:col-span-1">
-                        <select name="status" class="select select-bordered w-full"
-                                @change="$el.form.requestSubmit()">
-                            <option value="">All Status</option>
-                            <option value="published" @selected(request('status') === 'published')>Published</option>
-                            <option value="draft" @selected(request('status') === 'draft')>Draft</option>
-                        </select>
-                    </div>
-                @endauth
-                <div class="sm:col-span-1">
-                    <select name="sort" class="select select-bordered w-full"
-                            @change="$el.form.requestSubmit()">
-                        <option value="" @selected(!request('sort'))>Newest First</option>
-                        <option value="oldest" @selected(request('sort') === 'oldest')>Oldest First</option>
-                        <option value="title_asc" @selected(request('sort') === 'title_asc')>Title A–Z</option>
-                        <option value="title_desc" @selected(request('sort') === 'title_desc')>Title Z–A</option>
-                    </select>
-                </div>
+                <x-filters.search placeholder="Search by title or slug..." :colspan="auth()->check() ? 1 : 2" />
+                <x-filters.category-select :categories="$categories" />
+                <x-filters.select name="status" label="Status"
+                    :options="['published' => 'Published', 'draft' => 'Draft']"
+                    emptyLabel="All Status" :auth="true" />
+                <x-filters.sort />
             </x-filter-banner>
             @if($articles->isNotEmpty())
                 @php $placeholderUrl = placeholder_image_url(); @endphp

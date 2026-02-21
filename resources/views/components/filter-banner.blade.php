@@ -1,12 +1,24 @@
-@props(['action', 'target', 'clearRoute', 'persistKey' => ''])
+@props(['action', 'target', 'clearRoute', 'persistKey' => '', 'navigationLabel' => 'Navigate'])
 
 @php
     $hasFilters = request('search') || request('category') || request('type') || request('status') || request('sort');
+    $hasNavigation = isset($navigation) && trim((string) $navigation) !== '';
 @endphp
 
-<div x-data="{ open: {{ $persistKey ? "\$persist(" . ($hasFilters ? 'true' : 'false') . ").as('" . $persistKey . "')" : ($hasFilters ? 'true' : 'false') }} }" class="mb-6">
-    {{-- Toolbar row: Toggle + Clear + toolbar slot --}}
+<div x-data="{
+    open: {{ $persistKey ? "\$persist(" . ($hasFilters ? 'true' : 'false') . ").as('" . $persistKey . "')" : ($hasFilters ? 'true' : 'false') }},
+    navOpen: false,
+}" class="mb-6">
+    {{-- Toolbar row: Navigation Toggle + Filter Toggle + Clear + toolbar slot --}}
     <div class="flex items-center gap-2">
+        @if($hasNavigation)
+            <button @click="navOpen = !navOpen" class="btn btn-ghost btn-sm gap-1" type="button">
+                <i class="ph ph-folders text-lg"></i>
+                {{ $navigationLabel }}
+                <i class="ph ph-caret-down text-sm transition-transform duration-200" :class="navOpen && 'rotate-180'"></i>
+            </button>
+        @endif
+
         <button @click="open = !open" class="btn btn-ghost btn-sm gap-1" type="button">
             <i class="ph ph-funnel text-lg"></i>
             Filters
@@ -29,6 +41,13 @@
             </div>
         @endif
     </div>
+
+    {{-- Collapsible navigation panel --}}
+    @if($hasNavigation)
+        <div x-show="navOpen" x-collapse x-cloak class="mt-3">
+            {{ $navigation }}
+        </div>
+    @endif
 
     {{-- Collapsible filter form --}}
     <div x-show="open" x-collapse x-cloak class="mt-3">

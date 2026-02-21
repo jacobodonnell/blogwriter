@@ -1,5 +1,6 @@
 @props([
     'category',
+    'categories',
     'children',
     'articles',
     'photos',
@@ -68,13 +69,14 @@
             @auth
                 <a href="{{ route('admin.categories.index') }}" class="btn btn-ghost btn-sm gap-1">
                     <i class="ph ph-gear text-lg"></i>
-                    Manage
+                    Manage Categories
                 </a>
             @endauth
         </header>
 
         <x-category-feed
             :feedUrl="$feedUrl"
+            :categories="$categories"
             :children="$children"
             :articles="$articles"
             :photos="$photos"

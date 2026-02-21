@@ -8,13 +8,14 @@ use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\Photo;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 final readonly class ContentFilterService
 {
     /**
-     * Filter and paginate articles with auth-based scoping, search, status, and category filters.
+     * Filter and paginate articles with auth-based scoping, search, status, category, and sort.
      *
      * @param  array<int>|null  $categoryIds
      */
@@ -28,6 +29,11 @@ final readonly class ContentFilterService
 
         if ($categoryIds !== null) {
             $query->whereIn('category_id', $categoryIds);
+        } elseif ($request->filled('category')) {
+            $category = Category::where('slug', $request->input('category'))->first();
+            if ($category) {
+                $query->where('category_id', $category->id);
+            }
         }
 
         if ($search = $request->query('search')) {
@@ -42,14 +48,15 @@ final readonly class ContentFilterService
             $query->where('status', $status);
         }
 
+        $this->applySortOrder($query, $request, 'title');
+
         return $query->with('category')
-            ->orderBy('published_at', 'desc')
             ->paginate(10, ['*'], 'articles_page')
             ->withQueryString();
     }
 
     /**
-     * Filter and paginate photos with auth-based scoping, search, status, and category filters.
+     * Filter and paginate photos with auth-based scoping, search, status, category, and sort.
      *
      * @param  array<int>|null  $categoryIds
      */
@@ -63,6 +70,11 @@ final readonly class ContentFilterService
 
         if ($categoryIds !== null) {
             $query->whereIn('category_id', $categoryIds);
+        } elseif ($request->filled('category')) {
+            $category = Category::where('slug', $request->input('category'))->first();
+            if ($category) {
+                $query->where('category_id', $category->id);
+            }
         }
 
         if ($search = $request->query('search')) {
@@ -80,8 +92,9 @@ final readonly class ContentFilterService
             $query->where('status', $status);
         }
 
-        return $query->orderBy('published_at', 'desc')
-            ->paginate(12, ['*'], 'photos_page')
+        $this->applySortOrder($query, $request, 'alt_text');
+
+        return $query->paginate(12, ['*'], 'photos_page')
             ->withQueryString();
     }
 
@@ -107,5 +120,20 @@ final readonly class ContentFilterService
         return auth()->check()
             ? $query->count()
             : $query->published()->count();
+    }
+
+    /**
+     * Apply sort order to a query based on the request's `sort` parameter.
+     *
+     * @param  Builder<\Illuminate\Database\Eloquent\Model>  $query
+     */
+    private function applySortOrder(Builder $query, Request $request, string $titleColumn): void
+    {
+        match ($request->query('sort')) {
+            'oldest' => $query->orderBy('published_at', 'asc'),
+            'title_asc' => $query->orderBy($titleColumn, 'asc'),
+            'title_desc' => $query->orderBy($titleColumn, 'desc'),
+            default => $query->orderBy('published_at', 'desc'),
+        };
     }
 }
