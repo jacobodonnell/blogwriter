@@ -71,7 +71,6 @@
         </x-slot:navigation>
 
         <x-filter-banner.search :placeholder="$isRoot ? 'Search all content...' : 'Search in ' . $category->name . '...'" :colspan="4" />
-        <x-filter-banner.category-select :categories="$categories" :selected="$selectedCategory ?? null" :flat="true" />
         <x-filter-banner.select name="type" label="Content Type"
             :options="['articles' => 'Articles', 'photos' => 'Photos']"
             emptyLabel="All Content" />
