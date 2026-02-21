@@ -81,7 +81,7 @@
 
                                 {{-- Summary (p-summary) --}}
                                 @if($loop->first || $article->excerpt)
-                                    <div class="p-summary text-base-content/80 leading-relaxed {{ $loop->first ? '' : 'min-h-0' }}">
+                                    <div class="p-summary text-base-content/80 leading-loose {{ $loop->first ? '' : 'min-h-0' }}">
                                         <p class="{{ $loop->first ? 'line-clamp-4' : 'line-clamp-3' }}">{{ $article->excerpt }}</p>
                                     </div>
                                 @endif

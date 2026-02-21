@@ -122,7 +122,7 @@
 
                                     {{-- Summary (p-summary) --}}
                                     @if($article->excerpt)
-                                        <p class="p-summary text-base-content/80 leading-relaxed">
+                                        <p class="p-summary text-base-content/80 leading-loose line-clamp-3">
                                             {{ $article->excerpt }}
                                         </p>
                                     @endif
