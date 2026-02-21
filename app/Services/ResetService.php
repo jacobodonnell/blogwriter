@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\Resettable;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +14,7 @@ use RuntimeException;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\warning;
 
-final class ResetService
+final class ResetService implements Resettable
 {
     public function reset(Command $command): int
     {

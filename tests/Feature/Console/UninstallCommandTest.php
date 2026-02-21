@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Services\ResetService;
+use App\Contracts\Resettable;
 use Illuminate\Console\Command;
 
 afterEach(function (): void {
@@ -23,13 +23,13 @@ it('cancels when confirmation is declined', function (): void {
 it('uninstalls with --force flag', function (): void {
     file_put_contents(storage_path('installed.lock'), now());
 
-    $mock = Mockery::mock(ResetService::class);
+    $mock = Mockery::mock(Resettable::class);
     $mock->shouldReceive('reset')->once()->andReturnUsing(function (): int {
         @unlink(storage_path('installed.lock'));
 
         return Command::SUCCESS;
     });
-    $this->app->instance(ResetService::class, $mock);
+    $this->app->instance(Resettable::class, $mock);
 
     $this->artisan('blogwriter:uninstall --force')
         ->assertSuccessful();
@@ -40,9 +40,9 @@ it('uninstalls with --force flag', function (): void {
 it('handles missing installation gracefully', function (): void {
     @unlink(storage_path('installed.lock'));
 
-    $mock = Mockery::mock(ResetService::class);
+    $mock = Mockery::mock(Resettable::class);
     $mock->shouldReceive('reset')->once()->andReturn(Command::SUCCESS);
-    $this->app->instance(ResetService::class, $mock);
+    $this->app->instance(Resettable::class, $mock);
 
     $this->artisan('blogwriter:uninstall --force')
         ->assertSuccessful();

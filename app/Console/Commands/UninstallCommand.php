@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Services\ResetService;
+use App\Contracts\Resettable;
 use Illuminate\Console\Command;
 
 final class UninstallCommand extends Command
@@ -13,7 +13,7 @@ final class UninstallCommand extends Command
 
     protected $description = 'Uninstall BlogWriter and reset to a clean state';
 
-    public function __construct(public ResetService $resetService)
+    public function __construct(public Resettable $resetService)
     {
         parent::__construct();
     }
