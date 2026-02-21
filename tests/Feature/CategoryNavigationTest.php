@@ -41,20 +41,22 @@ it('category feed has collapsible subcategory chips with x-target.push', functio
         ->assertSee('x-target.push="category-content"', false);
 });
 
-it('both routes have content-type tabs with x-target.push', function (): void {
+it('both routes have content-type filter select', function (): void {
     $category = Category::factory()->create();
 
     // Categories index
     $indexResponse = $this->get(route('categories.index'));
     $indexResponse->assertOk();
     $indexContent = $indexResponse->getContent();
-    expect($indexContent)->toContain('aria-label="Content filter"');
+    expect($indexContent)->toContain('name="type"');
+    expect($indexContent)->toContain('All Content');
 
     // Category show
     $showResponse = $this->get(route('categories.show', $category->slug));
     $showResponse->assertOk();
     $showContent = $showResponse->getContent();
-    expect($showContent)->toContain('aria-label="Content filter"');
+    expect($showContent)->toContain('name="type"');
+    expect($showContent)->toContain('All Content');
 });
 
 it('both routes have breadcrumbs', function (): void {

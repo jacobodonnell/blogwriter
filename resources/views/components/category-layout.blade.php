@@ -15,8 +15,7 @@
     $isRoot = is_null($category);
     $title = $isRoot ? 'Categories' : $category->name;
     $pageTitle = $title . ' - ' . config('app.name');
-    $childrenLabel = $isRoot ? 'Categories' : 'Subcategories';
-    $parentUrl = match (true) {
+$parentUrl = match (true) {
         $isRoot => null,
         $category->parent !== null => $category->parent->permalink(),
         default => route('categories.index'),
@@ -84,7 +83,6 @@
             :articleCount="$articleCount"
             :photoCount="$photoCount"
             :searchPlaceholder="$searchPlaceholder"
-            :childrenLabel="$childrenLabel"
             :parentUrl="$parentUrl"
             :parentLabel="$parentLabel"
             :category="$category"

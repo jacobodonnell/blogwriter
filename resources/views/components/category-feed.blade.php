@@ -8,22 +8,12 @@
     'articleCount',
     'photoCount',
     'searchPlaceholder' => 'Search content...',
-    'childrenLabel' => 'Subcategories',
     'parentUrl' => null,
     'parentLabel' => null,
     'category' => null,
 ])
 
 <x-filter-banner :action="$feedUrl" target="category-content" :clearRoute="$feedUrl" persistKey="categories_filters_open">
-    <x-slot:toolbar>
-        @auth
-            <a href="{{ route('admin.categories.index') }}" class="btn btn-ghost btn-sm gap-1">
-                <i class="ph ph-gear text-lg"></i>
-                Manage Categories
-            </a>
-        @endauth
-    </x-slot:toolbar>
-
     <x-slot:navigation>
         @if($children->isNotEmpty() || $parentUrl)
             <div class="flex flex-wrap gap-2">
@@ -48,44 +38,16 @@
         @endif
     </x-slot:navigation>
 
-    <x-filters.search :placeholder="$searchPlaceholder" :colspan="auth()->check() ? 1 : 2" />
+    <x-filters.search :placeholder="$searchPlaceholder" :colspan="4" />
     <x-filters.category-select :categories="$categories" />
+    <x-filters.select name="type" label="Content Type"
+        :options="['articles' => 'Articles', 'photos' => 'Photos']"
+        emptyLabel="All Content" />
+    <x-filters.sort />
     <x-filters.select name="status" label="Status"
         :options="['published' => 'Published', 'draft' => 'Draft']"
         emptyLabel="All Status" :auth="true" />
-    <x-filters.sort />
-
-    @if(request('type'))
-        <input type="hidden" name="type" value="{{ request('type') }}">
-    @endif
 </x-filter-banner>
-
-{{-- Content-Type Filter Tabs --}}
-<nav class="flex gap-1 mb-6" aria-label="Content filter">
-    @php
-        $tabParams = array_filter([
-            'search' => request('search'),
-            'status' => request('status'),
-            'category' => request('category'),
-            'sort' => request('sort'),
-        ]);
-    @endphp
-    <a href="{{ $feedUrl . ($tabParams ? '?' . http_build_query($tabParams) : '') }}"
-       x-target.push="category-content"
-       class="btn btn-sm {{ $currentType === 'all' ? 'btn-primary' : 'btn-ghost' }}">
-        All
-    </a>
-    <a href="{{ $feedUrl . '?' . http_build_query(array_merge($tabParams, ['type' => 'articles'])) }}"
-       x-target.push="category-content"
-       class="btn btn-sm {{ $currentType === 'articles' ? 'btn-primary' : 'btn-ghost' }}">
-        <i class="ph ph-article"></i> Articles
-    </a>
-    <a href="{{ $feedUrl . '?' . http_build_query(array_merge($tabParams, ['type' => 'photos'])) }}"
-       x-target.push="category-content"
-       class="btn btn-sm {{ $currentType === 'photos' ? 'btn-primary' : 'btn-ghost' }}">
-        <i class="ph ph-camera"></i> Photos
-    </a>
-</nav>
 
 {{-- Articles List --}}
 @if($articles->isNotEmpty())

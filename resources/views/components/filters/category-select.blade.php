@@ -2,7 +2,11 @@
 
 @if($auth)
     @auth
-        <div class="sm:col-span-{{ $colspan }}">
+        <div @class([
+            'sm:col-span-2' => $colspan == 2,
+            'sm:col-span-3' => $colspan == 3,
+            'sm:col-span-4' => $colspan == 4,
+        ])>
             <label class="label"><span class="label-text">{{ $label }}</span></label>
             <x-category-select :categories="$categories"
                 name="category" emptyLabel="All Categories"
@@ -11,7 +15,11 @@
         </div>
     @endauth
 @else
-    <div class="sm:col-span-{{ $colspan }}">
+    <div @class([
+        'sm:col-span-2' => $colspan == 2,
+        'sm:col-span-3' => $colspan == 3,
+        'sm:col-span-4' => $colspan == 4,
+    ])>
         <label class="label"><span class="label-text">{{ $label }}</span></label>
         <x-category-select :categories="$categories"
             name="category" emptyLabel="All Categories"

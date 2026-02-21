@@ -1,10 +1,12 @@
 @props(['label' => 'Search', 'placeholder' => 'Search...', 'name' => 'search', 'auth' => false, 'colspan' => 1])
 
-@php $wrapper = function($content) use ($auth) { return $auth ? '@auth' . $content . '@endauth' : $content; }; @endphp
-
 @if($auth)
     @auth
-        <div class="sm:col-span-{{ $colspan }}">
+        <div @class([
+            'sm:col-span-2' => $colspan == 2,
+            'sm:col-span-3' => $colspan == 3,
+            'sm:col-span-4' => $colspan == 4,
+        ])>
             <label class="label"><span class="label-text">{{ $label }}</span></label>
             <input type="text" name="{{ $name }}" value="{{ request($name) }}"
                    placeholder="{{ $placeholder }}"
@@ -13,7 +15,11 @@
         </div>
     @endauth
 @else
-    <div class="sm:col-span-{{ $colspan }}">
+    <div @class([
+        'sm:col-span-2' => $colspan == 2,
+        'sm:col-span-3' => $colspan == 3,
+        'sm:col-span-4' => $colspan == 4,
+    ])>
         <label class="label"><span class="label-text">{{ $label }}</span></label>
         <input type="text" name="{{ $name }}" value="{{ request($name) }}"
                placeholder="{{ $placeholder }}"
