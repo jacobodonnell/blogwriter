@@ -55,8 +55,8 @@ final class CreateArticleController extends Controller
 
         try {
             $imageResult = $this->applyFeaturedImage->handle($request, $data);
-        } catch (PhotoUploadFailedException $e) {
-            Log::error('Failed to upload featured image', ['error' => $e->getMessage()]);
+        } catch (PhotoUploadFailedException $photoUploadFailedException) {
+            Log::error('Failed to upload featured image', ['error' => $photoUploadFailedException->getMessage()]);
 
             return redirect()->back()
                 ->withInput()

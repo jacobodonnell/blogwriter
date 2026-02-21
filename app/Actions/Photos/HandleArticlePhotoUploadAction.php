@@ -32,13 +32,13 @@ final readonly class HandleArticlePhotoUploadAction
             ]);
 
             return $photo->id;
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             Log::error('Failed to create photo from upload', [
                 'article_id' => $articleId,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
-            throw new PhotoUploadFailedException($e->getMessage(), previous: $e);
+            throw new PhotoUploadFailedException($exception->getMessage(), previous: $exception);
         }
     }
 }

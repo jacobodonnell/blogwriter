@@ -16,9 +16,7 @@ final class Setting extends Model
     {
         $cacheKey = 'setting.'.$key;
 
-        return Cache::remember($cacheKey, now()->addHour(), function () use ($key) {
-            return self::query()->where('key', $key)->value('value');
-        }) ?? $default;
+        return Cache::remember($cacheKey, now()->addHour(), fn () => self::query()->where('key', $key)->value('value')) ?? $default;
     }
 
     /**
