@@ -11,6 +11,7 @@ use App\Http\Requests\Admin\StorePhotoRequest;
 use App\Http\Requests\Admin\UpdatePhotoRequest;
 use App\Models\Category;
 use App\Models\Photo;
+use App\Services\ContentFilterService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,6 +24,7 @@ final class AdminPhotoController extends Controller
     public function __construct(
         private readonly CreatePhotoFromUploadAction $createPhotoFromUpload,
         private readonly ExtractExifDataAction $extractExif,
+        private readonly ContentFilterService $contentFilter,
     ) {}
 
     /**
@@ -30,32 +32,13 @@ final class AdminPhotoController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = Photo::query()
-            ->orderBy('created_at', 'desc');
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search): void {
-                $q->where('alt_text', 'like', sprintf('%%%s%%', $search))
-                    ->orWhere('slug', 'like', sprintf('%%%s%%', $search))
-                    ->orWhere('caption', 'like', sprintf('%%%s%%', $search));
-            });
-        }
-
-        if ($request->filled('category')) {
-            $category = Category::where('slug', $request->input('category'))->first();
-            if ($category) {
-                $query->where('category_id', $category->id);
-            }
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
         $perPage = in_array((int) $request->input('perPage'), [12, 24, 48]) ? (int) $request->input('perPage') : 12;
 
-        $photos = $query->paginate($perPage)->withQueryString();
+        $photos = $this->contentFilter->filterPhotos($request, options: [
+            'adminMode' => true,
+            'allowedPerPage' => [12, 24, 48],
+            'perPage' => 12,
+        ]);
 
         $categories = Category::tree()->get();
 

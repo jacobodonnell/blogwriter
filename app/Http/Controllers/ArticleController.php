@@ -4,55 +4,27 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Category;
+use App\Services\ContentFilterService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 final class ArticleController extends Controller
 {
+    public function __construct(
+        private readonly ContentFilterService $contentFilter,
+    ) {}
+
     /**
      * Display the articles listing page.
      */
     public function index(Request $request): View
     {
-        $articleQuery = auth()->check()
-            ? Article::query()
-            : Article::published();
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $articleQuery->where(function ($q) use ($search): void {
-                $q->where('title', 'like', sprintf('%%%s%%', $search))
-                    ->orWhere('slug', 'like', sprintf('%%%s%%', $search));
-            });
-        }
-
-        if ($request->filled('category')) {
-            $category = Category::where('slug', $request->input('category'))->first();
-            if ($category) {
-                $articleQuery->where('category_id', $category->id);
-            }
-        }
-
-        if (auth()->check() && $request->filled('status')) {
-            $articleQuery->where('status', Status::from($request->input('status')));
-        }
-
-        $sortMap = [
-            'oldest' => ['published_at', 'asc'],
-            'title_asc' => ['title', 'asc'],
-            'title_desc' => ['title', 'desc'],
-        ];
-        $sortKey = $request->input('sort', '');
-        [$sortColumn, $sortDirection] = $sortMap[$sortKey] ?? ['published_at', 'desc'];
-
-        $articles = $articleQuery->with('category')
-            ->orderBy($sortColumn, $sortDirection)
-            ->paginate(10)
-            ->withQueryString();
+        $articles = $this->contentFilter->filterArticles($request, options: [
+            'eagerLoad' => ['category'],
+        ]);
 
         $categories = Category::whereNull('parent_id')
             ->with('children')

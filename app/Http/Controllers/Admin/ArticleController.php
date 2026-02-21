@@ -11,6 +11,7 @@ use App\Http\Requests\UpdateArticleRequest;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\Photo;
+use App\Services\ContentFilterService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -18,22 +19,13 @@ use Illuminate\View\View;
 
 final class ArticleController extends Controller
 {
-    /**
-     * Allowed sort columns for the articles index.
-     *
-     * @var array<string>
-     */
     private const ALLOWED_SORTS = ['title', 'status', 'published_at', 'created_at', 'updated_at'];
 
-    /**
-     * Allowed per-page options for the articles index.
-     *
-     * @var array<int>
-     */
     private const ALLOWED_PER_PAGE = [10, 20, 50, 100];
 
     public function __construct(
         private readonly ApplyArticleFeaturedImageAction $applyFeaturedImage,
+        private readonly ContentFilterService $contentFilter,
     ) {}
 
     /**
@@ -48,34 +40,19 @@ final class ArticleController extends Controller
             ? $request->input('direction')
             : 'desc';
 
-        $query = Article::query()
-            ->with(['category', 'featuredPhoto.media'])
-            ->orderBy($currentSort, $currentDirection);
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search): void {
-                $q->where('title', 'like', sprintf('%%%s%%', $search))
-                    ->orWhere('slug', 'like', sprintf('%%%s%%', $search));
-            });
-        }
-
-        if ($request->filled('category')) {
-            $category = Category::where('slug', $request->input('category'))->first();
-            if ($category) {
-                $query->where('category_id', $category->id);
-            }
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
         $perPage = in_array((int) $request->input('perPage'), self::ALLOWED_PER_PAGE)
             ? (int) $request->input('perPage')
             : 20;
 
-        $articles = $query->paginate($perPage)->withQueryString();
+        $articles = $this->contentFilter->filterArticles($request, options: [
+            'adminMode' => true,
+            'eagerLoad' => ['category', 'featuredPhoto.media'],
+            'allowedSorts' => self::ALLOWED_SORTS,
+            'defaultSort' => 'updated_at',
+            'allowedPerPage' => self::ALLOWED_PER_PAGE,
+            'perPage' => 20,
+        ]);
+
         $categories = Category::tree()->get();
 
         $viewData = [
@@ -112,7 +89,7 @@ final class ArticleController extends Controller
     {
         $article->load('category');
         $categories = Category::tree()->get();
-        $photos = Photo::published()->latest()->limit(50)->get();
+        $photos = Photo::published()->with('media')->latest()->limit(50)->get();
 
         return view('admin.articles.customizer', [
             'article' => $article,

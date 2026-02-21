@@ -21,6 +21,7 @@ final class HomeController extends Controller
             ->paginate(10);
 
         $photos = Photo::published()
+            ->with('media')
             ->orderBy('published_at', 'desc')
             ->limit(9)
             ->get();

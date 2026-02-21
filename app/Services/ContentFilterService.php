@@ -18,40 +18,33 @@ final readonly class ContentFilterService
      * Filter and paginate articles with auth-based scoping, search, status, category, and sort.
      *
      * @param  array<int>|null  $categoryIds
+     * @param  array<string, mixed>  $options  Override defaults: perPage, pageName, sort, eagerLoad, adminMode
      */
-    public function filterArticles(Request $request, ?array $categoryIds = null): LengthAwarePaginator
+    public function filterArticles(Request $request, ?array $categoryIds = null, array $options = []): LengthAwarePaginator
     {
-        $isAuth = auth()->check();
+        $adminMode = $options['adminMode'] ?? false;
 
-        $query = $isAuth
+        $query = $adminMode
             ? Article::query()
-            : Article::published();
+            : (auth()->check() ? Article::query() : Article::published());
 
-        if ($categoryIds !== null) {
-            $query->whereIn('category_id', $categoryIds);
-        } elseif ($request->filled('category')) {
-            $category = Category::where('slug', $request->input('category'))->first();
-            if ($category) {
-                $query->where('category_id', $category->id);
-            }
+        $this->applyCategory($query, $request, $categoryIds);
+        $this->applySearch($query, $request, ['title', 'slug']);
+        $this->applyStatus($query, $request, $adminMode || auth()->check());
+
+        $eagerLoad = $options['eagerLoad'] ?? ['category', 'featuredPhoto'];
+        $query->with($eagerLoad);
+
+        if ($adminMode) {
+            $this->applyAdminSort($query, $request, $options['allowedSorts'] ?? ['title', 'status', 'published_at', 'created_at', 'updated_at'], $options['defaultSort'] ?? 'updated_at');
+        } else {
+            $this->applySortOrder($query, $request, 'title');
         }
 
-        if ($search = $request->query('search')) {
-            $query->where('title', 'like', sprintf('%%%s%%', $search));
-        }
+        $perPage = $this->resolvePerPage($request, $options['allowedPerPage'] ?? null, $options['perPage'] ?? 10);
+        $pageName = $options['pageName'] ?? ($adminMode ? 'page' : 'articles_page');
 
-        $status = $isAuth && $request->filled('status')
-            ? Status::from($request->input('status'))
-            : null;
-
-        if ($status) {
-            $query->where('status', $status);
-        }
-
-        $this->applySortOrder($query, $request, 'title');
-
-        return $query->with(['category', 'featuredPhoto'])
-            ->paginate(10, ['*'], 'articles_page')
+        return $query->paginate($perPage, ['*'], $pageName)
             ->withQueryString();
     }
 
@@ -59,42 +52,30 @@ final readonly class ContentFilterService
      * Filter and paginate photos with auth-based scoping, search, status, category, and sort.
      *
      * @param  array<int>|null  $categoryIds
+     * @param  array<string, mixed>  $options  Override defaults: perPage, pageName, sort, eagerLoad, adminMode
      */
-    public function filterPhotos(Request $request, ?array $categoryIds = null): LengthAwarePaginator
+    public function filterPhotos(Request $request, ?array $categoryIds = null, array $options = []): LengthAwarePaginator
     {
-        $isAuth = auth()->check();
+        $adminMode = $options['adminMode'] ?? false;
 
-        $query = $isAuth
+        $query = $adminMode
             ? Photo::query()
-            : Photo::published();
+            : (auth()->check() ? Photo::query() : Photo::published());
 
-        if ($categoryIds !== null) {
-            $query->whereIn('category_id', $categoryIds);
-        } elseif ($request->filled('category')) {
-            $category = Category::where('slug', $request->input('category'))->first();
-            if ($category) {
-                $query->where('category_id', $category->id);
-            }
+        $this->applyCategory($query, $request, $categoryIds);
+        $this->applySearch($query, $request, ['alt_text', 'slug', 'caption']);
+        $this->applyStatus($query, $request, $adminMode || auth()->check());
+
+        if ($adminMode) {
+            $query->orderBy('created_at', 'desc');
+        } else {
+            $this->applySortOrder($query, $request, 'alt_text');
         }
 
-        if ($search = $request->query('search')) {
-            $query->where(function ($q) use ($search): void {
-                $q->where('alt_text', 'like', sprintf('%%%s%%', $search))
-                    ->orWhere('caption', 'like', sprintf('%%%s%%', $search));
-            });
-        }
+        $perPage = $this->resolvePerPage($request, $options['allowedPerPage'] ?? null, $options['perPage'] ?? 12);
+        $pageName = $options['pageName'] ?? ($adminMode ? 'page' : 'photos_page');
 
-        $status = $isAuth && $request->filled('status')
-            ? Status::from($request->input('status'))
-            : null;
-
-        if ($status) {
-            $query->where('status', $status);
-        }
-
-        $this->applySortOrder($query, $request, 'alt_text');
-
-        return $query->paginate(12, ['*'], 'photos_page')
+        return $query->paginate($perPage, ['*'], $pageName)
             ->withQueryString();
     }
 
@@ -123,7 +104,58 @@ final readonly class ContentFilterService
     }
 
     /**
-     * Apply sort order to a query based on the request's `sort` parameter.
+     * Apply category filter from request or explicit IDs.
+     *
+     * @param  Builder<\Illuminate\Database\Eloquent\Model>  $query
+     * @param  array<int>|null  $categoryIds
+     */
+    private function applyCategory(Builder $query, Request $request, ?array $categoryIds): void
+    {
+        if ($categoryIds !== null) {
+            $query->whereIn('category_id', $categoryIds);
+        } elseif ($request->filled('category')) {
+            $category = Category::where('slug', $request->input('category'))->first();
+            if ($category) {
+                $query->where('category_id', $category->id);
+            }
+        }
+    }
+
+    /**
+     * Apply search filter across specified columns.
+     *
+     * @param  Builder<\Illuminate\Database\Eloquent\Model>  $query
+     * @param  array<string>  $columns
+     */
+    private function applySearch(Builder $query, Request $request, array $columns): void
+    {
+        if (! $request->filled('search')) {
+            return;
+        }
+
+        $search = $request->input('search');
+        $query->where(function ($q) use ($search, $columns): void {
+            foreach ($columns as $i => $column) {
+                $method = $i === 0 ? 'where' : 'orWhere';
+                $q->{$method}($column, 'like', sprintf('%%%s%%', $search));
+            }
+        });
+    }
+
+    /**
+     * Apply status filter when allowed.
+     *
+     * @param  Builder<\Illuminate\Database\Eloquent\Model>  $query
+     */
+    private function applyStatus(Builder $query, Request $request, bool $allowed): void
+    {
+        if ($allowed && $request->filled('status')) {
+            $query->where('status', Status::from($request->input('status')));
+        }
+    }
+
+    /**
+     * Apply sort order for public-facing pages.
      *
      * @param  Builder<\Illuminate\Database\Eloquent\Model>  $query
      */
@@ -135,5 +167,39 @@ final readonly class ContentFilterService
             'title_desc' => $query->orderBy($titleColumn, 'desc'),
             default => $query->orderBy('published_at', 'desc'),
         };
+    }
+
+    /**
+     * Apply sort for admin table views (column + direction).
+     *
+     * @param  Builder<\Illuminate\Database\Eloquent\Model>  $query
+     * @param  array<string>  $allowedSorts
+     */
+    private function applyAdminSort(Builder $query, Request $request, array $allowedSorts, string $defaultSort): void
+    {
+        $sort = in_array($request->input('sort'), $allowedSorts)
+            ? $request->input('sort')
+            : $defaultSort;
+        $direction = in_array($request->input('direction'), ['asc', 'desc'])
+            ? $request->input('direction')
+            : 'desc';
+
+        $query->orderBy($sort, $direction);
+    }
+
+    /**
+     * Resolve per-page value from request, constrained to allowed values.
+     *
+     * @param  array<int>|null  $allowed
+     */
+    private function resolvePerPage(Request $request, ?array $allowed, int $default): int
+    {
+        if ($allowed === null) {
+            return $default;
+        }
+
+        $value = (int) $request->input('perPage');
+
+        return in_array($value, $allowed) ? $value : $default;
     }
 }

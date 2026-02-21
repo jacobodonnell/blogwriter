@@ -41,7 +41,7 @@ final class CreateArticleController extends Controller
         return view('admin.articles.customizer', [
             'article' => $article,
             'categories' => Category::tree()->get(),
-            'photos' => Photo::published()->latest()->limit(50)->get(),
+            'photos' => Photo::published()->with('media')->latest()->limit(50)->get(),
             'isNew' => true,
         ]);
     }

@@ -4,54 +4,24 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Enums\Status;
 use App\Models\Category;
 use App\Models\Photo;
+use App\Services\ContentFilterService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 final class PhotoController extends Controller
 {
+    public function __construct(
+        private readonly ContentFilterService $contentFilter,
+    ) {}
+
     /**
      * Display a listing of photos.
      */
     public function index(Request $request): View
     {
-        $photoQuery = auth()->check()
-            ? Photo::query()
-            : Photo::published();
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $photoQuery->where(function ($q) use ($search): void {
-                $q->where('alt_text', 'like', sprintf('%%%s%%', $search))
-                    ->orWhere('slug', 'like', sprintf('%%%s%%', $search))
-                    ->orWhere('caption', 'like', sprintf('%%%s%%', $search));
-            });
-        }
-
-        if ($request->filled('category')) {
-            $category = Category::where('slug', $request->input('category'))->first();
-            if ($category) {
-                $photoQuery->where('category_id', $category->id);
-            }
-        }
-
-        if (auth()->check() && $request->filled('status')) {
-            $photoQuery->where('status', Status::from($request->input('status')));
-        }
-
-        $sortMap = [
-            'oldest' => ['published_at', 'asc'],
-            'title_asc' => ['alt_text', 'asc'],
-            'title_desc' => ['alt_text', 'desc'],
-        ];
-        $sortKey = $request->input('sort', '');
-        [$sortColumn, $sortDirection] = $sortMap[$sortKey] ?? ['published_at', 'desc'];
-
-        $photos = $photoQuery->orderBy($sortColumn, $sortDirection)
-            ->paginate(12)
-            ->withQueryString();
+        $photos = $this->contentFilter->filterPhotos($request);
 
         $categories = Category::whereNull('parent_id')
             ->with('children')
