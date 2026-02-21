@@ -50,7 +50,7 @@
                                 </figure>
                             @endif
 
-                            <div class="card-body">
+                            <div class="card-body overflow-hidden">
                                 {{-- Category --}}
                                 @if($article->category)
                                     <div class="flex flex-wrap gap-2">
@@ -81,9 +81,9 @@
 
                                 {{-- Summary (p-summary) --}}
                                 @if($loop->first || $article->excerpt)
-                                    <p class="p-summary text-base-content/80 leading-relaxed {{ $loop->first ? '' : 'line-clamp-2' }}">
-                                        {{ $article->excerpt }}
-                                    </p>
+                                    <div class="p-summary text-base-content/80 leading-relaxed {{ $loop->first ? '' : 'min-h-0' }}">
+                                        <p class="{{ $loop->first ? 'line-clamp-4' : 'line-clamp-3' }}">{{ $article->excerpt }}</p>
+                                    </div>
                                 @endif
 
                                 {{-- Card Actions --}}

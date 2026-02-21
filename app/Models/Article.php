@@ -281,7 +281,7 @@ final class Article extends Model
     }
 
     /**
-     * Get the excerpt - either summary or first 255 chars of content.
+     * Get the excerpt - either summary or first 500 chars of content.
      */
     protected function excerpt(): Attribute
     {
@@ -291,7 +291,7 @@ final class Article extends Model
                     return $this->summary;
                 }
 
-                return Str::limit(Markdown::toPlainText($this->attributes['content'] ?? ''), 255);
+                return Str::limit(Markdown::toPlainText($this->attributes['content'] ?? ''), 500, '');
             },
         );
     }
