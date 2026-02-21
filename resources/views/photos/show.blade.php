@@ -47,7 +47,7 @@
         {{-- Category Badge --}}
         @if($photo->category)
             <div class="flex flex-wrap gap-2 mb-4">
-                <a href="{{ $photo->category->permalink() }}"
+                <a href="{{ $photo->category->urlFor('photos') }}"
                    class="badge badge-primary badge-outline">
                     {{ $photo->category->name }}
                 </a>

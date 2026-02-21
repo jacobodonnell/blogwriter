@@ -12,7 +12,6 @@ it('returns successful response for public navigation links', function (string $
     $this->get($route)->assertSuccessful();
 })->with([
     'home' => fn () => route('home'),
-    'categories' => fn () => route('categories.index'),
     'about' => fn () => route('about'),
 ]);
 
@@ -51,7 +50,6 @@ it('shows menu-active on guest desktop nav for current route', function (string 
 })->with([
     'home' => fn () => route('home'),
     'articles' => fn () => route('articles.index'),
-    'categories' => fn () => route('categories.index'),
     'about' => fn () => route('about'),
 ]);
 
@@ -62,9 +60,20 @@ it('shows menu-active on guest mobile drawer for current route', function (strin
 })->with([
     'home' => fn () => route('home'),
     'articles' => fn () => route('articles.index'),
-    'categories' => fn () => route('categories.index'),
     'about' => fn () => route('about'),
 ]);
+
+it('does not show Categories in guest public nav', function (): void {
+    $response = $this->get(route('home'));
+    $content = $response->getContent();
+
+    // Desktop nav should not have a Categories link
+    expect($content)->not->toContain('>Categories</a>');
+});
+
+it('public categories route returns 404', function (): void {
+    $this->get('/categories')->assertNotFound();
+});
 
 it('welcome blade file does not exist', function (): void {
     expect(file_exists(resource_path('views/welcome.blade.php')))->toBeFalse();
@@ -79,14 +88,11 @@ it('renders custom 404 page', function (): void {
 
 it('has no broken links in public pages smoke test', function (): void {
     $article = App\Models\Article::factory()->published()->create();
-    $category = App\Models\Category::factory()->create();
 
     $pages = [
         route('home'),
         route('about'),
-        route('categories.index'),
         route('articles.show', $article->slug),
-        route('categories.show', $category->slug),
     ];
 
     foreach ($pages as $page) {

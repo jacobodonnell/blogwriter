@@ -37,10 +37,6 @@
                 @endif
             </div>
             <div class="flex gap-2">
-                <a href="{{ route('categories.index') }}" class="btn btn-ghost">
-                    <i class="ph ph-eye text-xl"></i>
-                    <span class="hidden sm:inline">View Categories</span>
-                </a>
                 <button
                     class="btn btn-primary"
                     onclick="document.getElementById('add-category-modal').showModal()">
@@ -48,6 +44,18 @@
                     <span class="hidden sm:inline">{{ $parent ? 'Add Subcategory' : 'Add Category' }}</span>
                 </button>
             </div>
+        </div>
+
+        {{-- View Switching Tabs --}}
+        <div class="flex items-center gap-2">
+            <a href="{{ route('admin.categories.index') }}" class="btn btn-ghost btn-sm btn-active gap-1">
+                <i class="ph ph-table text-lg"></i>
+                Table
+            </a>
+            <a href="{{ route('admin.categories.explore') }}" class="btn btn-ghost btn-sm gap-1">
+                <i class="ph ph-folders text-lg"></i>
+                Explore
+            </a>
         </div>
 
         {{-- Filters --}}

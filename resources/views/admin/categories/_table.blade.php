@@ -67,7 +67,7 @@
                                             @else
                                                 {{ $category->name }}
                                             @endif
-                                            <x-admin.icon-button tooltip="View category" href="{{ $category->permalink() }}" icon="eye" class="btn-xs opacity-50 hover:opacity-100" data-test="view-category" />
+                                            <x-admin.icon-button tooltip="View category" href="{{ $category->adminExploreUrl() }}" icon="eye" class="btn-xs opacity-50 hover:opacity-100" data-test="view-category" />
                                         </div>
                                     </div>
                                     @if($category->description)

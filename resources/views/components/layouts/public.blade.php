@@ -67,7 +67,6 @@
                         <li><a href="{{ route('home') }}" class="{{ request()->is('/') ? 'menu-active' : '' }}">Home</a></li>
                         <li><a href="{{ route('articles.index') }}" class="{{ request()->is('articles*') && !request()->is('admin*') ? 'menu-active' : '' }}">Articles</a></li>
                         <li><a href="{{ route('photos.index') }}" class="{{ request()->is('photos') && !request()->is('admin*') ? 'menu-active' : '' }}">Photos</a></li>
-                        <li><a href="{{ route('categories.index') }}" class="{{ request()->is('categories*') && !request()->is('admin*') ? 'menu-active' : '' }}">Categories</a></li>
                         <li><a href="{{ route('about') }}" class="{{ request()->is('about') ? 'menu-active' : '' }}">About</a></li>
                     </ul>
 
@@ -115,7 +114,6 @@
                     <li><a href="{{ route('home') }}" class="{{ request()->is('/') ? 'menu-active' : '' }}"><i class="ph ph-house text-lg"></i> Home</a></li>
                     <li><a href="{{ route('articles.index') }}" class="{{ request()->is('articles*') && !request()->is('admin*') ? 'menu-active' : '' }}"><i class="ph ph-article text-lg"></i> Articles</a></li>
                     <li><a href="{{ route('photos.index') }}" class="{{ request()->is('photos') && !request()->is('admin*') ? 'menu-active' : '' }}"><i class="ph ph-camera text-lg"></i> Photos</a></li>
-                    <li><a href="{{ route('categories.index') }}" class="{{ request()->is('categories*') && !request()->is('admin*') ? 'menu-active' : '' }}"><i class="ph ph-folder-open text-lg"></i> Categories</a></li>
                     <li><a href="{{ route('about') }}" class="{{ request()->is('about') ? 'menu-active' : '' }}"><i class="ph ph-user text-lg"></i> About</a></li>
                 </ul>
             </div>

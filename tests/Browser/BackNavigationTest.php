@@ -41,9 +41,13 @@ it('renders styled page after browser back following AJAX table refresh', functi
     // Verify the new category appeared in the table (AJAX refresh happened)
     $page->assertSee('Back Nav Test Category');
 
-    // Click the eye icon to navigate to the public category page
+    // Click the eye icon to navigate to the admin explore page
     $page->click('@view-category')
         ->wait(1);
+
+    // Verify we're on the admin explore page (not the public categories)
+    $page->assertSee('Back Nav Test Category')
+        ->assertNoJavaScriptErrors();
 
     // Go back (simulates browser back button)
     $page->back()

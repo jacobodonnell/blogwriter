@@ -126,26 +126,6 @@ it('prevents guests from uploading photos', function (): void {
     ])->assertUnauthorized();
 });
 
-// --- Category Page Auth Links ---
-
-it('does not show manage categories link on category page for guests', function (): void {
-    $category = Category::factory()->create();
-
-    $this->get(route('categories.show', $category->slug))
-        ->assertSuccessful()
-        ->assertDontSee('Manage Categories');
-});
-
-it('shows manage categories link on category page for auth users', function (): void {
-    $user = User::factory()->create();
-    $category = Category::factory()->create();
-
-    $this->actingAs($user)
-        ->get(route('categories.show', $category->slug))
-        ->assertSuccessful()
-        ->assertSee('Manage');
-});
-
 // --- About Page Auth Links ---
 
 it('does not show edit profile link on about page for guests', function (): void {

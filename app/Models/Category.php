@@ -120,13 +120,26 @@ final class Category extends Model
     }
 
     /**
-     * Get the permalink for this category using full ancestor path.
+     * Get the public URL for this category, filtered by content type.
      */
-    public function permalink(): string
+    public function urlFor(string $type = 'articles'): string
+    {
+        $route = match ($type) {
+            'photos' => 'photos.index',
+            default => 'articles.index',
+        };
+
+        return route($route, ['category' => $this->slug]);
+    }
+
+    /**
+     * Get the admin explore URL for this category using full ancestor path.
+     */
+    public function adminExploreUrl(): string
     {
         $slugs = $this->ancestors()->pluck('slug')->push($this->slug)->all();
 
-        return route('categories.show', implode('/', $slugs));
+        return route('admin.categories.explore.show', implode('/', $slugs));
     }
 
     protected static function booted(): void

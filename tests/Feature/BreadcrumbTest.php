@@ -49,14 +49,6 @@ it('photo show has breadcrumbs', function (): void {
         ->assertSee('Photos');
 });
 
-it('categories index has breadcrumbs', function (): void {
-    $this->get(route('categories.index'))
-        ->assertOk()
-        ->assertSee('breadcrumbs', escape: false)
-        ->assertSee('Home')
-        ->assertSee('Categories');
-});
-
 it('about page has breadcrumbs', function (): void {
     App\Models\User::factory()->create();
 

@@ -10,7 +10,7 @@
 {{-- Category + Draft Badge --}}
 <div class="flex flex-wrap gap-2">
     @if($article->category)
-        <a href="{{ $article->category->permalink() }}"
+        <a href="{{ $article->category->urlFor('articles') }}"
            class="badge badge-primary badge-sm">
             {{ $article->category->name }}
         </a>

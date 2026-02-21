@@ -35,8 +35,7 @@ final class AppServiceProvider extends ServiceProvider
             'photos.*',
             'components.seo-meta',
             'components.layouts.partials.public-footer',
-            'components.category-feed',
-            'components.category-layout',
+            'admin.categories._explore-content',
         ], function ($view): void {
             $view->with('authorName', Cache::remember(
                 'author_name',

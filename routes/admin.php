@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\AppearanceController;
 use App\Http\Controllers\Admin\ArticleController;
 use App\Http\Controllers\Admin\ArticlePreviewController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CategoryExploreController;
 use App\Http\Controllers\Admin\CreateArticleController;
 use App\Http\Controllers\Admin\CreateArticlePreviewController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -49,6 +50,13 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function (): v
     Route::get('/categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
     Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+
+    // Category explore — filesystem browser view
+    Route::get('/categories/explore', [CategoryExploreController::class, 'index'])
+        ->name('categories.explore');
+    Route::get('/categories/explore/{path}', [CategoryExploreController::class, 'show'])
+        ->where('path', '.*')
+        ->name('categories.explore.show');
 
     // Category children — slug-path index (must be last among category GET routes)
     Route::get('/categories/{path}', [AdminCategoryChildrenController::class, 'index'])

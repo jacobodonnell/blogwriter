@@ -8,8 +8,6 @@
                 :active="request()->is('articles*') && !request()->is('admin*')" />
     <x-nav-item href="{{ route('photos.index') }}" icon="image" label="Photos"
                 :active="request()->is('photos') && !request()->is('admin*')" />
-    <x-nav-item href="{{ route('categories.index') }}" icon="folder-open" label="Categories"
-                :active="request()->is('categories*') && !request()->is('admin*')" />
     <x-nav-item href="{{ route('about') }}" icon="user" label="About" :active="request()->is('about')" />
 
     <div class="divider my-2"></div>
