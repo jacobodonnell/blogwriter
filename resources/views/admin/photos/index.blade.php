@@ -3,41 +3,92 @@
         <li>Photos</li>
     </x-slot:breadcrumb>
 
-    <div class="space-y-6">
+    <div class="space-y-6"
+         x-data="{
+            filtersOpen: $persist(true).as('admin_photos_filters_open'),
+         }">
         {{-- Header --}}
-        <div class="flex justify-between items-center">
+        <div class="flex flex-wrap justify-between items-center gap-2">
             <div>
                 <h1 class="text-3xl font-bold">Photos</h1>
                 <p class="text-base-content/70 mt-1">Manage your photo library.</p>
             </div>
             <div class="flex gap-2">
+                {{-- Filters Toggle --}}
+                <button class="btn btn-ghost" @click="filtersOpen = !filtersOpen">
+                    <i class="ph ph-funnel text-xl"></i>
+                    Filters
+                    @if($activeFilterCount > 0)
+                        <span class="badge badge-sm badge-primary">{{ $activeFilterCount }}</span>
+                    @endif
+                    <i class="ph ph-caret-down text-sm transition-transform duration-200" :class="filtersOpen && 'rotate-180'"></i>
+                </button>
+
                 <a href="{{ route('photos.index') }}" class="btn btn-ghost">
-                    <i class="ph ph-eye text-xl mr-2"></i>
-                    View Photos
+                    <i class="ph ph-eye text-xl"></i>
+                    <span class="hidden sm:inline">View Photos</span>
                 </a>
                 <a href="{{ route('admin.photos.create') }}" class="btn btn-primary">
-                    <i class="ph ph-plus text-xl mr-2"></i>
-                    New Photo
+                    <i class="ph ph-plus text-xl"></i>
+                    <span class="hidden sm:inline">New Photo</span>
                 </a>
             </div>
         </div>
 
-        {{-- Filters --}}
-        <div class="card bg-base-100 shadow">
+        {{-- Collapsible Filters --}}
+        <div x-show="filtersOpen" x-collapse x-cloak class="card bg-base-100 shadow">
             <div class="card-body">
-                <form method="GET" action="{{ route('admin.photos.index') }}" class="flex flex-wrap gap-4 items-end">
-                    <div class="form-control w-full md:w-48">
-                        <label class="label">
+                <form method="GET" action="{{ route('admin.photos.index') }}"
+                      x-target="photos-grid"
+                      id="photos-filter-form"
+                      class="grid grid-cols-1 md:grid-cols-[1fr_auto_auto_auto] gap-4 items-end">
+
+                    <div class="flex items-center justify-between gap-4 md:block">
+                        <label class="label shrink-0">
+                            <span class="label-text">Search</span>
+                        </label>
+                        <input type="text"
+                               name="search"
+                               value="{{ request('search') }}"
+                               placeholder="Search by alt text, slug, or caption..."
+                               class="input input-bordered w-full"
+                               @input.debounce.400ms="$el.form.requestSubmit()" />
+                    </div>
+
+                    <div class="flex items-center justify-between gap-4 md:block">
+                        <label class="label shrink-0">
+                            <span class="label-text">Category</span>
+                        </label>
+                        <x-category-select :categories="$categories"
+                            name="category" emptyLabel="All Categories"
+                            :selected="request('category')" :useSlug="true"
+                            @change="$el.form.requestSubmit()"
+                            class="select select-bordered w-full md:w-auto" />
+                    </div>
+
+                    <div class="flex items-center justify-between gap-4 md:block">
+                        <label class="label shrink-0">
                             <span class="label-text">Status</span>
                         </label>
-                        <select name="status" class="select select-bordered" @change="$el.form.requestSubmit()">
+                        <select name="status" class="select select-bordered w-full md:w-auto" @change="$el.form.requestSubmit()">
                             <option value="">All Status</option>
                             <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Published</option>
                             <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>
                         </select>
                     </div>
 
-                    @if(request('status'))
+                    <div class="flex items-center justify-between gap-4 md:block">
+                        <label class="label shrink-0">
+                            <span class="label-text">Per Page</span>
+                        </label>
+                        <select name="perPage" class="select select-bordered w-full md:w-auto" @change="$el.form.requestSubmit()">
+                            @foreach([12, 24, 48] as $option)
+                                <option value="{{ $option }}" {{ $perPage == $option ? 'selected' : '' }}>{{ $option }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    @if($activeFilterCount > 0)
                         <a href="{{ route('admin.photos.index') }}" class="btn btn-ghost">
                             Clear Filters
                         </a>
@@ -47,90 +98,6 @@
         </div>
 
         {{-- Photos Grid --}}
-        @if($photos->count() > 0)
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @foreach($photos as $photo)
-                    <article class="card bg-base-100 shadow">
-                        <figure class="relative aspect-square">
-                            <img src="{{ $photo->image_url }}"
-                                 alt="{{ $photo->alt_text }}"
-                                 class="w-full h-full object-cover">
-
-                            {{-- Status Badge --}}
-                            <div class="absolute top-2 left-2">
-                                <span @class([
-                                    'badge',
-                                    'badge-success' => $photo->status->value === 'published',
-                                    'badge-warning' => $photo->status->value === 'draft',
-                                ])>
-                                    {{ $photo->status->label() }}
-                                </span>
-                            </div>
-                        </figure>
-
-                        <div class="card-body">
-                            <h3 class="card-title text-base line-clamp-2">
-                                {{ $photo->alt_text }}
-                            </h3>
-
-                            @if($photo->caption)
-                                <p class="text-sm text-base-content/60 line-clamp-2">
-                                    {{ Str::limit(strip_tags(Str::markdown($photo->caption)), 80) }}
-                                </p>
-                            @endif
-
-                            {{-- Metadata --}}
-                            <div class="text-sm text-base-content/60 mt-2">
-                                <div class="flex items-center gap-2">
-                                    <i class="ph ph-calendar-blank"></i>
-                                    {{ $photo->published_at?->format('M j, Y') ?? 'Not published' }}
-                                </div>
-                                @if($photo->articles()->count() > 0)
-                                    <div class="flex items-center gap-2 mt-1">
-                                        <i class="ph ph-article"></i>
-                                        Used in {{ $photo->articles()->count() }} {{ Str::plural('article', $photo->articles()->count()) }}
-                                    </div>
-                                @endif
-                            </div>
-
-                            {{-- Actions --}}
-                            <div class="card-actions justify-end mt-4">
-                                <x-admin.icon-button tooltip="Edit" href="{{ route('admin.photos.edit', $photo) }}" icon="pencil-simple" />
-                                <x-admin.icon-button tooltip="View details" href="{{ route('admin.photos.show', $photo) }}" icon="info" />
-
-                                @if($photo->isPublic())
-                                    <x-admin.icon-button tooltip="View" href="{{ route('photos.show', $photo->slug) }}" icon="eye" />
-                                @endif
-
-                                <form method="POST"
-                                      action="{{ route('admin.photos.destroy', $photo) }}"
-                                      class="inline"
-                                      onsubmit="return confirm('Are you sure you want to delete this photo?{{ $photo->articles()->count() > 0 ? ' This photo is used in ' . $photo->articles()->count() . ' article(s).' : '' }}');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <x-admin.icon-button-submit tooltip="Delete" icon="trash" class="text-error" />
-                                </form>
-                            </div>
-                        </div>
-                    </article>
-                @endforeach
-            </div>
-
-            {{-- Pagination --}}
-            <div class="mt-8">
-                {{ $photos->links() }}
-            </div>
-        @else
-            <div class="text-center py-12 card bg-base-100 shadow">
-                <div class="card-body">
-                    <p class="text-base-content/60 mb-4">No photos found.</p>
-                    @if(request('status'))
-                        <a href="{{ route('admin.photos.index') }}" class="btn btn-ghost">Clear Filters</a>
-                    @else
-                        <a href="{{ route('admin.photos.create') }}" class="btn btn-primary">Upload First Photo</a>
-                    @endif
-                </div>
-            </div>
-        @endif
+        @include('admin.photos._grid')
     </div>
 </x-layouts.admin>

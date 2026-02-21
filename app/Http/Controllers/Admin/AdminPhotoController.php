@@ -36,15 +36,50 @@ final class AdminPhotoController extends Controller
         $query = Photo::query()
             ->orderBy('created_at', 'desc');
 
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search): void {
+                $q->where('alt_text', 'like', sprintf('%%%s%%', $search))
+                    ->orWhere('slug', 'like', sprintf('%%%s%%', $search))
+                    ->orWhere('caption', 'like', sprintf('%%%s%%', $search));
+            });
+        }
+
+        if ($request->filled('category')) {
+            $category = Category::where('slug', $request->input('category'))->first();
+            if ($category) {
+                $query->where('category_id', $category->id);
+            }
+        }
+
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        $photos = $query->paginate(12)->withQueryString();
+        $perPage = in_array((int) $request->input('perPage'), [12, 24, 48]) ? (int) $request->input('perPage') : 12;
 
-        return view('admin.photos.index', [
+        $photos = $query->paginate($perPage)->withQueryString();
+
+        $categories = Category::tree()->get();
+
+        $activeFilterCount = collect([
+            $request->input('search'),
+            $request->input('category'),
+            $request->input('status'),
+        ])->filter()->count();
+
+        $viewData = [
             'photos' => $photos,
-        ]);
+            'categories' => $categories,
+            'activeFilterCount' => $activeFilterCount,
+            'perPage' => $perPage,
+        ];
+
+        if ($request->header('X-Alpine-Target')) {
+            return view('admin.photos._grid', $viewData);
+        }
+
+        return view('admin.photos.index', $viewData);
     }
 
     /**

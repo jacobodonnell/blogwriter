@@ -7,28 +7,27 @@
         <x-breadcrumb :items="[['label' => 'Photos']]" />
 
         {{-- Header --}}
-        <header class="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <div class="min-w-0">
-                <x-page-heading title="Photos" :subtitle="$subtitle" class="mb-2" />
-            </div>
-            <div class="flex shrink-0 gap-2">
-                @auth
-                    <a href="{{ route('admin.photos.index') }}" class="btn btn-ghost btn-sm gap-1">
-                        <i class="ph ph-gear text-lg"></i>
-                        Manage
-                    </a>
-                    <button class="btn btn-primary btn-sm gap-2"
-                            onclick="document.getElementById('upload-photo-modal').showModal()">
-                        <i class="ph ph-upload-simple"></i>
-                        Upload
-                    </button>
-                @endauth
-            </div>
+        <header class="mb-6">
+            <x-page-heading title="Photos" :subtitle="$subtitle" class="mb-2" />
         </header>
 
         {{-- Filter banner + Results (Alpine AJAX target) --}}
         <div id="photo-results" x-merge="morph">
-            <x-filter-banner :action="route('photos.index')" target="photo-results" :clearRoute="route('photos.index')">
+            <x-filter-banner :action="route('photos.index')" target="photo-results" :clearRoute="route('photos.index')" persistKey="photos_filters_open">
+                <x-slot:toolbar>
+                    @auth
+                        <a href="{{ route('admin.photos.index') }}" class="btn btn-ghost btn-sm gap-1">
+                            <i class="ph ph-gear text-lg"></i>
+                            Manage Photos
+                        </a>
+                        <button class="btn btn-primary btn-sm gap-2"
+                                onclick="document.getElementById('upload-photo-modal').showModal()">
+                            <i class="ph ph-upload-simple"></i>
+                            Upload
+                        </button>
+                    @endauth
+                </x-slot:toolbar>
+
                 <div class="sm:col-span-2">
                     <input type="text" name="search" value="{{ request('search') }}"
                            placeholder="Search photos..."
