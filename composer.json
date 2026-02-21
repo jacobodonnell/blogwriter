@@ -18,7 +18,6 @@
         "spatie/laravel-medialibrary": "^11.0"
     },
     "require-dev": {
-        "cweagans/composer-patches": "^2.0",
         "driftingly/rector-laravel": "^2.0",
         "fakerphp/faker": "^1.23",
         "laravel/boost": "^2.1",
@@ -27,7 +26,6 @@
         "laravel/sail": "^1.41",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
-        "nunomaduro/mock-final-classes": "^1.2",
         "pestphp/pest": "^4.3",
         "pestphp/pest-plugin-browser": "^4.3",
         "pestphp/pest-plugin-laravel": "*",
@@ -96,11 +94,6 @@
     "extra": {
         "laravel": {
             "dont-discover": []
-        },
-        "patches": {
-            "pestphp/pest-plugin-browser": {
-                "Fix JS asset truncation at 8192 bytes in LaravelHttpServer": "patches/pest-plugin-browser-js-truncation.patch"
-            }
         }
     },
     "config": {
@@ -109,8 +102,7 @@
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true,
-            "php-http/discovery": true,
-            "cweagans/composer-patches": true
+            "php-http/discovery": true
         }
     },
     "minimum-stability": "stable",
