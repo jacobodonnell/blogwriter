@@ -1,0 +1,27 @@
+@props(['name', 'label', 'options' => [], 'emptyLabel' => 'All', 'auth' => false, 'colspan' => 1])
+
+@if($auth)
+    @auth
+        <div class="sm:col-span-{{ $colspan }}">
+            <label class="label"><span class="label-text">{{ $label }}</span></label>
+            <select name="{{ $name }}" {{ $attributes->merge(['class' => 'select select-bordered w-full']) }}
+                    @change="$el.form.requestSubmit()">
+                <option value="">{{ $emptyLabel }}</option>
+                @foreach($options as $value => $display)
+                    <option value="{{ $value }}" @selected(request($name) === (string) $value)>{{ $display }}</option>
+                @endforeach
+            </select>
+        </div>
+    @endauth
+@else
+    <div class="sm:col-span-{{ $colspan }}">
+        <label class="label"><span class="label-text">{{ $label }}</span></label>
+        <select name="{{ $name }}" {{ $attributes->merge(['class' => 'select select-bordered w-full']) }}
+                @change="$el.form.requestSubmit()">
+            <option value="">{{ $emptyLabel }}</option>
+            @foreach($options as $value => $display)
+                <option value="{{ $value }}" @selected(request($name) === (string) $value)>{{ $display }}</option>
+            @endforeach
+        </select>
+    </div>
+@endif
