@@ -73,9 +73,18 @@
                 {{-- Content --}}
                 <fieldset class="fieldset">
                     <legend class="fieldset-legend">Content (Markdown)</legend>
-                    <textarea id="content-editor" name="content" x-model="content"
-                              class="textarea textarea-bordered w-full h-64 font-mono text-sm @error('content') textarea-error @enderror"
-                              placeholder="## Write your article here...">{{ old('content', $article->content) }}</textarea>
+
+                    {{-- Skeleton placeholder while EasyMDE initializes --}}
+                    <div x-show="!editorReady" x-transition:leave x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="space-y-2">
+                        <div class="skeleton h-10 w-full rounded"></div>
+                        <div class="skeleton h-64 w-full rounded"></div>
+                    </div>
+
+                    <div :class="!editorReady && 'h-0 overflow-hidden'">
+                        <textarea id="content-editor" name="content" x-model="content"
+                                  class="textarea textarea-bordered w-full h-64 font-mono text-sm @error('content') textarea-error @enderror"
+                                  placeholder="## Write your article here...">{{ old('content', $article->content) }}</textarea>
+                    </div>
                     @error('content')
                     <div role="alert" class="alert alert-error mt-2" x-data="{ show: true }" x-show="show"
                          x-init="setTimeout(() => show = false, 8000)" x-transition>

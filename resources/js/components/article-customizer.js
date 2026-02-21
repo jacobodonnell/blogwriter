@@ -17,6 +17,7 @@ export default function articleCustomizer(config) {
         wasEverPublished: config.wasEverPublished,
         originalPublishedAt: config.originalPublishedAt,
         contentError: false,
+        editorReady: false,
         hasNewPhoto: false,
 
         get isPlaceholderSlug() {
@@ -86,6 +87,8 @@ export default function articleCustomizer(config) {
                     ],
                     initialValue: this.content,
                 });
+
+                this.editorReady = true;
 
                 this.easyMDE.codemirror.on('change', () => {
                     this.content = this.easyMDE.value();
