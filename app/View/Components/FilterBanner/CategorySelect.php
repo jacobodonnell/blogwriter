@@ -11,6 +11,8 @@ final class CategorySelect extends FilterField
 {
     public function __construct(
         public Collection $categories,
+        public ?string $selected = null,
+        public bool $flat = false,
         string $label = 'Category',
         string $name = 'category',
         bool $auth = false,

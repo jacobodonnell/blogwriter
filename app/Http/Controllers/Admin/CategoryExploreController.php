@@ -35,12 +35,12 @@ final class CategoryExploreController extends Controller
             $photos = $this->contentFilter->filterPhotos($request);
         }
 
-        $categoryTree = Category::tree()->get();
-
         $viewData = [
             'category' => null,
-            'children' => $categoryTree,
-            'categories' => $categoryTree,
+            'categoryPath' => null,
+            'selectedCategory' => null,
+            'children' => Category::tree()->get(),
+            'categories' => Category::flatTree(),
             'articles' => $articles,
             'photos' => $photos,
             'currentType' => $type,
@@ -76,9 +76,13 @@ final class CategoryExploreController extends Controller
             $photos = $this->contentFilter->filterPhotos($request, $categoryIds);
         }
 
+        $categoryPath = $category->ancestors()->pluck('name')->push($category->name)->implode('/');
+
         $viewData = [
             'category' => $category,
-            'categories' => Category::tree()->get(),
+            'categoryPath' => $categoryPath,
+            'selectedCategory' => $category->slug,
+            'categories' => Category::flatTree(),
             'articles' => $articles,
             'photos' => $photos,
             'children' => $category->children()->orderBy('name')->get(),

@@ -37,9 +37,10 @@ final class Category extends Model
 
         $categories = self::hydrate($rows);
 
-        // Attach depth as an attribute for display purposes
+        // Attach depth and sort_path as attributes for display purposes
         foreach ($categories as $i => $category) {
             $category->depth = $rows[$i]->depth;
+            $category->sort_path = $rows[$i]->sort_path;
         }
 
         return $categories;

@@ -17,6 +17,32 @@
 
 <div id="explore-content" x-merge="morph">
 
+    {{-- Header --}}
+    <div class="flex flex-wrap justify-between items-center gap-2">
+        <div>
+            <h1 class="text-3xl font-bold">
+                <i class="ph ph-{{ $category ? 'folder' : 'folders' }} text-primary mr-2"></i>
+                {{ $categoryPath ?? 'Explore Categories' }}
+            </h1>
+
+            @if($category?->description)
+                <p class="text-base-content/70 text-lg max-w-2xl mt-2">{{ $category->description }}</p>
+            @endif
+
+            <p class="text-sm text-base-content/60 mt-2">
+                {{ $articleCount }} {{ Str::plural('article', $articleCount) }}
+                @if($photoCount > 0)
+                    &middot; {{ $photoCount }} {{ Str::plural('photo', $photoCount) }}
+                @endif
+            </p>
+        </div>
+
+        <a href="{{ route('admin.categories.index') }}" class="btn btn-primary btn-sm gap-1">
+            <i class="ph ph-plus"></i>
+            New Category
+        </a>
+    </div>
+
     <x-filter-banner :action="$feedUrl" target="explore-content" :clearRoute="$feedUrl" persistKey="admin_explore_filters_open">
         <x-slot:navigation>
             @if($children->isNotEmpty() || $parentUrl)
@@ -43,7 +69,7 @@
         </x-slot:navigation>
 
         <x-filter-banner.search :placeholder="$isRoot ? 'Search all content...' : 'Search in ' . $category->name . '...'" :colspan="4" />
-        <x-filter-banner.category-select :categories="$categories" />
+        <x-filter-banner.category-select :categories="$categories" :selected="$selectedCategory ?? null" :flat="true" />
         <x-filter-banner.select name="type" label="Content Type"
             :options="['articles' => 'Articles', 'photos' => 'Photos']"
             emptyLabel="All Content" />
