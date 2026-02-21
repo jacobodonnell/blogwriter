@@ -1,0 +1,30 @@
+--- a/src/Drivers/LaravelHttpServer.php
++++ b/src/Drivers/LaravelHttpServer.php
+@@ -329,21 +329,15 @@
+         $contentType = $contentType[0] ?? 'application/octet-stream';
+
+         if (str_ends_with($filepath, '.js')) {
+-            $temporaryStream = fopen('php://temp', 'r+');
+-            assert($temporaryStream !== false, 'Failed to open temporary stream.');
+-
+-            // @phpstan-ignore-next-line
+-            $temporaryContent = fread($file, (int) filesize($filepath));
+-
+-            assert($temporaryContent !== false, 'Failed to open temporary stream.');
++            fclose($file);
+
++            $temporaryContent = file_get_contents($filepath);
++            assert($temporaryContent !== false, 'Failed to read JS file.');
+             $content = $this->rewriteAssetUrl($temporaryContent);
+
+-            fwrite($temporaryStream, $content);
+-
+-            rewind($temporaryStream);
+-
+-            $file = $temporaryStream;
++            return new Response(200, [
++                'Content-Type' => $contentType,
++            ], $content);
+         }
+
+         return new Response(200, [
