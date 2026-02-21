@@ -12,32 +12,13 @@
 
     @auth
         {{-- Authenticated: Unified sidebar layout --}}
-        <div x-cloak x-data="sidebar"
-            class="flex flex-col min-h-screen">
+        <x-layouts.app-shell>
+            <main class="container mx-auto px-4 py-8 flex-1">
+                {{ $slot }}
+            </main>
 
-            {{-- Full-width Header --}}
-            @include('components.layouts.partials.app-header')
-
-            {{-- Body: Sidebar + Content --}}
-            <div class="flex flex-1 relative">
-                {{-- Sidebar --}}
-                @include('components.layouts.partials.app-sidebar')
-
-                {{-- Main Content --}}
-                <div class="flex-1 flex flex-col min-w-0 transition-all duration-300">
-                    <x-flash-messages />
-
-                    {{-- Main Content --}}
-                    <main class="container mx-auto px-4 py-8 flex-1">
-                        {{ $slot }}
-                    </main>
-
-                    {{-- Footer --}}
-                    @include('components.layouts.partials.public-footer')
-                </div>
-            </div>
-
-        </div>
+            @include('components.layouts.partials.public-footer')
+        </x-layouts.app-shell>
 
     @else
         {{-- Guest: Responsive navbar with mobile drawer --}}
