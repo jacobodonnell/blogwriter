@@ -41,7 +41,15 @@ final class PhotoController extends Controller
             $photoQuery->where('status', Status::from($request->input('status')));
         }
 
-        $photos = $photoQuery->orderBy('published_at', 'desc')
+        $sortMap = [
+            'oldest' => ['published_at', 'asc'],
+            'title_asc' => ['alt_text', 'asc'],
+            'title_desc' => ['alt_text', 'desc'],
+        ];
+        $sortKey = $request->input('sort', '');
+        [$sortColumn, $sortDirection] = $sortMap[$sortKey] ?? ['published_at', 'desc'];
+
+        $photos = $photoQuery->orderBy($sortColumn, $sortDirection)
             ->paginate(12)
             ->withQueryString();
 

@@ -28,13 +28,13 @@
                     @endauth
                 </x-slot:toolbar>
 
-                <div class="sm:col-span-2">
+                <div class="@auth sm:col-span-1 @else sm:col-span-2 @endauth">
                     <input type="text" name="search" value="{{ request('search') }}"
                            placeholder="Search photos..."
                            class="input input-bordered w-full"
                            @input.debounce.400ms="$el.form.requestSubmit()">
                 </div>
-                <div class="@auth sm:col-span-1 @else sm:col-span-2 @endauth">
+                <div class="sm:col-span-1">
                     <x-category-select :categories="$categories"
                         name="category" emptyLabel="All Categories"
                         :selected="request('category')" :useSlug="true"
@@ -50,6 +50,15 @@
                         </select>
                     </div>
                 @endauth
+                <div class="sm:col-span-1">
+                    <select name="sort" class="select select-bordered w-full"
+                            @change="$el.form.requestSubmit()">
+                        <option value="" @selected(!request('sort'))>Newest First</option>
+                        <option value="oldest" @selected(request('sort') === 'oldest')>Oldest First</option>
+                        <option value="title_asc" @selected(request('sort') === 'title_asc')>Title A–Z</option>
+                        <option value="title_desc" @selected(request('sort') === 'title_desc')>Title Z–A</option>
+                    </select>
+                </div>
             </x-filter-banner>
             @if($photos->isNotEmpty())
                 <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1">
@@ -93,7 +102,7 @@
             @else
                 <div class="text-center py-16">
                     <div class="text-6xl mb-4"><i class="ph ph-camera-slash text-base-content/30"></i></div>
-                    @if(request('search') || request('category') || request('status'))
+                    @if(request('search') || request('category') || request('status') || request('sort'))
                         <h2 class="text-2xl font-bold mb-2">No photos found</h2>
                         <p class="text-base-content/60 mb-6">Try adjusting your filters.</p>
                         <a href="{{ route('photos.index') }}" class="btn btn-ghost">Clear Filters</a>
