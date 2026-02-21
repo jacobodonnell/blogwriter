@@ -62,3 +62,39 @@ body {
 .font-admin {
     font-family: var(--font-instrument-sans) !important;
 }
+
+/* Global AJAX loading states — Alpine AJAX sets aria-busy="true" on targets */
+[aria-busy="true"] {
+    opacity: 0.6;
+    pointer-events: none;
+    transition: opacity 150ms ease;
+    position: relative;
+}
+
+[aria-busy="true"]::after {
+    content: '';
+    display: block;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 9999px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: loading-ring 1s linear infinite;
+}
+
+@keyframes loading-ring {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Preview panel refreshes frequently — use subtler loading state */
+#preview-panel[aria-busy="true"] {
+    opacity: 0.85;
+}
+
+#preview-panel[aria-busy="true"]::after {
+    display: none;
+}
