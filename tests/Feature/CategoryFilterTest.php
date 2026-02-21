@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\Photo;
@@ -76,7 +77,7 @@ it('auth user can filter by draft status', function (): void {
     Article::factory()->published()->create(['title' => 'Published Article']);
 
     $this->actingAs(User::first())
-        ->get(route('categories.index', ['status' => 'draft', 'type' => 'articles']))
+        ->get(route('categories.index', ['status' => Status::Draft->value, 'type' => 'articles']))
         ->assertOk()
         ->assertViewHas('articles', fn ($articles) => $articles->count() === 1 && $articles->first()->title === 'Draft Article');
 });
@@ -85,7 +86,7 @@ it('guest ignores status filter', function (): void {
     Article::factory()->published()->create(['title' => 'Published Only']);
     Article::factory()->draft()->create(['title' => 'Draft Only']);
 
-    $this->get(route('categories.index', ['status' => 'draft', 'type' => 'articles']))
+    $this->get(route('categories.index', ['status' => Status::Draft->value, 'type' => 'articles']))
         ->assertOk()
         ->assertViewHas('articles', fn ($articles) => $articles->count() === 1 && $articles->first()->title === 'Published Only');
 });

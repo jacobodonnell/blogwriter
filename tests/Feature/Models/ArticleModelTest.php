@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Status;
 use App\Models\Article;
 
 it('isPlaceholderSlug returns true for placeholder slugs', function (): void {
@@ -35,7 +36,7 @@ it('wasEdited returns false when last_edited_at is null', function (): void {
 it('isPublished returns true for published article with past published_at', function (): void {
     $article = new Article;
     $article->setRawAttributes([
-        'status' => 'published',
+        'status' => Status::Published->value,
         'published_at' => now()->subDay()->toDateTimeString(),
     ]);
 
@@ -45,7 +46,7 @@ it('isPublished returns true for published article with past published_at', func
 it('isPublished returns false for draft article', function (): void {
     $article = new Article;
     $article->setRawAttributes([
-        'status' => 'draft',
+        'status' => Status::Draft->value,
         'published_at' => now()->subDay()->toDateTimeString(),
     ]);
 
@@ -55,7 +56,7 @@ it('isPublished returns false for draft article', function (): void {
 it('isPublished returns false when published_at is in the future', function (): void {
     $article = new Article;
     $article->setRawAttributes([
-        'status' => 'published',
+        'status' => Status::Published->value,
         'published_at' => now()->addDay()->toDateTimeString(),
     ]);
 
