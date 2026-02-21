@@ -51,48 +51,10 @@
 
 {{-- Articles List --}}
 @if($articles->isNotEmpty())
-    <div class="space-y-8">
+    <div class="flex flex-col gap-6">
         @foreach($articles as $article)
-            <article class="h-entry card bg-base-100 shadow-sm border border-base-200">
-                <div class="card-body">
-                    <h2 class="p-name card-title text-xl">
-                        <a href="{{ route('articles.show', $article->slug) }}" class="u-url hover:link-primary">
-                            {{ $article->title }}
-                        </a>
-                        @auth
-                            @if($article->status === \App\Enums\Status::Draft)
-                                <span class="badge badge-warning badge-sm">Draft</span>
-                            @endif
-                        @endauth
-                    </h2>
-
-                    <div class="flex items-center gap-4 text-sm text-base-content/60 mb-3">
-                        <time class="dt-published" datetime="{{ $article->published_at?->toIso8601String() }}">
-                            {{ $article->published_at?->format('F j, Y') }}
-                        </time>
-                        <span class="flex items-center gap-1">
-                            <i class="ph ph-clock"></i>
-                            {{ $article->reading_time }} min read
-                        </span>
-                    </div>
-
-                    <p class="p-summary text-base-content/80 leading-relaxed">
-                        {{ $article->excerpt }}
-                    </p>
-
-                    <div class="card-actions justify-end mt-4">
-                        <a href="{{ route('articles.show', $article->slug) }}"
-                           class="btn btn-primary btn-sm gap-1">
-                            Read Article
-                            <i class="ph ph-arrow-right"></i>
-                        </a>
-                    </div>
-
-                    <span class="p-author h-card hidden">
-                        <span class="p-name">{{ $authorName }}</span>
-                    </span>
-                </div>
-            </article>
+            <x-article-card :article="$article"
+                :odd="$loop->odd" :author-name="$authorName" />
         @endforeach
     </div>
 

@@ -34,80 +34,11 @@
 
             {{-- Articles Bento Grid --}}
             @if($articles->isNotEmpty())
-                @php $placeholderUrl = placeholder_image_url(); @endphp
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    @foreach($articles as $index => $article)
-                        {{-- h-entry for each article --}}
-                        <article class="h-entry card bg-base-100 shadow-sm border border-base-200 hover:shadow-md transition-shadow {{ $loop->first ? 'md:col-span-2' : '' }}">
-                            {{-- Featured Image --}}
-                            @if($article->featured_image_url || $placeholderUrl)
-                                <figure class="{{ $loop->first ? 'aspect-[16/10]' : 'aspect-video' }} overflow-hidden">
-                                    <a href="{{ route('articles.show', $article->slug) }}">
-                                        <img src="{{ $article->featured_image_url ?? $placeholderUrl }}"
-                                             alt="{{ $article->title }}"
-                                             class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
-                                    </a>
-                                </figure>
-                            @endif
-
-                            <div class="card-body overflow-hidden">
-                                {{-- Category --}}
-                                @if($article->category)
-                                    <div class="flex flex-wrap gap-2">
-                                        <a href="{{ $article->category->permalink() }}"
-                                           class="badge badge-primary badge-sm">
-                                            {{ $article->category->name }}
-                                        </a>
-                                    </div>
-                                @endif
-
-                                {{-- Title (p-name) --}}
-                                <h2 class="p-name card-title {{ $loop->first ? 'text-2xl md:text-3xl' : 'text-lg' }}">
-                                    <a href="{{ route('articles.show', $article->slug) }}" class="u-url hover:link-primary">
-                                        {{ $article->title }}
-                                    </a>
-                                </h2>
-
-                                {{-- Meta --}}
-                                <div class="flex items-center gap-4 text-sm text-base-content/60">
-                                    <time class="dt-published" datetime="{{ $article->published_at?->toIso8601String() }}">
-                                        {{ $article->published_at?->format('F j, Y') }}
-                                    </time>
-                                    <span class="flex items-center gap-1">
-                                        <i class="ph ph-clock"></i>
-                                        {{ $article->reading_time }} min read
-                                    </span>
-                                </div>
-
-                                {{-- Summary (p-summary) --}}
-                                @if($loop->first || $article->excerpt)
-                                    <div class="p-summary text-base-content/80 leading-loose {{ $loop->first ? '' : 'min-h-0' }}">
-                                        <p class="{{ $loop->first ? 'line-clamp-4' : 'line-clamp-3' }}">{{ $article->excerpt }}</p>
-                                    </div>
-                                @endif
-
-                                {{-- Card Actions --}}
-                                <div class="card-actions justify-end mt-auto items-center">
-                                    @auth
-                                        <a href="{{ route('admin.articles.edit', $article) }}"
-                                           class="btn btn-ghost btn-xs gap-1">
-                                            <i class="ph ph-pencil-simple"></i>
-                                            Edit
-                                        </a>
-                                    @endauth
-                                    <a href="{{ route('articles.show', $article->slug) }}"
-                                       class="btn btn-primary btn-sm">
-                                        Read More
-                                        <i class="ph ph-arrow-right"></i>
-                                    </a>
-                                </div>
-
-                                {{-- Hidden author info for h-entry --}}
-                                <span class="p-author h-card hidden">
-                                    <span class="p-name">{{ $authorName }}</span>
-                                </span>
-                            </div>
-                        </article>
+                    @foreach($articles as $article)
+                        <x-article-card :article="$article"
+                            :featured="$loop->first" :stacked="!$loop->first"
+                            :author-name="$authorName" />
                     @endforeach
                 </div>
 

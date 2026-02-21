@@ -16,7 +16,7 @@ final class HomeController extends Controller
     public function index(): View
     {
         $articles = Article::published()
-            ->with('category')
+            ->with(['category', 'featuredPhoto'])
             ->orderBy('published_at', 'desc')
             ->paginate(10);
 

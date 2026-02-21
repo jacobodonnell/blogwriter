@@ -39,88 +39,10 @@
                 <x-filters.sort />
             </x-filter-banner>
             @if($articles->isNotEmpty())
-                @php $placeholderUrl = placeholder_image_url(); @endphp
                 <div class="flex flex-col gap-6">
                     @foreach($articles as $article)
-                        <article class="h-entry card bg-base-100 shadow-sm border border-base-200 hover:shadow-md transition-shadow">
-                            <div class="flex flex-col {{ $loop->odd ? 'md:flex-row' : 'md:flex-row-reverse' }}">
-                                {{-- Featured Image --}}
-                                @php($articleImage = $article->featured_image_url ?? $placeholderUrl)
-                                @if($articleImage)
-                                    <figure class="md:w-2/5 aspect-video overflow-hidden {{ $loop->odd ? 'md:rounded-l-2xl md:rounded-r-none' : 'md:rounded-r-2xl md:rounded-l-none' }} rounded-t-2xl md:rounded-t-none">
-                                        <a href="{{ route('articles.show', $article->slug) }}">
-                                            <img src="{{ $articleImage }}"
-                                                 alt="{{ $article->title }}"
-                                                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
-                                        </a>
-                                    </figure>
-                                @endif
-
-                                {{-- Content --}}
-                                <div class="card-body {{ $articleImage ? 'md:w-3/5' : 'w-full' }}">
-                                    {{-- Category --}}
-                                    <div class="flex flex-wrap gap-2">
-                                        @if($article->category)
-                                            <a href="{{ $article->category->permalink() }}"
-                                               class="badge badge-primary badge-sm">
-                                                {{ $article->category->name }}
-                                            </a>
-                                        @endif
-                                        @auth
-                                            @if($article->status === \App\Enums\Status::Draft)
-                                                <span class="badge badge-warning badge-sm">Draft</span>
-                                            @endif
-                                        @endauth
-                                    </div>
-
-                                    {{-- Title (p-name) --}}
-                                    <h2 class="p-name card-title text-xl">
-                                        <a href="{{ route('articles.show', $article->slug) }}" class="u-url hover:link-primary">
-                                            {{ $article->title }}
-                                        </a>
-                                    </h2>
-
-                                    {{-- Meta --}}
-                                    <div class="flex items-center gap-4 text-sm text-base-content/60">
-                                        <time class="dt-published" datetime="{{ $article->published_at?->toIso8601String() }}">
-                                            {{ $article->published_at?->format('F j, Y') }}
-                                        </time>
-                                        <span class="flex items-center gap-1">
-                                            <i class="ph ph-clock"></i>
-                                            {{ $article->reading_time }} min read
-                                        </span>
-                                    </div>
-
-                                    {{-- Summary (p-summary) --}}
-                                    @if($article->excerpt)
-                                        <p class="p-summary text-base-content/80 leading-loose line-clamp-3">
-                                            {{ $article->excerpt }}
-                                        </p>
-                                    @endif
-
-                                    {{-- Card Actions --}}
-                                    <div class="card-actions justify-end mt-4 items-center">
-                                        @auth
-                                            <a href="{{ route('admin.articles.edit', $article) }}"
-                                               class="btn btn-ghost btn-xs gap-1">
-                                                <i class="ph ph-pencil-simple"></i>
-                                                Edit
-                                            </a>
-                                        @endauth
-                                        <a href="{{ route('articles.show', $article->slug) }}"
-                                           class="btn btn-primary btn-sm">
-                                            Read More
-                                            <i class="ph ph-arrow-right"></i>
-                                        </a>
-                                    </div>
-
-                                    {{-- Hidden author info for h-entry --}}
-                                    <span class="p-author h-card hidden">
-                                        <span class="p-name">{{ $authorName }}</span>
-                                    </span>
-                                </div>
-                            </div>
-                        </article>
+                        <x-article-card :article="$article"
+                            :odd="$loop->odd" :author-name="$authorName" />
                     @endforeach
                 </div>
 

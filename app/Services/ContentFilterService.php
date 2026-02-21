@@ -50,7 +50,7 @@ final readonly class ContentFilterService
 
         $this->applySortOrder($query, $request, 'title');
 
-        return $query->with('category')
+        return $query->with(['category', 'featuredPhoto'])
             ->paginate(10, ['*'], 'articles_page')
             ->withQueryString();
     }
