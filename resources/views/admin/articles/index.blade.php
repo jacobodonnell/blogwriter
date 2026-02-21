@@ -82,69 +82,20 @@
         </div>
 
         {{-- Collapsible Filters --}}
-        <div x-show="filtersOpen" x-collapse x-cloak class="card bg-base-100 shadow">
-            <div class="card-body">
-                <form method="GET" action="{{ route('admin.articles.index') }}"
-                      x-target="articles-table"
-                      id="articles-filter-form"
-                      class="grid grid-cols-1 md:grid-cols-[1fr_auto_auto_auto] gap-4 items-end">
-                    {{-- Preserve sort params --}}
-                    <input type="hidden" name="sort" value="{{ $currentSort }}" />
-                    <input type="hidden" name="direction" value="{{ $currentDirection }}" />
+        <x-admin.filter-banner :action="route('admin.articles.index')" target="articles-table"
+            :clearRoute="route('admin.articles.index')" :activeFilterCount="$activeFilterCount">
+            <x-slot:hidden>
+                <input type="hidden" name="sort" value="{{ $currentSort }}" />
+                <input type="hidden" name="direction" value="{{ $currentDirection }}" />
+            </x-slot:hidden>
 
-                    <div class="flex items-center justify-between gap-4 md:block">
-                        <label class="label shrink-0">
-                            <span class="label-text">Search</span>
-                        </label>
-                        <input type="text"
-                               name="search"
-                               value="{{ request('search') }}"
-                               placeholder="Search by title or slug..."
-                               class="input input-bordered w-full"
-                               @input.debounce.400ms="$el.form.requestSubmit()" />
-                    </div>
-
-                    <div class="flex items-center justify-between gap-4 md:block">
-                        <label class="label shrink-0">
-                            <span class="label-text">Category</span>
-                        </label>
-                        <x-category-select :categories="$categories"
-                            name="category" emptyLabel="All Categories"
-                            :selected="request('category')" :useSlug="true"
-                            @change="$el.form.requestSubmit()"
-                            class="select select-bordered w-full md:w-auto" />
-                    </div>
-
-                    <div class="flex items-center justify-between gap-4 md:block">
-                        <label class="label shrink-0">
-                            <span class="label-text">Status</span>
-                        </label>
-                        <select name="status" class="select select-bordered w-full md:w-auto" @change="$el.form.requestSubmit()">
-                            <option value="">All Status</option>
-                            <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Published</option>
-                            <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>
-                        </select>
-                    </div>
-
-                    <div class="flex items-center justify-between gap-4 md:block">
-                        <label class="label shrink-0">
-                            <span class="label-text">Per Page</span>
-                        </label>
-                        <select name="perPage" class="select select-bordered w-full md:w-auto" @change="$el.form.requestSubmit()">
-                            @foreach([10, 20, 50, 100] as $option)
-                                <option value="{{ $option }}" {{ $perPage == $option ? 'selected' : '' }}>{{ $option }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    @if($activeFilterCount > 0)
-                        <a href="{{ route('admin.articles.index') }}" class="btn btn-ghost">
-                            Clear Filters
-                        </a>
-                    @endif
-                </form>
-            </div>
-        </div>
+            <x-filters.search placeholder="Search by title or slug..." />
+            <x-filters.category-select :categories="$categories" />
+            <x-filters.select name="status" label="Status"
+                :options="['published' => 'Published', 'draft' => 'Draft']"
+                emptyLabel="All Status" />
+            <x-filters.per-page :options="[10, 20, 50, 100]" :default="$perPage" />
+        </x-admin.filter-banner>
 
         {{-- Articles List --}}
         @include('admin.articles._table')
