@@ -87,7 +87,8 @@
 
                 {{-- Submit Button --}}
                 <div class="form-control">
-                    <button type="submit" class="btn btn-primary w-full" data-test="login-submit" :class="{ 'loading': processing }" :disabled="processing">
+                    <button type="submit" class="btn btn-primary w-full" data-test="login-submit" :disabled="processing">
+                        <span x-show="processing" x-cloak class="loading loading-ring"></span>
                         <span x-show="!processing">Log in</span>
                         <span x-show="processing">Logging in...</span>
                     </button>
