@@ -134,6 +134,46 @@ it('filters by category via AJAX without full page reload', function (): void {
         ->assertDontSee('PHP Basics');
 })->group('slow');
 
+it('clears all filters and resets form inputs', function (): void {
+    $category = Category::factory()->create(['name' => 'Tech']);
+    Article::factory()->published()->create([
+        'title' => 'Tech Article',
+        'category_id' => $category->id,
+    ]);
+    Article::factory()->published()->create([
+        'title' => 'Other Article',
+    ]);
+
+    $page = visit('/articles');
+
+    // Open filters and apply category + search
+    $page->click('button:has-text("Filters")')
+        ->wait(0.5);
+    $page->select('@filter-category', $category->slug)
+        ->wait(1);
+    $page->fill('@filter-search', 'Tech')
+        ->wait(0.5);
+
+    // Verify inputs have values
+    $page->assertSelected('@filter-category', $category->slug)
+        ->assertValue('@filter-search', 'Tech');
+
+    // Clear button should be visible
+    $page->assertVisible('@filter-clear');
+
+    // Click Clear
+    $page->click('@filter-clear')
+        ->wait(1);
+
+    // Form inputs should be reset to defaults
+    $page->assertSelected('@filter-category', '')
+        ->assertValue('@filter-search', '');
+
+    // Both articles visible
+    $page->assertSee('Tech Article')
+        ->assertSee('Other Article');
+})->group('slow');
+
 it('clears all filters and resets results', function (): void {
     $category = Category::factory()->create(['name' => 'Tech']);
     Article::factory()->published()->create([
@@ -149,14 +189,14 @@ it('clears all filters and resets results', function (): void {
     // Open filters and apply a category filter
     $page->click('button:has-text("Filters")')
         ->wait(0.5);
-    $page->select('select[name="category"]', $category->slug)
+    $page->select('@filter-category', $category->slug)
         ->wait(1);
 
     $page->assertSee('Tech Article')
         ->assertDontSee('Other Article');
 
     // Click Clear to reset
-    $page->click('a:has-text("Clear")')
+    $page->click('@filter-clear')
         ->wait(1);
 
     $page->assertSee('Tech Article')

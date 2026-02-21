@@ -14,8 +14,8 @@ final class Sort extends FilterField
     public const DEFAULT_OPTIONS = [
         '' => 'Newest First',
         'oldest' => 'Oldest First',
-        'title_asc' => 'Title A\u{2013}Z',
-        'title_desc' => 'Title Z\u{2013}A',
+        'title_asc' => 'Title A–Z',
+        'title_desc' => 'Title Z–A',
     ];
 
     /**
