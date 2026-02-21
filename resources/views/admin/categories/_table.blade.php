@@ -93,7 +93,7 @@
                                 <td class="text-right">
                                     <div class="flex justify-end gap-2">
                                         <x-admin.icon-button tooltip="Edit" href="{{ route('admin.categories.edit', $category) }}" icon="pencil-simple" />
-                                        @if($category->articles_count === 0 && $category->children_count === 0)
+                                        @if($category->articles_count === 0 && $category->photos_count === 0 && $category->children_count === 0)
                                             <form method="POST"
                                                   action="{{ route('admin.categories.destroy', $category) }}"
                                                   x-target="categories-table"

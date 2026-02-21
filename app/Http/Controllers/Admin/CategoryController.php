@@ -154,6 +154,11 @@ final class CategoryController extends Controller
                 ->with('error', 'Cannot delete category with articles. Remove articles first.');
         }
 
+        if ($category->photos()->count() > 0) {
+            return redirect($redirectUrl)
+                ->with('error', 'Cannot delete category with photos. Remove photos first.');
+        }
+
         $category->delete();
 
         return redirect($redirectUrl)
