@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Models\User;
 
+const INSTALL_TEST_PASSWORD = 'SecurePass123!@#456';
+
 function installArgs(array $overrides = []): array
 {
     return array_merge([
@@ -11,15 +13,16 @@ function installArgs(array $overrides = []): array
         '--site-url' => 'https://test.com',
         '--admin-name' => 'Test User',
         '--admin-email' => 'test@example.com',
-        '--admin-password' => 'SecurePass123!@#456',
+        '--admin-password' => INSTALL_TEST_PASSWORD,
         '--no-seed' => true,
     ], $overrides);
 }
 
 beforeEach(function (): void {
-    @unlink(storage_path('installed.lock'));
+    if (file_exists(storage_path('installed.lock'))) {
+        unlink(storage_path('installed.lock'));
+    }
 
-    // Backup .env so tests that modify it don't corrupt development settings
     $this->envPath = base_path('.env');
     $this->envBackupPath = base_path('.env.test-backup');
     if (file_exists($this->envPath)) {
@@ -28,7 +31,6 @@ beforeEach(function (): void {
 });
 
 afterEach(function (): void {
-    // Restore .env from backup
     if (file_exists($this->envBackupPath)) {
         rename($this->envBackupPath, $this->envPath);
     }
@@ -36,20 +38,16 @@ afterEach(function (): void {
 
 describe('non-interactive installation (arguments/flags)', function (): void {
     it('completes installation with all required arguments', function (): void {
-
         $this->artisan('blogwriter:install', installArgs([
             '--site-name' => 'My Test Blog',
         ]))->assertSuccessful();
 
-        // Verify admin user created
         $this->assertDatabaseHas('users', [
             'email' => 'test@example.com',
             'name' => 'Test User',
         ]);
 
         expect(User::count())->toBe(1);
-
-        // Verify lock file created
         expect(file_exists(storage_path('installed.lock')))->toBeTrue();
     });
 
@@ -59,7 +57,6 @@ describe('non-interactive installation (arguments/flags)', function (): void {
             '--no-seed' => false,
         ]))->assertSuccessful();
 
-        // Verify demo content was seeded
         expect(App\Models\Category::count())->toBeGreaterThan(0);
         expect(App\Models\Article::count())->toBeGreaterThan(0);
     })->group('slow');
@@ -67,7 +64,6 @@ describe('non-interactive installation (arguments/flags)', function (): void {
     it('skips seeding when --no-seed flag is provided', function (): void {
         $this->artisan('blogwriter:install', installArgs())->assertSuccessful();
 
-        // Verify no demo content exists
         expect(App\Models\Category::count())->toBe(0);
         expect(App\Models\Article::count())->toBe(0);
     });
@@ -91,7 +87,6 @@ describe('non-interactive installation (arguments/flags)', function (): void {
     });
 
     it('bypasses already-installed check with --force flag', function (): void {
-        // Create lock file to simulate already installed state
         file_put_contents(storage_path('installed.lock'), now());
 
         $this->artisan('blogwriter:install', installArgs([
@@ -130,22 +125,19 @@ describe('interactive installation (prompts)', function (): void {
             ->expectsQuestion('What is your name?', 'Test User')
             ->expectsQuestion('What is your email address?', 'test@example.com')
             ->expectsConfirmation('Use this passphrase?', 'no')
-            ->expectsQuestion('Create a password', 'SecurePass123!@#456')
-            ->expectsQuestion('Confirm your password', 'SecurePass123!@#456')
+            ->expectsQuestion('Create a password', INSTALL_TEST_PASSWORD)
+            ->expectsQuestion('Confirm your password', INSTALL_TEST_PASSWORD)
             ->expectsOutputToContain('Step 3: Demo Content')
             ->expectsConfirmation('Would you like to seed your blog with demo articles?', false)
             ->expectsOutputToContain('Installation Complete!')
             ->assertSuccessful();
 
-        // Verify admin user created
         $this->assertDatabaseHas('users', [
             'email' => 'test@example.com',
             'name' => 'Test User',
         ]);
 
         expect(User::count())->toBe(1);
-
-        // Verify lock file created
         expect(file_exists(storage_path('installed.lock')))->toBeTrue();
     });
 
@@ -174,11 +166,11 @@ describe('interactive installation (prompts)', function (): void {
             ->expectsQuestion('What is your name?', 'Test User')
             ->expectsQuestion('What is your email address?', 'test@example.com')
             ->expectsConfirmation('Use this passphrase?', 'no')
-            ->expectsQuestion('Create a password', 'SecurePass123!@#456')
+            ->expectsQuestion('Create a password', INSTALL_TEST_PASSWORD)
             ->expectsQuestion('Confirm your password', 'WrongPassword789')
             ->expectsOutputToContain('Passwords do not match')
-            ->expectsQuestion('Create a password', 'SecurePass123!@#456')
-            ->expectsQuestion('Confirm your password', 'SecurePass123!@#456')
+            ->expectsQuestion('Create a password', INSTALL_TEST_PASSWORD)
+            ->expectsQuestion('Confirm your password', INSTALL_TEST_PASSWORD)
             ->expectsConfirmation('Would you like to seed your blog with demo articles?', false)
             ->expectsOutputToContain('Installation Complete!')
             ->assertSuccessful();
@@ -193,11 +185,11 @@ describe('interactive installation (prompts)', function (): void {
             ->expectsQuestion('What is your name?', 'Test User')
             ->expectsQuestion('What is your email address?', 'test@example.com')
             ->expectsConfirmation('Use this passphrase?', 'no')
-            ->expectsQuestion('Create a password', 'SecurePass123!@#456')
+            ->expectsQuestion('Create a password', INSTALL_TEST_PASSWORD)
             ->expectsQuestion('Confirm your password', 'Wrong1')
-            ->expectsQuestion('Create a password', 'SecurePass123!@#456')
+            ->expectsQuestion('Create a password', INSTALL_TEST_PASSWORD)
             ->expectsQuestion('Confirm your password', 'Wrong2')
-            ->expectsQuestion('Create a password', 'SecurePass123!@#456')
+            ->expectsQuestion('Create a password', INSTALL_TEST_PASSWORD)
             ->expectsQuestion('Confirm your password', 'Wrong3')
             ->expectsOutputToContain('Maximum attempts reached')
             ->expectsConfirmation('Would you like to seed your blog with demo articles?', false)
@@ -237,7 +229,6 @@ describe('interactive installation (prompts)', function (): void {
             ->expectsOutputToContain('Installation Complete!')
             ->assertSuccessful();
 
-        // Verify demo content was seeded
         expect(App\Models\Category::count())->toBeGreaterThan(0);
         expect(App\Models\Article::count())->toBeGreaterThan(0);
     })->group('slow');
@@ -254,7 +245,6 @@ describe('interactive installation (prompts)', function (): void {
             ->expectsOutputToContain('Installation Complete!')
             ->assertSuccessful();
 
-        // Verify no demo content exists
         expect(App\Models\Category::count())->toBe(0);
         expect(App\Models\Article::count())->toBe(0);
     });
@@ -286,8 +276,6 @@ describe('already installed detection', function (): void {
             ->assertSuccessful();
 
         expect(file_exists(storage_path('installed.lock')))->toBeTrue();
-
-        @unlink(storage_path('installed.lock'));
     });
 
     it('suggests password reset command when selected', function (): void {
@@ -298,8 +286,6 @@ describe('already installed detection', function (): void {
             ->expectsQuestion('What would you like to do?', 'password')
             ->expectsOutputToContain('blogwriter:user:reset-password')
             ->assertSuccessful();
-
-        @unlink(storage_path('installed.lock'));
     });
 
     it('suggests profile command when selected', function (): void {
@@ -310,21 +296,19 @@ describe('already installed detection', function (): void {
             ->expectsQuestion('What would you like to do?', 'profile')
             ->expectsOutputToContain('blogwriter:profile')
             ->assertSuccessful();
-
-        @unlink(storage_path('installed.lock'));
     });
 });
 
 describe('environment configuration', function (): void {
     it('creates .env file from .env.example', function (): void {
-        // Remove .env to test fresh creation (beforeEach already removed lock file)
-        @unlink(base_path('.env'));
+        if (file_exists(base_path('.env'))) {
+            unlink(base_path('.env'));
+        }
 
         $this->artisan('blogwriter:install', installArgs())
             ->expectsOutputToContain('Creating .env file')
             ->assertSuccessful();
 
-        // Verify .env was created
         expect(file_exists(base_path('.env')))->toBeTrue();
     });
 
@@ -333,7 +317,6 @@ describe('environment configuration', function (): void {
             ->expectsOutputToContain('Generating application key')
             ->assertSuccessful();
 
-        // Verify APP_KEY is set in .env
         $envContent = file_get_contents(base_path('.env'));
         expect($envContent)->toContain('APP_KEY=base64:');
     });
@@ -344,8 +327,9 @@ describe('environment configuration', function (): void {
 
         $hasExample = file_exists($envExamplePath);
 
-        // Remove .env so install tries to create it from .env.example
-        @unlink(base_path('.env'));
+        if (file_exists(base_path('.env'))) {
+            unlink(base_path('.env'));
+        }
 
         if ($hasExample) {
             rename($envExamplePath, $envExampleBackupPath);

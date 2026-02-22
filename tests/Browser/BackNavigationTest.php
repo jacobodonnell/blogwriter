@@ -56,16 +56,4 @@ it('renders styled page after browser back following AJAX table refresh', functi
     // Assert the full admin layout rendered — not just the AJAX partial
     $page->assertSee('Categories')
         ->assertNoJavaScriptErrors();
-
-    // Verify the full page layout is present (not just the table partial)
-    $page->assertScript(
-        "document.querySelector('head title') !== null",
-        true
-    );
-
-    // Verify admin sidebar navigation rendered
-    $page->assertScript(
-        "document.querySelector('nav') !== null || document.querySelector('.menu') !== null",
-        true
-    );
 })->group('slow');

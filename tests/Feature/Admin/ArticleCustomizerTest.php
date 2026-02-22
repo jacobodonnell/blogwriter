@@ -149,7 +149,6 @@ it('preview update uniquifies slug when it conflicts with another article', func
     ])->assertOk();
 
     $article->refresh();
-    // Slug should be uniquified since "there" is taken
     expect($article->slug)->toBe('there-1')
         ->and($article->title)->toBe('There');
 });
@@ -192,6 +191,22 @@ it('accepts POST with _method PUT for ajax preview update', function (): void {
     ])
         ->assertOk()
         ->assertViewIs('admin.articles.preview');
+});
+
+it('renders view live link for published article', function (): void {
+    $article = Article::factory()->published()->for($this->user)->create();
+
+    get(route('admin.articles.edit', $article))
+        ->assertOk()
+        ->assertSee('View Live');
+});
+
+it('does not render view live link for draft article', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create();
+
+    get(route('admin.articles.edit', $article))
+        ->assertOk()
+        ->assertDontSee('View Live');
 });
 
 it('index view button links to permalink for published', function (): void {

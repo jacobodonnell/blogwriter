@@ -83,6 +83,12 @@ it('validates email field', function (): void {
         ->assertSessionHasErrors('profile_email');
 });
 
+it('redirects /admin/settings to profile settings', function (): void {
+    $this->actingAs($this->user)
+        ->get('/admin/settings')
+        ->assertRedirect('/admin/settings/profile');
+});
+
 it('clears settings when fields are empty', function (): void {
     Setting::set('profile_bio', 'Old bio.');
     Setting::set('profile_github', 'https://github.com/old');

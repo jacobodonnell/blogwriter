@@ -64,7 +64,7 @@ it('does not use raw status strings in application code', function (): void {
 
             if (preg_match_all($pattern, $contents, $matches, PREG_OFFSET_CAPTURE)) {
                 foreach ($matches[0] as $match) {
-                    $line = mb_substr_count(mb_substr($contents, 0, $match[1]), "\n") + 1;
+                    $line = count(explode("\n", mb_substr($contents, 0, $match[1])));
                     $relativePath = str_replace($basePath.'/', '', $file->getPathname());
                     $violations[] = "{$relativePath}:{$line} — {$match[0]}";
                 }

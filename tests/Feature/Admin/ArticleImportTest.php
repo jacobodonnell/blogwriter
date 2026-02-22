@@ -15,7 +15,9 @@ beforeEach(function (): void {
 
 afterEach(function (): void {
     foreach (glob(storage_path('framework/testing/bw-import-*.zip')) as $file) {
-        @unlink($file);
+        if (file_exists($file)) {
+            unlink($file);
+        }
     }
 });
 
@@ -199,7 +201,6 @@ it('returns preflight_warning when article references unknown category slug', fu
         'missing' => ['unknown-cat'],
     ]);
 
-    // Nothing imported yet
     expect(Article::query()->count())->toBe(0);
 });
 
@@ -318,6 +319,42 @@ it('maps featured_image_url in frontmatter to meta.featured_image_url', function
 
     $article = Article::query()->where('slug', 'image-article')->first();
     expect($article->meta['featured_image_url'])->toBe('https://cdn.example.com/hero.jpg');
+});
+
+// ---------------------------------------------------------------------------
+// Error cases
+// ---------------------------------------------------------------------------
+
+it('rejects a corrupted (non-zip) binary file with 422', function (): void {
+    $tmpPath = storage_path('framework/testing/bw-import-'.uniqid().'.zip');
+    file_put_contents($tmpPath, random_bytes(256));
+    $file = new UploadedFile($tmpPath, 'import.zip', 'application/zip', null, true);
+
+    $this->withHeaders(['Accept' => 'application/json'])
+        ->post(route('admin.import.articles'), [
+            'file' => $file,
+            'duplicate_strategy' => 'skip',
+        ])->assertStatus(422);
+});
+
+it('gracefully skips articles with invalid yaml frontmatter', function (): void {
+    $badMd = "---\ntitle: [unclosed\n---\n\nHello world.";
+
+    $zip = makeImportZip(['articles/bad-frontmatter.md' => $badMd]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['imported' => 0]);
+});
+
+it('returns ok with zero imported and zero skipped for a zip with no md files', function (): void {
+    $zip = makeImportZip([]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok', 'imported' => 0, 'skipped' => 0]);
 });
 
 it('restores created_at from frontmatter', function (): void {
