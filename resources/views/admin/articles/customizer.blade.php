@@ -158,16 +158,12 @@
                                     class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Align Right">
                                 <i class="ph ph-text-align-right"></i>
                             </button>
-                            <button type="button" @click="command('imageAlignFull')"
+                            <button type="button" @click="command('imageFullWidth')"
                                     :class="isImageAlign('full') && 'btn-active'"
                                     class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Full Width">
                                 <i class="ph ph-arrows-out-line-horizontal"></i>
                             </button>
                             <div class="divider divider-horizontal mx-0"></div>
-                            <button type="button" @click="command('imageReset')"
-                                    class="btn btn-ghost btn-xs tooltip" data-tip="Reset (no alignment, natural width)">
-                                <i class="ph ph-arrow-counter-clockwise"></i>
-                            </button>
                             <button type="button" @click="openEditImage()"
                                     class="btn btn-ghost btn-xs tooltip" data-tip="Edit image">
                                 <i class="ph ph-pencil-simple"></i> Edit

@@ -115,6 +115,34 @@ export default function articleCustomizer(config) {
                                 };
                             },
 
+                            addNodeView() {
+                                const parentFactory = this.parent?.();
+                                if (!parentFactory) return null;
+                                return (props) => {
+                                    const nodeView = parentFactory(props);
+                                    const syncAttrs = (attrs) => {
+                                        const el = nodeView.element;
+                                        if (attrs.src && el.src !== attrs.src) el.src = attrs.src;
+                                        el.alt = attrs.alt ?? '';
+                                        nodeView.container.className = attrs.align ? `img-align-${attrs.align}` : '';
+                                        if (attrs.width) {
+                                            el.style.width = `${attrs.width}px`;
+                                        } else {
+                                            el.style.removeProperty('width');
+                                        }
+                                    };
+                                    syncAttrs(props.node.attrs);
+                                    const originalUpdate = nodeView.update.bind(nodeView);
+                                    nodeView.update = (updatedNode, decorations, innerDecorations) => {
+                                        const result = originalUpdate(updatedNode, decorations, innerDecorations);
+                                        if (result === false) return false;
+                                        syncAttrs(updatedNode.attrs);
+                                        return result;
+                                    };
+                                    return nodeView;
+                                };
+                            },
+
                             renderMarkdown(node) {
                                 const { src = '', alt = '', title, align, width, caption } = node.attrs ?? {};
                                 const parts = [alt];
@@ -145,11 +173,13 @@ export default function articleCustomizer(config) {
                                 const { align, caption, width, ...rest } = HTMLAttributes;
                                 const cls = align ? `img-align-${align}` : null;
                                 const imgAttrs = mergeAttributes(rest, {
-                                    class: cls,
-                                    style: width ? `width:${width}px` : null,
+                                    style: width ? `width:${width}px;max-width:100%` : null,
                                 });
                                 if (caption) {
                                     return ['figure', { class: cls }, ['img', imgAttrs], ['figcaption', {}, caption]];
+                                }
+                                if (cls) {
+                                    return ['div', { class: cls }, ['img', imgAttrs]];
                                 }
                                 return ['img', imgAttrs];
                             },
@@ -239,11 +269,10 @@ export default function articleCustomizer(config) {
                     }
                 },
                 youtube: () => { this.youtubeUrl = ''; this.showYoutubeDialog = true; },
-                imageAlignLeft:   () => this.replaceImageNode({ align: 'left' }),
-                imageAlignCenter: () => this.replaceImageNode({ align: 'center' }),
-                imageAlignRight:  () => this.replaceImageNode({ align: 'right' }),
-                imageAlignFull:   () => this.replaceImageNode({ align: 'full' }),
-                imageReset:       () => this.replaceImageNode({ align: null, width: null }),
+                imageAlignLeft:   () => rawEditor.chain().focus().updateAttributes('image', { align: 'left' }).run(),
+                imageAlignCenter: () => rawEditor.chain().focus().updateAttributes('image', { align: 'center' }).run(),
+                imageAlignRight:  () => rawEditor.chain().focus().updateAttributes('image', { align: 'right' }).run(),
+                imageFullWidth:   () => rawEditor.chain().focus().updateAttributes('image', { align: 'full', width: null }).run(),
             };
             map[name]?.();
         },
@@ -280,20 +309,13 @@ export default function articleCustomizer(config) {
                 caption: this.imageCaption || undefined,
             };
             if (this.editingImage) {
-                this.replaceImageNode(attrs);
+                rawEditor.chain().focus().updateAttributes('image', attrs).run();
             } else {
                 rawEditor.chain().focus().setImage(attrs).run();
             }
             this.showImageDialog = false;
             this.editingImage = false;
             this.resetImageDialog();
-        },
-
-        replaceImageNode(newAttrs) {
-            const current = rawEditor.getAttributes('image');
-            const merged  = { ...current, ...newAttrs };
-            Object.keys(merged).forEach(k => { if (merged[k] == null) { delete merged[k]; } });
-            rawEditor.chain().focus().deleteSelection().setImage(merged).run();
         },
 
         isImageAlign(align) {

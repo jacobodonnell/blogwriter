@@ -13,26 +13,26 @@ it('renders plain images unchanged', function () {
         ->not->toContain('<figure');
 });
 
-it('applies align:center class', function () {
+it('applies align:center class on wrapper div', function () {
     $html = Markdown::render('![My image|align:center](https://example.com/img.jpg)');
-    expect($html)->toContain('class="img-align-center"')
+    expect($html)->toContain('<div class="img-align-center">')
         ->toContain('src="https://example.com/img.jpg"')
         ->toContain('alt="My image"');
 });
 
-it('applies align:left class', function () {
+it('applies align:left class on wrapper div', function () {
     $html = Markdown::render('![Photo|align:left](https://example.com/img.jpg)');
-    expect($html)->toContain('class="img-align-left"');
+    expect($html)->toContain('<div class="img-align-left">');
 });
 
-it('applies align:right class', function () {
+it('applies align:right class on wrapper div', function () {
     $html = Markdown::render('![Photo|align:right](https://example.com/img.jpg)');
-    expect($html)->toContain('class="img-align-right"');
+    expect($html)->toContain('<div class="img-align-right">');
 });
 
-it('applies align:full class', function () {
+it('applies align:full class on wrapper div', function () {
     $html = Markdown::render('![Photo|align:full](https://example.com/img.jpg)');
-    expect($html)->toContain('class="img-align-full"');
+    expect($html)->toContain('<div class="img-align-full">');
 });
 
 it('applies width style', function () {
@@ -52,7 +52,8 @@ it('combines align width and caption', function () {
     expect($html)->toContain('class="img-align-center"')
         ->toContain('style="width:500px;max-width:100%"')
         ->toContain('<figure')
-        ->toContain('<figcaption>Nice photo</figcaption>');
+        ->toContain('<figcaption>Nice photo</figcaption>')
+        ->not->toContain('<div class="img-align-center">');
 });
 
 it('strips extended images from plain text', function () {
@@ -79,7 +80,7 @@ it('escapes XSS in caption', function () {
 
 it('handles CRLF line endings', function () {
     $html = Markdown::render("![Image|align:center](https://example.com/img.jpg)\r\n\r\nSome text");
-    expect($html)->toContain('class="img-align-center"')
+    expect($html)->toContain('<div class="img-align-center">')
         ->toContain('Some text');
 });
 

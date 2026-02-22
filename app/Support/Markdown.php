@@ -201,13 +201,16 @@ final class Markdown
             $style = $width ? 'width:'.$width.'px;max-width:100%' : null;
 
             $imgTag = '<img src="'.e($src).'" alt="'.e($alt).'"'
-                .($class ? ' class="'.e($class).'"' : '')
                 .($style ? ' style="'.e($style).'"' : '')
                 .'>';
 
-            $replacement = $caption
-                ? '<figure'.($class ? ' class="'.e($class).'"' : '').'>'.$imgTag.'<figcaption>'.e($caption).'</figcaption></figure>'
-                : $imgTag;
+            if ($caption) {
+                $replacement = '<figure'.($class ? ' class="'.e($class).'"' : '').'>'.$imgTag.'<figcaption>'.e($caption).'</figcaption></figure>';
+            } elseif ($class) {
+                $replacement = '<div class="'.e($class).'">'.$imgTag.'</div>';
+            } else {
+                $replacement = $imgTag;
+            }
 
             $html = str_replace('<p>IMAGE_EMBED_'.$index.'_PLACEHOLDER</p>', $replacement, $html);
         }
