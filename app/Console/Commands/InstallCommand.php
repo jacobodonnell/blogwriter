@@ -11,12 +11,10 @@ use App\Models\User;
 use App\Services\InstallService;
 use App\Services\ResetService;
 use Illuminate\Console\Command;
-use Illuminate\Database\Console\Migrations\FreshCommand;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
-use ReflectionClass;
 
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\error;
@@ -84,19 +82,13 @@ final class InstallCommand extends Command
             return self::FAILURE;
         }
 
-        // Check current prohibition state using reflection
-        $reflection = new ReflectionClass(FreshCommand::class);
-        $property = $reflection->getProperty('prohibitedFromRunning');
-        $wasProhibited = $property->getValue();
-
-        // Disable destructive command prohibition for installer context
+        // Installer needs to run migrations and potentially wipe the database
         DB::prohibitDestructiveCommands(false);
 
         try {
             return $this->runInstallation();
         } finally {
-            // Restore original prohibition state
-            DB::prohibitDestructiveCommands($wasProhibited);
+            DB::prohibitDestructiveCommands(true);
         }
     }
 
@@ -156,18 +148,7 @@ final class InstallCommand extends Command
         }
 
         $config = $this->gatherConfiguration();
-
-        if (! $didFreshInstall) {
-            $this->install($config);
-        } else {
-            $this->installService->ensureStorageDirectories();
-            $this->installService->createStorageLink();
-            $this->installService->setupEnvironmentFile();
-            $this->installService->generateAppKey();
-            $this->installService->updateEnvironmentFile($config);
-
-            $this->postMigrationSetup($config);
-        }
+        $this->install($config, skipDatabase: $didFreshInstall);
 
         return self::SUCCESS;
     }
@@ -286,7 +267,13 @@ final class InstallCommand extends Command
         ];
     }
 
-    private function install(array $config): void
+    /**
+     * Run the installation pipeline.
+     *
+     * When reinstalling after a reset, the database and migrations are already
+     * handled by ResetService, so skipDatabase avoids re-running them.
+     */
+    private function install(array $config, bool $skipDatabase = false): void
     {
         $this->newLine();
         info('Installing BlogWriter...');
@@ -309,8 +296,11 @@ final class InstallCommand extends Command
         $this->installService->updateEnvironmentFile($config);
         info('✓ Environment configured');
 
-        $this->installService->runMigrations();
-        info('✓ Database migrated');
+        if (! $skipDatabase) {
+            $this->installService->ensureDatabaseFile();
+            $this->installService->runMigrations();
+            info('✓ Database migrated');
+        }
 
         $this->postMigrationSetup($config);
     }

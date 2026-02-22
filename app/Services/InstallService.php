@@ -13,11 +13,21 @@ final class InstallService
 {
     /**
      * Check if BlogWriter is already installed.
+     *
+     * When a lock file exists, verifies the database is healthy before
+     * trusting it. Stale locks (missing/empty DB) are removed.
      */
     public function isAlreadyInstalled(): bool
     {
         if (file_exists(storage_path('installed.lock'))) {
-            return true;
+            if ($this->isDatabaseHealthy()) {
+                return true;
+            }
+
+            // Stale lock — DB is missing or corrupt
+            @unlink(storage_path('installed.lock'));
+
+            return false;
         }
 
         try {
@@ -31,6 +41,33 @@ final class InstallService
         }
 
         return false;
+    }
+
+    /**
+     * Ensure the SQLite database file exists, cleaning up orphaned WAL files.
+     *
+     * Call this before running migrations to prevent "database is locked" errors
+     * when stale -wal/-shm files remain after the main .sqlite file was deleted.
+     */
+    public function ensureDatabaseFile(): void
+    {
+        $dbPath = config('database.connections.sqlite.database');
+
+        if ($dbPath === ':memory:' || file_exists($dbPath)) {
+            return;
+        }
+
+        // Clean up orphaned WAL files
+        foreach (['-wal', '-shm'] as $suffix) {
+            $walFile = $dbPath.$suffix;
+            if (file_exists($walFile)) {
+                @unlink($walFile);
+            }
+        }
+
+        if (! touch($dbPath)) {
+            throw new RuntimeException(sprintf('Failed to create database file: %s. Check file permissions.', $dbPath));
+        }
     }
 
     /**
@@ -231,6 +268,27 @@ final class InstallService
     public function createLockFile(): void
     {
         file_put_contents(storage_path('installed.lock'), now());
+    }
+
+    /**
+     * Check if the SQLite database file exists, is non-empty, and queryable.
+     */
+    private function isDatabaseHealthy(): bool
+    {
+        $dbPath = config('database.connections.sqlite.database');
+
+        // In-memory databases are always considered healthy if queryable
+        if ($dbPath !== ':memory:' && (! file_exists($dbPath) || filesize($dbPath) === 0)) {
+            return false;
+        }
+
+        try {
+            User::exists();
+
+            return true;
+        } catch (Exception) {
+            return false;
+        }
     }
 
     /**

@@ -77,6 +77,28 @@ describe('ResetService', function (): void {
         $service->reset($this->command);
     });
 
+    it('cleans orphaned WAL files when main sqlite is missing', function (): void {
+        $dbPath = config('database.connections.sqlite.database');
+
+        // Ensure main db doesn't exist but WAL files do
+        if (file_exists($dbPath)) {
+            unlink($dbPath);
+        }
+        file_put_contents($dbPath.'-wal', 'orphaned');
+        file_put_contents($dbPath.'-shm', 'orphaned');
+
+        Storage::shouldReceive('disk')->andReturnSelf();
+        Storage::shouldReceive('deleteDirectory')->andReturn(true);
+
+        $service = new ResetService;
+        $exitCode = $service->reset($this->command);
+
+        expect($exitCode)->toBe(Command::SUCCESS)
+            ->and(file_exists($dbPath.'-wal'))->toBeFalse()
+            ->and(file_exists($dbPath.'-shm'))->toBeFalse()
+            ->and(file_exists($dbPath))->toBeTrue();
+    });
+
     it('returns failure exit code when exception occurs', function (): void {
         Storage::shouldReceive('disk')->andThrow(new RuntimeException('Storage failure'));
 

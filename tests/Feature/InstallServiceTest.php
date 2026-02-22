@@ -25,10 +25,36 @@ it('detects not installed when no lock file and no users', function (): void {
     expect($this->service->isAlreadyInstalled())->toBeFalse();
 });
 
-it('detects installed state from lock file', function (): void {
+it('detects installed state from lock file with healthy database', function (): void {
+    User::factory()->create();
     file_put_contents(storage_path('installed.lock'), now());
 
     expect($this->service->isAlreadyInstalled())->toBeTrue();
+});
+
+it('returns false and removes stale lock when database file is empty', function (): void {
+    file_put_contents(storage_path('installed.lock'), now());
+
+    // Point config at a temp empty file to simulate empty database
+    $tempDb = tempnam(sys_get_temp_dir(), 'bw_test_');
+    file_put_contents($tempDb, '');
+    config(['database.connections.sqlite.database' => $tempDb]);
+
+    expect($this->service->isAlreadyInstalled())->toBeFalse()
+        ->and(file_exists(storage_path('installed.lock')))->toBeFalse();
+
+    @unlink($tempDb);
+});
+
+it('returns false and removes stale lock when database file is missing', function (): void {
+    file_put_contents(storage_path('installed.lock'), now());
+
+    $tempDb = tempnam(sys_get_temp_dir(), 'bw_test_');
+    @unlink($tempDb); // Ensure it doesn't exist
+    config(['database.connections.sqlite.database' => $tempDb]);
+
+    expect($this->service->isAlreadyInstalled())->toBeFalse()
+        ->and(file_exists(storage_path('installed.lock')))->toBeFalse();
 });
 
 it('detects installed state from existing user', function (): void {
@@ -75,6 +101,46 @@ it('generates a passphrase string', function (): void {
     $passphrase = App\Services\PasswordGenerator::generate();
 
     expect($passphrase)->toBeString()->not->toBeEmpty();
+});
+
+it('ensureDatabaseFile cleans orphaned WAL files and creates database', function (): void {
+    // Use a temp path to avoid interfering with the in-memory test DB
+    $tempDb = tempnam(sys_get_temp_dir(), 'bw_test_');
+    @unlink($tempDb); // Ensure it doesn't exist
+    config(['database.connections.sqlite.database' => $tempDb]);
+
+    // Create orphaned WAL files
+    file_put_contents($tempDb.'-wal', 'orphaned');
+    file_put_contents($tempDb.'-shm', 'orphaned');
+
+    $this->service->ensureDatabaseFile();
+
+    expect(file_exists($tempDb))->toBeTrue()
+        ->and(file_exists($tempDb.'-wal'))->toBeFalse()
+        ->and(file_exists($tempDb.'-shm'))->toBeFalse();
+
+    @unlink($tempDb);
+});
+
+it('ensureDatabaseFile is a no-op when database exists', function (): void {
+    $tempDb = tempnam(sys_get_temp_dir(), 'bw_test_');
+    file_put_contents($tempDb, 'existing');
+    config(['database.connections.sqlite.database' => $tempDb]);
+
+    $this->service->ensureDatabaseFile();
+
+    expect(file_get_contents($tempDb))->toBe('existing');
+
+    @unlink($tempDb);
+});
+
+it('ensureDatabaseFile is a no-op for memory databases', function (): void {
+    config(['database.connections.sqlite.database' => ':memory:']);
+
+    // Should not throw
+    $this->service->ensureDatabaseFile();
+
+    expect(true)->toBeTrue();
 });
 
 it('creates lock file', function (): void {

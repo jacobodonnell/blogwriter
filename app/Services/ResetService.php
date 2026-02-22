@@ -37,38 +37,41 @@ final class ResetService implements Resettable
             info('[2/5] Wiping database...');
             $dbPath = config('database.connections.sqlite.database');
 
-            if (file_exists($dbPath)) {
-                // Close all connections properly
-                DB::disconnect('sqlite');
-                DB::purge('sqlite');
+            // Close all connections properly
+            DB::disconnect('sqlite');
+            DB::purge('sqlite');
 
-                // Force garbage collection to release any PHP references
-                gc_collect_cycles();
+            // Force garbage collection to release any PHP references
+            gc_collect_cycles();
 
-                // Wait a moment for locks to clear
-                usleep(250000); // 250ms
+            // SQLite locks are released asynchronously at the OS level after
+            // disconnect + purge. A brief wait prevents "database is locked"
+            // errors when deleting the file immediately after.
+            usleep(250000); // 250ms
 
-                // Delete database file and WAL files (for WAL mode)
-                $filesToDelete = [
-                    $dbPath,
-                    $dbPath.'-wal',
-                    $dbPath.'-shm',
-                ];
+            // Delete database file and WAL files (for WAL mode)
+            // WAL cleanup runs even if the main .sqlite is already gone
+            $filesToDelete = [
+                $dbPath,
+                $dbPath.'-wal',
+                $dbPath.'-shm',
+            ];
 
-                foreach ($filesToDelete as $file) {
-                    if (! file_exists($file)) {
-                        continue;
-                    }
-
-                    if (unlink($file)) {
-                        continue;
-                    }
-
-                    throw new RuntimeException(sprintf('Failed to delete file: %s. File may be locked.', $file));
+            foreach ($filesToDelete as $file) {
+                if (! file_exists($file)) {
+                    continue;
                 }
 
-                // Create fresh empty database
-                touch($dbPath);
+                if (unlink($file)) {
+                    continue;
+                }
+
+                throw new RuntimeException(sprintf('Failed to delete file: %s. File may be locked.', $file));
+            }
+
+            // Create fresh empty database
+            if (! touch($dbPath)) {
+                throw new RuntimeException(sprintf('Failed to create database file: %s. Check file permissions.', $dbPath));
             }
 
             // Reconnect and run migrations using exec to avoid deadlocks

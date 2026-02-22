@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Services\InstallService;
 use Closure;
 use Illuminate\Http\Request;
 
-final class EnsureInstalled
+final readonly class EnsureInstalled
 {
+    public function __construct(private InstallService $installService) {}
+
     public function handle(Request $request, Closure $next): mixed
     {
         // Skip in testing environment
@@ -16,21 +19,23 @@ final class EnsureInstalled
             return $next($request);
         }
 
-        // Skip install route itself
+        // Always allow the install route through
         if ($request->is('install') || $request->is('install/*')) {
             return $next($request);
         }
 
-        // Skip login route (only auth route needed for CLI-only install)
-        if ($request->is('login')) {
+        // Check installed: lock file + healthy database
+        if ($this->installService->isAlreadyInstalled()) {
             return $next($request);
         }
 
-        // Check if installed (lock file exists)
-        if (! file_exists(storage_path('installed.lock'))) {
+        // Not installed — tiered response:
+        // Auth/admin routes → redirect to installer (actionable for the site owner)
+        if ($request->is('login', 'logout', 'user/*', 'admin', 'admin/*')) {
             return redirect('/install');
         }
 
-        return $next($request);
+        // Public frontend → 404 (no content exists, nothing to show)
+        abort(404);
     }
 }
