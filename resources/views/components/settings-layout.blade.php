@@ -7,6 +7,7 @@
             'profile' => 'Profile',
             'site' => 'Site',
             'appearance' => 'Appearance',
+            'export' => 'Export',
         } }}</li>
     </x-slot:breadcrumb>
 
@@ -29,6 +30,12 @@
                 <a href="{{ route('admin.settings.appearance') }}" class="{{ $active === 'appearance' ? 'menu-active' : '' }}">
                     <i class="ph ph-palette text-lg"></i>
                     Appearance
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.settings.export') }}" class="{{ $active === 'export' ? 'menu-active' : '' }}">
+                    <i class="ph ph-download-simple text-lg"></i>
+                    Export
                 </a>
             </li>
         </ul>

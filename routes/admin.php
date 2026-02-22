@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\CategoryExploreController;
 use App\Http\Controllers\Admin\CreateArticleController;
 use App\Http\Controllers\Admin\CreateArticlePreviewController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ExportController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\PlaceholderImageController;
 use App\Http\Controllers\Admin\ProfileSettingsController;
@@ -72,6 +73,10 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function (): v
     // Appearance
     Route::get('/settings/appearance', [AppearanceController::class, 'edit'])->name('settings.appearance');
     Route::put('/settings/appearance', [AppearanceController::class, 'update'])->name('settings.appearance.update');
+
+    // Export
+    Route::get('/settings/export', [ExportController::class, 'index'])->name('settings.export');
+    Route::post('/export/articles', [ExportController::class, 'articles'])->name('export.articles');
 
     // Private media file serving
     Route::get('/media/{media}/{conversion?}', [MediaController::class, 'show'])->name('media.show');
