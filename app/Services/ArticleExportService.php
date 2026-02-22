@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\Status;
 use App\Models\Article;
 use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\Yaml\Yaml;
@@ -23,7 +24,7 @@ final class ArticleExportService
             $content = $article->getAttributes()['content'] ?? '';
             $fileContent = "---\n".Yaml::dump($frontmatter, 2, 2)."---\n\n".$content;
 
-            $zip->addFile("articles/{$article->slug}.md", $fileContent);
+            $zip->addFile(sprintf('articles/%s.md', $article->slug), $fileContent);
         }
     }
 
@@ -37,16 +38,23 @@ final class ArticleExportService
         $frontmatter = [
             'title' => $article->title,
             'date' => $article->published_at?->utc()->toIso8601String()
-                ?? $article->created_at->utc()->toIso8601String(),
+                                        ?? $article->created_at->utc()->toIso8601String(),
+            'created_at' => $article->created_at->utc()->toIso8601String(),
+            'last_edited_at' => $article->last_edited_at?->utc()->toIso8601String(),
             'slug' => $article->slug,
-            'draft' => $article->status->value === 'draft',
+            'draft' => $article->status === Status::Draft,
             'description' => $article->summary ?: null,
             'author' => $article->user?->name,
             'category' => $article->category?->slug,
-            'past_slugs' => $article->past_slugs ?? [],
+            'past_slugs' => array_values($article->past_slugs ?? []),
             'meta_title' => $article->meta['meta_title'] ?? null,
             'meta_description' => $article->meta['meta_description'] ?? null,
-            'featured_image_url' => $article->meta['featured_image_url'] ?? null,
+            'featured_image_url' => $article->featured_image_url ?: null,
+            'featured_image_caption' => $article->featured_image_caption ?: null,
+            'featured_image_alt' => $article->meta['featured_image_alt']
+                                        ?? $article->featuredPhoto?->alt_text
+                                        ?: null,
+            'og_image' => $article->meta['og_image'] ?? null,
         ];
 
         return array_filter($frontmatter, fn ($value): bool => $value !== null);

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\User;
@@ -74,7 +75,7 @@ it('builds correct frontmatter for a published article', function (): void {
             'meta_description' => 'Custom desc.',
         ],
     ]);
-    $article->load('user', 'category');
+    $article->load('user', 'category', 'featuredPhoto.media');
 
     $service = new ArticleExportService();
     $frontmatter = $service->buildFrontmatter($article);
@@ -85,17 +86,19 @@ it('builds correct frontmatter for a published article', function (): void {
         ->and($frontmatter['category'])->toBe('tech')
         ->and($frontmatter['past_slugs'])->toContain('old-slug')
         ->and($frontmatter['meta_title'])->toBe('Custom Title')
-        ->and($frontmatter['meta_description'])->toBe('Custom desc.');
+        ->and($frontmatter['meta_description'])->toBe('Custom desc.')
+        ->and($frontmatter)->toHaveKey('created_at');
 });
 
 it('marks draft articles as draft in frontmatter', function (): void {
     $article = Article::factory()->draft()->create(['slug' => 'draft-article']);
-    $article->load('user', 'category');
+    $article->load('user', 'category', 'featuredPhoto.media');
 
     $service = new ArticleExportService();
     $frontmatter = $service->buildFrontmatter($article);
 
-    expect($frontmatter['draft'])->toBeTrue();
+    expect($frontmatter['draft'])->toBeTrue()
+        ->and($frontmatter['draft'])->toBe($article->status === Status::Draft);
 });
 
 it('omits null frontmatter fields', function (): void {
@@ -104,7 +107,7 @@ it('omits null frontmatter fields', function (): void {
         'category_id' => null,
         'meta' => null,
     ]);
-    $article->load('user', 'category');
+    $article->load('user', 'category', 'featuredPhoto.media');
 
     $service = new ArticleExportService();
     $frontmatter = $service->buildFrontmatter($article);
@@ -112,7 +115,88 @@ it('omits null frontmatter fields', function (): void {
     expect($frontmatter)->not->toHaveKey('description')
         ->and($frontmatter)->not->toHaveKey('category')
         ->and($frontmatter)->not->toHaveKey('meta_title')
-        ->and($frontmatter)->not->toHaveKey('meta_description');
+        ->and($frontmatter)->not->toHaveKey('meta_description')
+        ->and($frontmatter)->not->toHaveKey('last_edited_at')
+        ->and($frontmatter)->not->toHaveKey('featured_image_url')
+        ->and($frontmatter)->not->toHaveKey('featured_image_alt');
+});
+
+it('exports last_edited_at when set and omits it when null', function (): void {
+    $articleWithEdit = Article::factory()->published()->create([
+        'last_edited_at' => now()->subDay(),
+    ]);
+    $articleWithEdit->load('user', 'category', 'featuredPhoto.media');
+
+    $articleNoEdit = Article::factory()->published()->create([
+        'last_edited_at' => null,
+    ]);
+    $articleNoEdit->load('user', 'category', 'featuredPhoto.media');
+
+    $service = new ArticleExportService();
+
+    expect($service->buildFrontmatter($articleWithEdit))->toHaveKey('last_edited_at')
+        ->and($service->buildFrontmatter($articleNoEdit))->not->toHaveKey('last_edited_at');
+});
+
+it('always exports created_at', function (): void {
+    $article = Article::factory()->published()->create();
+    $article->load('user', 'category', 'featuredPhoto.media');
+
+    $service = new ArticleExportService();
+    $frontmatter = $service->buildFrontmatter($article);
+
+    expect($frontmatter)->toHaveKey('created_at')
+        ->and($frontmatter['created_at'])->toBe($article->created_at->utc()->toIso8601String());
+});
+
+it('serializes empty past_slugs as a YAML list not an object', function (): void {
+    $article = Article::factory()->published()->create(['past_slugs' => []]);
+    $article->load('user', 'category', 'featuredPhoto.media');
+
+    $service = new ArticleExportService();
+    $frontmatter = $service->buildFrontmatter($article);
+
+    // past_slugs must be an indexed array so Yaml::dump renders it as [] not {}
+    expect(array_is_list($frontmatter['past_slugs']))->toBeTrue();
+});
+
+it('exports featured_image_url from meta when set directly', function (): void {
+    $article = Article::factory()->published()->create([
+        'meta' => ['featured_image_url' => 'https://example.com/image.jpg'],
+    ]);
+    $article->load('user', 'category', 'featuredPhoto.media');
+
+    $service = new ArticleExportService();
+    $frontmatter = $service->buildFrontmatter($article);
+
+    expect($frontmatter['featured_image_url'])->toBe('https://example.com/image.jpg');
+});
+
+it('does not use title as fallback for featured_image_alt', function (): void {
+    $article = Article::factory()->published()->create([
+        'title' => 'My Article Title',
+        'photo_id' => null,
+        'meta' => [],
+    ]);
+    $article->load('user', 'category', 'featuredPhoto.media');
+
+    $service = new ArticleExportService();
+    $frontmatter = $service->buildFrontmatter($article);
+
+    // featured_image_alt must not fall back to title — it should be absent entirely
+    expect($frontmatter)->not->toHaveKey('featured_image_alt');
+});
+
+it('exports featured_image_alt from meta when set', function (): void {
+    $article = Article::factory()->published()->create([
+        'meta' => ['featured_image_alt' => 'A descriptive alt text'],
+    ]);
+    $article->load('user', 'category', 'featuredPhoto.media');
+
+    $service = new ArticleExportService();
+    $frontmatter = $service->buildFrontmatter($article);
+
+    expect($frontmatter['featured_image_alt'])->toBe('A descriptive alt text');
 });
 
 it('streams articles as markdown files to a zip', function (): void {
@@ -121,7 +205,7 @@ it('streams articles as markdown files to a zip', function (): void {
         'slug' => 'hello-world',
         'content' => 'Some content.',
     ]);
-    $article->load('user', 'category');
+    $article->load('user', 'category', 'featuredPhoto.media');
 
     $captured = '';
     $stream = fopen('php://memory', 'r+');

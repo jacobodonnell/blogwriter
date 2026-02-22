@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Admin\AdminPhotoController;
 use App\Http\Controllers\Admin\AppearanceController;
 use App\Http\Controllers\Admin\ArticleController;
+use App\Http\Controllers\Admin\ArticleExportController;
 use App\Http\Controllers\Admin\ArticlePreviewController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CategoryExploreController;
@@ -76,7 +77,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function (): v
 
     // Export
     Route::get('/settings/export', [ExportController::class, 'index'])->name('settings.export');
-    Route::post('/export/articles', [ExportController::class, 'articles'])->name('export.articles');
+    Route::post('/export/articles', [ArticleExportController::class, 'store'])->name('export.articles');
 
     // Private media file serving
     Route::get('/media/{media}/{conversion?}', [MediaController::class, 'show'])->name('media.show');
