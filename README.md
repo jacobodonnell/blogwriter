@@ -2,7 +2,8 @@
 
 **Own your content. Own your domain.**
 
-BlogWriter is a personal blogging platform you install on your own server. No platform fees, no content policies you didn't write, no risk of your work disappearing because a company pivoted. Your words, your photos, your domain.
+BlogWriter is a personal blogging platform you install on your own server. No platform fees, no content policies you
+didn't write, no risk of your work disappearing because a company pivoted. Your words, your photos, your domain.
 
 ## Features
 
