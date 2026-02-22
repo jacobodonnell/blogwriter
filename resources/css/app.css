@@ -141,6 +141,14 @@ body {
     margin: 1.5rem 0;
 }
 .tiptap-editor .ProseMirror img { max-width: 100%; border-radius: 0.5rem; }
+.tiptap-editor .ProseMirror div[data-youtube-video] {
+    max-width: 100%;
+    aspect-ratio: 16 / 9;
+}
+.tiptap-editor .ProseMirror div[data-youtube-video] iframe {
+    width: 100%;
+    height: 100%;
+}
 
 /* Active toolbar button */
 .tiptap-toolbar .btn-active {
