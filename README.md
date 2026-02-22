@@ -22,12 +22,13 @@ BlogWriter is a personal blogging platform you install on your own server. No pl
 - Dashboard with content stats
 - Sortable, filterable articles table with column toggles and per-page pagination
 - Statamic-inspired live preview customizer with resizable split-pane editor and AJAX auto-save
+- Markdown export (ZIP) and import for round-tripping content
 
 **IndieWeb:**
 
 - Microformats2 markup: h-card, h-entry, h-feed
 - `rel="me"` links for identity verification (GitHub, Mastodon, Bluesky, Email)
-- RSS/Atom/JSON feeds and IndieAuth are planned
+- RSS 2.0, Atom 1.0, and JSON Feed 1.1 at `/feed`, `/atom`, and `/feed.json`
 
 **Infrastructure:**
 
@@ -86,9 +87,9 @@ Full documentation is in the [`docs/`](docs/) directory:
 
 BlogWriter is in pre-alpha.
 
-**Built:** Articles, Photos, Categories, Appearance (35 themes, 11 fonts), Admin panel, CLI Installer, Auth, MediaLibrary, Microformats (h-card, h-entry, h-feed, rel="me"), PWA
+**Built:** Articles, Photos, Categories, Appearance (35 themes, 11 fonts), Admin panel, CLI Installer, Auth, MediaLibrary, Microformats (h-card, h-entry, h-feed, rel="me"), RSS/Atom/JSON Feeds, Import & Export, PWA
 
-**Planned:** Notes, Tags, RSS/Atom/JSON feeds, IndieAuth, Webmentions
+**Planned:** Notes, Tags, Feed discovery `<link>` tags, IndieAuth, Webmentions
 
 **Future:** Monetization, podcasts, video, plugin marketplace, managed hosting
 
