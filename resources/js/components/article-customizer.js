@@ -22,6 +22,7 @@ export default function articleCustomizer(config) {
         showLinkDialog: false,
         linkUrl: '',
         showImageDialog: false,
+        editingImage: false,
         imageUrl: '',
         imageAlt: '',
         imageCaption: '',
@@ -224,12 +225,20 @@ export default function articleCustomizer(config) {
                 codeBlock: () => rawEditor.chain().focus().toggleCodeBlock().run(),
                 horizontalRule: () => rawEditor.chain().focus().setHorizontalRule().run(),
                 link: () => { this.linkUrl = ''; this.showLinkDialog = true; },
-                image: () => { this.resetImageDialog(); this.showImageDialog = true; },
+                image: () => {
+                    if (rawEditor.isActive('image')) {
+                        this.openEditImage();
+                    } else {
+                        this.resetImageDialog();
+                        this.showImageDialog = true;
+                    }
+                },
                 youtube: () => { this.youtubeUrl = ''; this.showYoutubeDialog = true; },
                 imageAlignLeft:   () => rawEditor.chain().focus().updateAttributes('image', { align: 'left' }).run(),
                 imageAlignCenter: () => rawEditor.chain().focus().updateAttributes('image', { align: 'center' }).run(),
                 imageAlignRight:  () => rawEditor.chain().focus().updateAttributes('image', { align: 'right' }).run(),
                 imageAlignFull:   () => rawEditor.chain().focus().updateAttributes('image', { align: 'full' }).run(),
+                imageReset:       () => rawEditor.chain().focus().updateAttributes('image', { align: null, width: null }).run(),
             };
             map[name]?.();
         },
@@ -244,15 +253,32 @@ export default function articleCustomizer(config) {
             this.showLinkDialog = false;
         },
 
+        openEditImage() {
+            if (!rawEditor || !rawEditor.isActive('image')) return;
+            const attrs = rawEditor.getAttributes('image');
+            this.imageUrl     = attrs.src     ?? '';
+            this.imageAlt     = attrs.alt     ?? '';
+            this.imageCaption = attrs.caption ?? '';
+            this.imageAlign   = attrs.align   ?? 'center';
+            this.editingImage = true;
+            this.showImageDialog = true;
+        },
+
         insertImage() {
             if (!this.imageUrl) return;
-            rawEditor.chain().focus().setImage({
-                src: this.imageUrl,
-                alt: this.imageAlt || undefined,
-                align: this.imageAlign || undefined,
+            const attrs = {
+                src:     this.imageUrl,
+                alt:     this.imageAlt     || undefined,
+                align:   this.imageAlign   || undefined,
                 caption: this.imageCaption || undefined,
-            }).run();
+            };
+            if (this.editingImage) {
+                rawEditor.chain().focus().updateAttributes('image', attrs).run();
+            } else {
+                rawEditor.chain().focus().setImage(attrs).run();
+            }
             this.showImageDialog = false;
+            this.editingImage = false;
             this.resetImageDialog();
         },
 
@@ -261,10 +287,11 @@ export default function articleCustomizer(config) {
         },
 
         resetImageDialog() {
-            this.imageUrl = '';
-            this.imageAlt = '';
+            this.imageUrl     = '';
+            this.imageAlt     = '';
             this.imageCaption = '';
-            this.imageAlign = 'center';
+            this.imageAlign   = 'center';
+            this.editingImage = false;
         },
 
         insertYoutube() {

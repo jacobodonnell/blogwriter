@@ -139,10 +139,10 @@
                             </button>
                         </div>
 
-                        {{-- Contextual image alignment toolbar (shows when image is selected) --}}
+                        {{-- Contextual image toolbar (shows when image is selected) --}}
                         <div x-show="isActive('image')" x-cloak
                              class="flex items-center gap-1 px-2 py-1 bg-base-200 border border-base-content/20 border-t-0 border-b-0">
-                            <span class="text-xs text-base-content/50 mr-1">Align:</span>
+                            <span class="text-xs text-base-content/50 mr-1">Image:</span>
                             <button type="button" @click="command('imageAlignLeft')"
                                     :class="isImageAlign('left') && 'btn-active'"
                                     class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Align Left">
@@ -163,6 +163,15 @@
                                     class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Full Width">
                                 <i class="ph ph-arrows-out-line-horizontal"></i>
                             </button>
+                            <div class="divider divider-horizontal mx-0"></div>
+                            <button type="button" @click="command('imageReset')"
+                                    class="btn btn-ghost btn-xs tooltip" data-tip="Reset (no alignment, natural width)">
+                                <i class="ph ph-arrow-counter-clockwise"></i>
+                            </button>
+                            <button type="button" @click="openEditImage()"
+                                    class="btn btn-ghost btn-xs tooltip" data-tip="Edit image">
+                                <i class="ph ph-pencil-simple"></i> Edit
+                            </button>
                         </div>
 
                         {{-- Tiptap editor mount point --}}
@@ -176,6 +185,9 @@
                             <button type="button" @click="showLinkDialog = false" class="btn btn-sm btn-ghost">Cancel</button>
                         </div>
                         <div x-show="showImageDialog" class="mt-2 p-3 border border-base-content/20 rounded-field bg-base-50 space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-medium" x-text="editingImage ? 'Edit Image' : 'Insert Image'"></span>
+                            </div>
                             <div class="flex gap-2 items-center">
                                 <input x-model="imageUrl" type="url" placeholder="Image URL (https://...)" class="input input-sm input-bordered flex-1" data-test="image-url-input" @keydown.enter.prevent="insertImage()">
                             </div>
@@ -204,8 +216,10 @@
                                     </button>
                                 </div>
                                 <div class="flex-1"></div>
-                                <button type="button" @click="insertImage()" class="btn btn-sm btn-primary" data-test="image-insert-btn">Insert</button>
-                                <button type="button" @click="showImageDialog = false" class="btn btn-sm btn-ghost">Cancel</button>
+                                <button type="button" @click="insertImage()" class="btn btn-sm btn-primary" data-test="image-insert-btn">
+                                    <span x-text="editingImage ? 'Update' : 'Insert'"></span>
+                                </button>
+                                <button type="button" @click="showImageDialog = false; editingImage = false" class="btn btn-sm btn-ghost">Cancel</button>
                             </div>
                         </div>
                         <div x-show="showYoutubeDialog" class="flex gap-2 mt-2 items-center">
