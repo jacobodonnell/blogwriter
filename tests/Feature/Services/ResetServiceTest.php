@@ -13,6 +13,11 @@ describe('ResetService', function (): void {
             unlink($lockPath);
         }
 
+        // Use a temp file instead of :memory: so touch()/unlink() don't
+        // create stray files in the project root
+        $this->tempDb = tempnam(sys_get_temp_dir(), 'bw_reset_test_');
+        config(['database.connections.sqlite.database' => $this->tempDb]);
+
         $this->command = Mockery::mock(Command::class);
         $this->command->shouldReceive('newLine')->atLeast()->once();
 
@@ -20,6 +25,12 @@ describe('ResetService', function (): void {
         DB::shouldReceive('disconnect')->andReturn(null);
         DB::shouldReceive('purge')->andReturn(null);
         DB::shouldReceive('reconnect')->andReturn(null);
+    });
+
+    afterEach(function (): void {
+        @unlink($this->tempDb);
+        @unlink($this->tempDb.'-wal');
+        @unlink($this->tempDb.'-shm');
     });
 
     it('removes installation lock file when it exists', function (): void {
