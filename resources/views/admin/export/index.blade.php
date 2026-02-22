@@ -1,6 +1,186 @@
 <x-settings-layout active="export">
     <div class="space-y-6">
 
+        {{-- Import Articles Card --}}
+        <div class="card bg-base-100 shadow"
+             x-data="{
+                state: 'idle',
+                token: null,
+                missing: [],
+                duplicateStrategy: 'skip',
+                fileInput: null,
+
+                async submitImport(event) {
+                    event.preventDefault();
+                    const form = event.target;
+                    const file = form.querySelector('input[type=file]').files[0];
+                    if (!file) return;
+
+                    this.state = 'uploading';
+                    const data = new FormData(form);
+
+                    try {
+                        const res = await fetch('{{ route('admin.import.articles') }}', {
+                            method: 'POST',
+                            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content },
+                            body: data,
+                        });
+                        const json = await res.json();
+
+                        if (json.status === 'preflight_warning') {
+                            this.missing = json.missing;
+                            this.token = json.token;
+                            this.state = 'warning';
+                        } else if (json.status === 'ok') {
+                            this.handleSuccess(json);
+                        } else {
+                            this.handleError(json.message ?? 'Import failed.');
+                        }
+                    } catch (e) {
+                        this.handleError('An unexpected error occurred.');
+                    }
+                },
+
+                async confirmImport() {
+                    this.state = 'uploading';
+
+                    try {
+                        const res = await fetch('{{ route('admin.import.articles.confirm') }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ token: this.token, duplicate_strategy: this.duplicateStrategy }),
+                        });
+                        const json = await res.json();
+
+                        if (json.status === 'ok') {
+                            this.handleSuccess(json);
+                        } else {
+                            this.handleError(json.message ?? 'Import failed.');
+                        }
+                    } catch (e) {
+                        this.handleError('An unexpected error occurred.');
+                    }
+                },
+
+                handleSuccess(json) {
+                    $dispatch('toast:show', {
+                        message: 'Imported ' + json.imported + ' article' + (json.imported !== 1 ? 's' : '') + '. Skipped ' + json.skipped + '.',
+                        type: 'success',
+                    });
+                    this.reset();
+                },
+
+                handleError(message) {
+                    $dispatch('toast:show', { message: message, type: 'error' });
+                    this.reset();
+                },
+
+                reset() {
+                    this.state = 'idle';
+                    this.token = null;
+                    this.missing = [];
+                    if (this.$refs.fileInput) {
+                        this.$refs.fileInput.value = '';
+                    }
+                },
+             }">
+            <div class="card-body">
+                <h2 class="card-title font-admin">
+                    <i class="ph ph-upload-simple text-xl"></i>
+                    Import Articles
+                </h2>
+                <p class="text-sm text-base-content/60 font-admin">
+                    Upload a BlogWriter ZIP export to import articles and categories.
+                    Articles with duplicate slugs will be skipped or overwritten based on your choice.
+                </p>
+
+                {{-- Idle / Upload form --}}
+                <form @submit="submitImport($event)" class="mt-4 space-y-4" x-show="state !== 'warning'">
+                    <div class="form-control">
+                        <input
+                            type="file"
+                            name="file"
+                            accept=".zip"
+                            x-ref="fileInput"
+                            class="file-input file-input-bordered w-full max-w-sm font-admin"
+                            :disabled="state === 'uploading'"
+                            data-test="import-file-input"
+                        >
+                    </div>
+
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend font-admin text-xs">Duplicate articles</legend>
+                        <label class="label gap-2 cursor-pointer justify-start font-admin text-sm">
+                            <input type="radio" name="duplicate_strategy" value="skip" class="radio radio-sm" x-model="duplicateStrategy">
+                            <span>Skip — keep existing articles unchanged</span>
+                        </label>
+                        <label class="label gap-2 cursor-pointer justify-start font-admin text-sm">
+                            <input type="radio" name="duplicate_strategy" value="overwrite" class="radio radio-sm" x-model="duplicateStrategy">
+                            <span>Overwrite — replace existing articles with imported data</span>
+                        </label>
+                    </fieldset>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary font-admin"
+                        :disabled="state === 'uploading'"
+                        data-test="import-articles-btn"
+                    >
+                        <span x-show="state !== 'uploading'">
+                            <i class="ph ph-upload-simple text-lg"></i>
+                            Import Articles
+                        </span>
+                        <span x-show="state === 'uploading'" x-cloak class="flex items-center gap-2">
+                            <span class="loading loading-spinner loading-sm"></span>
+                            Importing&hellip;
+                        </span>
+                    </button>
+                </form>
+
+                {{-- Preflight warning --}}
+                <div x-show="state === 'warning'" x-cloak class="mt-4 space-y-4">
+                    <div role="alert" class="alert alert-warning font-admin">
+                        <i class="ph ph-warning text-xl"></i>
+                        <div>
+                            <p class="font-semibold" x-text="missing.length + ' categor' + (missing.length === 1 ? 'y' : 'ies') + ' weren\'t found in BlogWriter.'"></p>
+                            <div class="flex flex-wrap gap-1 mt-2">
+                                <template x-for="slug in missing" :key="slug">
+                                    <span class="badge badge-warning font-mono text-xs" x-text="slug"></span>
+                                </template>
+                            </div>
+                            <p class="mt-2 text-sm">These articles will be imported with no category assigned.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button
+                            type="button"
+                            class="btn btn-primary font-admin"
+                            @click="confirmImport()"
+                            :disabled="state === 'uploading'"
+                        >
+                            <span x-show="state !== 'uploading'">Proceed with Import</span>
+                            <span x-show="state === 'uploading'" x-cloak class="flex items-center gap-2">
+                                <span class="loading loading-spinner loading-sm"></span>
+                                Importing&hellip;
+                            </span>
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-ghost font-admin"
+                            @click="reset()"
+                            :disabled="state === 'uploading'"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         {{-- Export Articles Card --}}
         <div class="card bg-base-100 shadow"
              x-data="{
@@ -13,7 +193,7 @@
             <div class="card-body">
                 <h2 class="card-title font-admin">
                     <i class="ph ph-file-text text-xl"></i>
-                    Articles
+                    Export Articles
                 </h2>
                 <p class="text-sm text-base-content/60 font-admin">
                     Export all {{ $articleCount }} {{ Str::plural('article', $articleCount) }} as Markdown files with YAML frontmatter.

@@ -29,6 +29,7 @@ final class ArticleExportController extends Controller
             );
 
             $exportService->streamToZip($zip, $articles);
+            $exportService->streamCategoriesToZip($zip);
 
             $zip->finish();
         }, $filename, [

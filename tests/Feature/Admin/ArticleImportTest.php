@@ -1,0 +1,321 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models\Article;
+use App\Models\Category;
+use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Symfony\Component\Yaml\Yaml;
+
+beforeEach(function (): void {
+    $this->user = User::factory()->create();
+    $this->actingAs($this->user);
+});
+
+afterEach(function (): void {
+    foreach (glob(storage_path('framework/testing/bw-import-*.zip')) as $file) {
+        @unlink($file);
+    }
+});
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Build an in-memory ZIP as an UploadedFile.
+ *
+ * @param  array<string, string>  $files  filename => contents
+ */
+function makeImportZip(array $files): UploadedFile
+{
+    $tmpPath = storage_path('framework/testing/bw-import-'.uniqid().'.zip');
+    $za = new ZipArchive();
+    $za->open($tmpPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+    // ZipArchive won't write a file if it's empty, so always include a placeholder
+    $za->addFromString('.keep', '');
+    foreach ($files as $name => $contents) {
+        $za->addFromString($name, $contents);
+    }
+    $za->close();
+
+    return new UploadedFile($tmpPath, 'import.zip', 'application/zip', null, true);
+}
+
+/**
+ * Build a Markdown article file string.
+ *
+ * @param  array<string, mixed>  $frontmatter
+ */
+function makeArticleMd(array $frontmatter, string $content = 'Hello world.'): string
+{
+    return "---\n".Yaml::dump($frontmatter, 2, 2)."---\n\n".$content;
+}
+
+// ---------------------------------------------------------------------------
+// Validation
+// ---------------------------------------------------------------------------
+
+it('rejects non-zip files with 422', function (): void {
+    $file = UploadedFile::fake()->create('import.txt', 10, 'text/plain');
+
+    $this->withHeaders(['Accept' => 'application/json'])
+        ->post(route('admin.import.articles'), [
+            'file' => $file,
+            'duplicate_strategy' => 'skip',
+        ])->assertStatus(422);
+});
+
+it('rejects missing duplicate_strategy with 422', function (): void {
+    $zip = makeImportZip([]);
+
+    $this->withHeaders(['Accept' => 'application/json'])
+        ->post(route('admin.import.articles'), [
+            'file' => $zip,
+        ])->assertStatus(422);
+});
+
+it('rejects invalid duplicate_strategy with 422', function (): void {
+    $zip = makeImportZip([]);
+
+    $this->withHeaders(['Accept' => 'application/json'])
+        ->post(route('admin.import.articles'), [
+            'file' => $zip,
+            'duplicate_strategy' => 'delete',
+        ])->assertStatus(422);
+});
+
+// ---------------------------------------------------------------------------
+// Basic import
+// ---------------------------------------------------------------------------
+
+it('imports articles from a valid zip', function (): void {
+    $md1 = makeArticleMd(['title' => 'First Article', 'slug' => 'first-article', 'draft' => false, 'date' => '2024-01-01T00:00:00+00:00']);
+    $md2 = makeArticleMd(['title' => 'Second Article', 'slug' => 'second-article', 'draft' => false, 'date' => '2024-01-02T00:00:00+00:00']);
+
+    $zip = makeImportZip([
+        'articles/first-article.md' => $md1,
+        'articles/second-article.md' => $md2,
+    ]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok', 'imported' => 2, 'skipped' => 0]);
+
+    expect(Article::query()->count())->toBe(2);
+});
+
+it('returns ok with zero imported for an empty zip', function (): void {
+    $zip = makeImportZip([]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok', 'imported' => 0, 'skipped' => 0]);
+});
+
+// ---------------------------------------------------------------------------
+// Duplicate strategies
+// ---------------------------------------------------------------------------
+
+it('skips duplicate slugs when strategy is skip', function (): void {
+    Article::factory()->create(['slug' => 'existing-article', 'title' => 'Original Title']);
+
+    $md = makeArticleMd(['title' => 'New Title', 'slug' => 'existing-article', 'draft' => false, 'date' => '2024-01-01T00:00:00+00:00']);
+    $fresh = makeArticleMd(['title' => 'Fresh Article', 'slug' => 'fresh-article', 'draft' => false, 'date' => '2024-01-01T00:00:00+00:00']);
+
+    $zip = makeImportZip([
+        'articles/existing-article.md' => $md,
+        'articles/fresh-article.md' => $fresh,
+    ]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok', 'imported' => 1, 'skipped' => 1]);
+
+    expect(Article::query()->where('slug', 'existing-article')->value('title'))->toBe('Original Title');
+});
+
+it('overwrites duplicate slugs when strategy is overwrite', function (): void {
+    Article::factory()->create(['slug' => 'my-article', 'title' => 'Old Title']);
+
+    $md = makeArticleMd(['title' => 'Updated Title', 'slug' => 'my-article', 'draft' => false, 'date' => '2024-01-01T00:00:00+00:00']);
+
+    $zip = makeImportZip(['articles/my-article.md' => $md]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'overwrite',
+    ])->assertJson(['status' => 'ok', 'imported' => 1, 'skipped' => 0]);
+
+    expect(Article::query()->where('slug', 'my-article')->value('title'))->toBe('Updated Title');
+});
+
+// ---------------------------------------------------------------------------
+// Category resolution
+// ---------------------------------------------------------------------------
+
+it('resolves category slug to category_id on import', function (): void {
+    $category = Category::factory()->create(['slug' => 'tech']);
+
+    $md = makeArticleMd([
+        'title' => 'Tech Article',
+        'slug' => 'tech-article',
+        'draft' => false,
+        'date' => '2024-01-01T00:00:00+00:00',
+        'category' => 'tech',
+    ]);
+
+    $zip = makeImportZip(['articles/tech-article.md' => $md]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok']);
+
+    $article = Article::query()->where('slug', 'tech-article')->first();
+    expect($article->category_id)->toBe($category->id);
+});
+
+it('returns preflight_warning when article references unknown category slug', function (): void {
+    $md = makeArticleMd([
+        'title' => 'Mystery Article',
+        'slug' => 'mystery-article',
+        'draft' => false,
+        'date' => '2024-01-01T00:00:00+00:00',
+        'category' => 'unknown-cat',
+    ]);
+
+    $zip = makeImportZip(['articles/mystery-article.md' => $md]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson([
+        'status' => 'preflight_warning',
+        'missing' => ['unknown-cat'],
+    ]);
+
+    // Nothing imported yet
+    expect(Article::query()->count())->toBe(0);
+});
+
+// ---------------------------------------------------------------------------
+// Confirm endpoint
+// ---------------------------------------------------------------------------
+
+it('confirm imports articles with category_id null for missing categories', function (): void {
+    $md = makeArticleMd([
+        'title' => 'No Category',
+        'slug' => 'no-category',
+        'draft' => false,
+        'date' => '2024-01-01T00:00:00+00:00',
+        'category' => 'unknown-cat',
+    ]);
+
+    $zip = makeImportZip(['articles/no-category.md' => $md]);
+
+    $warningResponse = $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'preflight_warning']);
+
+    $token = $warningResponse->json('token');
+
+    $this->post(route('admin.import.articles.confirm'), [
+        'token' => $token,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok', 'imported' => 1]);
+
+    $article = Article::query()->where('slug', 'no-category')->first();
+    expect($article->category_id)->toBeNull();
+});
+
+it('returns error for stale or missing session token on confirm', function (): void {
+    $this->post(route('admin.import.articles.confirm'), [
+        'token' => 'nonexistent-token',
+        'duplicate_strategy' => 'skip',
+    ])->assertStatus(422)
+        ->assertJson(['status' => 'error']);
+});
+
+// ---------------------------------------------------------------------------
+// categories.yaml import
+// ---------------------------------------------------------------------------
+
+it('creates categories from categories.yaml and imports articles without warning', function (): void {
+    $categoriesYaml = Yaml::dump([
+        ['id' => 1, 'name' => 'Technology', 'slug' => 'technology', 'description' => null, 'parent_slug' => null],
+    ], 2, 2);
+
+    $md = makeArticleMd([
+        'title' => 'Tech Post',
+        'slug' => 'tech-post',
+        'draft' => false,
+        'date' => '2024-01-01T00:00:00+00:00',
+        'category' => 'technology',
+    ]);
+
+    $zip = makeImportZip([
+        'categories.yaml' => $categoriesYaml,
+        'articles/tech-post.md' => $md,
+    ]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok', 'imported' => 1]);
+
+    expect(Category::query()->where('slug', 'technology')->exists())->toBeTrue();
+});
+
+it('fires preflight warning when categories.yaml present but article has extra unknown category', function (): void {
+    $categoriesYaml = Yaml::dump([
+        ['id' => 1, 'name' => 'Technology', 'slug' => 'technology', 'description' => null, 'parent_slug' => null],
+    ], 2, 2);
+
+    $md = makeArticleMd([
+        'title' => 'Mystery Post',
+        'slug' => 'mystery-post',
+        'draft' => false,
+        'date' => '2024-01-01T00:00:00+00:00',
+        'category' => 'extra-unknown',
+    ]);
+
+    $zip = makeImportZip([
+        'categories.yaml' => $categoriesYaml,
+        'articles/mystery-post.md' => $md,
+    ]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'preflight_warning', 'missing' => ['extra-unknown']]);
+});
+
+// ---------------------------------------------------------------------------
+// Field mapping
+// ---------------------------------------------------------------------------
+
+it('maps featured_image_url in frontmatter to meta.featured_image_url', function (): void {
+    $md = makeArticleMd([
+        'title' => 'Image Article',
+        'slug' => 'image-article',
+        'draft' => false,
+        'date' => '2024-01-01T00:00:00+00:00',
+        'featured_image_url' => 'https://cdn.example.com/hero.jpg',
+    ]);
+
+    $zip = makeImportZip(['articles/image-article.md' => $md]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok']);
+
+    $article = Article::query()->where('slug', 'image-article')->first();
+    expect($article->meta['featured_image_url'])->toBe('https://cdn.example.com/hero.jpg');
+});

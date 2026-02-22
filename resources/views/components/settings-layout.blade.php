@@ -7,7 +7,7 @@
             'profile' => 'Profile',
             'site' => 'Site',
             'appearance' => 'Appearance',
-            'export' => 'Export',
+            'export' => 'Import & Export',
         } }}</li>
     </x-slot:breadcrumb>
 
@@ -34,8 +34,8 @@
             </li>
             <li>
                 <a href="{{ route('admin.settings.export') }}" class="{{ $active === 'export' ? 'menu-active' : '' }}">
-                    <i class="ph ph-download-simple text-lg"></i>
-                    Export
+                    <i class="ph ph-arrows-left-right text-lg"></i>
+                    Import & Export
                 </a>
             </li>
         </ul>

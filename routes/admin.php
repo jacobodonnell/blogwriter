@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AdminPhotoController;
 use App\Http\Controllers\Admin\AppearanceController;
 use App\Http\Controllers\Admin\ArticleController;
 use App\Http\Controllers\Admin\ArticleExportController;
+use App\Http\Controllers\Admin\ArticleImportController;
 use App\Http\Controllers\Admin\ArticlePreviewController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CategoryExploreController;
@@ -78,6 +79,10 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function (): v
     // Export
     Route::get('/settings/export', [ExportController::class, 'index'])->name('settings.export');
     Route::post('/export/articles', [ArticleExportController::class, 'store'])->name('export.articles');
+
+    // Import
+    Route::post('/import/articles', [ArticleImportController::class, 'store'])->name('import.articles');
+    Route::post('/import/articles/confirm', [ArticleImportController::class, 'confirm'])->name('import.articles.confirm');
 
     // Private media file serving
     Route::get('/media/{media}/{conversion?}', [MediaController::class, 'show'])->name('media.show');

@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\User;
 use App\Services\ArticleExportService;
 use Illuminate\Database\Eloquent\Collection;
+use Symfony\Component\Yaml\Yaml;
 use ZipStream\ZipStream;
 
 beforeEach(function (): void {
@@ -197,6 +198,93 @@ it('exports featured_image_alt from meta when set', function (): void {
     $frontmatter = $service->buildFrontmatter($article);
 
     expect($frontmatter['featured_image_alt'])->toBe('A descriptive alt text');
+});
+
+it('omits featured_image_url when only a photo_id is set and no meta URL', function (): void {
+    $article = Article::factory()->published()->create([
+        'meta' => [],
+    ]);
+    $article->load('user', 'category', 'featuredPhoto.media');
+
+    $service = new ArticleExportService();
+    $frontmatter = $service->buildFrontmatter($article);
+
+    expect($frontmatter)->not->toHaveKey('featured_image_url');
+});
+
+it('includes featured_image_url from meta when explicitly set', function (): void {
+    $article = Article::factory()->published()->create([
+        'meta' => ['featured_image_url' => 'https://cdn.example.com/hero.jpg'],
+    ]);
+    $article->load('user', 'category', 'featuredPhoto.media');
+
+    $service = new ArticleExportService();
+    $frontmatter = $service->buildFrontmatter($article);
+
+    expect($frontmatter['featured_image_url'])->toBe('https://cdn.example.com/hero.jpg');
+});
+
+it('zip contains categories.yaml', function (): void {
+    Category::factory()->count(2)->create();
+
+    $stream = fopen('php://memory', 'r+');
+    $zip = new ZipStream(outputName: null, sendHttpHeaders: false, outputStream: $stream);
+
+    $service = new ArticleExportService();
+    $service->streamCategoriesToZip($zip);
+    $zip->finish();
+
+    rewind($stream);
+    $zipBytes = stream_get_contents($stream);
+    fclose($stream);
+
+    $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
+    file_put_contents($tmpFile, $zipBytes);
+
+    $za = new ZipArchive();
+    $za->open($tmpFile, ZipArchive::RDONLY);
+    $contents = $za->getFromName('categories.yaml');
+    $za->close();
+    unlink($tmpFile);
+
+    expect($contents)->not->toBeFalse();
+});
+
+it('categories.yaml lists categories with correct slug and name', function (): void {
+    $parent = Category::factory()->create(['name' => 'Technology', 'slug' => 'technology']);
+    $child = Category::factory()->withParent($parent)->create(['name' => 'PHP', 'slug' => 'php']);
+
+    $stream = fopen('php://memory', 'r+');
+    $zip = new ZipStream(outputName: null, sendHttpHeaders: false, outputStream: $stream);
+
+    $service = new ArticleExportService();
+    $service->streamCategoriesToZip($zip);
+    $zip->finish();
+
+    rewind($stream);
+    $zipBytes = stream_get_contents($stream);
+    fclose($stream);
+
+    $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
+    file_put_contents($tmpFile, $zipBytes);
+
+    $za = new ZipArchive();
+    $za->open($tmpFile, ZipArchive::RDONLY);
+    $yamlContent = $za->getFromName('categories.yaml');
+    $za->close();
+    unlink($tmpFile);
+
+    $data = Yaml::parse($yamlContent);
+
+    $parentEntry = collect($data)->firstWhere('slug', 'technology');
+    $childEntry = collect($data)->firstWhere('slug', 'php');
+
+    expect($parentEntry)->not->toBeNull()
+        ->and($parentEntry['name'])->toBe('Technology')
+        ->and($parentEntry['parent_slug'])->toBeNull()
+        ->and($childEntry)->not->toBeNull()
+        ->and($childEntry['name'])->toBe('PHP')
+        ->and($childEntry['parent_slug'])->toBe('technology');
 });
 
 it('streams articles as markdown files to a zip', function (): void {

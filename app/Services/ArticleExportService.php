@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Enums\Status;
 use App\Models\Article;
+use App\Models\Category;
 use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\Yaml\Yaml;
 use ZipStream\ZipStream;
@@ -29,6 +30,24 @@ final class ArticleExportService
     }
 
     /**
+     * Stream all categories as a YAML file into the given ZipStream.
+     */
+    public function streamCategoriesToZip(ZipStream $zip): void
+    {
+        $categories = Category::query()->with('parent')->orderBy('id')->get();
+
+        $data = $categories->map(fn (Category $category): array => [
+            'id' => $category->id,
+            'name' => $category->name,
+            'slug' => $category->slug,
+            'description' => $category->description,
+            'parent_slug' => $category->parent?->slug,
+        ])->values()->all();
+
+        $zip->addFile('categories.yaml', Yaml::dump($data, 2, 2));
+    }
+
+    /**
      * Build the YAML frontmatter array for an article.
      *
      * @return array<string, mixed>
@@ -49,7 +68,7 @@ final class ArticleExportService
             'past_slugs' => array_values($article->past_slugs ?? []),
             'meta_title' => $article->meta['meta_title'] ?? null,
             'meta_description' => $article->meta['meta_description'] ?? null,
-            'featured_image_url' => $article->featured_image_url ?: null,
+            'featured_image_url' => $article->meta['featured_image_url'] ?? null,
             'featured_image_caption' => $article->featured_image_caption ?: null,
             'featured_image_alt' => $article->meta['featured_image_alt']
                                         ?? $article->featuredPhoto?->alt_text
