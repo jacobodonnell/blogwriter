@@ -2,7 +2,14 @@
     <div class="space-y-6">
 
         {{-- Export Articles Card --}}
-        <div class="card bg-base-100 shadow" x-data="{ exporting: false }">
+        <div class="card bg-base-100 shadow"
+             x-data="{
+                exporting: false,
+                startExport() {
+                    this.exporting = true;
+                    setTimeout(() => { this.exporting = false; }, 1500);
+                }
+             }">
             <div class="card-body">
                 <h2 class="card-title font-admin">
                     <i class="ph ph-file-text text-xl"></i>
@@ -13,7 +20,7 @@
                     Each article is saved as <code class="font-mono text-xs bg-base-200 px-1 py-0.5 rounded">{slug}.md</code>.
                 </p>
 
-                <form method="POST" action="{{ route('admin.export.articles') }}" @submit="exporting = true" class="mt-4">
+                <form method="POST" action="{{ route('admin.export.articles') }}" @submit="startExport()" class="mt-4">
                     @csrf
                     <button
                         type="submit"

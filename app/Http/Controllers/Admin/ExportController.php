@@ -34,6 +34,7 @@ final class ExportController extends Controller
             $zip = new ZipStream(
                 outputName: null,
                 sendHttpHeaders: false,
+                defaultEnableZeroHeader: false,
             );
 
             $exportService->streamToZip($zip, $articles);
