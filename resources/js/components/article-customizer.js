@@ -239,11 +239,11 @@ export default function articleCustomizer(config) {
                     }
                 },
                 youtube: () => { this.youtubeUrl = ''; this.showYoutubeDialog = true; },
-                imageAlignLeft:   () => rawEditor.chain().focus().updateAttributes('image', { align: 'left' }).run(),
-                imageAlignCenter: () => rawEditor.chain().focus().updateAttributes('image', { align: 'center' }).run(),
-                imageAlignRight:  () => rawEditor.chain().focus().updateAttributes('image', { align: 'right' }).run(),
-                imageAlignFull:   () => rawEditor.chain().focus().updateAttributes('image', { align: 'full' }).run(),
-                imageReset:       () => rawEditor.chain().focus().updateAttributes('image', { align: null, width: null }).run(),
+                imageAlignLeft:   () => this.replaceImageNode({ align: 'left' }),
+                imageAlignCenter: () => this.replaceImageNode({ align: 'center' }),
+                imageAlignRight:  () => this.replaceImageNode({ align: 'right' }),
+                imageAlignFull:   () => this.replaceImageNode({ align: 'full' }),
+                imageReset:       () => this.replaceImageNode({ align: null, width: null }),
             };
             map[name]?.();
         },
@@ -280,13 +280,20 @@ export default function articleCustomizer(config) {
                 caption: this.imageCaption || undefined,
             };
             if (this.editingImage) {
-                rawEditor.chain().focus().updateAttributes('image', attrs).run();
+                this.replaceImageNode(attrs);
             } else {
                 rawEditor.chain().focus().setImage(attrs).run();
             }
             this.showImageDialog = false;
             this.editingImage = false;
             this.resetImageDialog();
+        },
+
+        replaceImageNode(newAttrs) {
+            const current = rawEditor.getAttributes('image');
+            const merged  = { ...current, ...newAttrs };
+            Object.keys(merged).forEach(k => { if (merged[k] == null) { delete merged[k]; } });
+            rawEditor.chain().focus().deleteSelection().setImage(merged).run();
         },
 
         isImageAlign(align) {
