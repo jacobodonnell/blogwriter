@@ -126,8 +126,12 @@ export default function articleCustomizer(config) {
                                     nodeView.handleResize = (deltaX, deltaY) => {
                                         originalHandleResize(deltaX, deltaY);
                                         nodeView.element.style.height = 'auto';
-                                        // Expand wrapper to match image's new pixel width so it can grow beyond its % width
-                                        nodeView.wrapper.style.width = `${nodeView.element.style.width}`;
+                                        // Sync wrapper width but clamp to container so it never overflows
+                                        const maxWidth = nodeView.container.offsetWidth;
+                                        const raw = parseInt(nodeView.element.style.width, 10);
+                                        const clamped = Math.min(raw, maxWidth);
+                                        nodeView.wrapper.style.width = `${clamped}px`;
+                                        nodeView.element.style.width = `${clamped}px`;
                                     };
 
                                     nodeView.onCommit = (finalWidth) => {

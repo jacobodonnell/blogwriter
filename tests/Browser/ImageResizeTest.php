@@ -127,6 +127,47 @@ it('image width renders in server-side preview HTML', function (): void {
     expect($hasWidthStyle)->toBeTrue();
 })->group('slow');
 
+it('image cannot be resized beyond editor container width', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'content' => '![|width:80%](https://placehold.co/600x400)',
+    ]);
+
+    $page = loginAndNavigate('/admin/articles/'.$article->id.'/edit');
+
+    $page->wait(3)
+        ->assertNoJavaScriptErrors();
+
+    // Click image to select it and reveal handles
+    $page->click('[data-resize-wrapper] img')
+        ->wait(0.5);
+
+    // Simulate drag on right handle: mousedown, mousemove +500px outward, mouseup
+    $page->script("(() => {
+        const handle = document.querySelector('[data-resize-handle=\"right\"]');
+        if (!handle) return 'no-handle';
+        const rect = handle.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        handle.dispatchEvent(new MouseEvent('mousedown', { clientX: x, clientY: y, bubbles: true }));
+        document.dispatchEvent(new MouseEvent('mousemove', { clientX: x + 500, clientY: y, bubbles: true }));
+        document.dispatchEvent(new MouseEvent('mouseup', { clientX: x + 500, clientY: y, bubbles: true }));
+    })()");
+
+    $page->wait(1);
+
+    $value = $page->value('input[name="content"]');
+
+    // Should either have no width token (full width, >=98%) or a percentage <= 100
+    if (str_contains($value, 'width:')) {
+        preg_match('/width:(\d+)%/', $value, $matches);
+        expect($matches)->not->toBeEmpty();
+        expect((int) $matches[1])->toBeLessThanOrEqual(100);
+    } else {
+        // No width token means full-width — that's correct
+        expect($value)->toContain('![](https://placehold.co/600x400');
+    }
+})->group('slow');
+
 it('image can be resized larger by dragging handle outward', function (): void {
     $article = Article::factory()->draft()->for($this->user)->create([
         'content' => '![|width:30%](https://placehold.co/600x400)',
