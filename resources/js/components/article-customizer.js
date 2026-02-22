@@ -1,4 +1,12 @@
+import { Editor, mergeAttributes } from '@tiptap/core';
+import StarterKit from '@tiptap/starter-kit';
+import Image from '@tiptap/extension-image';
+import Youtube from '@tiptap/extension-youtube';
+import { Markdown } from '@tiptap/markdown';
+
 export default function articleCustomizer(config) {
+    let rawEditor = null;
+
     return {
         title: config.title,
         slug: config.slug,
@@ -11,7 +19,16 @@ export default function articleCustomizer(config) {
         showUrlField: config.showUrlField,
         featuredImageCaption: config.featuredImageCaption,
         usePhotoCaption: config.usePhotoCaption,
-        easyMDE: null,
+        showLinkDialog: false,
+        linkUrl: '',
+        showImageDialog: false,
+        editingImage: false,
+        imageUrl: '',
+        imageAlt: '',
+        imageCaption: '',
+        imageAlign: 'center',
+        showYoutubeDialog: false,
+        youtubeUrl: '',
         initialStatus: config.initialStatus,
         currentStatus: config.currentStatus,
         wasEverPublished: config.wasEverPublished,
@@ -19,6 +36,7 @@ export default function articleCustomizer(config) {
         contentError: false,
         editorReady: false,
         hasNewPhoto: false,
+        updatedAt: 0,
 
         get isPlaceholderSlug() {
             return /^untitled-[a-z0-9]{8}$/.test(this.slug);
@@ -70,33 +88,140 @@ export default function articleCustomizer(config) {
 
         init() {
             this.$nextTick(() => {
-                const ta = document.getElementById('content-editor');
-                if (!ta) return;
+                const el = document.getElementById('content-editor');
+                if (!el) return;
 
-                this.easyMDE = new EasyMDE({
-                    element: ta,
-                    forceSync: true,
-                    spellChecker: false,
-                    status: false,
-                    placeholder: '## Write your article here...',
-                    toolbar: [
-                        'bold', 'italic', 'heading-2', 'heading-3', '|',
-                        'quote', 'unordered-list', 'ordered-list', '|',
-                        'link', 'image', 'code', 'horizontal-rule', '|',
-                        'guide'
+                rawEditor = new Editor({
+                    element: el,
+                    extensions: [
+                        StarterKit.configure({
+                            heading: { levels: [2, 3, 4, 5] },
+                            codeBlock: { languageClassPrefix: 'language-' },
+                            link: { openOnClick: false },
+                        }),
+                        Image.configure({
+                            resize: {
+                                enabled: true,
+                                directions: ['left', 'right'],
+                                minWidth: 60,
+                                alwaysPreserveAspectRatio: true,
+                            },
+                        }).extend({
+                            addAttributes() {
+                                return {
+                                    ...this.parent?.(),
+                                    align: { default: null },
+                                    caption: { default: null },
+                                };
+                            },
+
+                            addNodeView() {
+                                const parentFactory = this.parent?.();
+                                if (!parentFactory) return null;
+                                return (props) => {
+                                    const nodeView = parentFactory(props);
+                                    const syncAttrs = (attrs) => {
+                                        const el = nodeView.element;
+                                        if (attrs.src && el.src !== attrs.src) el.src = attrs.src;
+                                        el.alt = attrs.alt ?? '';
+                                        nodeView.container.className = attrs.align ? `img-align-${attrs.align}` : '';
+                                        if (attrs.width) {
+                                            el.style.width = `${attrs.width}px`;
+                                        } else {
+                                            el.style.removeProperty('width');
+                                        }
+                                    };
+                                    syncAttrs(props.node.attrs);
+                                    const originalUpdate = nodeView.update.bind(nodeView);
+                                    nodeView.update = (updatedNode, decorations, innerDecorations) => {
+                                        const result = originalUpdate(updatedNode, decorations, innerDecorations);
+                                        if (result === false) return false;
+                                        syncAttrs(updatedNode.attrs);
+                                        return result;
+                                    };
+                                    return nodeView;
+                                };
+                            },
+
+                            renderMarkdown(node) {
+                                const { src = '', alt = '', title, align, width, caption } = node.attrs ?? {};
+                                const parts = [alt];
+                                if (align) parts.push(`align:${align}`);
+                                if (width) parts.push(`width:${width}`);
+                                if (caption) parts.push(`caption:${encodeURIComponent(caption)}`);
+                                const altStr = parts.join('|');
+                                return title ? `![${altStr}](${src} "${title}")` : `![${altStr}](${src})`;
+                            },
+
+                            parseMarkdown(token, h) {
+                                const parts = (token.text ?? '').split('|');
+                                const alt = parts[0] ?? '';
+                                const attrs = { src: token.href, alt, title: token.title ?? null };
+                                for (const part of parts.slice(1)) {
+                                    const colonIdx = part.indexOf(':');
+                                    if (colonIdx === -1) continue;
+                                    const key = part.slice(0, colonIdx).trim();
+                                    const value = part.slice(colonIdx + 1).trim();
+                                    if (key === 'align') attrs.align = value;
+                                    if (key === 'width') attrs.width = parseInt(value, 10) || null;
+                                    if (key === 'caption') attrs.caption = decodeURIComponent(value);
+                                }
+                                return h.createNode('image', attrs, []);
+                            },
+
+                            renderHTML({ HTMLAttributes }) {
+                                const { align, caption, width, ...rest } = HTMLAttributes;
+                                const cls = align ? `img-align-${align}` : null;
+                                const imgAttrs = mergeAttributes(rest, {
+                                    style: width ? `width:${width}px;max-width:100%` : null,
+                                });
+                                if (caption) {
+                                    return ['figure', { class: cls }, ['img', imgAttrs], ['figcaption', {}, caption]];
+                                }
+                                if (cls) {
+                                    return ['div', { class: cls }, ['img', imgAttrs]];
+                                }
+                                return ['img', imgAttrs];
+                            },
+                        }),
+                        Youtube.configure({ controls: true }).extend({
+                            renderMarkdown: (node) => {
+                                return `@[youtube](${node.attrs?.src || ''})`;
+                            },
+                            markdownTokenizer: {
+                                name: 'youtube',
+                                level: 'block',
+                                start(src) {
+                                    return src.search(/^@\[youtube\]/m);
+                                },
+                                tokenize(src) {
+                                    const match = src.match(/^@\[youtube\]\(([^)]+)\)(?:\n|$)/);
+                                    if (!match) return undefined;
+                                    return { type: 'youtube', raw: match[0], attributes: { src: match[1] } };
+                                },
+                            },
+                            parseMarkdown: (token, h) => {
+                                return h.createNode('youtube', { src: token.attributes?.src }, []);
+                            },
+                        }),
+                        Markdown.configure({ html: false, transformPastedText: true }),
                     ],
-                    initialValue: this.content,
+                    content: this.content || '',
+                    contentType: 'markdown',
+                    onUpdate: ({ editor }) => {
+                        this.updatedAt = Date.now();
+                        this.content = editor.getMarkdown();
+                        this.contentError = false;
+                        document.getElementById('customizer-form').dispatchEvent(
+                            new Event('input', { bubbles: true })
+                        );
+                    },
+                    onSelectionUpdate: () => {
+                        this.updatedAt = Date.now();
+                    },
                 });
 
                 this.editorReady = true;
-
-                this.easyMDE.codemirror.on('change', () => {
-                    this.content = this.easyMDE.value();
-                    this.contentError = false;
-                    document.getElementById('customizer-form').dispatchEvent(
-                        new Event('input', { bubbles: true })
-                    );
-                });
             });
 
             const store = Alpine.store('saveButton');
@@ -117,6 +242,104 @@ export default function articleCustomizer(config) {
                 if (this.buttonAction === 'unpublish') { document.getElementById('unpublish-modal').showModal(); return; }
                 this.submitFullSave();
             });
+        },
+
+        command(name) {
+            if (!rawEditor) return;
+            const map = {
+                bold: () => rawEditor.chain().focus().toggleBold().run(),
+                italic: () => rawEditor.chain().focus().toggleItalic().run(),
+                h2: () => rawEditor.chain().focus().toggleHeading({ level: 2 }).run(),
+                h3: () => rawEditor.chain().focus().toggleHeading({ level: 3 }).run(),
+                h4: () => rawEditor.chain().focus().toggleHeading({ level: 4 }).run(),
+                h5: () => rawEditor.chain().focus().toggleHeading({ level: 5 }).run(),
+                blockquote: () => rawEditor.chain().focus().toggleBlockquote().run(),
+                bulletList: () => rawEditor.chain().focus().toggleBulletList().run(),
+                orderedList: () => rawEditor.chain().focus().toggleOrderedList().run(),
+                code: () => rawEditor.chain().focus().toggleCode().run(),
+                codeBlock: () => rawEditor.chain().focus().toggleCodeBlock().run(),
+                horizontalRule: () => rawEditor.chain().focus().setHorizontalRule().run(),
+                link: () => { this.linkUrl = ''; this.showLinkDialog = true; },
+                image: () => {
+                    if (rawEditor.isActive('image')) {
+                        this.openEditImage();
+                    } else {
+                        this.resetImageDialog();
+                        this.showImageDialog = true;
+                    }
+                },
+                youtube: () => { this.youtubeUrl = ''; this.showYoutubeDialog = true; },
+                imageAlignLeft:   () => rawEditor.chain().focus().updateAttributes('image', { align: 'left' }).run(),
+                imageAlignCenter: () => rawEditor.chain().focus().updateAttributes('image', { align: 'center' }).run(),
+                imageAlignRight:  () => rawEditor.chain().focus().updateAttributes('image', { align: 'right' }).run(),
+                imageFullWidth:   () => rawEditor.chain().focus().updateAttributes('image', { align: 'full', width: null }).run(),
+            };
+            map[name]?.();
+        },
+
+        isActive(name, attrs = {}) {
+            // Reading updatedAt makes Alpine re-evaluate this whenever selection or content changes.
+            void this.updatedAt;
+            return rawEditor?.isActive(name, attrs) ?? false;
+        },
+
+        insertLink() {
+            if (!this.linkUrl) return;
+            rawEditor.chain().focus().setLink({ href: this.linkUrl }).run();
+            this.showLinkDialog = false;
+        },
+
+        openEditImage() {
+            if (!rawEditor || !rawEditor.isActive('image')) return;
+            const attrs = rawEditor.getAttributes('image');
+            this.imageUrl     = attrs.src     ?? '';
+            this.imageAlt     = attrs.alt     ?? '';
+            this.imageCaption = attrs.caption ?? '';
+            this.imageAlign   = attrs.align   ?? 'center';
+            this.editingImage = true;
+            this.showImageDialog = true;
+        },
+
+        insertImage() {
+            if (!this.imageUrl) return;
+            const attrs = {
+                src:     this.imageUrl,
+                alt:     this.imageAlt     || undefined,
+                align:   this.imageAlign   || undefined,
+                caption: this.imageCaption || undefined,
+            };
+            if (this.editingImage) {
+                rawEditor.chain().focus().updateAttributes('image', attrs).run();
+            } else {
+                rawEditor.chain().focus().setImage(attrs).run();
+            }
+            this.showImageDialog = false;
+            this.editingImage = false;
+            this.resetImageDialog();
+        },
+
+        isImageAlign(align) {
+            void this.updatedAt;
+            return rawEditor?.getAttributes('image')?.align === align;
+        },
+
+        resetImageDialog() {
+            this.imageUrl     = '';
+            this.imageAlt     = '';
+            this.imageCaption = '';
+            this.imageAlign   = 'center';
+            this.editingImage = false;
+        },
+
+        insertYoutube() {
+            if (!this.youtubeUrl) return;
+            rawEditor.chain().focus().setYoutubeVideo({ src: this.youtubeUrl }).run();
+            this.showYoutubeDialog = false;
+        },
+
+        destroy() {
+            rawEditor?.destroy();
+            rawEditor = null;
         },
 
         attachPhoto() {
@@ -140,17 +363,15 @@ export default function articleCustomizer(config) {
         },
 
         submitFullSave() {
-            if (this.easyMDE) {
-                this.content = this.easyMDE.value();
+            if (rawEditor) {
+                this.content = rawEditor.getMarkdown();
             }
             if (!this.content || !this.content.trim()) {
                 this.contentError = true;
-                if (this.easyMDE) {
-                    this.easyMDE.codemirror.focus();
-                }
+                rawEditor?.commands.focus();
                 return;
             }
-            let form = document.getElementById('customizer-form');
+            const form = document.getElementById('customizer-form');
             form.removeAttribute('x-target');
             form.action = config.saveRoute;
             form.submit();

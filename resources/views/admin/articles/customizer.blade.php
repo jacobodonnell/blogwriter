@@ -72,19 +72,159 @@
 
                 {{-- Content --}}
                 <fieldset class="fieldset">
-                    <legend class="fieldset-legend">Content (Markdown)</legend>
+                    <legend class="fieldset-legend">Content</legend>
 
-                    {{-- Skeleton placeholder while EasyMDE initializes --}}
+                    {{-- Hidden field for form submission --}}
+                    <input type="hidden" name="content" :value="content">
+
+                    {{-- Skeleton placeholder while Tiptap initializes --}}
                     <div x-show="!editorReady" x-transition:leave x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="space-y-2">
                         <div class="skeleton h-10 w-full rounded"></div>
                         <div class="skeleton h-64 w-full rounded"></div>
                     </div>
 
                     <div :class="!editorReady && 'h-0 overflow-hidden'">
-                        <textarea id="content-editor" name="content" x-model="content"
-                                  class="textarea textarea-bordered w-full h-64 font-mono text-sm @error('content') textarea-error @enderror"
-                                  placeholder="## Write your article here...">{{ old('content', $article->content) }}</textarea>
+                        {{-- Tiptap toolbar --}}
+                        <div class="tiptap-toolbar flex flex-wrap items-center gap-1 p-2 bg-base-200 border border-base-content/20 border-b-0 rounded-t-field">
+                            <button type="button" @click="command('bold')" :class="isActive('bold') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Bold" data-test="toolbar-bold">
+                                <i class="ph ph-text-b"></i>
+                            </button>
+                            <button type="button" @click="command('italic')" :class="isActive('italic') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Italic" data-test="toolbar-italic">
+                                <i class="ph ph-text-italic"></i>
+                            </button>
+                            <div class="divider divider-horizontal mx-0"></div>
+                            <button type="button" @click="command('h2')" :class="isActive('heading', {level:2}) && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Heading 2" data-test="toolbar-h2">H2</button>
+                            <button type="button" @click="command('h3')" :class="isActive('heading', {level:3}) && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Heading 3">H3</button>
+                            <button type="button" @click="command('h4')" :class="isActive('heading', {level:4}) && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Heading 4">H4</button>
+                            <button type="button" @click="command('h5')" :class="isActive('heading', {level:5}) && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Heading 5">H5</button>
+                            <div class="divider divider-horizontal mx-0"></div>
+                            <button type="button" @click="command('blockquote')" :class="isActive('blockquote') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Blockquote" data-test="toolbar-blockquote">
+                                <i class="ph ph-quotes"></i>
+                            </button>
+                            <button type="button" @click="command('bulletList')" :class="isActive('bulletList') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Bullet List" data-test="toolbar-bullet-list">
+                                <i class="ph ph-list-bullets"></i>
+                            </button>
+                            <button type="button" @click="command('orderedList')" :class="isActive('orderedList') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Ordered List" data-test="toolbar-ordered-list">
+                                <i class="ph ph-list-numbers"></i>
+                            </button>
+                            <div class="divider divider-horizontal mx-0"></div>
+                            <button type="button" @click="command('link')"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Link">
+                                <i class="ph ph-link"></i>
+                            </button>
+                            <button type="button" @click="command('image')"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Image">
+                                <i class="ph ph-image"></i>
+                            </button>
+                            <button type="button" @click="command('code')" :class="isActive('code') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Inline Code">
+                                <i class="ph ph-code"></i>
+                            </button>
+                            <button type="button" @click="command('horizontalRule')"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Horizontal Rule">
+                                <i class="ph ph-minus"></i>
+                            </button>
+                            <button type="button" @click="command('youtube')"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Embed Video" data-test="toolbar-youtube">
+                                <i class="ph ph-youtube-logo"></i>
+                            </button>
+                        </div>
+
+                        {{-- Contextual image toolbar (shows when image is selected) --}}
+                        <div x-show="isActive('image')" x-cloak
+                             class="flex items-center gap-1 px-2 py-1 bg-base-200 border border-base-content/20 border-t-0 border-b-0">
+                            <span class="text-xs text-base-content/50 mr-1">Image:</span>
+                            <button type="button" @click="command('imageAlignLeft')"
+                                    :class="isImageAlign('left') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Align Left">
+                                <i class="ph ph-text-align-left"></i>
+                            </button>
+                            <button type="button" @click="command('imageAlignCenter')"
+                                    :class="isImageAlign('center') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Align Center">
+                                <i class="ph ph-text-align-center"></i>
+                            </button>
+                            <button type="button" @click="command('imageAlignRight')"
+                                    :class="isImageAlign('right') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Align Right">
+                                <i class="ph ph-text-align-right"></i>
+                            </button>
+                            <button type="button" @click="command('imageFullWidth')"
+                                    :class="isImageAlign('full') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Full Width">
+                                <i class="ph ph-arrows-out-line-horizontal"></i>
+                            </button>
+                            <div class="divider divider-horizontal mx-0"></div>
+                            <button type="button" @click="openEditImage()"
+                                    class="btn btn-ghost btn-xs tooltip" data-tip="Edit image">
+                                <i class="ph ph-pencil-simple"></i> Edit
+                            </button>
+                        </div>
+
+                        {{-- Tiptap editor mount point --}}
+                        <div id="content-editor" data-test="content-editor"
+                             class="tiptap-editor @error('content') ring-2 ring-error @enderror border border-base-content/20 rounded-b-field bg-base-100 min-h-64 h-96 max-h-[80vh] overflow-y-auto resize-y focus-within:outline-2 focus-within:outline-primary/20"></div>
+
+                        {{-- Inline dialogs for link / image / youtube --}}
+                        <div x-show="showLinkDialog" class="flex gap-2 mt-2 items-center">
+                            <input x-model="linkUrl" type="url" placeholder="https://..." class="input input-sm input-bordered flex-1" data-test="link-url-input" @keydown.enter.prevent="insertLink()">
+                            <button type="button" @click="insertLink()" class="btn btn-sm btn-primary" data-test="link-insert-btn">Insert</button>
+                            <button type="button" @click="showLinkDialog = false" class="btn btn-sm btn-ghost">Cancel</button>
+                        </div>
+                        <div x-show="showImageDialog" class="mt-2 p-3 border border-base-content/20 rounded-field bg-base-50 space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-medium" x-text="editingImage ? 'Edit Image' : 'Insert Image'"></span>
+                            </div>
+                            <div class="flex gap-2 items-center">
+                                <input x-model="imageUrl" type="url" placeholder="Image URL (https://...)" class="input input-sm input-bordered flex-1" data-test="image-url-input" @keydown.enter.prevent="insertImage()">
+                            </div>
+                            <div class="flex gap-2">
+                                <input x-model="imageAlt" type="text" placeholder="Alt text" class="input input-sm input-bordered flex-1" data-test="image-alt-input">
+                                <input x-model="imageCaption" type="text" placeholder="Caption (optional)" class="input input-sm input-bordered flex-1" data-test="image-caption-input">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-base-content/60">Alignment:</span>
+                                <div class="join">
+                                    <button type="button" @click="imageAlign = 'left'" :class="imageAlign === 'left' && 'btn-active'"
+                                            class="btn btn-ghost btn-xs join-item tooltip" data-tip="Left">
+                                        <i class="ph ph-text-align-left"></i>
+                                    </button>
+                                    <button type="button" @click="imageAlign = 'center'" :class="imageAlign === 'center' && 'btn-active'"
+                                            class="btn btn-ghost btn-xs join-item tooltip" data-tip="Center">
+                                        <i class="ph ph-text-align-center"></i>
+                                    </button>
+                                    <button type="button" @click="imageAlign = 'right'" :class="imageAlign === 'right' && 'btn-active'"
+                                            class="btn btn-ghost btn-xs join-item tooltip" data-tip="Right">
+                                        <i class="ph ph-text-align-right"></i>
+                                    </button>
+                                    <button type="button" @click="imageAlign = 'full'" :class="imageAlign === 'full' && 'btn-active'"
+                                            class="btn btn-ghost btn-xs join-item tooltip" data-tip="Full Width">
+                                        <i class="ph ph-arrows-out-line-horizontal"></i>
+                                    </button>
+                                </div>
+                                <div class="flex-1"></div>
+                                <button type="button" @click="insertImage()" class="btn btn-sm btn-primary" data-test="image-insert-btn">
+                                    <span x-text="editingImage ? 'Update' : 'Insert'"></span>
+                                </button>
+                                <button type="button" @click="showImageDialog = false; editingImage = false" class="btn btn-sm btn-ghost">Cancel</button>
+                            </div>
+                        </div>
+                        <div x-show="showYoutubeDialog" class="flex gap-2 mt-2 items-center">
+                            <input x-model="youtubeUrl" type="url" placeholder="YouTube URL..." class="input input-sm input-bordered flex-1" data-test="youtube-url-input" @keydown.enter.prevent="insertYoutube()">
+                            <button type="button" @click="insertYoutube()" class="btn btn-sm btn-primary" data-test="youtube-embed-btn">Embed</button>
+                            <button type="button" @click="showYoutubeDialog = false" class="btn btn-sm btn-ghost">Cancel</button>
+                        </div>
                     </div>
+
                     @error('content')
                     <div role="alert" class="alert alert-error mt-2" x-data="{ show: true }" x-show="show"
                          x-init="setTimeout(() => show = false, 8000)" x-transition>

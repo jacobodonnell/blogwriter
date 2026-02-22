@@ -44,7 +44,7 @@ final readonly class ApplyArticleFeaturedImageAction
             $meta['featured_image_url'] = $request->featured_image;
             $photoId = null;
         } elseif ($request->filled('photo_id')) {
-            $photoId = $data['photo_id'];
+            $photoId = (int) $data['photo_id'];
             unset($meta['featured_image_url']);
         } elseif ($article instanceof Article) {
             // Preserve existing meta featured_image_url if present

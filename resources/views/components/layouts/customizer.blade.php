@@ -6,66 +6,6 @@
     icon-weight="regular"
     js-entry="resources/js/app-admin.js">
 
-    <x-slot:head>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.20.0/dist/easymde.min.css">
-        <script src="https://cdn.jsdelivr.net/npm/easymde@2.20.0/dist/easymde.min.js"></script>
-        <style>
-            .EasyMDEContainer .CodeMirror {
-                border: 1px solid color-mix(in oklch, var(--color-base-content) 20%, transparent);
-                border-radius: var(--radius-field, 0.5rem);
-                background: var(--color-base-100);
-                color: var(--color-base-content);
-                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-                font-size: 0.875rem;
-                min-height: 16rem;
-            }
-
-            .EasyMDEContainer .CodeMirror-focused {
-                border-color: var(--color-primary);
-                outline: 2px solid color-mix(in oklch, var(--color-primary) 20%, transparent);
-            }
-
-            .EasyMDEContainer .editor-toolbar {
-                border: 1px solid color-mix(in oklch, var(--color-base-content) 20%, transparent);
-                border-bottom: none;
-                border-radius: var(--radius-field, 0.5rem) var(--radius-field, 0.5rem) 0 0;
-                background: var(--color-base-200);
-                padding: 4px;
-            }
-
-            .EasyMDEContainer .editor-toolbar button {
-                color: var(--color-base-content);
-                width: 28px;
-                height: 28px;
-            }
-
-            .EasyMDEContainer .editor-toolbar button:hover {
-                background: color-mix(in oklch, var(--color-base-content) 10%, transparent);
-                border-radius: 4px;
-            }
-
-            .EasyMDEContainer .editor-toolbar button.active {
-                background: color-mix(in oklch, var(--color-primary) 15%, transparent);
-            }
-
-            .EasyMDEContainer .editor-toolbar i.separator {
-                border-left-color: color-mix(in oklch, var(--color-base-content) 20%, transparent);
-            }
-
-            .EasyMDEContainer .CodeMirror .CodeMirror-cursor {
-                border-left-color: var(--color-base-content);
-            }
-
-            .EasyMDEContainer .CodeMirror .cm-header {
-                color: var(--color-primary);
-            }
-
-            .EasyMDEContainer .CodeMirror .cm-link,
-            .EasyMDEContainer .CodeMirror .cm-url {
-                color: var(--color-accent);
-            }
-        </style>
-    </x-slot:head>
 
     <div x-data="customizerLayout()"
          @pointermove.window="if (dragging) {

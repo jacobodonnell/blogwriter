@@ -217,3 +217,69 @@ it('index view button links to permalink for published', function (): void {
         ->assertSee($article->permalink())
         ->assertSee('View Published');
 });
+
+it('stores content submitted from tiptap editor', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create();
+
+    put(route('admin.articles.update', $article), [
+        'title' => 'Tiptap Article',
+        'slug' => $article->slug,
+        'content' => "## Hello\n\nThis is a paragraph.",
+        'status' => Status::Draft->value,
+    ])->assertRedirect(route('admin.articles.edit', $article));
+
+    expect($article->fresh()->content)->toBe("## Hello\nThis is a paragraph.");
+});
+
+it('stores bold and italic markdown content correctly', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create();
+
+    put(route('admin.articles.update', $article), [
+        'title' => 'Formatting Test',
+        'slug' => $article->slug,
+        'content' => '**bold** and _italic_ text',
+        'status' => Status::Draft->value,
+    ])->assertRedirect();
+
+    $content = $article->fresh()->content;
+
+    expect($content)->toContain('**bold**')
+        ->and($content)->toContain('_italic_');
+});
+
+it('rejects content containing an H1 heading submitted from editor', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create();
+
+    put(route('admin.articles.update', $article), [
+        'title' => 'H1 Bypass Test',
+        'slug' => $article->slug,
+        'content' => "# Top level heading\n\nContent",
+        'status' => Status::Draft->value,
+    ])->assertSessionHasErrors('content');
+});
+
+it('stores blockquote markdown correctly', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create();
+
+    put(route('admin.articles.update', $article), [
+        'title' => 'Blockquote Test',
+        'slug' => $article->slug,
+        'content' => '> This is a quote',
+        'status' => Status::Draft->value,
+    ])->assertRedirect();
+
+    expect($article->fresh()->content)->toContain('> This is a quote');
+});
+
+it('stores link markdown correctly', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create();
+
+    put(route('admin.articles.update', $article), [
+        'title' => 'Link Test',
+        'slug' => $article->slug,
+        'content' => '[Visit example](https://example.com)',
+        'status' => Status::Draft->value,
+    ])->assertRedirect();
+
+    expect($article->fresh()->content)->toContain('[Visit example](https://example.com)');
+});
