@@ -64,13 +64,13 @@ describe('admin pages', function (): void {
             ->assertDontSee('app-guest', false);
     });
 
-    it('renders admin bundle on customizer', function (): void {
+    it('renders editor bundle on customizer', function (): void {
         $article = Article::factory()->create();
 
         $this->actingAs($this->user)
             ->get(route('admin.articles.edit', $article))
             ->assertSuccessful()
-            ->assertSee('app-admin', false)
+            ->assertSee('app-editor', false)
             ->assertDontSee('app-guest', false);
     });
 

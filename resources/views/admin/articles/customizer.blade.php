@@ -4,7 +4,8 @@
         @include('admin.articles.preview')
     </x-slot:preview>
 
-    <div x-data="articleCustomizer({
+    <div @photo-attached="handlePhotoAttached($event.detail)"
+         x-data="articleCustomizer({
             title: @js(old('title', $article->title ?? '')),
             slug: @js(old('slug', $article->slug ?? '')),
             content: @js(old('content', $article->content ?? '')),
@@ -21,7 +22,7 @@
             saveRoute: @js(($isNew ?? false) ? route('admin.articles.store') : route('admin.articles.update', $article)),
          })">
 
-        <form id="customizer-form"
+        <form x-ref="customizerForm"
               method="POST"
               enctype="multipart/form-data"
               action="{{ ($isNew ?? false) ? route('admin.articles.preview.store') : route('admin.articles.preview.update', $article) }}"
@@ -35,9 +36,9 @@
             @endunless
 
             {{-- Hidden file inputs for staged photo upload --}}
-            <input type="file" id="featured-image-file-input" name="featured_image_file" class="hidden">
-            <input type="hidden" id="featured-image-alt-input" name="featured_image_alt" value="">
-            <input type="hidden" id="featured-image-caption-input" name="featured_image_caption" value="">
+            <input type="file" x-ref="featuredImageFileInput" name="featured_image_file" class="hidden">
+            <input type="hidden" x-ref="featuredImageAltInput" name="featured_image_alt" value="">
+            <input type="hidden" x-ref="featuredImageCaptionInput" name="featured_image_caption" value="">
             <input type="hidden" name="meta[featured_image_caption]" :value="usePhotoCaption ? '' : featuredImageCaption">
             <input type="hidden" name="meta[use_photo_caption]" :value="usePhotoCaption ? '1' : ''">
 
@@ -138,7 +139,7 @@
                                     <i class="ph ph-minus"></i>
                                 </button>
                                 <button type="button" @click="command('youtube')"
-                                        class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Embed Video" data-test="toolbar-youtube">
+                                        class="btn btn-ghost btn-xs btn-square tooltip" data-tip="YouTube" data-test="toolbar-youtube">
                                     <i class="ph ph-youtube-logo"></i>
                                 </button>
                             </div>
@@ -160,8 +161,14 @@
                             </div>
 
                             {{-- Tiptap editor mount point --}}
-                            <div id="content-editor" data-test="content-editor"
-                                 class="tiptap-editor @error('content') ring-2 ring-error @enderror border border-base-content/20 rounded-b-field bg-base-100 min-h-64 h-96 max-h-[80vh] overflow-y-auto resize-y focus-within:outline-2 focus-within:outline-primary/20"></div>
+                            <div x-ref="contentEditor" data-test="content-editor"
+                                 class="tiptap-editor @error('content') ring-2 ring-error @enderror border border-base-content/20 bg-base-100 min-h-64 h-96 max-h-[80vh] overflow-y-auto resize-y focus-within:outline-2 focus-within:outline-primary/20"></div>
+
+                            {{-- Word count status bar --}}
+                            <div class="flex justify-end px-2 py-1 border border-base-content/20 border-t-0 bg-base-200 rounded-b-field text-xs text-base-content/50"
+                                 x-show="editorReady" x-cloak>
+                                <span x-text="wordCount + ' words'"></span>
+                            </div>
 
                             {{-- Inline dialogs for link / image / youtube --}}
                             <div x-show="showLinkDialog" class="flex gap-2 mt-2 items-center">
@@ -316,50 +323,50 @@
         </form>
 
         {{-- Publish Modal --}}
-        <x-editor-modal id="publish-modal" title="Publish this article?">
+        <x-editor-modal x-ref="publishModal" title="Publish this article?">
             <p>This article will be live and visible to everyone.</p>
 
             <x-slot:actions>
                 <button type="button" class="btn btn-success"
-                        @click="document.getElementById('publish-modal').close(); submitFullSave()">
+                        @click="$refs.publishModal.close(); submitFullSave()">
                     Publish
                 </button>
             </x-slot:actions>
         </x-editor-modal>
 
         {{-- Republish Modal --}}
-        <x-editor-modal id="republish-modal" title="Republish this article?">
+        <x-editor-modal x-ref="republishModal" title="Republish this article?">
             <p>This article was originally published on <strong x-text="originalPublishedAt"></strong>. The original
                 publish date will be preserved.</p>
 
             <x-slot:actions>
                 <button type="button" class="btn btn-success"
-                        @click="document.getElementById('republish-modal').close(); submitFullSave()">
+                        @click="$refs.republishModal.close(); submitFullSave()">
                     Republish
                 </button>
             </x-slot:actions>
         </x-editor-modal>
 
         {{-- Unpublish Modal --}}
-        <x-editor-modal id="unpublish-modal" title="Revert to draft?">
+        <x-editor-modal x-ref="unpublishModal" title="Revert to draft?">
             <p>This article will no longer be visible on your site. Anyone with the link will see a 404 until you
                 republish.</p>
 
             <x-slot:actions>
                 <button type="button" class="btn btn-error"
-                        @click="document.getElementById('unpublish-modal').close(); submitFullSave()">
+                        @click="$refs.unpublishModal.close(); submitFullSave()">
                     Unpublish
                 </button>
             </x-slot:actions>
         </x-editor-modal>
 
         {{-- Upload Photo Modal — stages file client-side, submits with main form --}}
-        <x-editor-modal id="upload-photo-modal" title="Upload Featured Image" maxWidth="max-w-xl">
+        <x-editor-modal x-ref="uploadPhotoModal" title="Upload Featured Image" maxWidth="max-w-xl">
             <div x-data="uploadPhotoModal()">
                 <div class="space-y-3">
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">Image</legend>
-                        <input type="file" id="photo-file-picker" data-test="photo-file-picker"
+                        <input type="file" x-ref="filePicker" data-test="photo-file-picker"
                                class="file-input file-input-bordered w-full"
                                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                                @change="handleFileChange($event)">
@@ -371,14 +378,14 @@
 
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">Alt Text</legend>
-                        <input type="text" id="photo-alt-text-input" data-test="photo-alt-text"
+                        <input type="text" x-ref="altInput" data-test="photo-alt-text"
                                class="input input-bordered w-full"
                                placeholder="Describe the image for accessibility">
                     </fieldset>
 
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">Caption (optional)</legend>
-                        <textarea id="photo-caption-input"
+                        <textarea x-ref="captionInput"
                                   class="textarea textarea-bordered w-full h-16 text-sm"
                                   placeholder="Photo caption"></textarea>
                     </fieldset>
@@ -388,14 +395,26 @@
                         <span>This photo will be published when you save the article.</span>
                     </div>
                 </div>
-            </div>
 
-            <x-slot:actions>
-                <button type="button" class="btn btn-primary" data-test="attach-photo"
-                        @click="attachPhoto()">
-                    Attach Photo
-                </button>
-            </x-slot:actions>
+                {{-- Action buttons rendered inline (inside uploadPhotoModal scope for $refs access) --}}
+                <div class="modal-action">
+                    <button type="button" class="btn btn-primary" data-test="attach-photo"
+                            @click="
+                                if (!$refs.filePicker.files[0] || !$refs.altInput.value.trim()) return;
+                                $dispatch('photo-attached', {
+                                    file: $refs.filePicker.files[0],
+                                    alt: $refs.altInput.value,
+                                    caption: $refs.captionInput.value
+                                });
+                                $el.closest('dialog').close();
+                            ">
+                        Attach Photo
+                    </button>
+                    <form method="dialog">
+                        <button class="btn">Cancel</button>
+                    </form>
+                </div>
+            </div>
         </x-editor-modal>
 
     </div>

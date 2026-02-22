@@ -10,7 +10,7 @@ export default function featuredImage(config) {
         },
 
         clearFileInput() {
-            const fi = document.getElementById('featured-image-file-input');
+            const fi = this.$refs.featuredImageFileInput;
             if (fi) fi.value = '';
         },
 

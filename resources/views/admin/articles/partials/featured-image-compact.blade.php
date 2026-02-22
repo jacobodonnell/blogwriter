@@ -22,7 +22,7 @@
     <div class="flex gap-2 mt-2">
         {{-- Upload New Button --}}
         <button type="button"
-                @click="document.getElementById('upload-photo-modal').showModal()"
+                @click="$refs.uploadPhotoModal.showModal()"
                 data-test="upload-new-photo"
                 class="btn btn-ghost btn-sm flex-1 gap-2">
             <i class="ph ph-upload-simple"></i>

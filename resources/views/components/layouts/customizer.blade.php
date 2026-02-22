@@ -4,7 +4,7 @@
     :title="$title . ' - ' . config('app.name', 'BlogWriter')"
     :dark-mode="true"
     icon-weight="regular"
-    js-entry="resources/js/app-admin.js">
+    js-entry="resources/js/app-editor.js">
 
 
     <div x-data="customizerLayout()"

@@ -1,11 +1,7 @@
-import { Editor, mergeAttributes } from '@tiptap/core';
-import StarterKit from '@tiptap/starter-kit';
-import Image from '@tiptap/extension-image';
-import Youtube from '@tiptap/extension-youtube';
-import { Markdown } from '@tiptap/markdown';
+import { createTiptapEditor } from '../extensions/tiptap-editor';
 
 export default function articleCustomizer(config) {
-    let rawEditor = null;
+    let editor = null;
 
     return {
         title: config.title,
@@ -85,157 +81,24 @@ export default function articleCustomizer(config) {
             return 'btn-primary';
         },
 
+        get wordCount() {
+            void this.updatedAt;
+            return editor?.wordCount ?? 0;
+        },
+
         init() {
             this.$nextTick(() => {
-                const el = document.getElementById('content-editor');
+                const el = this.$refs.contentEditor;
                 if (!el) return;
 
-                rawEditor = new Editor({
+                editor = createTiptapEditor({
                     element: el,
-                    extensions: [
-                        StarterKit.configure({
-                            heading: { levels: [2, 3, 4, 5] },
-                            codeBlock: { languageClassPrefix: 'language-' },
-                            link: { openOnClick: false },
-                        }),
-                        Image.configure({
-                            resize: {
-                                enabled: true,
-                                directions: ['left', 'right'],
-                                minWidth: 60,
-                                alwaysPreserveAspectRatio: true,
-                            },
-                        }).extend({
-                            addAttributes() {
-                                return {
-                                    ...this.parent?.(),
-                                    caption: { default: null },
-                                    width: {
-                                        default: null,
-                                        renderHTML: () => ({}),
-                                    },
-                                };
-                            },
-
-                            addNodeView() {
-                                const parentFactory = this.parent?.();
-                                if (!parentFactory) return null;
-                                return (props) => {
-                                    const nodeView = parentFactory(props);
-                                    const originalHandleResize = nodeView.handleResize.bind(nodeView);
-                                    nodeView.handleResize = (deltaX, deltaY) => {
-                                        originalHandleResize(deltaX, deltaY);
-                                        nodeView.element.style.height = 'auto';
-                                        // Sync wrapper width but clamp to container so it never overflows
-                                        const maxWidth = nodeView.container.offsetWidth;
-                                        const raw = parseInt(nodeView.element.style.width, 10);
-                                        const clamped = Math.min(raw, maxWidth);
-                                        nodeView.wrapper.style.width = `${clamped}px`;
-                                        nodeView.element.style.width = `${clamped}px`;
-                                    };
-
-                                    nodeView.onCommit = (finalWidth) => {
-                                        const containerWidth = nodeView.container.offsetWidth;
-                                        const pct = Math.round(finalWidth / containerWidth * 100);
-                                        const pos = nodeView.getPos?.();
-                                        if (pos === undefined) return;
-                                        if (pct >= 98) {
-                                            rawEditor.chain().setNodeSelection(pos).updateAttributes('image', { width: null }).run();
-                                        } else {
-                                            rawEditor.chain().setNodeSelection(pos).updateAttributes('image', { width: pct }).run();
-                                        }
-                                    };
-
-                                    const syncAttrs = (attrs) => {
-                                        const el = nodeView.element;
-                                        if (attrs.src && el.src !== attrs.src) el.src = attrs.src;
-                                        el.alt = attrs.alt ?? '';
-                                        el.style.maxWidth = '100%';
-                                        el.style.height = 'auto';
-                                        if (attrs.width) {
-                                            nodeView.wrapper.style.width = `${attrs.width}%`;
-                                            el.style.width = '100%';
-                                        } else {
-                                            nodeView.wrapper.style.width = '';
-                                            el.style.width = '';
-                                        }
-                                    };
-                                    syncAttrs(props.node.attrs);
-                                    const originalUpdate = nodeView.update.bind(nodeView);
-                                    nodeView.update = (updatedNode, decorations, innerDecorations) => {
-                                        const result = originalUpdate(updatedNode, decorations, innerDecorations);
-                                        if (result === false) return false;
-                                        syncAttrs(updatedNode.attrs);
-                                        return result;
-                                    };
-                                    return nodeView;
-                                };
-                            },
-
-                            renderMarkdown(node) {
-                                const { src = '', alt = '', title, width, caption } = node.attrs ?? {};
-                                const parts = [alt];
-                                if (width) parts.push(`width:${width}%`);
-                                if (caption) parts.push(`caption:${encodeURIComponent(caption)}`);
-                                const altStr = parts.join('|');
-                                return title ? `![${altStr}](${src} "${title}")` : `![${altStr}](${src})`;
-                            },
-
-                            parseMarkdown(token, h) {
-                                const parts = (token.text ?? '').split('|');
-                                const alt = parts[0] ?? '';
-                                const attrs = { src: token.href, alt, title: token.title ?? null };
-                                for (const part of parts.slice(1)) {
-                                    const colonIdx = part.indexOf(':');
-                                    if (colonIdx === -1) continue;
-                                    const key = part.slice(0, colonIdx).trim();
-                                    const value = part.slice(colonIdx + 1).trim();
-                                    if (key === 'width') attrs.width = parseInt(value, 10) || null;
-                                    if (key === 'caption') attrs.caption = decodeURIComponent(value);
-                                }
-                                return h.createNode('image', attrs, []);
-                            },
-
-                            renderHTML({ HTMLAttributes }) {
-                                const { caption, width, align, ...rest } = HTMLAttributes;
-                                const imgAttrs = mergeAttributes(rest, {
-                                    style: width ? `width:${width}%;max-width:100%` : 'max-width:100%',
-                                });
-                                if (caption) {
-                                    return ['figure', {}, ['img', imgAttrs], ['figcaption', {}, caption]];
-                                }
-                                return ['img', imgAttrs];
-                            },
-                        }),
-                        Youtube.configure({ controls: true }).extend({
-                            renderMarkdown: (node) => {
-                                return `@[youtube](${node.attrs?.src || ''})`;
-                            },
-                            markdownTokenizer: {
-                                name: 'youtube',
-                                level: 'block',
-                                start(src) {
-                                    return src.search(/^@\[youtube\]/m);
-                                },
-                                tokenize(src) {
-                                    const match = src.match(/^@\[youtube\]\(([^)]+)\)(?:\n|$)/);
-                                    if (!match) return undefined;
-                                    return { type: 'youtube', raw: match[0], attributes: { src: match[1] } };
-                                },
-                            },
-                            parseMarkdown: (token, h) => {
-                                return h.createNode('youtube', { src: token.attributes?.src }, []);
-                            },
-                        }),
-                        Markdown.configure({ html: false, transformPastedText: true }),
-                    ],
-                    content: this.content || '',
-                    contentType: 'markdown',
-                    onUpdate: ({ editor }) => {
+                    content: this.content,
+                    onUpdate: (e) => {
                         this.updatedAt = Date.now();
-                        this.content = editor.getMarkdown();
+                        this.content = e.getMarkdown();
                         this.contentError = false;
-                        document.getElementById('customizer-form').dispatchEvent(
+                        this.$refs.customizerForm.dispatchEvent(
                             new Event('input', { bubbles: true })
                         );
                     },
@@ -259,59 +122,57 @@ export default function articleCustomizer(config) {
             this.$watch('buttonClass', v => store.cssClass = v);
             this.$watch('buttonAction', v => store.action = v);
 
-            window.addEventListener('save-article', () => {
-                if (this.buttonAction === 'publish') { document.getElementById('publish-modal').showModal(); return; }
-                if (this.buttonAction === 'republish') { document.getElementById('republish-modal').showModal(); return; }
-                if (this.buttonAction === 'unpublish') { document.getElementById('unpublish-modal').showModal(); return; }
+            this._onSaveArticle = () => {
+                if (this.buttonAction === 'publish') { this.$refs.publishModal.showModal(); return; }
+                if (this.buttonAction === 'republish') { this.$refs.republishModal.showModal(); return; }
+                if (this.buttonAction === 'unpublish') { this.$refs.unpublishModal.showModal(); return; }
                 this.submitFullSave();
-            });
+            };
+
+            this._onKeydown = (e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+                    e.preventDefault();
+                    window.dispatchEvent(new CustomEvent('save-article'));
+                }
+            };
+
+            window.addEventListener('save-article', this._onSaveArticle);
+            window.addEventListener('keydown', this._onKeydown);
         },
 
         command(name) {
-            if (!rawEditor) return;
-            const map = {
-                bold: () => rawEditor.chain().focus().toggleBold().run(),
-                italic: () => rawEditor.chain().focus().toggleItalic().run(),
-                h2: () => rawEditor.chain().focus().toggleHeading({ level: 2 }).run(),
-                h3: () => rawEditor.chain().focus().toggleHeading({ level: 3 }).run(),
-                h4: () => rawEditor.chain().focus().toggleHeading({ level: 4 }).run(),
-                h5: () => rawEditor.chain().focus().toggleHeading({ level: 5 }).run(),
-                blockquote: () => rawEditor.chain().focus().toggleBlockquote().run(),
-                bulletList: () => rawEditor.chain().focus().toggleBulletList().run(),
-                orderedList: () => rawEditor.chain().focus().toggleOrderedList().run(),
-                code: () => rawEditor.chain().focus().toggleCode().run(),
-                codeBlock: () => rawEditor.chain().focus().toggleCodeBlock().run(),
-                horizontalRule: () => rawEditor.chain().focus().setHorizontalRule().run(),
-                link: () => { this.linkUrl = ''; this.showLinkDialog = true; },
-                image: () => {
-                    if (rawEditor.isActive('image')) {
-                        this.openEditImage();
-                    } else {
-                        this.resetImageDialog();
-                        this.showImageDialog = true;
-                    }
-                },
-                youtube: () => { this.youtubeUrl = ''; this.showYoutubeDialog = true; },
-                imageFullWidth: () => rawEditor.chain().focus().updateAttributes('image', { width: null }).run(),
-            };
-            map[name]?.();
+            if (!editor) return;
+            const signal = editor.command(name);
+            if (signal === 'link') {
+                this.linkUrl = '';
+                this.showLinkDialog = true;
+            } else if (signal === 'image') {
+                if (editor.isActive('image')) {
+                    this.openEditImage();
+                } else {
+                    this.resetImageDialog();
+                    this.showImageDialog = true;
+                }
+            } else if (signal === 'youtube') {
+                this.youtubeUrl = '';
+                this.showYoutubeDialog = true;
+            }
         },
 
         isActive(name, attrs = {}) {
-            // Reading updatedAt makes Alpine re-evaluate this whenever selection or content changes.
             void this.updatedAt;
-            return rawEditor?.isActive(name, attrs) ?? false;
+            return editor?.isActive(name, attrs) ?? false;
         },
 
         insertLink() {
             if (!this.linkUrl) return;
-            rawEditor.chain().focus().setLink({ href: this.linkUrl }).run();
+            editor.setLink({ href: this.linkUrl });
             this.showLinkDialog = false;
         },
 
         openEditImage() {
-            if (!rawEditor || !rawEditor.isActive('image')) return;
-            const attrs = rawEditor.getAttributes('image');
+            if (!editor || !editor.isActive('image')) return;
+            const attrs = editor.getAttributes('image');
             this.imageUrl     = attrs.src     ?? '';
             this.imageAlt     = attrs.alt     ?? '';
             this.imageCaption = attrs.caption ?? '';
@@ -327,18 +188,17 @@ export default function articleCustomizer(config) {
                 caption: this.imageCaption || undefined,
             };
             if (this.editingImage) {
-                rawEditor.chain().focus().updateAttributes('image', attrs).run();
+                editor.updateImageAttributes(attrs);
             } else {
-                rawEditor.chain().focus().setImage(attrs).run();
+                editor.setImage(attrs);
             }
             this.showImageDialog = false;
-            this.editingImage = false;
             this.resetImageDialog();
         },
 
         isImageFullWidth() {
             void this.updatedAt;
-            return rawEditor?.getAttributes('image')?.width == null;
+            return editor?.getAttributes('image')?.width == null;
         },
 
         resetImageDialog() {
@@ -350,48 +210,46 @@ export default function articleCustomizer(config) {
 
         insertYoutube() {
             if (!this.youtubeUrl) return;
-            rawEditor.chain().focus().setYoutubeVideo({ src: this.youtubeUrl }).run();
+            editor.setYoutubeVideo({ src: this.youtubeUrl });
             this.showYoutubeDialog = false;
         },
 
-        destroy() {
-            rawEditor?.destroy();
-            rawEditor = null;
-        },
-
-        attachPhoto() {
-            const picker = document.getElementById('photo-file-picker');
-            const altInput = document.getElementById('photo-alt-text-input');
-            if (!picker.files[0] || !altInput.value.trim()) return;
+        handlePhotoAttached({ file, alt, caption }) {
+            if (!file || !alt.trim()) return;
 
             const dt = new DataTransfer();
-            dt.items.add(picker.files[0]);
-            document.getElementById('featured-image-file-input').files = dt.files;
-            document.getElementById('featured-image-alt-input').value = altInput.value.trim();
-            document.getElementById('featured-image-caption-input').value = document.getElementById('photo-caption-input').value;
+            dt.items.add(file);
+            this.$refs.featuredImageFileInput.files = dt.files;
+            this.$refs.featuredImageAltInput.value = alt.trim();
+            this.$refs.featuredImageCaptionInput.value = caption;
 
-            this.uploadedPhotoUrl = URL.createObjectURL(picker.files[0]);
+            this.uploadedPhotoUrl = URL.createObjectURL(file);
             this.selectedPhotoId = '';
             this.featuredImageUrl = '';
             this.showUrlField = false;
             this.hasNewPhoto = true;
-
-            document.getElementById('upload-photo-modal').close();
         },
 
         submitFullSave() {
-            if (rawEditor) {
-                this.content = rawEditor.getMarkdown();
+            if (editor) {
+                this.content = editor.getMarkdown();
             }
-            if (!this.content || !this.content.trim()) {
+            if (!this.content?.trim()) {
                 this.contentError = true;
-                rawEditor?.commands.focus();
+                editor?.focus();
                 return;
             }
-            const form = document.getElementById('customizer-form');
+            const form = this.$refs.customizerForm;
             form.removeAttribute('x-target');
             form.action = config.saveRoute;
             form.submit();
+        },
+
+        destroy() {
+            window.removeEventListener('save-article', this._onSaveArticle);
+            window.removeEventListener('keydown', this._onKeydown);
+            editor?.destroy();
+            editor = null;
         },
     };
 }

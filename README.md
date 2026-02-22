@@ -86,9 +86,11 @@ Full documentation is in the [`docs/`](docs/) directory:
 
 ## Roadmap
 
-BlogWriter is in pre-alpha.
+BlogWriter is in pre-alpha. Expect breaking changes. I'll still do my best to prevent them, but back up your data
+regularly.
 
-**Built:** Articles, Photos, Categories, Appearance (35 themes, 11 fonts), Admin panel, CLI Installer, Auth, MediaLibrary, Microformats (h-card, h-entry, h-feed, rel="me"), RSS/Atom/JSON Feeds, Import & Export, PWA
+**Built:** Articles, Photos, Categories, Appearance (35 themes, 11 fonts), Admin panel, CLI Installer, Auth,
+MediaLibrary, Microformats (h-card, h-entry, h-feed, rel="me"), RSS/Atom/JSON Feeds, Import & Export, PWA
 
 **Planned:** Notes, Tags, IndieAuth, Webmentions
 
@@ -100,9 +102,11 @@ See the full [Roadmap](docs/roadmap.md).
 
 Pull requests are disabled on this repository. If you'd like to use the code, feel free to fork the project.
 
-If you find a bug or have a suggestion, [open an issue](https://github.com/jacobodonnell/blogwriter/issues) and I'll look it over.
+If you find a bug or have a suggestion, [open an issue](https://github.com/jacobodonnell/blogwriter/issues) and I'll
+look it over.
 
-**Philosophy:** Simple over clever. Explicit over magical. Standards over custom protocols. Less code over more features.
+**Philosophy:** Simple over clever. Explicit over magical. Standards over custom protocols. Less code over more
+features.
 
 ## Standing on the Shoulders of Giants
 
@@ -116,7 +120,12 @@ BlogWriter exists because of the open-source community:
 - **[Spatie](https://spatie.be)** --- The Spatie team for MediaLibrary and many other packages
 - **[DaisyUI](https://daisyui.com)** --- Pouya Saadeghi
 
-A personal note: I learned Laravel through [Jeffrey Way's](https://laracasts.com) teaching at Laracasts — specifically [Laravel From Scratch](https://laracasts.com/series/laravel-from-scratch-2026), the longest-running Laravel introductory series in the world. The AI-driven development workflow used to build this project was shaped by his [Leveraging AI for Laravel Development](https://laracasts.com/series/leveraging-ai-for-laravel-development) series. [LaravelDaily](https://laraveldaily.com) by Povilas Korop has also been an invaluable resource for real-world Laravel patterns and best practices. If you're learning Laravel, start with both.
+A personal note: I learned Laravel through [Jeffrey Way's](https://laracasts.com) teaching at Laracasts —
+specifically [Laravel From Scratch](https://laracasts.com/series/laravel-from-scratch-2026), the longest-running Laravel
+introductory series in the world. The AI-driven development workflow used to build this project was shaped by
+his [Leveraging AI for Laravel Development](https://laracasts.com/series/leveraging-ai-for-laravel-development)
+series. [LaravelDaily](https://laraveldaily.com) by Povilas Korop has also been an invaluable resource for real-world
+Laravel patterns and best practices. If you're learning Laravel, start with both.
 
 ## License
 
