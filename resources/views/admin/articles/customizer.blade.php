@@ -141,7 +141,7 @@
 
                         {{-- Tiptap editor mount point --}}
                         <div id="content-editor" data-test="content-editor"
-                             class="tiptap-editor @error('content') ring-2 ring-error @enderror border border-base-content/20 rounded-b-field bg-base-100 min-h-64 focus-within:outline-2 focus-within:outline-primary/20"></div>
+                             class="tiptap-editor @error('content') ring-2 ring-error @enderror border border-base-content/20 rounded-b-field bg-base-100 min-h-64 h-96 max-h-[80vh] overflow-y-auto resize-y focus-within:outline-2 focus-within:outline-primary/20"></div>
 
                         {{-- Inline dialogs for link / image / youtube --}}
                         <div x-show="showLinkDialog" class="flex gap-2 mt-2 items-center">
