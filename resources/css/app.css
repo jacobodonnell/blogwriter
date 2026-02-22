@@ -154,3 +154,57 @@ body {
 .tiptap-toolbar .btn-active {
     background: color-mix(in oklch, var(--color-primary) 15%, transparent);
 }
+
+/* Tiptap resize handles — side-edge pill style */
+[data-resize-wrapper] {
+    display: inline-block;
+    position: relative;
+}
+[data-resize-handle] {
+    width: 8px;
+    top: 0;
+    bottom: 0;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: col-resize;
+    transition: background 150ms ease;
+    z-index: 10;
+}
+[data-resize-wrapper]:hover [data-resize-handle] {
+    background: color-mix(in oklch, var(--color-primary) 20%, transparent);
+}
+[data-resize-handle]::after {
+    content: '';
+    display: block;
+    width: 2px;
+    height: 2rem;
+    background: transparent;
+    border-radius: 9999px;
+    transition: background 150ms ease;
+}
+[data-resize-wrapper]:hover [data-resize-handle]::after {
+    background: color-mix(in oklch, var(--color-base-content) 20%, transparent);
+}
+[data-resize-handle="left"]  { left: 0; }
+[data-resize-handle="right"] { right: 0; }
+
+/* Image alignment — editor context */
+.tiptap-editor .ProseMirror .img-align-left  { float: left; margin: 0 1rem 1rem 0; max-width: 50%; }
+.tiptap-editor .ProseMirror .img-align-right { float: right; margin: 0 0 1rem 1rem; max-width: 50%; }
+.tiptap-editor .ProseMirror .img-align-center { display: block; margin: 0 auto; }
+.tiptap-editor .ProseMirror .img-align-full  { display: block; width: 100%; }
+.tiptap-editor .ProseMirror figure { margin: 1rem 0; }
+.tiptap-editor .ProseMirror figcaption { font-size: 0.8125rem; text-align: center; opacity: 0.6; margin-top: 0.375rem; }
+
+/* Image alignment — public/preview context */
+.e-content .img-align-left, .prose .img-align-left { float: left; margin: 0 1.5rem 1rem 0; max-width: 50%; }
+.e-content .img-align-right, .prose .img-align-right { float: right; margin: 0 0 1rem 1.5rem; max-width: 50%; }
+.e-content .img-align-center, .prose .img-align-center { display: block; margin: 0 auto; }
+.e-content .img-align-full, .prose .img-align-full { display: block; width: 100%; max-width: 100%; }
+.e-content figure, .prose figure { margin: 1.5rem 0; }
+.e-content figcaption, .prose figcaption { font-size: 0.875rem; text-align: center; opacity: 0.65; margin-top: 0.5rem; }
+
+/* Clearfix for floated images */
+.e-content::after, .prose::after { content: ''; display: table; clear: both; }

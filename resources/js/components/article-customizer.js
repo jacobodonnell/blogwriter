@@ -1,4 +1,4 @@
-import { Editor } from '@tiptap/core';
+import { Editor, mergeAttributes } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Youtube from '@tiptap/extension-youtube';
@@ -23,6 +23,9 @@ export default function articleCustomizer(config) {
         linkUrl: '',
         showImageDialog: false,
         imageUrl: '',
+        imageAlt: '',
+        imageCaption: '',
+        imageAlign: 'center',
         showYoutubeDialog: false,
         youtubeUrl: '',
         initialStatus: config.initialStatus,
@@ -94,7 +97,61 @@ export default function articleCustomizer(config) {
                             codeBlock: { languageClassPrefix: 'language-' },
                             link: { openOnClick: false },
                         }),
-                        Image,
+                        Image.configure({
+                            resize: {
+                                enabled: true,
+                                directions: ['left', 'right'],
+                                minWidth: 60,
+                                alwaysPreserveAspectRatio: true,
+                            },
+                        }).extend({
+                            addAttributes() {
+                                return {
+                                    ...this.parent?.(),
+                                    align: { default: null },
+                                    caption: { default: null },
+                                };
+                            },
+
+                            renderMarkdown(node) {
+                                const { src = '', alt = '', title, align, width, caption } = node.attrs ?? {};
+                                const parts = [alt];
+                                if (align) parts.push(`align:${align}`);
+                                if (width) parts.push(`width:${width}`);
+                                if (caption) parts.push(`caption:${encodeURIComponent(caption)}`);
+                                const altStr = parts.join('|');
+                                return title ? `![${altStr}](${src} "${title}")` : `![${altStr}](${src})`;
+                            },
+
+                            parseMarkdown(token, h) {
+                                const parts = (token.text ?? '').split('|');
+                                const alt = parts[0] ?? '';
+                                const attrs = { src: token.href, alt, title: token.title ?? null };
+                                for (const part of parts.slice(1)) {
+                                    const colonIdx = part.indexOf(':');
+                                    if (colonIdx === -1) continue;
+                                    const key = part.slice(0, colonIdx).trim();
+                                    const value = part.slice(colonIdx + 1).trim();
+                                    if (key === 'align') attrs.align = value;
+                                    if (key === 'width') attrs.width = parseInt(value, 10) || null;
+                                    if (key === 'caption') attrs.caption = decodeURIComponent(value);
+                                }
+                                return h.createNode('image', attrs, []);
+                            },
+
+                            renderHTML({ HTMLAttributes }) {
+                                const { align, caption, width, ...rest } = HTMLAttributes;
+                                const cls = align ? `img-align-${align}` : null;
+                                const imgAttrs = mergeAttributes(rest, {
+                                    class: cls,
+                                    style: width ? `width:${width}px` : null,
+                                });
+                                if (caption) {
+                                    return ['figure', { class: cls }, ['img', imgAttrs], ['figcaption', {}, caption]];
+                                }
+                                return ['img', imgAttrs];
+                            },
+                        }),
                         Youtube.configure({ controls: true }).extend({
                             renderMarkdown: (node) => {
                                 return `@[youtube](${node.attrs?.src || ''})`;
@@ -167,8 +224,12 @@ export default function articleCustomizer(config) {
                 codeBlock: () => rawEditor.chain().focus().toggleCodeBlock().run(),
                 horizontalRule: () => rawEditor.chain().focus().setHorizontalRule().run(),
                 link: () => { this.linkUrl = ''; this.showLinkDialog = true; },
-                image: () => { this.imageUrl = ''; this.showImageDialog = true; },
+                image: () => { this.resetImageDialog(); this.showImageDialog = true; },
                 youtube: () => { this.youtubeUrl = ''; this.showYoutubeDialog = true; },
+                imageAlignLeft:   () => rawEditor.chain().focus().updateAttributes('image', { align: 'left' }).run(),
+                imageAlignCenter: () => rawEditor.chain().focus().updateAttributes('image', { align: 'center' }).run(),
+                imageAlignRight:  () => rawEditor.chain().focus().updateAttributes('image', { align: 'right' }).run(),
+                imageAlignFull:   () => rawEditor.chain().focus().updateAttributes('image', { align: 'full' }).run(),
             };
             map[name]?.();
         },
@@ -185,8 +246,25 @@ export default function articleCustomizer(config) {
 
         insertImage() {
             if (!this.imageUrl) return;
-            rawEditor.chain().focus().setImage({ src: this.imageUrl }).run();
+            rawEditor.chain().focus().setImage({
+                src: this.imageUrl,
+                alt: this.imageAlt || undefined,
+                align: this.imageAlign || undefined,
+                caption: this.imageCaption || undefined,
+            }).run();
             this.showImageDialog = false;
+            this.resetImageDialog();
+        },
+
+        isImageAlign(align) {
+            return rawEditor?.getAttributes('image')?.align === align;
+        },
+
+        resetImageDialog() {
+            this.imageUrl = '';
+            this.imageAlt = '';
+            this.imageCaption = '';
+            this.imageAlign = 'center';
         },
 
         insertYoutube() {
