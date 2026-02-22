@@ -12,6 +12,22 @@
         <span x-text="buttonLabel" data-test="save-button-label"></span>
     </button>
 
+    {{-- Draft pending: edits not yet saved --}}
+    @if($article?->exists && $article->hasDraft())
+        <div class="alert alert-warning text-xs py-2" data-test="draft-pending-warning">
+            <i class="ph ph-pencil-simple"></i>
+            <span>You have unsaved edits — saving will override the published article.</span>
+        </div>
+    @endif
+
+    {{-- Published with no pending draft: warn edits will go live immediately on save --}}
+    @if($article?->exists && $article->isPublished() && !$article->hasDraft())
+        <div class="alert alert-info text-xs py-2" data-test="live-edit-warning">
+            <i class="ph ph-globe"></i>
+            <span>Saving will update the live article immediately.</span>
+        </div>
+    @endif
+
     {{-- View Live (only when article is published on server) --}}
     @if($article?->exists && $article->isPublished())
         <a href="{{ route('articles.show', $article->slug) }}"

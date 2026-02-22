@@ -90,6 +90,16 @@ final class Article extends Model
         }
     }
 
+    /**
+     * Check if the article has unsaved draft edits staged for the next full save.
+     */
+    public function hasDraft(): bool
+    {
+        $raw = $this->getRawOriginal('draft_content');
+
+        return $raw !== null && $raw !== $this->getRawOriginal('content');
+    }
+
     protected static function booted(): void
     {
         self::saving(function ($article): void {
@@ -159,6 +169,41 @@ final class Article extends Model
      * Accessor: collapses \n\n back to \n for editor display (outside fenced code blocks).
      */
     protected function content(): Attribute
+    {
+        return Attribute::make(
+            get: function (?string $value): ?string {
+                if ($value === null) {
+                    return null;
+                }
+
+                return $this->processOutsideCodeBlocks($value, function (string $text): string {
+                    $placeholder = "\x00TRIPLE_NEWLINE\x00";
+                    $text = preg_replace('/\n{3,}/', $placeholder, $text);
+                    $text = str_replace("\n\n", "\n", $text);
+
+                    return str_replace($placeholder, "\n\n", $text);
+                });
+            },
+            set: function (?string $value): ?string {
+                if ($value === null) {
+                    return null;
+                }
+
+                return $this->processOutsideCodeBlocks($value, function (string $text): string {
+                    $placeholder = "\x00DOUBLE_NEWLINE\x00";
+                    $text = str_replace("\n\n", $placeholder, $text);
+                    $text = str_replace("\n", "\n\n", $text);
+
+                    return str_replace($placeholder, "\n\n", $text);
+                });
+            },
+        );
+    }
+
+    /**
+     * Accessor/mutator for draft_content: same newline normalisation as content.
+     */
+    protected function draftContent(): Attribute
     {
         return Attribute::make(
             get: function (?string $value): ?string {

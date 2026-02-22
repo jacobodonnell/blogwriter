@@ -43,7 +43,9 @@ final class ArticlePreviewController extends Controller
         }
 
         if (array_key_exists('content', $data)) {
-            $updateData['content'] = $data['content'] ?? $article->content;
+            $incoming = $data['content'];
+            $isDifferent = $incoming !== null && $incoming !== $article->content;
+            $updateData['draft_content'] = $isDifferent ? $incoming : null;
         }
 
         if (array_key_exists('summary', $data)) {
@@ -81,6 +83,11 @@ final class ArticlePreviewController extends Controller
         $article->update($updateData);
 
         $article->refresh()->load('category');
+
+        // Overlay draft_content onto content for preview rendering only (no DB write)
+        if ($article->hasDraft()) {
+            $article->content = $article->draft_content;
+        }
 
         return view('admin.articles.preview', ['article' => $article]);
     }

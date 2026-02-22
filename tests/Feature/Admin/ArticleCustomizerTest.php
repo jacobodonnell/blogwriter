@@ -283,3 +283,117 @@ it('stores link markdown correctly', function (): void {
 
     expect($article->fresh()->content)->toContain('[Visit example](https://example.com)');
 });
+
+// ---------------------------------------------------------------------------
+// Draft content system
+// ---------------------------------------------------------------------------
+
+it('preview update writes to draft_content, not content', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'content' => 'Original content',
+    ]);
+
+    put(route('admin.articles.preview.update', $article), [
+        'title' => $article->title,
+        'slug' => $article->slug,
+        'content' => 'Typed in editor',
+        'status' => Status::Draft->value,
+    ])->assertOk();
+
+    $fresh = $article->fresh();
+    expect($fresh->getRawOriginal('content'))->toContain('Original')
+        ->and($fresh->draft_content)->toBe('Typed in editor');
+});
+
+it('preview update clears draft_content when incoming matches canonical content', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'content' => 'Same content',
+    ]);
+
+    put(route('admin.articles.preview.update', $article), [
+        'title' => $article->title,
+        'slug' => $article->slug,
+        'content' => 'Same content',
+        'status' => Status::Draft->value,
+    ])->assertOk();
+
+    expect($article->fresh()->getRawOriginal('draft_content'))->toBeNull();
+});
+
+it('full save promotes draft_content to content and clears draft', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'content' => 'Published content',
+        'draft_content' => 'Staged draft edits',
+    ]);
+
+    put(route('admin.articles.update', $article), [
+        'title' => $article->title,
+        'slug' => $article->slug,
+        'content' => 'Staged draft edits',
+        'status' => Status::Draft->value,
+    ])->assertRedirect(route('admin.articles.edit', $article));
+
+    $fresh = $article->fresh();
+    expect($fresh->content)->toBe('Staged draft edits')
+        ->and($fresh->getRawOriginal('draft_content'))->toBeNull();
+});
+
+it('full save without prior draft uses submitted content', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'content' => 'Old content',
+    ]);
+
+    put(route('admin.articles.update', $article), [
+        'title' => $article->title,
+        'slug' => $article->slug,
+        'content' => 'Brand new content',
+        'status' => Status::Draft->value,
+    ])->assertRedirect();
+
+    $fresh = $article->fresh();
+    expect($fresh->content)->toBe('Brand new content')
+        ->and($fresh->getRawOriginal('draft_content'))->toBeNull();
+});
+
+it('edit page initialises editor with draft_content when present', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'content' => 'Published version',
+        'draft_content' => 'Draft version in editor',
+    ]);
+
+    get(route('admin.articles.edit', $article))
+        ->assertOk()
+        ->assertSee('Draft version in editor', escape: false);
+});
+
+it('hasDraft returns true when draft_content differs from content', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'content' => 'Published version',
+        'draft_content' => 'Staged edits',
+    ]);
+
+    expect($article->fresh()->hasDraft())->toBeTrue();
+});
+
+it('hasDraft returns false when draft_content is null', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'content' => 'Published version',
+    ]);
+
+    expect($article->fresh()->hasDraft())->toBeFalse();
+});
+
+it('preview renders draft content in preview pane', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'content' => 'Original content here',
+    ]);
+
+    put(route('admin.articles.preview.update', $article), [
+        'title' => $article->title,
+        'slug' => $article->slug,
+        'content' => 'Brand new draft text',
+        'status' => Status::Draft->value,
+    ])
+        ->assertOk()
+        ->assertSee('Brand new draft text');
+});

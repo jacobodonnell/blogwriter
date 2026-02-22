@@ -119,7 +119,8 @@ final class ArticleController extends Controller
         $article->update([
             'title' => $data['title'],
             'slug' => $data['slug'],
-            'content' => $data['content'] ?? $article->content,
+            'content' => $data['content'] ?? $article->draft_content ?? $article->content,
+            'draft_content' => null,
             'summary' => $data['summary'] ?? null,
             'status' => $data['status'],
             'published_at' => $data['published_at'] ?? $article->published_at,

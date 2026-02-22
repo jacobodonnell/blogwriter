@@ -21,6 +21,7 @@ return new class extends Migration
             $table->json('past_slugs')->default('[]');
             $table->text('summary')->nullable();
             $table->longText('content');
+            $table->longText('draft_content')->nullable();
             $table->enum('status', ['draft', 'published'])->default('draft');
             $table->timestamp('published_at')->nullable();
             $table->timestamp('last_edited_at')->nullable();

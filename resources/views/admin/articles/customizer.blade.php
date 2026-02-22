@@ -8,7 +8,7 @@
          x-data="articleCustomizer({
             title: @js(old('title', $article->title ?? '')),
             slug: @js(old('slug', $article->slug ?? '')),
-            content: @js(old('content', $article->content ?? '')),
+            content: @js(old('content', $article->draft_content ?? $article->content ?? '')),
             summary: @js(old('summary', $article->summary ?? '')),
             selectedPhotoId: @js(old('photo_id', $article->photo_id ?? '')),
             featuredImageUrl: @js(old('featured_image', $article->meta['featured_image_url'] ?? '')),
