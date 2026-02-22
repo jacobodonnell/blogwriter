@@ -120,10 +120,19 @@ export default function articleCustomizer(config) {
                                 if (!parentFactory) return null;
                                 return (props) => {
                                     const nodeView = parentFactory(props);
+                                    const originalHandleResize = nodeView.handleResize.bind(nodeView);
+                                    nodeView.handleResize = (deltaX, deltaY) => {
+                                        originalHandleResize(deltaX, deltaY);
+                                        nodeView.element.style.height = 'auto';
+                                    };
+
                                     const syncAttrs = (attrs) => {
                                         const el = nodeView.element;
                                         if (attrs.src && el.src !== attrs.src) el.src = attrs.src;
                                         el.alt = attrs.alt ?? '';
+                                        el.style.maxWidth = '100%';
+                                        el.style.height = 'auto';
+                                        nodeView.wrapper.style.maxWidth = '100%';
                                         nodeView.container.className = attrs.align ? `img-align-${attrs.align}` : '';
                                         if (attrs.width) {
                                             el.style.width = `${attrs.width}px`;
