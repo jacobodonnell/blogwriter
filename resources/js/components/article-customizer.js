@@ -5,6 +5,8 @@ import Youtube from '@tiptap/extension-youtube';
 import { Markdown } from '@tiptap/markdown';
 
 export default function articleCustomizer(config) {
+    let rawEditor = null;
+
     return {
         title: config.title,
         slug: config.slug,
@@ -17,7 +19,6 @@ export default function articleCustomizer(config) {
         showUrlField: config.showUrlField,
         featuredImageCaption: config.featuredImageCaption,
         usePhotoCaption: config.usePhotoCaption,
-        editor: null,
         showLinkDialog: false,
         linkUrl: '',
         showImageDialog: false,
@@ -85,7 +86,7 @@ export default function articleCustomizer(config) {
                 const el = document.getElementById('content-editor');
                 if (!el) return;
 
-                this.editor = new Editor({
+                rawEditor = new Editor({
                     element: el,
                     extensions: [
                         StarterKit.configure({
@@ -97,6 +98,8 @@ export default function articleCustomizer(config) {
                         Youtube.configure({ controls: true }),
                         Markdown.configure({ html: false, transformPastedText: true }),
                     ],
+                    content: this.content || '',
+                    contentType: 'markdown',
                     onUpdate: ({ editor }) => {
                         this.content = editor.getMarkdown();
                         this.contentError = false;
@@ -106,9 +109,6 @@ export default function articleCustomizer(config) {
                     },
                 });
 
-                if (this.content) {
-                    this.editor.commands.setContent(this.content, false, { contentType: 'markdown' });
-                }
                 this.editorReady = true;
             });
 
@@ -133,21 +133,20 @@ export default function articleCustomizer(config) {
         },
 
         command(name) {
-            if (!this.editor) return;
-            const chain = this.editor.chain().focus();
+            if (!rawEditor) return;
             const map = {
-                bold: () => chain.toggleBold().run(),
-                italic: () => chain.toggleItalic().run(),
-                h2: () => chain.toggleHeading({ level: 2 }).run(),
-                h3: () => chain.toggleHeading({ level: 3 }).run(),
-                h4: () => chain.toggleHeading({ level: 4 }).run(),
-                h5: () => chain.toggleHeading({ level: 5 }).run(),
-                blockquote: () => chain.toggleBlockquote().run(),
-                bulletList: () => chain.toggleBulletList().run(),
-                orderedList: () => chain.toggleOrderedList().run(),
-                code: () => chain.toggleCode().run(),
-                codeBlock: () => chain.toggleCodeBlock().run(),
-                horizontalRule: () => chain.setHorizontalRule().run(),
+                bold: () => rawEditor.chain().focus().toggleBold().run(),
+                italic: () => rawEditor.chain().focus().toggleItalic().run(),
+                h2: () => rawEditor.chain().focus().toggleHeading({ level: 2 }).run(),
+                h3: () => rawEditor.chain().focus().toggleHeading({ level: 3 }).run(),
+                h4: () => rawEditor.chain().focus().toggleHeading({ level: 4 }).run(),
+                h5: () => rawEditor.chain().focus().toggleHeading({ level: 5 }).run(),
+                blockquote: () => rawEditor.chain().focus().toggleBlockquote().run(),
+                bulletList: () => rawEditor.chain().focus().toggleBulletList().run(),
+                orderedList: () => rawEditor.chain().focus().toggleOrderedList().run(),
+                code: () => rawEditor.chain().focus().toggleCode().run(),
+                codeBlock: () => rawEditor.chain().focus().toggleCodeBlock().run(),
+                horizontalRule: () => rawEditor.chain().focus().setHorizontalRule().run(),
                 link: () => { this.linkUrl = ''; this.showLinkDialog = true; },
                 image: () => { this.imageUrl = ''; this.showImageDialog = true; },
                 youtube: () => { this.youtubeUrl = ''; this.showYoutubeDialog = true; },
@@ -156,30 +155,30 @@ export default function articleCustomizer(config) {
         },
 
         isActive(name, attrs = {}) {
-            return this.editor?.isActive(name, attrs) ?? false;
+            return rawEditor?.isActive(name, attrs) ?? false;
         },
 
         insertLink() {
             if (!this.linkUrl) return;
-            this.editor.chain().focus().setLink({ href: this.linkUrl }).run();
+            rawEditor.chain().focus().setLink({ href: this.linkUrl }).run();
             this.showLinkDialog = false;
         },
 
         insertImage() {
             if (!this.imageUrl) return;
-            this.editor.chain().focus().setImage({ src: this.imageUrl }).run();
+            rawEditor.chain().focus().setImage({ src: this.imageUrl }).run();
             this.showImageDialog = false;
         },
 
         insertYoutube() {
             if (!this.youtubeUrl) return;
-            this.editor.chain().focus().setYoutubeVideo({ src: this.youtubeUrl }).run();
+            rawEditor.chain().focus().setYoutubeVideo({ src: this.youtubeUrl }).run();
             this.showYoutubeDialog = false;
         },
 
         destroy() {
-            this.editor?.destroy();
-            this.editor = null;
+            rawEditor?.destroy();
+            rawEditor = null;
         },
 
         attachPhoto() {
@@ -203,12 +202,12 @@ export default function articleCustomizer(config) {
         },
 
         submitFullSave() {
-            if (this.editor) {
-                this.content = this.editor.getMarkdown();
+            if (rawEditor) {
+                this.content = rawEditor.getMarkdown();
             }
             if (!this.content || !this.content.trim()) {
                 this.contentError = true;
-                this.editor?.commands.focus();
+                rawEditor?.commands.focus();
                 return;
             }
             const form = document.getElementById('customizer-form');

@@ -87,16 +87,16 @@
                         {{-- Tiptap toolbar --}}
                         <div class="tiptap-toolbar flex flex-wrap items-center gap-1 p-2 bg-base-200 border border-base-content/20 border-b-0 rounded-t-field">
                             <button type="button" @click="command('bold')" :class="isActive('bold') && 'btn-active'"
-                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Bold">
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Bold" data-test="toolbar-bold">
                                 <i class="ph ph-text-b"></i>
                             </button>
                             <button type="button" @click="command('italic')" :class="isActive('italic') && 'btn-active'"
-                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Italic">
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Italic" data-test="toolbar-italic">
                                 <i class="ph ph-text-italic"></i>
                             </button>
                             <div class="divider divider-horizontal mx-0"></div>
                             <button type="button" @click="command('h2')" :class="isActive('heading', {level:2}) && 'btn-active'"
-                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Heading 2">H2</button>
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Heading 2" data-test="toolbar-h2">H2</button>
                             <button type="button" @click="command('h3')" :class="isActive('heading', {level:3}) && 'btn-active'"
                                     class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Heading 3">H3</button>
                             <button type="button" @click="command('h4')" :class="isActive('heading', {level:4}) && 'btn-active'"
@@ -105,15 +105,15 @@
                                     class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Heading 5">H5</button>
                             <div class="divider divider-horizontal mx-0"></div>
                             <button type="button" @click="command('blockquote')" :class="isActive('blockquote') && 'btn-active'"
-                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Blockquote">
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Blockquote" data-test="toolbar-blockquote">
                                 <i class="ph ph-quotes"></i>
                             </button>
                             <button type="button" @click="command('bulletList')" :class="isActive('bulletList') && 'btn-active'"
-                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Bullet List">
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Bullet List" data-test="toolbar-bullet-list">
                                 <i class="ph ph-list-bullets"></i>
                             </button>
                             <button type="button" @click="command('orderedList')" :class="isActive('orderedList') && 'btn-active'"
-                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Ordered List">
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Ordered List" data-test="toolbar-ordered-list">
                                 <i class="ph ph-list-numbers"></i>
                             </button>
                             <div class="divider divider-horizontal mx-0"></div>
@@ -134,19 +134,19 @@
                                 <i class="ph ph-minus"></i>
                             </button>
                             <button type="button" @click="command('youtube')"
-                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Embed Video">
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Embed Video" data-test="toolbar-youtube">
                                 <i class="ph ph-youtube-logo"></i>
                             </button>
                         </div>
 
                         {{-- Tiptap editor mount point --}}
-                        <div id="content-editor"
+                        <div id="content-editor" data-test="content-editor"
                              class="tiptap-editor @error('content') ring-2 ring-error @enderror border border-base-content/20 rounded-b-field bg-base-100 min-h-64 focus-within:outline-2 focus-within:outline-primary/20"></div>
 
                         {{-- Inline dialogs for link / image / youtube --}}
                         <div x-show="showLinkDialog" class="flex gap-2 mt-2 items-center">
-                            <input x-model="linkUrl" type="url" placeholder="https://..." class="input input-sm input-bordered flex-1" @keydown.enter.prevent="insertLink()">
-                            <button type="button" @click="insertLink()" class="btn btn-sm btn-primary">Insert</button>
+                            <input x-model="linkUrl" type="url" placeholder="https://..." class="input input-sm input-bordered flex-1" data-test="link-url-input" @keydown.enter.prevent="insertLink()">
+                            <button type="button" @click="insertLink()" class="btn btn-sm btn-primary" data-test="link-insert-btn">Insert</button>
                             <button type="button" @click="showLinkDialog = false" class="btn btn-sm btn-ghost">Cancel</button>
                         </div>
                         <div x-show="showImageDialog" class="flex gap-2 mt-2 items-center">
@@ -155,8 +155,8 @@
                             <button type="button" @click="showImageDialog = false" class="btn btn-sm btn-ghost">Cancel</button>
                         </div>
                         <div x-show="showYoutubeDialog" class="flex gap-2 mt-2 items-center">
-                            <input x-model="youtubeUrl" type="url" placeholder="YouTube or Vimeo URL..." class="input input-sm input-bordered flex-1" @keydown.enter.prevent="insertYoutube()">
-                            <button type="button" @click="insertYoutube()" class="btn btn-sm btn-primary">Embed</button>
+                            <input x-model="youtubeUrl" type="url" placeholder="YouTube or Vimeo URL..." class="input input-sm input-bordered flex-1" data-test="youtube-url-input" @keydown.enter.prevent="insertYoutube()">
+                            <button type="button" @click="insertYoutube()" class="btn btn-sm btn-primary" data-test="youtube-embed-btn">Embed</button>
                             <button type="button" @click="showYoutubeDialog = false" class="btn btn-sm btn-ghost">Cancel</button>
                         </div>
                     </div>
