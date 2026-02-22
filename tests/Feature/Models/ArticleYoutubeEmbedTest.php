@@ -71,3 +71,11 @@ it('handles youtube live URLs', function (): void {
 
     expect($html)->toContain('https://www.youtube.com/embed/dQw4w9WgXcQ');
 });
+
+it('renders youtube embed with CRLF line endings', function (): void {
+    $content = "@[youtube](https://www.youtube.com/watch?v=dQw4w9WgXcQ)\r\n\r\nMore text";
+
+    $html = Markdown::render($content);
+
+    expect($html)->toContain('youtube.com/embed/dQw4w9WgXcQ');
+});

@@ -17,6 +17,7 @@ final class Markdown
      */
     public static function toPlainText(string $content): string
     {
+        $content = str_replace("\r\n", "\n", $content);
         $content = preg_replace(self::YOUTUBE_EMBED_PATTERN, '', $content);
 
         $html = Str::markdown((string) $content);
@@ -35,6 +36,7 @@ final class Markdown
      */
     public static function render(string $content, array $options = []): string
     {
+        $content = str_replace("\r\n", "\n", $content);
         [$content, $embeds] = self::extractVideoEmbeds($content);
 
         $host = parse_url((string) config('app.url'), PHP_URL_HOST);
