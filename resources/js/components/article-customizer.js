@@ -36,6 +36,7 @@ export default function articleCustomizer(config) {
         contentError: false,
         editorReady: false,
         hasNewPhoto: false,
+        updatedAt: 0,
 
         get isPlaceholderSlug() {
             return /^untitled-[a-z0-9]{8}$/.test(this.slug);
@@ -178,11 +179,15 @@ export default function articleCustomizer(config) {
                     content: this.content || '',
                     contentType: 'markdown',
                     onUpdate: ({ editor }) => {
+                        this.updatedAt = Date.now();
                         this.content = editor.getMarkdown();
                         this.contentError = false;
                         document.getElementById('customizer-form').dispatchEvent(
                             new Event('input', { bubbles: true })
                         );
+                    },
+                    onSelectionUpdate: () => {
+                        this.updatedAt = Date.now();
                     },
                 });
 
@@ -244,6 +249,8 @@ export default function articleCustomizer(config) {
         },
 
         isActive(name, attrs = {}) {
+            // Reading updatedAt makes Alpine re-evaluate this whenever selection or content changes.
+            void this.updatedAt;
             return rawEditor?.isActive(name, attrs) ?? false;
         },
 
@@ -283,6 +290,7 @@ export default function articleCustomizer(config) {
         },
 
         isImageAlign(align) {
+            void this.updatedAt;
             return rawEditor?.getAttributes('image')?.align === align;
         },
 
