@@ -95,7 +95,26 @@ export default function articleCustomizer(config) {
                             link: { openOnClick: false },
                         }),
                         Image,
-                        Youtube.configure({ controls: true }),
+                        Youtube.configure({ controls: true }).extend({
+                            renderMarkdown: (node) => {
+                                return `@[youtube](${node.attrs?.src || ''})`;
+                            },
+                            markdownTokenizer: {
+                                name: 'youtube',
+                                level: 'block',
+                                start(src) {
+                                    return src.search(/^@\[youtube\]/m);
+                                },
+                                tokenize(src) {
+                                    const match = src.match(/^@\[youtube\]\(([^)]+)\)(?:\n|$)/);
+                                    if (!match) return undefined;
+                                    return { type: 'youtube', raw: match[0], attributes: { src: match[1] } };
+                                },
+                            },
+                            parseMarkdown: (token, h) => {
+                                return h.createNode('youtube', { src: token.attributes?.src }, []);
+                            },
+                        }),
                         Markdown.configure({ html: false, transformPastedText: true }),
                     ],
                     content: this.content || '',

@@ -155,7 +155,7 @@
                             <button type="button" @click="showImageDialog = false" class="btn btn-sm btn-ghost">Cancel</button>
                         </div>
                         <div x-show="showYoutubeDialog" class="flex gap-2 mt-2 items-center">
-                            <input x-model="youtubeUrl" type="url" placeholder="YouTube or Vimeo URL..." class="input input-sm input-bordered flex-1" data-test="youtube-url-input" @keydown.enter.prevent="insertYoutube()">
+                            <input x-model="youtubeUrl" type="url" placeholder="YouTube URL..." class="input input-sm input-bordered flex-1" data-test="youtube-url-input" @keydown.enter.prevent="insertYoutube()">
                             <button type="button" @click="insertYoutube()" class="btn btn-sm btn-primary" data-test="youtube-embed-btn">Embed</button>
                             <button type="button" @click="showYoutubeDialog = false" class="btn btn-sm btn-ghost">Cancel</button>
                         </div>

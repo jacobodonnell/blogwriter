@@ -90,7 +90,7 @@ it('multiple toolbar commands work sequentially without JS errors', function ():
         ->assertNoJavaScriptErrors();
 })->group('slow');
 
-it('youtube embed dialog opens and works without JS errors', function (): void {
+it('youtube embed dialog opens and serializes as @[youtube] syntax', function (): void {
     $page = loginToAdmin();
 
     $page->navigate('/admin/articles/create')
@@ -99,8 +99,12 @@ it('youtube embed dialog opens and works without JS errors', function (): void {
         ->wait(0.5)
         ->fill('[data-test="youtube-url-input"]', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ')
         ->click('[data-test="youtube-embed-btn"]')
-        ->wait(0.5)
+        ->wait(1)
         ->assertNoJavaScriptErrors();
+
+    $value = $page->value('input[name="content"]');
+
+    expect($value)->toContain('@[youtube](');
 })->group('slow');
 
 it('typing in editor updates hidden content field', function (): void {
