@@ -30,6 +30,7 @@ You'll need basic comfort with a terminal — copying and pasting a few commands
 
 - **Articles** — Long-form posts with a Markdown editor (EasyMDE), live preview customizer, categories, featured images, and permalink redirects
 - **Photos** — Your own media library, stored on your server. Upload images with captions, alt text, and EXIF display. Draft photos stay private until you publish; published photos are served directly from your server. Automatic image conversions (thumbnail, medium, large) via Spatie MediaLibrary.
+- **Feeds** — RSS 2.0, Atom 1.0, and JSON Feed 1.1 at `/feed`, `/atom`, and `/feed.json`
 
 **Appearance customization:**
 
@@ -43,6 +44,7 @@ You'll need basic comfort with a terminal — copying and pasting a few commands
 - Sortable, filterable articles table with column toggles and per-page pagination
 - Statamic-inspired live preview customizer with resizable split-pane editor
 - AJAX auto-save while editing
+- Markdown export (ZIP) and import — round-trip your content with full fidelity
 
 **IndieWeb markup:**
 
@@ -66,7 +68,7 @@ You'll need basic comfort with a terminal — copying and pasting a few commands
 
 ## What's Coming
 
-See the [Roadmap](/docs/advanced/roadmap) for planned features including Notes, Tags, RSS/Atom/JSON feeds, IndieAuth, and more.
+See the [Roadmap](/docs/advanced/roadmap) for planned features including Notes, Tags, IndieAuth, and more.
 
 ## Documentation
 

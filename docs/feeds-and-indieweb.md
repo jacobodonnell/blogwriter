@@ -87,19 +87,21 @@ You can verify your microformats implementation using:
 
 ---
 
-## Feeds: Planned
+## Feeds: Implemented
 
-RSS, Atom, and JSON Feed generation is planned. When implemented, BlogWriter will produce:
+BlogWriter generates three feed formats from your published articles and photos.
 
 | Feed      | URL                                 | Format        |
 |-----------|-------------------------------------|---------------|
-| RSS       | `yourdomain.com/feed` (also `/rss`) | RSS 2.0       |
-| Atom      | `yourdomain.com/atom`               | Atom 1.0      |
-| JSON Feed | `yourdomain.com/feed.json`          | JSON Feed 1.1 |
+| RSS       | `/feed` (or `/rss`)                 | RSS 2.0       |
+| Atom      | `/atom`                             | Atom 1.0      |
+| JSON Feed | `/feed.json`                        | JSON Feed 1.1 |
 
-All three will include full content (not excerpts) for recent published posts.
+All feeds include full content (not excerpts) for the 20 most recent published items across articles and photos, sorted chronologically.
 
-Feed discovery `<link>` tags will be added to the HTML head so feed readers can auto-discover your feeds.
+### Feed Discovery
+
+Feed discovery `<link>` tags (for auto-discovery by feed readers) are planned but not yet added to the HTML `<head>`.
 
 ---
 
@@ -123,7 +125,8 @@ Webmentions are a protocol for sites to notify each other when they link to one 
 |----------------------------------------|-------------|
 | Microformats (h-card, h-entry, h-feed) | Implemented |
 | rel="me" identity links                | Implemented |
-| RSS/Atom/JSON Feeds                    | Planned     |
+| RSS/Atom/JSON Feeds                    | Implemented |
+| Feed discovery `<link>` tags           | Planned     |
 | IndieAuth                              | Planned     |
 | Webmentions                            | Planned     |
 

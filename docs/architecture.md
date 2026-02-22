@@ -83,13 +83,15 @@ blogwriter/
 │   ├── Console/
 │   │   └── Commands/
 │   │       ├── InstallCommand.php          # php artisan blogwriter:install
+│   │       ├── UninstallCommand.php        # php artisan blogwriter:uninstall
 │   │       ├── CreateUserCommand.php
 │   │       ├── SeedCommand.php
-│   │       ├── CheckImageHealth.php
 │   │       ├── DiagnoseCommand.php
 │   │       └── ProfileCommand.php
 │   ├── Exceptions/
 │   │   └── SingleUserViolationException.php
+│   ├── DTOs/
+│   │   └── FeedItem.php                    # Typed DTO for feed entries
 │   ├── Http/
 │   │   ├── Controllers/
 │   │   │   ├── AboutController.php         # Public about page
@@ -97,6 +99,7 @@ blogwriter/
 │   │   │   ├── PhotoController.php         # Public photo display
 │   │   │   ├── CategoryController.php
 │   │   │   ├── CategoryContentController.php
+│   │   │   ├── FeedController.php          # RSS, Atom, JSON Feed
 │   │   │   ├── HomeController.php          # Public homepage
 │   │   │   ├── InstallController.php       # Install page (shows CLI instructions)
 │   │   │   └── Admin/
@@ -111,6 +114,9 @@ blogwriter/
 │   │   │       ├── ProfileSettingsController.php
 │   │   │       ├── SiteSettingsController.php
 │   │   │       ├── AppearanceController.php
+│   │   │       ├── ArticleExportController.php
+│   │   │       ├── ArticleImportController.php
+│   │   │       ├── ExportController.php
 │   │   │       └── MediaController.php     # Serves draft media from private disk
 │   │   └── Requests/
 │   │       ├── StoreArticleRequest.php
@@ -124,6 +130,14 @@ blogwriter/
 │   │   ├── Category.php
 │   │   ├── User.php
 │   │   ├── Setting.php
+│   ├── Services/
+│   │   ├── FeedService.php                 # Merges articles + photos for feeds
+│   │   ├── ArticleExportService.php
+│   │   └── ArticleImportService.php
+│   ├── Support/
+│   │   ├── ParsedImport.php
+│   │   ├── PreflightResult.php
+│   │   └── ImportResult.php
 │   └── View/
 │       └── Components/
 ├── config/
@@ -140,10 +154,13 @@ blogwriter/
 │   │   │   ├── articles.blade.php          # Articles index (h-feed)
 │   │   │   ├── article.blade.php           # Single article (h-entry)
 │   │   │   ├── category.blade.php          # Category page (h-feed)
-│   │   │   └── profile.blade.php           # Profile page (h-card)
+│   │   │   └── about.blade.php             # Profile/about page (h-card)
 │   │   ├── photos/
 │   │   │   ├── index.blade.php             # Photos index (h-feed)
 │   │   │   └── show.blade.php              # Single photo (h-entry)
+│   │   ├── feeds/
+│   │   │   ├── rss.blade.php               # RSS 2.0 feed
+│   │   │   └── atom.blade.php              # Atom 1.0 feed
 │   │   ├── admin/
 │   │   │   ├── dashboard.blade.php
 │   │   │   ├── articles/

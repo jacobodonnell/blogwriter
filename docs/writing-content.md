@@ -156,4 +156,23 @@ The articles index provides a sortable, filterable table:
 
 The dashboard displays content stats and quick action links.
 
+---
+
+## Import & Export
+
+### Exporting Articles
+
+Go to **Settings → Import & Export → Export Articles** to download a ZIP containing all your articles as Markdown files with YAML frontmatter, plus a `categories.yaml` file.
+
+The ZIP is compatible with Hugo, Jekyll, Eleventy, and other static site generators.
+
+### Importing Articles
+
+Upload a BlogWriter export ZIP to restore articles on a fresh install or migrate from another instance. The importer:
+
+- Restores categories from `categories.yaml` (if present)
+- Warns if any article references a category not found in the database
+- Lets you skip or overwrite duplicate slugs
+- Preserves original `created_at`, `published_at`, `slug`, and all metadata
+
 #### [Up Next: *Appearance*](/docs/customization/appearance)

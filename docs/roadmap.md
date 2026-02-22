@@ -58,11 +58,21 @@ BlogWriter is in pre-alpha. This roadmap shows what's built and what's planned.
 - Draft media served via authenticated controller (private disk); published media served from public disk
 - Profile page with h-card
 
+### Feeds & Distribution
+
+- RSS 2.0, Atom 1.0, and JSON Feed 1.1 at `/feed`, `/atom`, and `/feed.json`
+- All feeds include full content for the 20 most recent published items (articles + photos)
+
+### Import & Export
+
+- Markdown export ZIP — download all articles as `.md` files with YAML frontmatter via the admin panel
+- ZIP import — restore articles with categories, slugs, and timestamps preserved via the admin panel
+
 ### Developer Experience
 
 - Pest 4 test suite with factories
 - Laravel Pint code formatting
-- Artisan commands: install, create-user, seed, diagnose, profile, check-image-health
+- Artisan commands: install, create-user, seed, diagnose, profile, uninstall
 
 ---
 
@@ -79,9 +89,8 @@ BlogWriter is in pre-alpha. This roadmap shows what's built and what's planned.
 
 ### Feeds & Distribution
 
-- RSS 2.0, Atom 1.0, JSON Feed 1.1 generation
-- Feed discovery `<link>` tags
-- Markdown export (`.md` URLs)
+- Feed discovery `<link>` tags (auto-discovery for feed readers)
+- Markdown export (`.md` URLs per article)
 
 ### IndieWeb Protocols
 
