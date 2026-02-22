@@ -28,7 +28,7 @@ You'll need basic comfort with a terminal — copying and pasting a few commands
 
 **Two ways to publish:**
 
-- **Articles** — Long-form posts with a Markdown editor (EasyMDE), live preview customizer, categories, featured images, and permalink redirects
+- **Articles** — Long-form posts with a Tiptap WYSIWYG editor, live preview customizer, categories, featured images, and permalink redirects
 - **Photos** — Your own media library, stored on your server. Upload images with captions, alt text, and EXIF display. Draft photos stay private until you publish; published photos are served directly from your server. Automatic image conversions (thumbnail, medium, large) via Spatie MediaLibrary.
 - **Feeds** — RSS 2.0, Atom 1.0, and JSON Feed 1.1 at `/feed`, `/atom`, and `/feed.json`
 

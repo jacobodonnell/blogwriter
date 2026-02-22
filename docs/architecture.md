@@ -25,7 +25,7 @@ Technical overview of BlogWriter for contributors.
 | CSS Components    | DaisyUI                 | v5      |
 | Auth Backend      | Laravel Fortify         | v1      |
 | Media             | Spatie MediaLibrary     | ---     |
-| Editor            | EasyMDE                 | ---     |
+| Editor            | Tiptap + tiptap-markdown| ---     |
 | Testing           | Pest                    | v4      |
 
 ---
@@ -55,9 +55,16 @@ Authentication uses Laravel Fortify for the backend, with a custom login UI buil
 
 One admin account. One blog. Registration is disabled after the first user is created. A `SingleUserViolationException` is thrown if additional user creation is attempted. Enforcement is via a `booted()` model event on `User` that runs before any save.
 
-### EasyMDE Editor
+### Tiptap Editor
 
-Articles use EasyMDE, a Markdown editor with toolbar buttons and preview. Content is stored as Markdown in the database.
+Articles use Tiptap, a WYSIWYG editor with a rich formatting toolbar. Content is entered as WYSIWYG and stored as Markdown in the database via the tiptap-markdown extension — users never see raw Markdown syntax.
+
+The toolbar provides: Bold, Italic, H2, H3, Blockquote, Bullet list, Ordered list, YouTube embed (dialog), and Image alignment/resize controls.
+
+Custom syntax is handled transparently by the client-side Markdown serializer and the server-side `Markdown::render()` renderer:
+
+- **YouTube embeds** — Rendered as responsive iframes; stored as `@[youtube](url)` internally
+- **Image alignment/sizing** — Controlled via editor UI; stored as extended Markdown syntax (`![alt|align:center,width:50%,caption:text](url)`) internally
 
 ### Content Newline Normalization
 
@@ -226,7 +233,7 @@ blogwriter/
 
 | Type    | Editor  | Storage             | Rendering        |
 |---------|---------|---------------------|------------------|
-| Article | EasyMDE | `content` (Markdown)| Markdown -> HTML |
+| Article | Tiptap  | `content` (Markdown)| Markdown -> HTML |
 | Photo   | Upload  | MediaLibrary files  | Image conversions|
 | Photo   | Caption | `caption` (Markdown)| Markdown -> HTML |
 

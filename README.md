@@ -8,7 +8,7 @@ BlogWriter is a personal blogging platform you install on your own server. No pl
 
 **Content:**
 
-- **Articles** --- Long-form posts with EasyMDE Markdown editor, live preview customizer, categories, featured images, and permalink slug redirects
+- **Articles** --- Long-form posts with Tiptap WYSIWYG editor, live preview customizer, categories, featured images, and permalink slug redirects
 - **Photos** --- Image posts with captions, alt text, EXIF display, and automatic image conversions (thumbnail, medium, large) via Spatie MediaLibrary
 
 **Appearance:**
@@ -67,7 +67,7 @@ The installer checks requirements, creates your database, sets up your admin acc
 | CSS | Tailwind CSS v4 + DaisyUI | Utility-first with pre-built components |
 | Auth | Laravel Fortify | Headless auth, custom UI |
 | Media | Spatie MediaLibrary | Image handling and conversions |
-| Editor | EasyMDE | Markdown editing with toolbar and preview |
+| Editor | Tiptap + tiptap-markdown | WYSIWYG editing, Markdown storage |
 | Testing | Pest 4 | Expressive, readable tests |
 
 ## Documentation
@@ -89,7 +89,7 @@ BlogWriter is in pre-alpha.
 
 **Built:** Articles, Photos, Categories, Appearance (35 themes, 11 fonts), Admin panel, CLI Installer, Auth, MediaLibrary, Microformats (h-card, h-entry, h-feed, rel="me"), RSS/Atom/JSON Feeds, Import & Export, PWA
 
-**Planned:** Notes, Tags, Feed discovery `<link>` tags, IndieAuth, Webmentions
+**Planned:** Notes, Tags, IndieAuth, Webmentions
 
 **Future:** Monetization, podcasts, video, plugin marketplace, managed hosting
 

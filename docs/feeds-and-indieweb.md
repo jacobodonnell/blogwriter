@@ -101,7 +101,7 @@ All feeds include full content (not excerpts) for the 20 most recent published i
 
 ### Feed Discovery
 
-Feed discovery `<link>` tags (for auto-discovery by feed readers) are planned but not yet added to the HTML `<head>`.
+Feed discovery `<link>` tags are included in the HTML `<head>` for all public pages, enabling feed readers to automatically detect your feeds.
 
 ---
 
@@ -126,7 +126,7 @@ Webmentions are a protocol for sites to notify each other when they link to one 
 | Microformats (h-card, h-entry, h-feed) | Implemented |
 | rel="me" identity links                | Implemented |
 | RSS/Atom/JSON Feeds                    | Implemented |
-| Feed discovery `<link>` tags           | Planned     |
+| Feed discovery `<link>` tags           | Implemented |
 | IndieAuth                              | Planned     |
 | Webmentions                            | Planned     |
 

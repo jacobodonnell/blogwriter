@@ -37,13 +37,20 @@ Articles are long-form posts with titles. Blog posts, essays, tutorials.
 
 The Customizer is BlogWriter's article editor — a Statamic-inspired split-pane layout with editing controls on the left and a live preview of your article on the right. The preview updates as you type and the pane is resizable.
 
-As you type, your changes auto-save in the background via AJAX and the preview updates. The editor uses **EasyMDE**, a Markdown editor with toolbar formatting buttons and live Markdown preview.
+As you type, your changes auto-save in the background via AJAX and the preview updates. The editor uses **Tiptap**, a WYSIWYG rich-text editor — you format your content with toolbar buttons and never see raw Markdown syntax. A full-width toggle hides the preview panel when you want more writing room.
+
+The toolbar includes: **Bold**, **Italic**, **H2**, **H3**, **Blockquote**, **Bullet list**, **Ordered list**, **YouTube embed** (dialog), and **Image alignment/resize** controls.
+
+Markdown is the underlying storage format, but all syntax is handled transparently:
+
+- **YouTube embeds** — Click the embed button, paste a URL, and it renders as a responsive iframe. Stored as `@[youtube](url)` internally.
+- **Image alignment and sizing** — Select an image in the editor to access alignment and resize handles. Stored as extended Markdown syntax internally.
 
 ### Fields
 
 - **Title** (required) — Your article's headline. A URL slug is auto-generated from the title. You can edit the slug manually.
 - **Summary** (optional) — A short description used in article lists and SEO meta tags.
-- **Content** (required) — Markdown content via EasyMDE editor. A `NoH1Heading` validation rule prevents H1 headings in content (the title serves as the H1).
+- **Content** (required) — Rich text via Tiptap editor. A `NoH1Heading` validation rule prevents H1 headings in content (the title serves as the H1).
 - **Featured Image** (optional) — Attach a photo in two ways:
   1. Select an existing photo from the dropdown
   2. Upload a new photo directly from the customizer via a modal — the photo is created and associated automatically

@@ -49,7 +49,7 @@ fees or platform risk.
 
 ### Publishing
 
-- [x] Article editor (EasyMDE Markdown editor)
+- [x] Article editor (Tiptap WYSIWYG editor)
 - [ ] Note composer (quick post interface)
 - [x] Draft/published workflow
 - [x] Categories (tags planned)
@@ -58,9 +58,10 @@ fees or platform risk.
 
 ### Feeds
 
-- [ ] RSS feed
-- [ ] Atom feed
-- [ ] JSON Feed
+- [x] RSS feed
+- [x] Atom feed
+- [x] JSON Feed
+- [x] Feed discovery `<link>` tags
 
 ### Installation
 
@@ -244,7 +245,7 @@ A separate Laravel management application that provisions BlogWriter instances i
 - **Database:** SQLite (simple, portable, fast)
 - **Authentication:** Laravel Fortify
 - **Frontend:** Blade + Alpine.js + Alpine AJAX + Tailwind CSS + DaisyUI
-- **Editor:** EasyMDE (current), block-based rich text editor (planned)
+- **Editor:** Tiptap with tiptap-markdown extension (current), block-based rich text editor (planned)
 - **Runtime:** FrankenPHP (optional, for performance)
 
 ### Why This Stack

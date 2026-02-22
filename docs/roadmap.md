@@ -14,7 +14,7 @@ BlogWriter is in pre-alpha. This roadmap shows what's built and what's planned.
 
 ### Content
 
-- Article CRUD with EasyMDE Markdown editor
+- Article CRUD with Tiptap WYSIWYG editor (Markdown storage)
 - Statamic-inspired live preview customizer with resizable split-pane editor
 - AJAX auto-save while editing
 - Draft/published workflow with timestamps
@@ -62,6 +62,7 @@ BlogWriter is in pre-alpha. This roadmap shows what's built and what's planned.
 
 - RSS 2.0, Atom 1.0, and JSON Feed 1.1 at `/feed`, `/atom`, and `/feed.json`
 - All feeds include full content for the 20 most recent published items (articles + photos)
+- Feed discovery `<link>` tags in HTML `<head>` for auto-discovery by feed readers
 
 ### Import & Export
 
@@ -89,7 +90,6 @@ BlogWriter is in pre-alpha. This roadmap shows what's built and what's planned.
 
 ### Feeds & Distribution
 
-- Feed discovery `<link>` tags (auto-discovery for feed readers)
 - Markdown export (`.md` URLs per article)
 
 ### IndieWeb Protocols

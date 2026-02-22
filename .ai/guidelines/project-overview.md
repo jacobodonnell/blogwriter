@@ -16,7 +16,7 @@ Make owning your content as easy as using Substack—without platform fees or pl
 - **Database:** SQLite
 - **Authentication:** Laravel Fortify (custom implementation)
 - **Frontend:** Blade + Alpine.js + Alpine AJAX + Tailwind CSS + DaisyUI
-- **Editor:** EasyMDE (Markdown) for articles
+- **Editor:** Tiptap with tiptap-markdown extension for articles
 
 ## DaisyUI
 
@@ -35,7 +35,7 @@ IMPORTANT: Activate the `daisyui-development` skill when:
 
 ## Content Types
 
-- **Articles** - Long-form posts with titles (EasyMDE Markdown editor)
+- **Articles** - Long-form posts with titles (Tiptap WYSIWYG editor)
 - **Notes** - Short posts (planned)
 - **Photos** - Images with captions
 
