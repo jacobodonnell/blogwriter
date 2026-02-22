@@ -168,6 +168,9 @@ final class ArticleImportService
                     'last_edited_at' => empty($frontmatter['last_edited_at'])
                         ? null
                         : \Carbon\Carbon::parse($frontmatter['last_edited_at'])->startOfSecond(),
+                    'created_at' => empty($frontmatter['created_at'])
+                        ? now()
+                        : \Carbon\Carbon::parse($frontmatter['created_at']),
                     'past_slugs' => $frontmatter['past_slugs'] ?? [],
                     'category_id' => isset($frontmatter['category'])
                         ? ($categoryMap[$frontmatter['category']] ?? null)

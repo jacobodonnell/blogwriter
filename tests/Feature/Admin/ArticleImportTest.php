@@ -319,3 +319,23 @@ it('maps featured_image_url in frontmatter to meta.featured_image_url', function
     $article = Article::query()->where('slug', 'image-article')->first();
     expect($article->meta['featured_image_url'])->toBe('https://cdn.example.com/hero.jpg');
 });
+
+it('restores created_at from frontmatter', function (): void {
+    $md = makeArticleMd([
+        'title' => 'Old Post',
+        'slug' => 'old-post',
+        'draft' => false,
+        'date' => '2023-06-15T10:00:00+00:00',
+        'created_at' => '2023-01-01T08:00:00+00:00',
+    ]);
+
+    $zip = makeImportZip(['articles/old-post.md' => $md]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok']);
+
+    $article = Article::query()->where('slug', 'old-post')->first();
+    expect($article->created_at->toIso8601String())->toBe('2023-01-01T08:00:00+00:00');
+});
