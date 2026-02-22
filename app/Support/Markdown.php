@@ -11,14 +11,17 @@ final class Markdown
 {
     private const YOUTUBE_EMBED_PATTERN = '/^@\[youtube\]\(([^)]+)\)$/m';
 
+    private const EXTENDED_IMAGE_PATTERN = '/!\[([^\]]*\|[^\]]*)\]\(([^)]+)\)/';
+
     /**
      * Convert markdown to plain text by rendering to HTML then stripping tags.
-     * Strips @[youtube](...) lines so they don't appear in excerpts/meta descriptions.
+     * Strips @[youtube](...) lines and extended images so they don't appear in excerpts/meta descriptions.
      */
     public static function toPlainText(string $content): string
     {
         $content = str_replace("\r\n", "\n", $content);
         $content = preg_replace(self::YOUTUBE_EMBED_PATTERN, '', $content);
+        $content = preg_replace(self::EXTENDED_IMAGE_PATTERN, '', $content);
 
         $html = Str::markdown((string) $content);
         $html = preg_replace('/<\/(h[1-6]|p|li|blockquote|div|tr)>/', '$0 ', $html);
@@ -38,6 +41,7 @@ final class Markdown
     {
         $content = str_replace("\r\n", "\n", $content);
         [$content, $embeds] = self::extractVideoEmbeds($content);
+        [$content, $images] = self::extractExtendedImages($content);
 
         $host = parse_url((string) config('app.url'), PHP_URL_HOST);
 
@@ -55,7 +59,9 @@ final class Markdown
             new ExternalLinkExtension,
         ]);
 
-        return self::restoreVideoEmbeds($html, $embeds);
+        $html = self::restoreVideoEmbeds($html, $embeds);
+
+        return self::restoreExtendedImages($html, $images);
     }
 
     /**
@@ -123,5 +129,89 @@ final class Markdown
         }
 
         return null;
+    }
+
+    /**
+     * Extract extended image syntax ![alt|key:val](url) and replace with placeholders.
+     *
+     * @return array{0: string, 1: array<int, array{alt: string, src: string}>}
+     */
+    private static function extractExtendedImages(string $content): array
+    {
+        $images = [];
+        $index = 0;
+
+        $content = preg_replace_callback(self::EXTENDED_IMAGE_PATTERN, function (array $matches) use (&$images, &$index): string {
+            $images[$index] = ['alt' => $matches[1], 'src' => $matches[2]];
+
+            return 'IMAGE_EMBED_'.$index++.'_PLACEHOLDER';
+        }, $content);
+
+        return [(string) $content, $images];
+    }
+
+    /**
+     * Parse the extended alt string (e.g. "Alt text|align:center|width:400|caption:Hello") into its components.
+     *
+     * @return array{alt: string, align: string|null, width: int|null, caption: string|null}
+     */
+    private static function parseExtendedImageAlt(string $rawAlt): array
+    {
+        $parts = explode('|', $rawAlt);
+        $alt = array_shift($parts);
+        $align = null;
+        $width = null;
+        $caption = null;
+
+        $allowedAligns = ['left', 'center', 'right', 'full'];
+
+        foreach ($parts as $part) {
+            $colonIdx = mb_strpos($part, ':');
+            if ($colonIdx === false) {
+                continue;
+            }
+
+            $key = mb_trim(mb_substr($part, 0, $colonIdx));
+            $value = mb_trim(mb_substr($part, $colonIdx + 1));
+
+            match ($key) {
+                'align' => $align = in_array($value, $allowedAligns, true) ? $value : null,
+                'width' => $width = is_numeric($value) ? (int) $value : null,
+                'caption' => $caption = urldecode($value),
+                default => null,
+            };
+        }
+
+        return compact('alt', 'align', 'width', 'caption');
+    }
+
+    /**
+     * Replace IMAGE_EMBED_N_PLACEHOLDER paragraphs with rendered image/figure HTML.
+     *
+     * @param  array<int, array{alt: string, src: string}>  $images
+     */
+    private static function restoreExtendedImages(string $html, array $images): string
+    {
+        foreach ($images as $index => $image) {
+            ['alt' => $rawAlt, 'src' => $src] = $image;
+            ['alt' => $alt, 'align' => $align, 'width' => $width, 'caption' => $caption] = self::parseExtendedImageAlt($rawAlt);
+
+            $class = $align ? 'img-align-'.$align : null;
+
+            $style = $width ? 'width:'.$width.'px;max-width:100%' : null;
+
+            $imgTag = '<img src="'.e($src).'" alt="'.e($alt).'"'
+                .($class ? ' class="'.e($class).'"' : '')
+                .($style ? ' style="'.e($style).'"' : '')
+                .'>';
+
+            $replacement = $caption
+                ? '<figure'.($class ? ' class="'.e($class).'"' : '').'>'.$imgTag.'<figcaption>'.e($caption).'</figcaption></figure>'
+                : $imgTag;
+
+            $html = str_replace('<p>IMAGE_EMBED_'.$index.'_PLACEHOLDER</p>', $replacement, $html);
+        }
+
+        return $html;
     }
 }
