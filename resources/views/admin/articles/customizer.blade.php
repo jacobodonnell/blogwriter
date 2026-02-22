@@ -72,19 +72,95 @@
 
                 {{-- Content --}}
                 <fieldset class="fieldset">
-                    <legend class="fieldset-legend">Content (Markdown)</legend>
+                    <legend class="fieldset-legend">Content</legend>
 
-                    {{-- Skeleton placeholder while EasyMDE initializes --}}
+                    {{-- Hidden field for form submission --}}
+                    <input type="hidden" name="content" :value="content">
+
+                    {{-- Skeleton placeholder while Tiptap initializes --}}
                     <div x-show="!editorReady" x-transition:leave x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="space-y-2">
                         <div class="skeleton h-10 w-full rounded"></div>
                         <div class="skeleton h-64 w-full rounded"></div>
                     </div>
 
                     <div :class="!editorReady && 'h-0 overflow-hidden'">
-                        <textarea id="content-editor" name="content" x-model="content"
-                                  class="textarea textarea-bordered w-full h-64 font-mono text-sm @error('content') textarea-error @enderror"
-                                  placeholder="## Write your article here...">{{ old('content', $article->content) }}</textarea>
+                        {{-- Tiptap toolbar --}}
+                        <div class="tiptap-toolbar flex flex-wrap items-center gap-1 p-2 bg-base-200 border border-base-content/20 border-b-0 rounded-t-field">
+                            <button type="button" @click="command('bold')" :class="isActive('bold') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Bold">
+                                <i class="ph ph-text-b"></i>
+                            </button>
+                            <button type="button" @click="command('italic')" :class="isActive('italic') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Italic">
+                                <i class="ph ph-text-italic"></i>
+                            </button>
+                            <div class="divider divider-horizontal mx-0"></div>
+                            <button type="button" @click="command('h2')" :class="isActive('heading', {level:2}) && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Heading 2">H2</button>
+                            <button type="button" @click="command('h3')" :class="isActive('heading', {level:3}) && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Heading 3">H3</button>
+                            <button type="button" @click="command('h4')" :class="isActive('heading', {level:4}) && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Heading 4">H4</button>
+                            <button type="button" @click="command('h5')" :class="isActive('heading', {level:5}) && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Heading 5">H5</button>
+                            <div class="divider divider-horizontal mx-0"></div>
+                            <button type="button" @click="command('blockquote')" :class="isActive('blockquote') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Blockquote">
+                                <i class="ph ph-quotes"></i>
+                            </button>
+                            <button type="button" @click="command('bulletList')" :class="isActive('bulletList') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Bullet List">
+                                <i class="ph ph-list-bullets"></i>
+                            </button>
+                            <button type="button" @click="command('orderedList')" :class="isActive('orderedList') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Ordered List">
+                                <i class="ph ph-list-numbers"></i>
+                            </button>
+                            <div class="divider divider-horizontal mx-0"></div>
+                            <button type="button" @click="command('link')"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Link">
+                                <i class="ph ph-link"></i>
+                            </button>
+                            <button type="button" @click="command('image')"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Image">
+                                <i class="ph ph-image"></i>
+                            </button>
+                            <button type="button" @click="command('code')" :class="isActive('code') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Inline Code">
+                                <i class="ph ph-code"></i>
+                            </button>
+                            <button type="button" @click="command('horizontalRule')"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Horizontal Rule">
+                                <i class="ph ph-minus"></i>
+                            </button>
+                            <button type="button" @click="command('youtube')"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Embed Video">
+                                <i class="ph ph-youtube-logo"></i>
+                            </button>
+                        </div>
+
+                        {{-- Tiptap editor mount point --}}
+                        <div id="content-editor"
+                             class="tiptap-editor @error('content') ring-2 ring-error @enderror border border-base-content/20 rounded-b-field bg-base-100 min-h-64 focus-within:outline-2 focus-within:outline-primary/20"></div>
+
+                        {{-- Inline dialogs for link / image / youtube --}}
+                        <div x-show="showLinkDialog" class="flex gap-2 mt-2 items-center">
+                            <input x-model="linkUrl" type="url" placeholder="https://..." class="input input-sm input-bordered flex-1" @keydown.enter.prevent="insertLink()">
+                            <button type="button" @click="insertLink()" class="btn btn-sm btn-primary">Insert</button>
+                            <button type="button" @click="showLinkDialog = false" class="btn btn-sm btn-ghost">Cancel</button>
+                        </div>
+                        <div x-show="showImageDialog" class="flex gap-2 mt-2 items-center">
+                            <input x-model="imageUrl" type="url" placeholder="https://..." class="input input-sm input-bordered flex-1" @keydown.enter.prevent="insertImage()">
+                            <button type="button" @click="insertImage()" class="btn btn-sm btn-primary">Insert</button>
+                            <button type="button" @click="showImageDialog = false" class="btn btn-sm btn-ghost">Cancel</button>
+                        </div>
+                        <div x-show="showYoutubeDialog" class="flex gap-2 mt-2 items-center">
+                            <input x-model="youtubeUrl" type="url" placeholder="YouTube or Vimeo URL..." class="input input-sm input-bordered flex-1" @keydown.enter.prevent="insertYoutube()">
+                            <button type="button" @click="insertYoutube()" class="btn btn-sm btn-primary">Embed</button>
+                            <button type="button" @click="showYoutubeDialog = false" class="btn btn-sm btn-ghost">Cancel</button>
+                        </div>
                     </div>
+
                     @error('content')
                     <div role="alert" class="alert alert-error mt-2" x-data="{ show: true }" x-show="show"
                          x-init="setTimeout(() => show = false, 8000)" x-transition>

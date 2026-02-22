@@ -1,3 +1,9 @@
+import { Editor } from '@tiptap/core';
+import StarterKit from '@tiptap/starter-kit';
+import Image from '@tiptap/extension-image';
+import Youtube from '@tiptap/extension-youtube';
+import { Markdown } from '@tiptap/markdown';
+
 export default function articleCustomizer(config) {
     return {
         title: config.title,
@@ -11,7 +17,13 @@ export default function articleCustomizer(config) {
         showUrlField: config.showUrlField,
         featuredImageCaption: config.featuredImageCaption,
         usePhotoCaption: config.usePhotoCaption,
-        easyMDE: null,
+        editor: null,
+        showLinkDialog: false,
+        linkUrl: '',
+        showImageDialog: false,
+        imageUrl: '',
+        showYoutubeDialog: false,
+        youtubeUrl: '',
         initialStatus: config.initialStatus,
         currentStatus: config.currentStatus,
         wasEverPublished: config.wasEverPublished,
@@ -70,33 +82,34 @@ export default function articleCustomizer(config) {
 
         init() {
             this.$nextTick(() => {
-                const ta = document.getElementById('content-editor');
-                if (!ta) return;
+                const el = document.getElementById('content-editor');
+                if (!el) return;
 
-                this.easyMDE = new EasyMDE({
-                    element: ta,
-                    forceSync: true,
-                    spellChecker: false,
-                    status: false,
-                    placeholder: '## Write your article here...',
-                    toolbar: [
-                        'bold', 'italic', 'heading-2', 'heading-3', '|',
-                        'quote', 'unordered-list', 'ordered-list', '|',
-                        'link', 'image', 'code', 'horizontal-rule', '|',
-                        'guide'
+                this.editor = new Editor({
+                    element: el,
+                    extensions: [
+                        StarterKit.configure({
+                            heading: { levels: [2, 3, 4, 5] },
+                            codeBlock: { languageClassPrefix: 'language-' },
+                            link: { openOnClick: false },
+                        }),
+                        Image,
+                        Youtube.configure({ controls: true }),
+                        Markdown.configure({ html: false, transformPastedText: true }),
                     ],
-                    initialValue: this.content,
+                    onUpdate: ({ editor }) => {
+                        this.content = editor.getMarkdown();
+                        this.contentError = false;
+                        document.getElementById('customizer-form').dispatchEvent(
+                            new Event('input', { bubbles: true })
+                        );
+                    },
                 });
 
+                if (this.content) {
+                    this.editor.commands.setContent(this.content, false, { contentType: 'markdown' });
+                }
                 this.editorReady = true;
-
-                this.easyMDE.codemirror.on('change', () => {
-                    this.content = this.easyMDE.value();
-                    this.contentError = false;
-                    document.getElementById('customizer-form').dispatchEvent(
-                        new Event('input', { bubbles: true })
-                    );
-                });
             });
 
             const store = Alpine.store('saveButton');
@@ -117,6 +130,56 @@ export default function articleCustomizer(config) {
                 if (this.buttonAction === 'unpublish') { document.getElementById('unpublish-modal').showModal(); return; }
                 this.submitFullSave();
             });
+        },
+
+        command(name) {
+            if (!this.editor) return;
+            const chain = this.editor.chain().focus();
+            const map = {
+                bold: () => chain.toggleBold().run(),
+                italic: () => chain.toggleItalic().run(),
+                h2: () => chain.toggleHeading({ level: 2 }).run(),
+                h3: () => chain.toggleHeading({ level: 3 }).run(),
+                h4: () => chain.toggleHeading({ level: 4 }).run(),
+                h5: () => chain.toggleHeading({ level: 5 }).run(),
+                blockquote: () => chain.toggleBlockquote().run(),
+                bulletList: () => chain.toggleBulletList().run(),
+                orderedList: () => chain.toggleOrderedList().run(),
+                code: () => chain.toggleCode().run(),
+                codeBlock: () => chain.toggleCodeBlock().run(),
+                horizontalRule: () => chain.setHorizontalRule().run(),
+                link: () => { this.linkUrl = ''; this.showLinkDialog = true; },
+                image: () => { this.imageUrl = ''; this.showImageDialog = true; },
+                youtube: () => { this.youtubeUrl = ''; this.showYoutubeDialog = true; },
+            };
+            map[name]?.();
+        },
+
+        isActive(name, attrs = {}) {
+            return this.editor?.isActive(name, attrs) ?? false;
+        },
+
+        insertLink() {
+            if (!this.linkUrl) return;
+            this.editor.chain().focus().setLink({ href: this.linkUrl }).run();
+            this.showLinkDialog = false;
+        },
+
+        insertImage() {
+            if (!this.imageUrl) return;
+            this.editor.chain().focus().setImage({ src: this.imageUrl }).run();
+            this.showImageDialog = false;
+        },
+
+        insertYoutube() {
+            if (!this.youtubeUrl) return;
+            this.editor.chain().focus().setYoutubeVideo({ src: this.youtubeUrl }).run();
+            this.showYoutubeDialog = false;
+        },
+
+        destroy() {
+            this.editor?.destroy();
+            this.editor = null;
         },
 
         attachPhoto() {
@@ -140,17 +203,15 @@ export default function articleCustomizer(config) {
         },
 
         submitFullSave() {
-            if (this.easyMDE) {
-                this.content = this.easyMDE.value();
+            if (this.editor) {
+                this.content = this.editor.getMarkdown();
             }
             if (!this.content || !this.content.trim()) {
                 this.contentError = true;
-                if (this.easyMDE) {
-                    this.easyMDE.codemirror.focus();
-                }
+                this.editor?.commands.focus();
                 return;
             }
-            let form = document.getElementById('customizer-form');
+            const form = document.getElementById('customizer-form');
             form.removeAttribute('x-target');
             form.action = config.saveRoute;
             form.submit();
