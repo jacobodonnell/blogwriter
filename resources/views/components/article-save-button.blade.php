@@ -5,12 +5,7 @@
     {{-- Main submit button --}}
     <button type="submit"
             data-test="save-button"
-            @click.prevent="
-                if (buttonAction === 'publish') { document.getElementById('publish-modal').showModal(); return; }
-                if (buttonAction === 'republish') { document.getElementById('republish-modal').showModal(); return; }
-                if (buttonAction === 'unpublish') { document.getElementById('unpublish-modal').showModal(); return; }
-                submitFullSave();
-            "
+            @click.prevent="window.dispatchEvent(new CustomEvent('save-article'))"
             class="btn w-full gap-2"
             :class="buttonClass">
         <i class="ph" :class="buttonIcon"></i>

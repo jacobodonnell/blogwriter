@@ -8,30 +8,30 @@
 
 
     <div x-data="customizerLayout()"
-         @pointermove.window="if (dragging) {
-            let delta = $event.clientX - startX;
-            startX = $event.clientX;
-            if (dragTarget === 'drawer') {
-                panelWidth = Math.min(700, Math.max(320, panelWidth + delta));
-            } else if (dragTarget === 'preview-left') {
-                previewWidth = Math.max(320, Math.min(previewAreaWidth, previewWidth - delta));
-            } else if (dragTarget === 'preview-right') {
-                previewWidth = Math.max(320, Math.min(previewAreaWidth, previewWidth + delta));
-            }
-         }"
-         @pointerup.window="if (dragging) { dragging = false; dragTarget = null; document.body.style.userSelect = ''; document.body.style.cursor = ''; }"
+         @pointermove.window="handleDrag($event)"
+         @pointerup.window="stopDrag()"
          class="flex flex-col h-screen">
 
         {{-- Top Navbar --}}
         <header class="navbar flex-nowrap bg-base-100 border-b border-base-300 px-4 shrink-0 z-30">
             <div class="flex flex-1 items-center gap-2">
                 {{-- Drawer Toggle (left side) --}}
-                <button @click="drawerOpen = !drawerOpen"
-                        class="btn btn-ghost btn-sm btn-square tooltip tooltip-right"
+                <button @click="drawerOpen ? closeDrawer() : drawerOpen = true"
+                        class="btn btn-ghost btn-sm btn-square tooltip tooltip-right z-10"
                         :class="{ 'btn-active': drawerOpen }"
                         :data-tip="drawerOpen ? 'Close editor' : 'Open editor'"
                         aria-label="Toggle editor">
                     <i class="ph ph-sidebar-simple text-lg"></i>
+                </button>
+
+                <button @click="fullWidth = !fullWidth"
+                        x-show="drawerOpen"
+                        class="btn btn-ghost btn-sm btn-square tooltip tooltip-right hidden sm:inline-flex"
+                        :class="{ 'btn-active': fullWidth }"
+                        :data-tip="fullWidth ? 'Exit full width' : 'Full width editor'"
+                        aria-label="Toggle full width editor"
+                        x-cloak>
+                    <i class="ph text-lg" :class="fullWidth ? 'ph-arrows-in-simple' : 'ph-frame-corners'"></i>
                 </button>
 
                 <div class="divider divider-horizontal mx-0 hidden sm:flex"></div>
@@ -55,7 +55,7 @@
                 </button>
 
                 {{-- Viewport Presets --}}
-                <div class="join hidden sm:flex">
+                <div class="join hidden sm:flex" x-show="!fullWidth" x-cloak>
                     <div class="tooltip tooltip-bottom" data-tip="Phone (375px)">
                         <button @click="setPreset(375)" class="btn btn-ghost btn-xs join-item"
                                 :class="{ 'btn-active': previewWidth === 375 }">
@@ -136,13 +136,13 @@
                  x-transition:leave-start="opacity-100 translate-x-0"
                  x-transition:leave-end="opacity-0 -translate-x-4"
                  class="shrink-0 overflow-y-auto bg-base-100 sm:max-w-none max-w-full relative"
-                 :style="{ width: window.innerWidth < 640 ? '100%' : panelWidth + 'px' }"
+                 :style="{ width: window.innerWidth < 640 || fullWidth ? '100%' : panelWidth + 'px' }"
                  x-cloak>
 
                 {{-- Mobile close button --}}
                 <div class="sm:hidden flex justify-between items-center p-4 pb-0">
                     <span class="font-medium text-sm">Editor</span>
-                    <button @click="drawerOpen = false" class="btn btn-ghost btn-xs btn-circle" aria-label="Close editor">
+                    <button @click="closeDrawer()" class="btn btn-ghost btn-xs btn-circle" aria-label="Close editor">
                         <i class="ph ph-x text-lg"></i>
                     </button>
                 </div>
@@ -159,13 +159,13 @@
                 @endif
 
                 {{-- Scrollable form content with bottom padding for sticky save button --}}
-                <div class="p-4 pb-20">
+                <div :class="fullWidth ? 'p-4 pb-4' : 'p-4 pb-20'">
                     {{ $slot }}
                 </div>
             </div>
 
             {{-- Gutter: Right edge of drawer --}}
-            <div x-show="drawerOpen"
+            <div x-show="drawerOpen && !fullWidth"
                  class="shrink-0 w-2 bg-base-300 cursor-col-resize hover:bg-primary/20 transition-colors items-center justify-center hidden sm:flex"
                  @pointerdown.prevent="startDrag('drawer', $event)"
                  x-cloak>
@@ -174,6 +174,8 @@
 
             {{-- Preview Area --}}
             <div class="flex-1 overflow-hidden bg-base-300 hidden sm:flex items-stretch"
+                 data-test="preview-panel"
+                 x-show="!(fullWidth && drawerOpen)"
                  :class="{ '!flex': !drawerOpen || window.innerWidth >= 640 }">
 
                 {{-- Preview wrapper: gutter-left + preview + gutter-right --}}

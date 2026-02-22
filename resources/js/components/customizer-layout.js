@@ -1,6 +1,7 @@
 export default function customizerLayout() {
     return {
         drawerOpen: JSON.parse(localStorage.getItem('customizerDrawerOpen') ?? 'true'),
+        fullWidth: JSON.parse(localStorage.getItem('customizerFullWidth') ?? 'false'),
         panelWidth: parseInt(localStorage.getItem('customizerWidth')) || 480,
         previewWidth: parseInt(localStorage.getItem('customizerPreviewWidth')) || 0,
         dragging: false,
@@ -10,6 +11,7 @@ export default function customizerLayout() {
 
         init() {
             this.$watch('drawerOpen', v => localStorage.setItem('customizerDrawerOpen', JSON.stringify(v)));
+            this.$watch('fullWidth', v => localStorage.setItem('customizerFullWidth', JSON.stringify(v)));
             this.$watch('panelWidth', w => localStorage.setItem('customizerWidth', w));
             this.$watch('previewWidth', w => localStorage.setItem('customizerPreviewWidth', w));
         },
@@ -23,12 +25,43 @@ export default function customizerLayout() {
             this.previewWidth = w;
         },
 
+        closeDrawer() {
+            if (this.fullWidth) {
+                this.fullWidth = false;
+            }
+            this.drawerOpen = false;
+        },
+
         startDrag(target, event) {
             this.dragging = true;
             this.dragTarget = target;
             this.startX = event.clientX;
             document.body.style.userSelect = 'none';
             document.body.style.cursor = 'col-resize';
+        },
+
+        handleDrag(event) {
+            if (!this.dragging) return;
+
+            const delta = event.clientX - this.startX;
+            this.startX = event.clientX;
+
+            if (this.dragTarget === 'drawer') {
+                this.panelWidth = Math.min(700, Math.max(320, this.panelWidth + delta));
+            } else if (this.dragTarget === 'preview-left') {
+                this.previewWidth = Math.max(320, Math.min(this.previewAreaWidth, this.previewWidth - delta));
+            } else if (this.dragTarget === 'preview-right') {
+                this.previewWidth = Math.max(320, Math.min(this.previewAreaWidth, this.previewWidth + delta));
+            }
+        },
+
+        stopDrag() {
+            if (!this.dragging) return;
+
+            this.dragging = false;
+            this.dragTarget = null;
+            document.body.style.userSelect = '';
+            document.body.style.cursor = '';
         },
     };
 }
