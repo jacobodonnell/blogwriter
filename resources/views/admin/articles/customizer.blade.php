@@ -139,6 +139,32 @@
                             </button>
                         </div>
 
+                        {{-- Contextual image alignment toolbar (shows when image is selected) --}}
+                        <div x-show="isActive('image')" x-cloak
+                             class="flex items-center gap-1 px-2 py-1 bg-base-200 border border-base-content/20 border-t-0 border-b-0">
+                            <span class="text-xs text-base-content/50 mr-1">Align:</span>
+                            <button type="button" @click="command('imageAlignLeft')"
+                                    :class="isImageAlign('left') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Align Left">
+                                <i class="ph ph-text-align-left"></i>
+                            </button>
+                            <button type="button" @click="command('imageAlignCenter')"
+                                    :class="isImageAlign('center') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Align Center">
+                                <i class="ph ph-text-align-center"></i>
+                            </button>
+                            <button type="button" @click="command('imageAlignRight')"
+                                    :class="isImageAlign('right') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Align Right">
+                                <i class="ph ph-text-align-right"></i>
+                            </button>
+                            <button type="button" @click="command('imageAlignFull')"
+                                    :class="isImageAlign('full') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Full Width">
+                                <i class="ph ph-arrows-out-line-horizontal"></i>
+                            </button>
+                        </div>
+
                         {{-- Tiptap editor mount point --}}
                         <div id="content-editor" data-test="content-editor"
                              class="tiptap-editor @error('content') ring-2 ring-error @enderror border border-base-content/20 rounded-b-field bg-base-100 min-h-64 h-96 max-h-[80vh] overflow-y-auto resize-y focus-within:outline-2 focus-within:outline-primary/20"></div>
@@ -149,10 +175,38 @@
                             <button type="button" @click="insertLink()" class="btn btn-sm btn-primary" data-test="link-insert-btn">Insert</button>
                             <button type="button" @click="showLinkDialog = false" class="btn btn-sm btn-ghost">Cancel</button>
                         </div>
-                        <div x-show="showImageDialog" class="flex gap-2 mt-2 items-center">
-                            <input x-model="imageUrl" type="url" placeholder="https://..." class="input input-sm input-bordered flex-1" @keydown.enter.prevent="insertImage()">
-                            <button type="button" @click="insertImage()" class="btn btn-sm btn-primary">Insert</button>
-                            <button type="button" @click="showImageDialog = false" class="btn btn-sm btn-ghost">Cancel</button>
+                        <div x-show="showImageDialog" class="mt-2 p-3 border border-base-content/20 rounded-field bg-base-50 space-y-2">
+                            <div class="flex gap-2 items-center">
+                                <input x-model="imageUrl" type="url" placeholder="Image URL (https://...)" class="input input-sm input-bordered flex-1" data-test="image-url-input" @keydown.enter.prevent="insertImage()">
+                            </div>
+                            <div class="flex gap-2">
+                                <input x-model="imageAlt" type="text" placeholder="Alt text" class="input input-sm input-bordered flex-1" data-test="image-alt-input">
+                                <input x-model="imageCaption" type="text" placeholder="Caption (optional)" class="input input-sm input-bordered flex-1" data-test="image-caption-input">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-base-content/60">Alignment:</span>
+                                <div class="join">
+                                    <button type="button" @click="imageAlign = 'left'" :class="imageAlign === 'left' && 'btn-active'"
+                                            class="btn btn-ghost btn-xs join-item tooltip" data-tip="Left">
+                                        <i class="ph ph-text-align-left"></i>
+                                    </button>
+                                    <button type="button" @click="imageAlign = 'center'" :class="imageAlign === 'center' && 'btn-active'"
+                                            class="btn btn-ghost btn-xs join-item tooltip" data-tip="Center">
+                                        <i class="ph ph-text-align-center"></i>
+                                    </button>
+                                    <button type="button" @click="imageAlign = 'right'" :class="imageAlign === 'right' && 'btn-active'"
+                                            class="btn btn-ghost btn-xs join-item tooltip" data-tip="Right">
+                                        <i class="ph ph-text-align-right"></i>
+                                    </button>
+                                    <button type="button" @click="imageAlign = 'full'" :class="imageAlign === 'full' && 'btn-active'"
+                                            class="btn btn-ghost btn-xs join-item tooltip" data-tip="Full Width">
+                                        <i class="ph ph-arrows-out-line-horizontal"></i>
+                                    </button>
+                                </div>
+                                <div class="flex-1"></div>
+                                <button type="button" @click="insertImage()" class="btn btn-sm btn-primary" data-test="image-insert-btn">Insert</button>
+                                <button type="button" @click="showImageDialog = false" class="btn btn-sm btn-ghost">Cancel</button>
+                            </div>
                         </div>
                         <div x-show="showYoutubeDialog" class="flex gap-2 mt-2 items-center">
                             <input x-model="youtubeUrl" type="url" placeholder="YouTube URL..." class="input input-sm input-bordered flex-1" data-test="youtube-url-input" @keydown.enter.prevent="insertYoutube()">
