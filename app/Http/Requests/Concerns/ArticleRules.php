@@ -19,7 +19,7 @@ trait ArticleRules
         return [
             'summary' => ['nullable', 'string', 'max:500'],
             'content' => ['required', 'string', new NoH1Heading],
-            'photo_id' => ['nullable', 'exists:photos,id', new PublishedPhoto],
+            'photo_id' => ['nullable', 'integer', 'exists:photos,id', new PublishedPhoto],
             'featured_image' => ['nullable', 'string', 'url', 'max:500'],
             'featured_image_file' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'featured_image_alt' => ['nullable', 'string', 'max:255'],
