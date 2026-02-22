@@ -26,7 +26,6 @@ export default function articleCustomizer(config) {
         imageUrl: '',
         imageAlt: '',
         imageCaption: '',
-        imageAlign: 'center',
         showYoutubeDialog: false,
         youtubeUrl: '',
         initialStatus: config.initialStatus,
@@ -110,8 +109,11 @@ export default function articleCustomizer(config) {
                             addAttributes() {
                                 return {
                                     ...this.parent?.(),
-                                    align: { default: null },
                                     caption: { default: null },
+                                    width: {
+                                        default: null,
+                                        renderHTML: () => ({}),
+                                    },
                                 };
                             },
 
@@ -124,6 +126,20 @@ export default function articleCustomizer(config) {
                                     nodeView.handleResize = (deltaX, deltaY) => {
                                         originalHandleResize(deltaX, deltaY);
                                         nodeView.element.style.height = 'auto';
+                                        // Expand wrapper to match image's new pixel width so it can grow beyond its % width
+                                        nodeView.wrapper.style.width = `${nodeView.element.style.width}`;
+                                    };
+
+                                    nodeView.onCommit = (finalWidth) => {
+                                        const containerWidth = nodeView.container.offsetWidth;
+                                        const pct = Math.round(finalWidth / containerWidth * 100);
+                                        const pos = nodeView.getPos?.();
+                                        if (pos === undefined) return;
+                                        if (pct >= 98) {
+                                            rawEditor.chain().setNodeSelection(pos).updateAttributes('image', { width: null }).run();
+                                        } else {
+                                            rawEditor.chain().setNodeSelection(pos).updateAttributes('image', { width: pct }).run();
+                                        }
                                     };
 
                                     const syncAttrs = (attrs) => {
@@ -132,12 +148,12 @@ export default function articleCustomizer(config) {
                                         el.alt = attrs.alt ?? '';
                                         el.style.maxWidth = '100%';
                                         el.style.height = 'auto';
-                                        nodeView.wrapper.style.maxWidth = '100%';
-                                        nodeView.container.className = attrs.align ? `img-align-${attrs.align}` : '';
                                         if (attrs.width) {
-                                            el.style.width = `${attrs.width}px`;
+                                            nodeView.wrapper.style.width = `${attrs.width}%`;
+                                            el.style.width = '100%';
                                         } else {
-                                            el.style.removeProperty('width');
+                                            nodeView.wrapper.style.width = '';
+                                            el.style.width = '';
                                         }
                                     };
                                     syncAttrs(props.node.attrs);
@@ -153,10 +169,9 @@ export default function articleCustomizer(config) {
                             },
 
                             renderMarkdown(node) {
-                                const { src = '', alt = '', title, align, width, caption } = node.attrs ?? {};
+                                const { src = '', alt = '', title, width, caption } = node.attrs ?? {};
                                 const parts = [alt];
-                                if (align) parts.push(`align:${align}`);
-                                if (width) parts.push(`width:${width}`);
+                                if (width) parts.push(`width:${width}%`);
                                 if (caption) parts.push(`caption:${encodeURIComponent(caption)}`);
                                 const altStr = parts.join('|');
                                 return title ? `![${altStr}](${src} "${title}")` : `![${altStr}](${src})`;
@@ -171,7 +186,6 @@ export default function articleCustomizer(config) {
                                     if (colonIdx === -1) continue;
                                     const key = part.slice(0, colonIdx).trim();
                                     const value = part.slice(colonIdx + 1).trim();
-                                    if (key === 'align') attrs.align = value;
                                     if (key === 'width') attrs.width = parseInt(value, 10) || null;
                                     if (key === 'caption') attrs.caption = decodeURIComponent(value);
                                 }
@@ -179,16 +193,12 @@ export default function articleCustomizer(config) {
                             },
 
                             renderHTML({ HTMLAttributes }) {
-                                const { align, caption, width, ...rest } = HTMLAttributes;
-                                const cls = align ? `img-align-${align}` : null;
+                                const { caption, width, align, ...rest } = HTMLAttributes;
                                 const imgAttrs = mergeAttributes(rest, {
-                                    style: width ? `width:${width}px;max-width:100%` : null,
+                                    style: width ? `width:${width}%;max-width:100%` : 'max-width:100%',
                                 });
                                 if (caption) {
-                                    return ['figure', { class: cls }, ['img', imgAttrs], ['figcaption', {}, caption]];
-                                }
-                                if (cls) {
-                                    return ['div', { class: cls }, ['img', imgAttrs]];
+                                    return ['figure', {}, ['img', imgAttrs], ['figcaption', {}, caption]];
                                 }
                                 return ['img', imgAttrs];
                             },
@@ -278,10 +288,7 @@ export default function articleCustomizer(config) {
                     }
                 },
                 youtube: () => { this.youtubeUrl = ''; this.showYoutubeDialog = true; },
-                imageAlignLeft:   () => rawEditor.chain().focus().updateAttributes('image', { align: 'left' }).run(),
-                imageAlignCenter: () => rawEditor.chain().focus().updateAttributes('image', { align: 'center' }).run(),
-                imageAlignRight:  () => rawEditor.chain().focus().updateAttributes('image', { align: 'right' }).run(),
-                imageFullWidth:   () => rawEditor.chain().focus().updateAttributes('image', { align: 'full', width: null }).run(),
+                imageFullWidth: () => rawEditor.chain().focus().updateAttributes('image', { width: null }).run(),
             };
             map[name]?.();
         },
@@ -304,7 +311,6 @@ export default function articleCustomizer(config) {
             this.imageUrl     = attrs.src     ?? '';
             this.imageAlt     = attrs.alt     ?? '';
             this.imageCaption = attrs.caption ?? '';
-            this.imageAlign   = attrs.align   ?? 'center';
             this.editingImage = true;
             this.showImageDialog = true;
         },
@@ -314,7 +320,6 @@ export default function articleCustomizer(config) {
             const attrs = {
                 src:     this.imageUrl,
                 alt:     this.imageAlt     || undefined,
-                align:   this.imageAlign   || undefined,
                 caption: this.imageCaption || undefined,
             };
             if (this.editingImage) {
@@ -327,16 +332,15 @@ export default function articleCustomizer(config) {
             this.resetImageDialog();
         },
 
-        isImageAlign(align) {
+        isImageFullWidth() {
             void this.updatedAt;
-            return rawEditor?.getAttributes('image')?.align === align;
+            return rawEditor?.getAttributes('image')?.width == null;
         },
 
         resetImageDialog() {
             this.imageUrl     = '';
             this.imageAlt     = '';
             this.imageCaption = '';
-            this.imageAlign   = 'center';
             this.editingImage = false;
         },
 

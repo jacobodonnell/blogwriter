@@ -40,6 +40,11 @@ it('applies width style', function () {
     expect($html)->toContain('style="width:400px;max-width:100%"');
 });
 
+it('applies percentage width style', function () {
+    $html = Markdown::render('![Image|width:50%](https://example.com/img.jpg)');
+    expect($html)->toContain('style="width:50%;max-width:100%"');
+});
+
 it('wraps in figure with figcaption when caption present', function () {
     $html = Markdown::render('![Image|caption:A%20caption](https://example.com/img.jpg)');
     expect($html)->toContain('<figure')

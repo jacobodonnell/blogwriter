@@ -140,7 +140,7 @@ body {
     border-color: color-mix(in oklch, var(--color-base-content) 20%, transparent);
     margin: 1.5rem 0;
 }
-.tiptap-editor .ProseMirror img { max-width: 100%; border-radius: 0.5rem; }
+.tiptap-editor .ProseMirror img { max-width: 100%; }
 .tiptap-editor .ProseMirror div[data-youtube-video] {
     max-width: 100%;
     aspect-ratio: 16 / 9;
@@ -190,21 +190,10 @@ body {
 [data-resize-handle="left"]  { left: 0; }
 [data-resize-handle="right"] { right: 0; }
 
-/* Image alignment — editor context (class on [data-resize-container]) */
-.tiptap-editor .ProseMirror [data-resize-container].img-align-left   { justify-content: flex-start; }
-.tiptap-editor .ProseMirror [data-resize-container].img-align-right  { justify-content: flex-end; }
-.tiptap-editor .ProseMirror [data-resize-container].img-align-center { justify-content: center; }
-.tiptap-editor .ProseMirror [data-resize-container].img-align-full   { display: block; width: 100%; }
-.tiptap-editor .ProseMirror [data-resize-container].img-align-full [data-resize-wrapper] { width: 100%; }
-.tiptap-editor .ProseMirror [data-resize-container].img-align-full img { width: 100%; }
+/* Images are always centered */
+.tiptap-editor .ProseMirror [data-resize-container] { justify-content: center; margin-top: 0.75rem; }
 .tiptap-editor .ProseMirror figure { margin: 1rem 0; }
 .tiptap-editor .ProseMirror figcaption { font-size: 0.8125rem; text-align: center; opacity: 0.6; margin-top: 0.375rem; }
-
-/* Image alignment — public/preview context (class on wrapper div) */
-.e-content .img-align-left,   .prose .img-align-left   { display: flex; justify-content: flex-start; }
-.e-content .img-align-right,  .prose .img-align-right  { display: flex; justify-content: flex-end; }
-.e-content .img-align-center, .prose .img-align-center { display: flex; justify-content: center; }
-.e-content .img-align-full,   .prose .img-align-full   { display: block; width: 100%; }
-.e-content .img-align-full img, .prose .img-align-full img { width: 100%; }
+.e-content img, .prose img { display: block; margin-inline: auto; max-width: 100%; }
 .e-content figure, .prose figure { margin: 1.5rem 0; }
 .e-content figcaption, .prose figcaption { font-size: 0.875rem; text-align: center; opacity: 0.65; margin-top: 0.5rem; }

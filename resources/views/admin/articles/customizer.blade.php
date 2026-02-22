@@ -143,23 +143,8 @@
                         <div x-show="isActive('image')" x-cloak
                              class="flex items-center gap-1 px-2 py-1 bg-base-200 border border-base-content/20 border-t-0 border-b-0">
                             <span class="text-xs text-base-content/50 mr-1">Image:</span>
-                            <button type="button" @click="command('imageAlignLeft')"
-                                    :class="isImageAlign('left') && 'btn-active'"
-                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Align Left">
-                                <i class="ph ph-text-align-left"></i>
-                            </button>
-                            <button type="button" @click="command('imageAlignCenter')"
-                                    :class="isImageAlign('center') && 'btn-active'"
-                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Align Center">
-                                <i class="ph ph-text-align-center"></i>
-                            </button>
-                            <button type="button" @click="command('imageAlignRight')"
-                                    :class="isImageAlign('right') && 'btn-active'"
-                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Align Right">
-                                <i class="ph ph-text-align-right"></i>
-                            </button>
                             <button type="button" @click="command('imageFullWidth')"
-                                    :class="isImageAlign('full') && 'btn-active'"
+                                    :class="isImageFullWidth() && 'btn-active'"
                                     class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Full Width">
                                 <i class="ph ph-arrows-out-line-horizontal"></i>
                             </button>
@@ -192,25 +177,6 @@
                                 <input x-model="imageCaption" type="text" placeholder="Caption (optional)" class="input input-sm input-bordered flex-1" data-test="image-caption-input">
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="text-xs text-base-content/60">Alignment:</span>
-                                <div class="join">
-                                    <button type="button" @click="imageAlign = 'left'" :class="imageAlign === 'left' && 'btn-active'"
-                                            class="btn btn-ghost btn-xs join-item tooltip" data-tip="Left">
-                                        <i class="ph ph-text-align-left"></i>
-                                    </button>
-                                    <button type="button" @click="imageAlign = 'center'" :class="imageAlign === 'center' && 'btn-active'"
-                                            class="btn btn-ghost btn-xs join-item tooltip" data-tip="Center">
-                                        <i class="ph ph-text-align-center"></i>
-                                    </button>
-                                    <button type="button" @click="imageAlign = 'right'" :class="imageAlign === 'right' && 'btn-active'"
-                                            class="btn btn-ghost btn-xs join-item tooltip" data-tip="Right">
-                                        <i class="ph ph-text-align-right"></i>
-                                    </button>
-                                    <button type="button" @click="imageAlign = 'full'" :class="imageAlign === 'full' && 'btn-active'"
-                                            class="btn btn-ghost btn-xs join-item tooltip" data-tip="Full Width">
-                                        <i class="ph ph-arrows-out-line-horizontal"></i>
-                                    </button>
-                                </div>
                                 <div class="flex-1"></div>
                                 <button type="button" @click="insertImage()" class="btn btn-sm btn-primary" data-test="image-insert-btn">
                                     <span x-text="editingImage ? 'Update' : 'Insert'"></span>

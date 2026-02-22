@@ -1,0 +1,164 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models\Article;
+use App\Models\User;
+
+beforeEach(function (): void {
+    $this->user = User::factory()->create([
+        'email' => 'test@blogwriter.test',
+        'password' => 'password',
+    ]);
+});
+
+function loginAndNavigate(string $path): mixed
+{
+    $page = visit('/login');
+
+    $page->fill('@login-email', 'test@blogwriter.test')
+        ->fill('@login-password', 'password')
+        ->click('@login-submit')
+        ->assertPathIs('/');
+
+    return $page->navigate($path);
+}
+
+it('image inserted via dialog appears centered in editor', function (): void {
+    $page = loginAndNavigate('/admin/articles/create');
+
+    $page->wait(3)
+        ->click('[data-tip="Image"]')
+        ->wait(0.5)
+        ->fill('[data-test="image-url-input"]', 'https://placehold.co/600x400')
+        ->click('[data-test="image-insert-btn"]')
+        ->wait(2)
+        ->assertNoJavaScriptErrors();
+
+    $justifyContent = $page->script(
+        "(() => window.getComputedStyle(document.querySelector('[data-resize-container]')).justifyContent)()"
+    );
+
+    expect($justifyContent)->toBe('center');
+})->group('slow');
+
+it('image resize stores percentage width in markdown', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'content' => '![|width:50%](https://placehold.co/600x400)',
+    ]);
+
+    $page = loginAndNavigate('/admin/articles/'.$article->id.'/edit');
+
+    $page->wait(3)
+        ->assertNoJavaScriptErrors();
+
+    $value = $page->value('input[name="content"]');
+
+    expect($value)->toContain('width:50%');
+})->group('slow');
+
+it('image at less than full width is visually narrower than container', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'content' => '![|width:50%](https://placehold.co/600x400)',
+    ]);
+
+    $page = loginAndNavigate('/admin/articles/'.$article->id.'/edit');
+
+    $page->wait(3)
+        ->assertNoJavaScriptErrors();
+
+    $widths = $page->script("(() => {
+        const wrapper = document.querySelector('[data-resize-wrapper]');
+        const container = document.querySelector('[data-resize-container]');
+        if (!wrapper || !container) return [0, 0];
+        return [wrapper.offsetWidth, container.offsetWidth];
+    })()");
+
+    $wrapperWidth = $widths[0];
+    $containerWidth = $widths[1];
+
+    // Wrapper should be roughly 50% of container (within 10% tolerance)
+    expect($containerWidth)->toBeGreaterThan(0);
+    $ratio = $wrapperWidth / $containerWidth;
+    expect($ratio)->toBeLessThan(0.65)
+        ->and($ratio)->toBeGreaterThan(0.35);
+})->group('slow');
+
+it('full-width button resets width to null', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'content' => '![|width:50%](https://placehold.co/600x400)',
+    ]);
+
+    $page = loginAndNavigate('/admin/articles/'.$article->id.'/edit');
+
+    $page->wait(3)
+        ->assertNoJavaScriptErrors();
+
+    // Click image to select it
+    $page->click('[data-resize-wrapper] img')
+        ->wait(0.5);
+
+    // Click full-width button
+    $page->click('[data-tip="Full Width"]')
+        ->wait(1);
+
+    $value = $page->value('input[name="content"]');
+
+    expect($value)->not->toContain('width:');
+})->group('slow');
+
+it('image width renders in server-side preview HTML', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'content' => '![|width:50%](https://placehold.co/600x400)',
+    ]);
+
+    $page = loginAndNavigate('/admin/articles/'.$article->id.'/edit');
+
+    $page->wait(5)
+        ->assertNoJavaScriptErrors();
+
+    // Check preview panel for image with width style
+    $hasWidthStyle = $page->script("(() => {
+        const img = document.querySelector('#preview-panel img[src*=\"placehold\"]');
+        if (!img) return false;
+        return img.style.cssText.includes('width') || (img.getAttribute('style') || '').includes('width');
+    })()");
+
+    expect($hasWidthStyle)->toBeTrue();
+})->group('slow');
+
+it('image can be resized larger by dragging handle outward', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'content' => '![|width:30%](https://placehold.co/600x400)',
+    ]);
+
+    $page = loginAndNavigate('/admin/articles/'.$article->id.'/edit');
+
+    $page->wait(3)
+        ->assertNoJavaScriptErrors();
+
+    // Click image to select it and reveal handles
+    $page->click('[data-resize-wrapper] img')
+        ->wait(0.5);
+
+    // Simulate drag on right handle: mousedown, mousemove +150px, mouseup
+    $page->script("(() => {
+        const handle = document.querySelector('[data-resize-handle=\"right\"]');
+        if (!handle) return 'no-handle';
+        const rect = handle.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        handle.dispatchEvent(new MouseEvent('mousedown', { clientX: x, clientY: y, bubbles: true }));
+        document.dispatchEvent(new MouseEvent('mousemove', { clientX: x + 150, clientY: y, bubbles: true }));
+        document.dispatchEvent(new MouseEvent('mouseup', { clientX: x + 150, clientY: y, bubbles: true }));
+    })()");
+
+    $page->wait(1);
+
+    $value = $page->value('input[name="content"]');
+
+    // Extract the width percentage — should be greater than 30%
+    preg_match('/width:(\d+)%/', $value, $matches);
+    expect($matches)->not->toBeEmpty();
+    expect((int) $matches[1])->toBeGreaterThan(30);
+})->group('slow');

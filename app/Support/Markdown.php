@@ -21,7 +21,7 @@ final class Markdown
     {
         $content = str_replace("\r\n", "\n", $content);
         $content = preg_replace(self::YOUTUBE_EMBED_PATTERN, '', $content);
-        $content = preg_replace(self::EXTENDED_IMAGE_PATTERN, '', $content);
+        $content = preg_replace(self::EXTENDED_IMAGE_PATTERN, '', (string) $content);
 
         $html = Str::markdown((string) $content);
         $html = preg_replace('/<\/(h[1-6]|p|li|blockquote|div|tr)>/', '$0 ', $html);
@@ -151,9 +151,9 @@ final class Markdown
     }
 
     /**
-     * Parse the extended alt string (e.g. "Alt text|align:center|width:400|caption:Hello") into its components.
+     * Parse the extended alt string (e.g. "Alt text|align:center|width:50%|caption:Hello") into its components.
      *
-     * @return array{alt: string, align: string|null, width: int|null, caption: string|null}
+     * @return array{alt: string, align: string|null, width: string|null, caption: string|null}
      */
     private static function parseExtendedImageAlt(string $rawAlt): array
     {
@@ -176,13 +176,29 @@ final class Markdown
 
             match ($key) {
                 'align' => $align = in_array($value, $allowedAligns, true) ? $value : null,
-                'width' => $width = is_numeric($value) ? (int) $value : null,
+                'width' => $width = self::parseWidth($value),
                 'caption' => $caption = urldecode($value),
                 default => null,
             };
         }
 
-        return compact('alt', 'align', 'width', 'caption');
+        return ['alt' => $alt, 'align' => $align, 'width' => $width, 'caption' => $caption];
+    }
+
+    /**
+     * Parse a width value — supports percentage (e.g. "50%") or pixel integers (e.g. "400").
+     */
+    private static function parseWidth(string $value): ?string
+    {
+        if (preg_match('/^\d+%$/', $value)) {
+            return $value;
+        }
+
+        if (is_numeric($value)) {
+            return $value.'px';
+        }
+
+        return null;
     }
 
     /**
@@ -198,7 +214,7 @@ final class Markdown
 
             $class = $align ? 'img-align-'.$align : null;
 
-            $style = $width ? 'width:'.$width.'px;max-width:100%' : null;
+            $style = $width ? 'width:'.$width.';max-width:100%' : null;
 
             $imgTag = '<img src="'.e($src).'" alt="'.e($alt).'"'
                 .($style ? ' style="'.e($style).'"' : '')
