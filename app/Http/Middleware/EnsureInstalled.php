@@ -35,7 +35,7 @@ final readonly class EnsureInstalled
             return redirect('/install');
         }
 
-        // Public frontend → 404 (no content exists, nothing to show)
-        abort(404);
+        // Public frontend → 503 (app exists but is not yet operational)
+        abort(503);
     }
 }

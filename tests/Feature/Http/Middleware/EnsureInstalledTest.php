@@ -63,17 +63,23 @@ it('redirects admin sub-routes to install when not installed', function (): void
         ->and($response->headers->get('Location'))->toContain('/install');
 });
 
-it('returns 404 for public frontend when not installed', function (): void {
-    $response = runMiddleware(createMiddlewareRequest('/'));
+it('returns 503 for public frontend when not installed', function (): void {
+    try {
+        runMiddleware(createMiddlewareRequest('/'));
+        $this->fail('Expected HttpException was not thrown');
+    } catch (Symfony\Component\HttpKernel\Exception\HttpException $e) {
+        expect($e->getStatusCode())->toBe(503);
+    }
+});
 
-    expect($response->getStatusCode())->toBe(404);
-})->throws(Symfony\Component\HttpKernel\Exception\NotFoundHttpException::class);
-
-it('returns 404 for articles when not installed', function (): void {
-    $response = runMiddleware(createMiddlewareRequest('/articles'));
-
-    expect($response->getStatusCode())->toBe(404);
-})->throws(Symfony\Component\HttpKernel\Exception\NotFoundHttpException::class);
+it('returns 503 for articles when not installed', function (): void {
+    try {
+        runMiddleware(createMiddlewareRequest('/articles'));
+        $this->fail('Expected HttpException was not thrown');
+    } catch (Symfony\Component\HttpKernel\Exception\HttpException $e) {
+        expect($e->getStatusCode())->toBe(503);
+    }
+});
 
 it('passes through when installed with healthy database', function (): void {
     User::factory()->create();
