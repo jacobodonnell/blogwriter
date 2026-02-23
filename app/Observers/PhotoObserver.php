@@ -23,14 +23,13 @@ final class PhotoObserver
             $photo->saveQuietly();
         }
 
-        // Clear published_at when unpublishing
-        if ($photo->status->isPrivate() && $photo->published_at) {
-            $photo->published_at = null;
-            $photo->saveQuietly();
-        }
-
-        // Detach photo from articles when switching to draft
+        // Clear published_at and detach from articles when unpublishing
         if ($photo->status->isPrivate()) {
+            if ($photo->published_at) {
+                $photo->published_at = null;
+                $photo->saveQuietly();
+            }
+
             $photo->articles()->update(['photo_id' => null]);
         }
 

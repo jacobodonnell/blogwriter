@@ -76,13 +76,11 @@ final class FeedService
             return null;
         }
 
-        return $items->max(fn (FeedItem $item): int => ($item->updatedAt ?? $item->publishedAt)->getTimestamp())
-            ? $items->reduce(function (?CarbonInterface $carry, FeedItem $item): CarbonInterface {
-                $date = $item->updatedAt ?? $item->publishedAt;
+        return $items->reduce(function (?CarbonInterface $carry, FeedItem $item): CarbonInterface {
+            $date = $item->updatedAt ?? $item->publishedAt;
 
-                return ! $carry instanceof CarbonInterface || $date->greaterThan($carry) ? $date : $carry;
-            })
-            : null;
+            return ! $carry instanceof CarbonInterface || $date->greaterThan($carry) ? $date : $carry;
+        });
     }
 
     /**

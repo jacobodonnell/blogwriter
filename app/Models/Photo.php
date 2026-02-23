@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\Status;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -101,7 +102,7 @@ final class Photo extends Model implements HasMedia
     {
         return [
             'status' => Status::class,
-            'published_at' => 'immutable_datetime',
+            'published_at' => 'datetime',
             'taken_at' => 'immutable_datetime',
             'meta' => 'array',
         ];
@@ -133,11 +134,10 @@ final class Photo extends Model implements HasMedia
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    #[Scope]
     protected function published($query)
     {
         return $query->where('status', Status::Published)
-            ->whereNotNull('published_at')
             ->where('published_at', '<=', now());
     }
 
@@ -147,7 +147,7 @@ final class Photo extends Model implements HasMedia
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    #[Scope]
     protected function draft($query)
     {
         return $query->where('status', Status::Draft);

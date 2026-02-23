@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Actions\GenerateUniqueSlugAction;
 use App\Enums\Status;
 use App\Support\Markdown;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -74,7 +75,7 @@ final class Article extends Model
      */
     public function isPublished(): bool
     {
-        return $this->status === Status::Published && $this->published_at !== null && $this->published_at <= now();
+        return $this->status === Status::Published && $this->published_at <= now();
     }
 
     /**
@@ -296,7 +297,7 @@ final class Article extends Model
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    #[Scope]
     protected function published($query)
     {
         return $query->where('status', Status::Published)
@@ -309,7 +310,7 @@ final class Article extends Model
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    #[Scope]
     protected function draft($query)
     {
         return $query->where('status', Status::Draft);
