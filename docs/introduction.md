@@ -68,16 +68,16 @@ You'll need basic comfort with a terminal — copying and pasting a few commands
 
 ## What's Coming
 
-See the [Roadmap](/docs/advanced/roadmap) for planned features including Notes, Tags, IndieAuth, and more.
+See the [Roadmap](roadmap.md) for planned features including Notes, Tags, IndieAuth, and more.
 
 ## Documentation
 
-- [Installation](/docs/getting-started/installation) — Get BlogWriter running on your server
-- [Writing Content](/docs/content/writing-content) — Create articles and photos
-- [Appearance](/docs/customization/appearance) — Customize your theme and font
-- [Settings](/docs/configuration/settings) — Configure your site and profile
-- [Feeds & IndieWeb](/docs/configuration/feeds-and-indieweb) — Microformats, feeds, and IndieWeb protocols
-- [Architecture](/docs/advanced/architecture) — Technical overview for contributors
-- [Roadmap](/docs/advanced/roadmap) — What's built, what's next
+- [Installation](installation.md) — Get BlogWriter running on your server
+- [Writing Content](writing-content.md) — Create articles and photos
+- [Appearance](appearance.md) — Customize your theme and font
+- [Settings](settings.md) — Configure your site and profile
+- [Feeds & IndieWeb](feeds-and-indieweb.md) — Microformats, feeds, and IndieWeb protocols
+- [Architecture](architecture.md) — Technical overview for contributors
+- [Roadmap](roadmap.md) — What's built, what's next
 
-#### [Up Next: *Installation*](/docs/getting-started/installation)
+#### [Up Next: *Installation*](installation.md)

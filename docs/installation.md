@@ -14,7 +14,7 @@ Get BlogWriter running on your server in a few minutes.
 
 <x-callout type="info" title="Local Development?">
   If you're setting up BlogWriter on your own machine for development or testing, see the
-  [Local Development](/docs/getting-started/local-development) guide instead.
+  [Local Development](local-development.md) guide instead.
 </x-callout>
 
 ## Requirements
@@ -138,8 +138,8 @@ window, faster loads, and a home screen icon.
 
 - **Visit your site** at your domain
 - **Log in** at `/admin` with the email and password you chose
-- **Start writing** — see the [Writing Content](/docs/content/writing-content) guide
-- **Customize your appearance** — see the [Appearance](/docs/customization/appearance) guide
+- **Start writing** — see the [Writing Content](writing-content.md) guide
+- **Customize your appearance** — see the [Appearance](appearance.md) guide
 
 ## Troubleshooting
 
@@ -165,4 +165,4 @@ root.
 **Accidentally locked out** — Re-run the installer (`php artisan blogwriter:install`). When prompted, choose "Yes" to
 reset if you want a fresh start, or "No" to cancel if your data is still accessible.
 
-#### [Up Next: *Writing Content*](/docs/content/writing-content)
+#### [Up Next: *Writing Content*](writing-content.md)

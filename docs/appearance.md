@@ -82,6 +82,6 @@ The config file defines:
 
 ## What's Coming
 
-A full theme system with custom templates and theme overrides is on the [Roadmap](/docs/advanced/roadmap).
+A full theme system with custom templates and theme overrides is on the [Roadmap](roadmap.md).
 
-#### [Up Next: *Settings*](/docs/configuration/settings)
+#### [Up Next: *Settings*](settings.md)

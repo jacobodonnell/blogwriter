@@ -29,7 +29,7 @@ Customize your blog's visual style:
 - **Dark theme** — Choose from 14 dark DaisyUI themes
 - **Font** — Choose from 11 fonts across 4 categories
 
-See the [Appearance](/docs/customization/appearance) guide for details on available themes and fonts.
+See the [Appearance](appearance.md) guide for details on available themes and fonts.
 
 ## Site Settings
 
@@ -54,4 +54,4 @@ php artisan config:clear
 - `php artisan blogwriter:diagnose` — Run health checks to identify common issues
 - `php artisan blogwriter:uninstall` — Full reset (destructive — removes database and configuration)
 
-#### [Up Next: *Feeds & IndieWeb*](/docs/configuration/feeds-and-indieweb)
+#### [Up Next: *Feeds & IndieWeb*](feeds-and-indieweb.md)

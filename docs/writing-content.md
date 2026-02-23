@@ -182,4 +182,4 @@ Upload a BlogWriter export ZIP to restore articles on a fresh install or migrate
 - Lets you skip or overwrite duplicate slugs
 - Preserves original `created_at`, `published_at`, `slug`, and all metadata
 
-#### [Up Next: *Appearance*](/docs/customization/appearance)
+#### [Up Next: *Appearance*](appearance.md)

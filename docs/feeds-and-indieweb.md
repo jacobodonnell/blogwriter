@@ -130,4 +130,4 @@ Webmentions are a protocol for sites to notify each other when they link to one 
 | IndieAuth                              | Planned     |
 | Webmentions                            | Planned     |
 
-#### [Up Next: *Architecture*](/docs/advanced/architecture)
+#### [Up Next: *Architecture*](architecture.md)
