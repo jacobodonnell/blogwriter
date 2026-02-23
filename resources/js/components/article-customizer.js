@@ -158,6 +158,7 @@ export default function articleCustomizer(config) {
                 });
 
                 this.editorReady = true;
+                this.savedContent = editor.getMarkdown(); // capture normalised baseline after parse round-trip
                 this.updatedAt = Date.now();
             });
 

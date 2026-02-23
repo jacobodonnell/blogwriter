@@ -124,3 +124,48 @@ it('has btn-success class when photo uploaded and btn-primary when not', functio
 
     $page->assertAttributeContains('@save-button', 'class', 'btn-success');
 })->group('slow');
+
+it('save button deactivates when editor content is reverted to original', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'content' => 'Original content here.',
+    ]);
+
+    $page = loginAndVisitEditor($article);
+    $page->wait(3); // wait for Tiptap to init
+
+    // Button starts inactive
+    $page->assertSeeIn('@save-button-label', 'Saved')
+        ->assertAttributeContains('@save-button', 'class', 'btn-ghost');
+
+    // Type something into the editor — button activates
+    $page->click('[data-test="content-editor"] .tiptap')
+        ->type('[data-test="content-editor"] .tiptap', ' extra')
+        ->wait(0.5);
+
+    $page->assertAttributeContains('@save-button', 'class', 'btn-primary');
+
+    // Revert: select all and retype the exact original content
+    $page->keys('[data-test="content-editor"] .tiptap', 'Control+a')
+        ->type('[data-test="content-editor"] .tiptap', 'Original content here.')
+        ->wait(0.5);
+
+    // Button should deactivate again
+    $page->assertSeeIn('@save-button-label', 'Saved')
+        ->assertAttributeContains('@save-button', 'class', 'btn-ghost');
+})->group('slow');
+
+it('save button activates immediately when category is changed', function (): void {
+    $category = App\Models\Category::factory()->create();
+    $article = Article::factory()->draft()->for($this->user)->create();
+
+    $page = loginAndVisitEditor($article);
+    $page->wait(2);
+
+    $page->assertSeeIn('@save-button-label', 'Saved')
+        ->assertAttributeContains('@save-button', 'class', 'btn-ghost');
+
+    $page->select('select[name="category_id"]', (string) $category->id)
+        ->wait(0.3);
+
+    $page->assertAttributeContains('@save-button', 'class', 'btn-primary');
+})->group('slow');

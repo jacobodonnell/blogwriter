@@ -297,6 +297,7 @@
                         <x-category-select :categories="$categories ?? collect()"
                             :selected="$article->category_id"
                             x-show="!hasNewCategory"
+                            @change="hasChanges = true"
                             @category-attached.window="
                                 $refs.newCategoryNameInput.value = $event.detail.name;
                                 $refs.newCategorySlugInput.value = $event.detail.slug ?? '';
