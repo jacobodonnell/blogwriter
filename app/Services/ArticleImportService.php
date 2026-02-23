@@ -124,6 +124,11 @@ final class ArticleImportService
 
     /**
      * Import articles from a parsed ZIP.
+     *
+     * H1 headings in body content are silently normalised to H2 on import.
+     * The article title already renders as H1 in the theme, so H1s in body
+     * content would create duplicate top-level headings. This mirrors the
+     * NoH1Heading validation rule enforced in the editor.
      */
     public function import(ParsedImport $parsed, string $duplicateStrategy, int $userId): ImportResult
     {
@@ -136,7 +141,7 @@ final class ArticleImportService
 
         foreach ($parsed->articles as $entry) {
             $frontmatter = $entry['frontmatter'];
-            $content = $entry['content'];
+            $content = preg_replace('/^# (?!#)/m', '## ', $entry['content']);
             $slug = $frontmatter['slug'] ?? null;
 
             if (empty($slug)) {

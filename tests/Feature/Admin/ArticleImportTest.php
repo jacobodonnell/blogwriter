@@ -425,6 +425,38 @@ it('silently succeeds when settings.yaml is absent from zip', function (): void 
     ])->assertJson(['status' => 'ok']);
 });
 
+// ---------------------------------------------------------------------------
+// H1→H2 normalisation
+// ---------------------------------------------------------------------------
+
+it('silently converts H1 headings to H2 during import', function (): void {
+    $content = "# Top Heading\n\nSome body text.\n\n## Already H2\n\n# Another H1";
+
+    $md = makeArticleMd([
+        'title' => 'H1 Article',
+        'slug' => 'h1-article',
+        'draft' => false,
+        'date' => '2024-01-01T00:00:00+00:00',
+    ], $content);
+
+    $zip = makeImportZip(['articles/h1-article.md' => $md]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok', 'imported' => 1]);
+
+    $article = Article::query()->where('slug', 'h1-article')->first();
+
+    expect($article->content)
+        ->toContain('## Top Heading')
+        ->toContain('## Already H2')
+        ->toContain('## Another H1');
+
+    // Ensure no bare H1s remain (a single # not followed by #)
+    expect($article->content)->not->toMatch('/^# (?!#)/m');
+});
+
 it('restores created_at from frontmatter', function (): void {
     $md = makeArticleMd([
         'title' => 'Old Post',

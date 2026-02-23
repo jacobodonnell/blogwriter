@@ -92,22 +92,7 @@
             </div>
         </header>
 
-        {{-- Flash Messages --}}
-        @if (session('success'))
-            <div class="alert alert-success mx-4 mt-2" x-data="{ show: true }" x-show="show"
-                 x-init="setTimeout(() => show = false, 3000)" x-transition>
-                <i class="ph ph-check-circle text-xl"></i>
-                <span>{{ session('success') }}</span>
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="alert alert-error mx-4 mt-2" x-data="{ show: true }" x-show="show"
-                 x-init="setTimeout(() => show = false, 5000)" x-transition>
-                <i class="ph ph-x-circle text-xl"></i>
-                <span>{{ session('error') }}</span>
-            </div>
-        @endif
+        <x-flash-messages />
 
         {{-- Main Content Area --}}
         <div class="flex-1 overflow-hidden flex relative">
