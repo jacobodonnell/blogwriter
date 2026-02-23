@@ -44,9 +44,7 @@ final class CreateArticlePreviewController extends Controller
         }
 
         if (! empty($data['featured_image'])) {
-            $meta = $article->meta ?? [];
-            $meta['featured_image_url'] = $data['featured_image'];
-            $article->meta = $meta;
+            $article->external_featured_img_url = $data['featured_image'];
         }
 
         // Build category relation for preview

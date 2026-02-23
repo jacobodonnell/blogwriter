@@ -34,6 +34,7 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('photos')
                 ->nullOnDelete();
+            $table->string('external_featured_img_url')->nullable();
             $table->timestamps();
 
             $table->index('slug');

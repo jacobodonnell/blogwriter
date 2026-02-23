@@ -37,14 +37,15 @@ final class FullArticleSeeder extends Seeder
                 default => Status::Draft,
             };
 
-            // Handle photo creation — only local demo images, external URLs go to meta
+            // Handle photo creation — only local demo images, external URLs go to column
             $photoId = null;
+            $externalUrl = null;
             $meta = $data['meta'] ?? [];
 
             if ($data['featured_image'] !== null) {
                 if ($this->isExternalUrl($data['featured_image'])) {
-                    // Store external URL in article meta instead of creating a Photo
-                    $meta['featured_image_url'] = $data['featured_image'];
+                    // Store external URL in dedicated column instead of creating a Photo
+                    $externalUrl = $data['featured_image'];
                 } else {
                     // Use local demo images
                     $demoImageNum = $demoImages[$imageCounter % count($demoImages)];
@@ -79,6 +80,7 @@ final class FullArticleSeeder extends Seeder
                     'status' => $status,
                     'published_at' => $status === Status::Published ? now()->subDays(random_int(1, 30)) : null,
                     'photo_id' => $photoId,
+                    'external_featured_img_url' => $externalUrl,
                     'meta' => $meta ?: null,
                     'category_id' => $categoryId,
                 ]

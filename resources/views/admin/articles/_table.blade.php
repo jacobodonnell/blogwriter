@@ -42,8 +42,8 @@
                                                  class="w-12 h-12 rounded object-cover" />
                                         </a>
                                         <span class="badge badge-success badge-xs mt-1">Uploaded</span>
-                                    @elseif($article->meta['featured_image_url'] ?? null)
-                                        <img src="{{ $article->meta['featured_image_url'] }}"
+                                    @elseif($article->external_featured_img_url)
+                                        <img src="{{ $article->external_featured_img_url }}"
                                              alt=""
                                              class="w-12 h-12 rounded object-cover" />
                                         <span class="badge badge-info badge-xs mt-1">External</span>

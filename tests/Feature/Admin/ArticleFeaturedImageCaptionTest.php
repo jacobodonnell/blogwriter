@@ -130,8 +130,8 @@ it('clears caption meta when featured image removed', function (): void {
 
 it('renders figcaption on public article page when caption exists', function (): void {
     $article = Article::factory()->published()->for($this->user)->create([
+        'external_featured_img_url' => 'https://example.com/image.jpg',
         'meta' => [
-            'featured_image_url' => 'https://example.com/image.jpg',
             'featured_image_caption' => 'A beautiful sunset',
         ],
     ]);
@@ -144,9 +144,7 @@ it('renders figcaption on public article page when caption exists', function ():
 
 it('omits figcaption on public article page when no caption', function (): void {
     $article = Article::factory()->published()->for($this->user)->create([
-        'meta' => [
-            'featured_image_url' => 'https://example.com/image.jpg',
-        ],
+        'external_featured_img_url' => 'https://example.com/image.jpg',
     ]);
 
     get(route('articles.show', $article->slug))

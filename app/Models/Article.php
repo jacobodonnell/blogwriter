@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 final class Article extends Model
@@ -23,7 +22,7 @@ final class Article extends Model
     /** Fields that can be staged in a draft snapshot. */
     private const DRAFTABLE_FIELDS = [
         'title', 'slug', 'content', 'summary',
-        'category_id', 'photo_id', 'meta',
+        'category_id', 'photo_id', 'external_featured_img_url', 'meta',
     ];
 
     /**
@@ -150,11 +149,9 @@ final class Article extends Model
                 $article->published_at = now()->startOfSecond();
             }
 
-            // Mutual exclusion: photo_id and meta.featured_image_url
-            $meta = $article->meta ?? [];
-            if ($article->photo_id && Arr::has($meta, 'featured_image_url')) {
-                Arr::forget($meta, 'featured_image_url');
-                $article->meta = $meta;
+            // Mutual exclusion: photo_id and external_featured_img_url
+            if ($article->photo_id && $article->external_featured_img_url) {
+                $article->external_featured_img_url = null;
             }
 
             // Track edit time for previously-published articles
@@ -195,12 +192,12 @@ final class Article extends Model
     }
 
     /**
-     * Get the featured image URL — meta URL first, then Photo relationship.
+     * Get the featured image URL — external URL first, then Photo relationship.
      */
     protected function featuredImageUrl(): Attribute
     {
         return Attribute::make(
-            get: fn (): ?string => Arr::get($this->meta ?? [], 'featured_image_url')
+            get: fn (): ?string => $this->external_featured_img_url
                 ?? $this->featuredPhoto?->image_url,
         );
     }

@@ -301,7 +301,7 @@ it('fires preflight warning when categories.yaml present but article has extra u
 // Field mapping
 // ---------------------------------------------------------------------------
 
-it('maps featured_image_url in frontmatter to meta.featured_image_url', function (): void {
+it('maps featured_image_url in frontmatter to external_featured_img_url column', function (): void {
     $md = makeArticleMd([
         'title' => 'Image Article',
         'slug' => 'image-article',
@@ -318,7 +318,7 @@ it('maps featured_image_url in frontmatter to meta.featured_image_url', function
     ])->assertJson(['status' => 'ok']);
 
     $article = Article::query()->where('slug', 'image-article')->first();
-    expect($article->meta['featured_image_url'])->toBe('https://cdn.example.com/hero.jpg');
+    expect($article->external_featured_img_url)->toBe('https://cdn.example.com/hero.jpg');
 });
 
 // ---------------------------------------------------------------------------

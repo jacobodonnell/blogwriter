@@ -38,7 +38,7 @@ final class UpdateArticlePreviewRequest extends FormRequest
             'meta.featured_image_caption' => ['nullable', 'string', 'max:500'],
             'meta.use_photo_caption' => ['nullable'],
             'photo_id' => ['nullable', 'integer', 'exists:photos,id', new PublishedPhoto],
-            'featured_image' => ['nullable', 'url', 'max:500'],
+            'featured_image' => ['nullable', 'string', 'max:500'],
         ];
     }
 }

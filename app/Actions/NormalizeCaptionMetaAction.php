@@ -22,7 +22,7 @@ final readonly class NormalizeCaptionMetaAction
         }
 
         // Clear caption keys if no featured image at all
-        if (($photoId === null || $photoId === 0) && in_array($featuredImageUrl, [null, '', '0'], true)) {
+        if (empty($photoId) && empty($featuredImageUrl)) {
             unset($meta['featured_image_caption'], $meta['use_photo_caption']);
         }
 

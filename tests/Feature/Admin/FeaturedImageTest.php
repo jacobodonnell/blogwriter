@@ -28,7 +28,7 @@ it('stores external URL in article meta instead of creating a photo', function (
     $article = Article::first();
 
     expect($article->photo_id)->toBeNull();
-    expect($article->meta['featured_image_url'])->toBe('https://example.com/image.jpg');
+    expect($article->external_featured_img_url)->toBe('https://example.com/image.jpg');
     expect($article->featured_image_url)->toBe('https://example.com/image.jpg');
 });
 
@@ -142,11 +142,11 @@ it('allows creating article without featured photo', function (): void {
     expect($article->featuredPhoto)->toBeNull();
 });
 
-it('setting photo_id clears meta.featured_image_url on save', function (): void {
+it('setting photo_id clears external_featured_img_url on save', function (): void {
     $photo = Photo::factory()->published()->create(['user_id' => $this->user->id]);
     $article = Article::factory()->create([
         'user_id' => $this->user->id,
-        'meta' => ['featured_image_url' => 'https://example.com/old.jpg'],
+        'external_featured_img_url' => 'https://example.com/old.jpg',
     ]);
 
     $article->photo_id = $photo->id;
@@ -154,7 +154,7 @@ it('setting photo_id clears meta.featured_image_url on save', function (): void 
     $article->refresh();
 
     expect($article->photo_id)->toBe($photo->id);
-    expect($article->meta)->not->toHaveKey('featured_image_url');
+    expect($article->external_featured_img_url)->toBeNull();
 });
 
 it('returns title as fallback alt text', function (): void {

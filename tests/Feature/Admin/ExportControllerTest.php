@@ -161,9 +161,9 @@ it('serializes empty past_slugs as a YAML list not an object', function (): void
     expect(array_is_list($frontmatter['past_slugs']))->toBeTrue();
 });
 
-it('exports featured_image_url from meta when set directly', function (): void {
+it('exports featured_image_url from external_featured_img_url column', function (): void {
     $article = Article::factory()->published()->create([
-        'meta' => ['featured_image_url' => 'https://example.com/image.jpg'],
+        'external_featured_img_url' => 'https://example.com/image.jpg',
     ]);
     $article->load('user', 'category', 'featuredPhoto.media');
 
@@ -212,9 +212,9 @@ it('omits featured_image_url when only a photo_id is set and no meta URL', funct
     expect($frontmatter)->not->toHaveKey('featured_image_url');
 });
 
-it('includes featured_image_url from meta when explicitly set', function (): void {
+it('includes featured_image_url from external_featured_img_url column', function (): void {
     $article = Article::factory()->published()->create([
-        'meta' => ['featured_image_url' => 'https://cdn.example.com/hero.jpg'],
+        'external_featured_img_url' => 'https://cdn.example.com/hero.jpg',
     ]);
     $article->load('user', 'category', 'featuredPhoto.media');
 

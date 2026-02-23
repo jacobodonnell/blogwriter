@@ -83,6 +83,7 @@ final class CreateArticleController extends Controller
             'published_at' => $data['published_at'] ?? null,
             'meta' => $imageResult['meta'],
             'photo_id' => $imageResult['photo_id'],
+            'external_featured_img_url' => $imageResult['external_featured_img_url'],
             'category_id' => $data['category_id'] ?? null,
         ]);
 

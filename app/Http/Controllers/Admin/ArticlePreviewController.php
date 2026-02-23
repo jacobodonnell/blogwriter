@@ -23,7 +23,8 @@ final class ArticlePreviewController extends Controller
         $data = $request->validated();
         $draft = [];
 
-        // Handle featured_image URL → meta
+        // Handle featured_image URL — use request->has() to detect "sent but empty" (cleared)
+        $featuredImageSent = $request->has('featured_image');
         $featuredImageUrl = $data['featured_image'] ?? null;
         unset($data['featured_image']);
 
@@ -51,20 +52,24 @@ final class ArticlePreviewController extends Controller
             }
         }
 
-        if (! empty($featuredImageUrl)) {
-            if ($this->valuesDiffer($featuredImageUrl, $liveMeta['featured_image_url'] ?? null)) {
-                $draftMeta['featured_image_url'] = $featuredImageUrl;
+        // Handle external featured image URL (sent but null/empty = user cleared it → null)
+        if ($featuredImageSent) {
+            $effectiveUrl = $featuredImageUrl ?: null;
+            $liveUrl = $article->getOriginal('external_featured_img_url');
+
+            if ($this->valuesDiffer($effectiveUrl, $liveUrl)) {
+                $draft['external_featured_img_url'] = $effectiveUrl;
             }
 
-            // Mutual exclusion: only draft photo_id=null if live has a photo
-            if ($article->getOriginal('photo_id') !== null) {
+            // Mutual exclusion: URL set → null out photo_id (only if live has one)
+            if ($effectiveUrl !== null && $article->getOriginal('photo_id') !== null) {
                 $draft['photo_id'] = null;
             }
         }
 
-        // Mutual exclusion: photo_id clears featured_image_url
+        // Mutual exclusion: photo_id clears external_featured_img_url
         if (! empty($draft['photo_id'])) {
-            unset($draftMeta['featured_image_url']);
+            $draft['external_featured_img_url'] = null;
         }
 
         if (! empty($draftMeta)) {

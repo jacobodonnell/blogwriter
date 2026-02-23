@@ -168,7 +168,6 @@ final class ArticleImportService
                 $meta = array_filter([
                     'meta_title' => $frontmatter['meta_title'] ?? null,
                     'meta_description' => $frontmatter['meta_description'] ?? null,
-                    'featured_image_url' => $frontmatter['featured_image_url'] ?? null,
                     'featured_image_caption' => $frontmatter['featured_image_caption'] ?? null,
                     'featured_image_alt' => $frontmatter['featured_image_alt'] ?? null,
                     'og_image' => $frontmatter['og_image'] ?? null,
@@ -192,6 +191,7 @@ final class ArticleImportService
                     'category_id' => isset($frontmatter['category'])
                         ? ($categoryMap[$frontmatter['category']] ?? null)
                         : null,
+                    'external_featured_img_url' => $frontmatter['featured_image_url'] ?? null,
                     'meta' => $meta ?: null,
                 ];
 

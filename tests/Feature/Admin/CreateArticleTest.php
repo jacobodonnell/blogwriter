@@ -113,7 +113,7 @@ it('preview auto-generates slug from title when placeholder', function (): void 
     expect(Article::count())->toBe(0);
 });
 
-it('stores featured image URL in meta', function (): void {
+it('stores featured image URL in dedicated column', function (): void {
     post(route('admin.articles.store'), [
         'title' => 'Article With Image',
         'slug' => 'article-with-image',
@@ -124,7 +124,7 @@ it('stores featured image URL in meta', function (): void {
 
     $article = Article::first();
 
-    expect($article->meta['featured_image_url'])->toBe('https://example.com/photo.jpg');
+    expect($article->external_featured_img_url)->toBe('https://example.com/photo.jpg');
 });
 
 it('rejects storing article with empty content', function (): void {

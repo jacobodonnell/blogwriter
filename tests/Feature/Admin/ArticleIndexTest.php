@@ -189,10 +189,10 @@ it('eager loads featuredPhoto relationship to prevent N+1', function (): void {
     $response->assertSuccessful();
 });
 
-it('displays articles with external featured image meta', function (): void {
+it('displays articles with external featured image URL', function (): void {
     Article::factory()->create([
         'title' => 'External Image Article',
-        'meta' => ['featured_image_url' => 'https://example.com/image.jpg'],
+        'external_featured_img_url' => 'https://example.com/image.jpg',
     ]);
 
     $response = $this->get(route('admin.articles.index'));

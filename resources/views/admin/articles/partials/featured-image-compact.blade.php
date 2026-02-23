@@ -54,6 +54,17 @@
         <p class="text-xs text-base-content/50 mt-1">External URL overrides photo selection.</p>
     </div>
 
+    {{-- Remove External URL Button --}}
+    <button type="button"
+            x-show="featuredImageUrl"
+            x-cloak
+            @click="removeExternalUrl(); checkDirty(); $refs.customizerForm.dispatchEvent(new Event('input', { bubbles: true }))"
+            data-test="remove-external-url"
+            class="btn btn-ghost btn-sm mt-2 gap-1 text-error w-full justify-start">
+        <i class="ph ph-x-circle"></i>
+        Remove image URL
+    </button>
+
     {{-- Image Preview (Alpine-driven) --}}
     <template x-if="previewUrl || featuredImageUrl">
         <div class="mt-3">

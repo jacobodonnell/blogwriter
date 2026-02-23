@@ -100,6 +100,7 @@ final class ArticleController extends Controller
             'liveSummary' => $article->getRawOriginal('summary') ?? '',
             'liveCategoryId' => $article->getOriginal('category_id'),
             'livePhotoId' => $article->getOriginal('photo_id'),
+            'liveExternalFeaturedImgUrl' => $article->getOriginal('external_featured_img_url'),
             'liveMeta' => $article->getOriginal('meta') ?? [],
         ]);
     }
@@ -141,6 +142,7 @@ final class ArticleController extends Controller
             'published_at' => $data['published_at'] ?? $article->published_at,
             'meta' => $imageResult['meta'],
             'photo_id' => $imageResult['photo_id'],
+            'external_featured_img_url' => $imageResult['external_featured_img_url'],
             'category_id' => $data['category_id'] ?? null,
         ]);
 

@@ -32,5 +32,14 @@ export default function featuredImage(config) {
             this.selectedPhotoId = '';
             this.usePhotoCaption = false;
         },
+
+        removeExternalUrl() {
+            this.featuredImageUrl = '';
+            this.showUrlField = false;
+            this.uploadedPhotoUrl = null;
+            this.hasNewPhoto = false;
+            this.usePhotoCaption = false;
+            this.featuredImageCaption = '';
+        },
     };
 }

@@ -95,7 +95,7 @@ final class ArticleExportService
             'past_slugs' => array_values($article->past_slugs ?? []),
             'meta_title' => $article->meta['meta_title'] ?? null,
             'meta_description' => $article->meta['meta_description'] ?? null,
-            'featured_image_url' => $article->meta['featured_image_url'] ?? null,
+            'featured_image_url' => $article->external_featured_img_url,
             'featured_image_caption' => $article->featured_image_caption ?: null,
             'featured_image_alt' => $article->meta['featured_image_alt']
                                         ?? $article->featuredPhoto?->alt_text

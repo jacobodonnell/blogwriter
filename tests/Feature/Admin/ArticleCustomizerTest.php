@@ -137,7 +137,7 @@ it('preview update uniquifies slug when it conflicts with another article', func
 
 it('full save preserves existing featured image', function (): void {
     $article = Article::factory()->draft()->for($this->user)->create([
-        'meta' => ['featured_image_url' => 'https://example.com/image.jpg'],
+        'external_featured_img_url' => 'https://example.com/image.jpg',
     ]);
 
     put(route('admin.articles.update', $article), [
@@ -147,7 +147,7 @@ it('full save preserves existing featured image', function (): void {
         'status' => Status::Draft->value,
     ])->assertRedirect();
 
-    expect($article->fresh()->meta['featured_image_url'])->toBe('https://example.com/image.jpg');
+    expect($article->fresh()->external_featured_img_url)->toBe('https://example.com/image.jpg');
 });
 
 it('accepts POST with _method PUT for ajax preview update', function (): void {
@@ -481,7 +481,7 @@ it('preview renders draft category in preview pane', function (): void {
 it('draft does not store photo_id null when live photo_id is already null', function (): void {
     $article = Article::factory()->draft()->for($this->user)->create([
         'photo_id' => null,
-        'meta' => ['featured_image_url' => 'https://example.com/image.jpg'],
+        'external_featured_img_url' => 'https://example.com/image.jpg',
     ]);
 
     put(route('admin.articles.preview.update', $article), [
@@ -495,4 +495,22 @@ it('draft does not store photo_id null when live photo_id is already null', func
     $draft = $article->fresh()->draft;
     expect($draft)->toHaveKey('title')
         ->and($draft)->not->toHaveKey('photo_id');
+});
+
+it('clearing external URL via preview writes null to draft', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'external_featured_img_url' => 'https://example.com/image.jpg',
+    ]);
+
+    put(route('admin.articles.preview.update', $article), [
+        'title' => $article->title,
+        'slug' => $article->slug,
+        'content' => $article->content,
+        'featured_image' => '',
+        'status' => $article->status->value,
+    ])->assertOk();
+
+    $draft = $article->fresh()->draft;
+    expect($draft)->toHaveKey('external_featured_img_url')
+        ->and($draft['external_featured_img_url'])->toBeNull();
 });
