@@ -1,8 +1,54 @@
-import { Editor } from '@tiptap/core';
+import { Editor, Extension } from '@tiptap/core';
+import { Plugin, PluginKey } from '@tiptap/pm/state';
+import { Slice } from '@tiptap/pm/model';
 import StarterKit from '@tiptap/starter-kit';
 import Youtube from '@tiptap/extension-youtube';
 import { Markdown } from '@tiptap/markdown';
 import { createResizableImage } from './resizable-image';
+
+/**
+ * Normalize markdown text: collapse CRLF, normalize excessive newlines,
+ * and expand single newlines between non-blank lines to paragraph breaks.
+ * Code blocks are left untouched.
+ */
+function normalizeMarkdown(text) {
+    if (!text) return text;
+    text = text.replace(/\r\n/g, '\n');
+    const parts = text.split(/(```[\s\S]*?```)/g);
+    return parts.map((part, i) => {
+        if (i % 2 !== 0) return part;
+        part = part.replace(/\n{3,}/g, '\n\n');
+        part = part.replace(/([^\n])\n([^\n])/g, '$1\n\n$2');
+        return part;
+    }).join('');
+}
+
+const MarkdownPaste = Extension.create({
+    name: 'markdownPaste',
+    addProseMirrorPlugins() {
+        return [
+            new Plugin({
+                key: new PluginKey('markdownPaste'),
+                props: {
+                    handlePaste: (view, event) => {
+                        const clipboardData = event.clipboardData;
+                        if (!clipboardData) return false;
+                        const html = clipboardData.getData('text/html');
+                        const text = clipboardData.getData('text/plain');
+                        if (html || !text) return false;
+                        const { $from } = view.state.selection;
+                        if ($from.parent.type.spec.code) return false;
+                        const json = this.editor.markdown.parse(normalizeMarkdown(text));
+                        const node = this.editor.state.schema.nodeFromJSON(json);
+                        const slice = new Slice(node.content, 0, 0);
+                        view.dispatch(view.state.tr.replaceSelection(slice).scrollIntoView());
+                        return true;
+                    },
+                },
+            }),
+        ];
+    },
+});
 
 export function createTiptapEditor({ element, content, onUpdate, onSelectionUpdate }) {
     let editor = new Editor({
@@ -34,9 +80,10 @@ export function createTiptapEditor({ element, content, onUpdate, onSelectionUpda
                     return h.createNode('youtube', { src: token.attributes?.src }, []);
                 },
             }),
-            Markdown.configure({ html: false, transformPastedText: true }),
+            Markdown.configure({ html: false }),
+            MarkdownPaste,
         ],
-        content: content ?? '',
+        content: normalizeMarkdown(content) ?? '',
         contentType: 'markdown',
         onUpdate: ({ editor: e }) => onUpdate?.(e),
         onSelectionUpdate: () => onSelectionUpdate?.(),

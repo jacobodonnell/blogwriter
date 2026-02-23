@@ -120,3 +120,45 @@ it('typing in editor updates hidden content field', function (): void {
 
     expect($value)->toContain('Hello from Tiptap');
 })->group('slow');
+
+it('pasting plain markdown renders as formatted content not a code block', function (): void {
+    $page = loginToAdmin();
+
+    $page->navigate('/admin/articles/create')
+        ->wait(3);
+
+    $page->script('
+        const editor = document.querySelector(".tiptap");
+        editor.focus();
+        const dt = new DataTransfer();
+        dt.setData("text/plain", "## Hello World\n\nThis is a paragraph.");
+        editor.dispatchEvent(new ClipboardEvent("paste", { clipboardData: dt, bubbles: true }));
+    ');
+
+    $page->wait(1)->assertNoJavaScriptErrors();
+
+    $value = $page->value('input[name="content"]');
+    expect($value)->toContain('## Hello World')
+        ->and($value)->not->toContain('```');
+})->group('slow');
+
+it('pasting markdown with single newlines normalizes to separate paragraphs', function (): void {
+    $page = loginToAdmin();
+
+    $page->navigate('/admin/articles/create')
+        ->wait(3);
+
+    $page->script('
+        const editor = document.querySelector(".tiptap");
+        editor.focus();
+        const dt = new DataTransfer();
+        dt.setData("text/plain", "First paragraph.\nSecond paragraph.");
+        editor.dispatchEvent(new ClipboardEvent("paste", { clipboardData: dt, bubbles: true }));
+    ');
+
+    $page->wait(1)->assertNoJavaScriptErrors();
+
+    $value = $page->value('input[name="content"]');
+    expect($value)->toContain('First paragraph.')
+        ->and($value)->toContain('Second paragraph.');
+})->group('slow');
