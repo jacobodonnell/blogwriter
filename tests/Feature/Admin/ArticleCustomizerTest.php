@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\Status;
 use App\Models\Article;
+use App\Models\Category;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -293,8 +294,8 @@ it('preview update does NOT overwrite live title on published article', function
 });
 
 it('preview update does NOT overwrite live category on published article', function (): void {
-    $category = App\Models\Category::factory()->create();
-    $newCategory = App\Models\Category::factory()->create();
+    $category = Category::factory()->create();
+    $newCategory = Category::factory()->create();
 
     $article = Article::factory()->published()->for($this->user)->create([
         'category_id' => $category->id,
@@ -425,6 +426,23 @@ it('index edit button is shown for draft articles', function (): void {
         ->assertDontSee('Preview Draft');
 });
 
+it('draft column is null when all submitted values match live', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'title' => 'Original Title',
+        'content' => 'Original content',
+    ]);
+
+    put(route('admin.articles.preview.update', $article), [
+        'title' => 'Original Title',
+        'slug' => $article->slug,
+        'content' => 'Original content',
+        'summary' => $article->summary ?? '',
+        'status' => $article->status->value,
+    ])->assertOk();
+
+    expect($article->fresh()->draft)->toBeNull();
+});
+
 it('live preview route returns article without draft applied', function (): void {
     $article = Article::factory()->published()->for($this->user)->withDraft([
         'title' => 'Draft Title',
@@ -439,4 +457,42 @@ it('live preview route returns article without draft applied', function (): void
         ->assertViewIs('admin.articles.preview')
         ->assertSee('Live Title')
         ->assertDontSee('Draft Title');
+});
+
+it('preview renders draft category in preview pane', function (): void {
+    $original = Category::factory()->create(['name' => 'Original Cat']);
+    $newCat = Category::factory()->create(['name' => 'New Draft Cat']);
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'category_id' => $original->id,
+    ]);
+
+    put(route('admin.articles.preview.update', $article), [
+        'title' => $article->title,
+        'slug' => $article->slug,
+        'content' => $article->content,
+        'category_id' => $newCat->id,
+        'status' => $article->status->value,
+    ])
+        ->assertOk()
+        ->assertSee('New Draft Cat')
+        ->assertDontSee('Original Cat');
+});
+
+it('draft does not store photo_id null when live photo_id is already null', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'photo_id' => null,
+        'meta' => ['featured_image_url' => 'https://example.com/image.jpg'],
+    ]);
+
+    put(route('admin.articles.preview.update', $article), [
+        'title' => 'Changed Title',
+        'slug' => $article->slug,
+        'content' => $article->content,
+        'featured_image' => 'https://example.com/image.jpg',
+        'status' => $article->status->value,
+    ])->assertOk();
+
+    $draft = $article->fresh()->draft;
+    expect($draft)->toHaveKey('title')
+        ->and($draft)->not->toHaveKey('photo_id');
 });

@@ -8,6 +8,7 @@ use App\Actions\GenerateUniqueSlugAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateArticlePreviewRequest;
 use App\Models\Article;
+use App\Models\Category;
 use Illuminate\View\View;
 
 final class ArticlePreviewController extends Controller
@@ -20,52 +21,92 @@ final class ArticlePreviewController extends Controller
     public function __invoke(UpdateArticlePreviewRequest $request, Article $article): View
     {
         $data = $request->validated();
-        $draft = $article->draft ?? [];
+        $draft = [];
 
-        // Translate featured_image URL into meta before merging into draft
+        // Handle featured_image URL → meta
         $featuredImageUrl = $data['featured_image'] ?? null;
         unset($data['featured_image']);
 
-        // Merge validated fields into draft snapshot (except status — intentional actions only)
+        // Only store fields that differ from the live DB values
         foreach ($data as $key => $value) {
-            if ($key === 'status') {
+            if ($key === 'status' || $key === 'meta') {
                 continue;
             }
 
-            $draft[$key] = $value;
+            if ($this->valuesDiffer($value, $article->getOriginal($key))) {
+                $draft[$key] = $value;
+            }
         }
 
-        // Apply featured_image URL to draft meta
+        // Build draft meta: only store meta keys that differ from live
+        $liveMeta = $article->getOriginal('meta') ?? [];
+        $incomingMeta = $data['meta'] ?? [];
+        $draftMeta = [];
+
+        foreach ($incomingMeta as $metaKey => $metaValue) {
+            $liveValue = $liveMeta[$metaKey] ?? null;
+
+            if ($this->valuesDiffer($metaValue, $liveValue)) {
+                $draftMeta[$metaKey] = $metaValue;
+            }
+        }
+
         if (! empty($featuredImageUrl)) {
-            $meta = $draft['meta'] ?? $article->meta ?? [];
-            $meta['featured_image_url'] = $featuredImageUrl;
-            $draft['meta'] = $meta;
-            $draft['photo_id'] = null;
-        }
+            if ($this->valuesDiffer($featuredImageUrl, $liveMeta['featured_image_url'] ?? null)) {
+                $draftMeta['featured_image_url'] = $featuredImageUrl;
+            }
 
-        // Slug generation within draft: resolve placeholders using draft title
-        if (isset($draft['slug']) && $draft['slug'] !== '') {
-            $baseSlug = Article::isPlaceholderSlug((string) $draft['slug']) && ! empty($draft['title'])
-                ? $draft['title']
-                : $draft['slug'];
-
-            $newSlug = app(GenerateUniqueSlugAction::class)
-                ->handle($baseSlug, Article::class, $article->id);
-
-            $draft['slug'] = $newSlug;
+            // Mutual exclusion: only draft photo_id=null if live has a photo
+            if ($article->getOriginal('photo_id') !== null) {
+                $draft['photo_id'] = null;
+            }
         }
 
         // Mutual exclusion: photo_id clears featured_image_url
         if (! empty($draft['photo_id'])) {
-            $meta = $draft['meta'] ?? $article->meta ?? [];
-            unset($meta['featured_image_url']);
-            $draft['meta'] = $meta;
+            unset($draftMeta['featured_image_url']);
         }
 
-        $article->update(['draft' => $draft]);
+        if (! empty($draftMeta)) {
+            $draft['meta'] = $draftMeta;
+        }
+
+        // Slug generation: use the incoming slug (even if it matched live) for placeholder resolution
+        $incomingSlug = $data['slug'] ?? null;
+
+        if ($incomingSlug !== null && $incomingSlug !== '') {
+            $draftTitle = $draft['title'] ?? $article->title;
+            $baseSlug = Article::isPlaceholderSlug((string) $incomingSlug) && ! empty($draftTitle)
+                ? $draftTitle
+                : ($draft['slug'] ?? $incomingSlug);
+
+            $newSlug = app(GenerateUniqueSlugAction::class)
+                ->handle($baseSlug, Article::class, $article->id);
+
+            if ($this->valuesDiffer($newSlug, $article->getOriginal('slug'))) {
+                $draft['slug'] = $newSlug;
+            } else {
+                unset($draft['slug']);
+            }
+        }
+
+        $article->update(['draft' => ! empty($draft) ? $draft : null]);
 
         $article->refresh()->load('category')->applyDraft();
 
+        // Re-resolve category relation if draft changed category_id
+        if ($article->category_id !== $article->getOriginal('category_id')) {
+            $article->setRelation('category', Category::find($article->category_id));
+        }
+
         return view('admin.articles.preview', ['article' => $article]);
+    }
+
+    private function valuesDiffer(mixed $incoming, mixed $live): bool
+    {
+        $a = $incoming === null || $incoming === '' ? '' : $incoming;
+        $b = $live === null || $live === '' ? '' : $live;
+
+        return (string) $a !== (string) $b;
     }
 }
