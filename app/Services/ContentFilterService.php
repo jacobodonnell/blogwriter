@@ -30,7 +30,7 @@ final readonly class ContentFilterService
 
         $this->applyCategory($query, $request, $categoryIds);
         $this->applySearch($query, $request, ['title', 'slug']);
-        $this->applyStatus($query, $request, $adminMode || auth()->check());
+        $this->applyStatus($query, $request, $adminMode || auth()->check(), $adminMode ? null : 'published');
 
         $eagerLoad = $options['eagerLoad'] ?? ['category', 'featuredPhoto'];
         $query->with($eagerLoad);
@@ -64,7 +64,7 @@ final readonly class ContentFilterService
 
         $this->applyCategory($query, $request, $categoryIds);
         $this->applySearch($query, $request, ['alt_text', 'slug', 'caption']);
-        $this->applyStatus($query, $request, $adminMode || auth()->check());
+        $this->applyStatus($query, $request, $adminMode || auth()->check(), $adminMode ? null : 'published');
 
         if ($adminMode) {
             $query->orderBy('created_at', 'desc');
@@ -147,11 +147,19 @@ final readonly class ContentFilterService
      *
      * @param  Builder<\Illuminate\Database\Eloquent\Model>  $query
      */
-    private function applyStatus(Builder $query, Request $request, bool $allowed): void
+    private function applyStatus(Builder $query, Request $request, bool $allowed, ?string $default = null): void
     {
-        if ($allowed && $request->filled('status')) {
-            $query->where('status', Status::from($request->input('status')));
+        if (! $allowed) {
+            return;
         }
+
+        $status = $request->input('status') ?: $default;
+
+        if ($status === null || $status === 'all') {
+            return;
+        }
+
+        $query->where('status', Status::from($status));
     }
 
     /**

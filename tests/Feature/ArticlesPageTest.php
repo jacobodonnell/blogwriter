@@ -106,6 +106,30 @@ it('filters articles by status for authenticated users', function (): void {
         ->assertDontSee('Published One');
 });
 
+it('authenticated user sees only published articles by default', function (): void {
+    $user = User::factory()->create();
+    Article::factory()->published()->create(['title' => 'Published Default']);
+    Article::factory()->draft()->create(['title' => 'Draft Hidden']);
+
+    $this->actingAs($user)
+        ->get('/articles')
+        ->assertSuccessful()
+        ->assertSee('Published Default')
+        ->assertDontSee('Draft Hidden');
+});
+
+it('authenticated user sees only published articles when status is cleared', function (): void {
+    $user = User::factory()->create();
+    Article::factory()->published()->create(['title' => 'Published One']);
+    Article::factory()->draft()->create(['title' => 'Draft One']);
+
+    $this->actingAs($user)
+        ->get('/articles?status=')
+        ->assertSuccessful()
+        ->assertSee('Published One')
+        ->assertDontSee('Draft One');
+});
+
 it('guests cannot see drafts via status filter', function (): void {
     Article::factory()->published()->create(['title' => 'Published Article']);
     Article::factory()->draft()->create(['title' => 'Secret Draft']);

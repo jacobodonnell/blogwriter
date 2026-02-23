@@ -18,6 +18,7 @@ final class Select extends FilterField
         public string $emptyLabel = 'All',
         bool $auth = false,
         int $colspan = 1,
+        public ?string $default = null,
     ) {
         parent::__construct($label, $name, $auth, $colspan);
     }

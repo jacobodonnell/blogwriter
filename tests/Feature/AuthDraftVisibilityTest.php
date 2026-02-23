@@ -8,12 +8,12 @@ use App\Models\User;
 
 // --- Articles Index ---
 
-it('shows draft articles to authenticated users on articles index', function (): void {
+it('shows draft articles to authenticated users via status=draft', function (): void {
     $user = User::factory()->create();
     $draft = Article::factory()->draft()->create();
 
     $this->actingAs($user)
-        ->get('/articles')
+        ->get('/articles?status=draft')
         ->assertSuccessful()
         ->assertSee($draft->title);
 });
@@ -57,12 +57,12 @@ it('shows draft badge on article show page for authenticated users', function ()
 
 // --- Photos Index ---
 
-it('shows draft photos to authenticated users on photos index', function (): void {
+it('shows draft photos to authenticated users via status=draft', function (): void {
     $user = User::factory()->create();
     $draft = Photo::factory()->draft()->create(['alt_text' => 'Draft Photo Alt']);
 
     $this->actingAs($user)
-        ->get('/photos')
+        ->get('/photos?status=draft')
         ->assertSuccessful()
         ->assertSee('Draft Photo Alt');
 });

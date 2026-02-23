@@ -4,7 +4,7 @@
             @change="$el.form.requestSubmit()">
         <option value="">{{ $emptyLabel }}</option>
         @foreach($options as $value => $display)
-            <option value="{{ $value }}" @selected(request($name) === (string) $value)>{{ $display }}</option>
+            <option value="{{ $value }}" @selected((request($name) ?: $default) === (string) $value)>{{ $display }}</option>
         @endforeach
     </select>
 </div>

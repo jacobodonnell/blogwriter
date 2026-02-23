@@ -35,7 +35,7 @@
                 <x-filter-banner.category-select :categories="$categories" />
                 <x-filter-banner.select name="status" label="Status"
                     :options="['published' => 'Published', 'draft' => 'Draft']"
-                    emptyLabel="All Status" :auth="true" />
+                    emptyLabel="All" default="published" :auth="true" />
                 <x-filter-banner.sort />
             </x-filter-banner>
             @if($articles->isNotEmpty())

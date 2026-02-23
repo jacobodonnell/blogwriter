@@ -86,6 +86,30 @@ it('filters photos by status for authenticated users', function (): void {
         ->assertDontSee('Published Snap');
 });
 
+it('authenticated user sees only published photos by default', function (): void {
+    $user = User::factory()->create();
+    Photo::factory()->published()->create(['alt_text' => 'Published Default']);
+    Photo::factory()->draft()->create(['alt_text' => 'Draft Hidden']);
+
+    $this->actingAs($user)
+        ->get('/photos')
+        ->assertSuccessful()
+        ->assertSee('Published Default')
+        ->assertDontSee('Draft Hidden');
+});
+
+it('authenticated user sees only published photos when status is cleared', function (): void {
+    $user = User::factory()->create();
+    Photo::factory()->published()->create(['alt_text' => 'Published Snap']);
+    Photo::factory()->draft()->create(['alt_text' => 'Draft Snap']);
+
+    $this->actingAs($user)
+        ->get('/photos?status=')
+        ->assertSuccessful()
+        ->assertSee('Published Snap')
+        ->assertDontSee('Draft Snap');
+});
+
 it('guests cannot see draft photos via status filter', function (): void {
     Photo::factory()->published()->create(['alt_text' => 'Public Photo']);
     Photo::factory()->draft()->create(['alt_text' => 'Hidden Draft Photo']);
