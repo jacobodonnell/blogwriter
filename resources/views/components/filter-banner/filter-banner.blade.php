@@ -5,7 +5,10 @@
         this.hasFilters = [...this.$refs.filterForm.querySelectorAll('select, input:not([type=hidden])')].some(el => el.value !== '');
     },
     clearFilters() {
-        this.$refs.filterForm.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+        this.$refs.filterForm.querySelectorAll('select').forEach(s => {
+            const def = s.dataset.clearValue;
+            s.value = def !== undefined ? def : '';
+        });
         this.$refs.filterForm.querySelectorAll('input:not([type=hidden])').forEach(i => i.value = '');
         this.hasFilters = false;
     },

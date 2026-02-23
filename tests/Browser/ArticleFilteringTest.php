@@ -171,6 +171,32 @@ it('clears all filters and resets form inputs', function (): void {
         ->assertSee('Other Article');
 })->group('slow');
 
+it('selecting all status updates url to status=all and shows all articles', function (): void {
+    Article::factory()->published()->create(['title' => 'Published Article']);
+    Article::factory()->draft()->create(['title' => 'Draft Article']);
+
+    $page = loginToArticles();
+
+    // Open filters
+    $page->click('button:has-text("Filters")')
+        ->wait(0.5);
+
+    // Default is published — draft not visible
+    $page->assertSee('Published Article')
+        ->assertDontSee('Draft Article');
+
+    // Select "All"
+    $page->select('select[name="status"]', 'all')
+        ->wait(1);
+
+    // URL should contain ?status=all
+    $page->assertQueryStringHas('status', 'all');
+
+    // Both articles now visible
+    $page->assertSee('Published Article')
+        ->assertSee('Draft Article');
+})->group('slow');
+
 it('clears all filters and resets results', function (): void {
     $category = Category::factory()->create(['name' => 'Tech']);
     Article::factory()->published()->create([
