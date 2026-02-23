@@ -14,80 +14,57 @@ final class ArticlePreviewController extends Controller
 {
     /**
      * Update article for live preview (AJAX auto-save).
+     *
+     * All changes are stored in the `draft` JSON column — live columns are never touched.
      */
     public function __invoke(UpdateArticlePreviewRequest $request, Article $article): View
     {
         $data = $request->validated();
+        $draft = $article->draft ?? [];
 
-        $updateData = [];
+        // Translate featured_image URL into meta before merging into draft
+        $featuredImageUrl = $data['featured_image'] ?? null;
+        unset($data['featured_image']);
 
-        if (isset($data['status'])) {
-            $updateData['status'] = $data['status'];
+        // Merge validated fields into draft snapshot (except status — intentional actions only)
+        foreach ($data as $key => $value) {
+            if ($key === 'status') {
+                continue;
+            }
+
+            $draft[$key] = $value;
         }
 
-        if (isset($data['title'])) {
-            $updateData['title'] = $data['title'];
+        // Apply featured_image URL to draft meta
+        if (! empty($featuredImageUrl)) {
+            $meta = $draft['meta'] ?? $article->meta ?? [];
+            $meta['featured_image_url'] = $featuredImageUrl;
+            $draft['meta'] = $meta;
+            $draft['photo_id'] = null;
         }
 
-        if (isset($data['slug']) && $data['slug'] !== '') {
-            $baseSlug = Article::isPlaceholderSlug((string) $data['slug']) && isset($data['title']) && $data['title'] !== ''
-                ? $data['title']
-                : $data['slug'];
+        // Slug generation within draft: resolve placeholders using draft title
+        if (isset($draft['slug']) && $draft['slug'] !== '') {
+            $baseSlug = Article::isPlaceholderSlug((string) $draft['slug']) && ! empty($draft['title'])
+                ? $draft['title']
+                : $draft['slug'];
 
             $newSlug = app(GenerateUniqueSlugAction::class)
                 ->handle($baseSlug, Article::class, $article->id);
 
-            if ($newSlug !== $article->slug) {
-                $updateData['slug'] = $newSlug;
-            }
+            $draft['slug'] = $newSlug;
         }
 
-        if (array_key_exists('content', $data)) {
-            $incoming = $data['content'];
-            $isDifferent = $incoming !== null && $incoming !== $article->content;
-            $updateData['draft_content'] = $isDifferent ? $incoming : null;
+        // Mutual exclusion: photo_id clears featured_image_url
+        if (! empty($draft['photo_id'])) {
+            $meta = $draft['meta'] ?? $article->meta ?? [];
+            unset($meta['featured_image_url']);
+            $draft['meta'] = $meta;
         }
 
-        if (array_key_exists('summary', $data)) {
-            $updateData['summary'] = $data['summary'] ?? null;
-        }
+        $article->update(['draft' => $draft]);
 
-        if (isset($data['meta'])) {
-            $updateData['meta'] = $data['meta'];
-        }
-
-        // Handle featured image: photo_id takes precedence over URL
-        if (array_key_exists('photo_id', $data)) {
-            if (! empty($data['photo_id'])) {
-                $updateData['photo_id'] = $data['photo_id'];
-                // Clear URL-based featured image when selecting a photo
-                $meta = $updateData['meta'] ?? $article->meta ?? [];
-                unset($meta['featured_image_url']);
-                $updateData['meta'] = $meta;
-            } else {
-                $updateData['photo_id'] = null;
-            }
-        }
-
-        if (! empty($data['featured_image'])) {
-            $meta = $updateData['meta'] ?? $article->meta ?? [];
-            $meta['featured_image_url'] = $data['featured_image'];
-            $updateData['meta'] = $meta;
-            $updateData['photo_id'] = null;
-        }
-
-        if (array_key_exists('category_id', $data)) {
-            $updateData['category_id'] = $data['category_id'] ?: null;
-        }
-
-        $article->update($updateData);
-
-        $article->refresh()->load('category');
-
-        // Overlay draft_content onto content for preview rendering only (no DB write)
-        if ($article->hasDraft()) {
-            $article->content = $article->draft_content;
-        }
+        $article->refresh()->load('category')->applyDraft();
 
         return view('admin.articles.preview', ['article' => $article]);
     }

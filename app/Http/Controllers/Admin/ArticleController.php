@@ -88,6 +88,16 @@ final class ArticleController extends Controller
     public function edit(Article $article): View
     {
         $article->load('category');
+
+        if ($article->hasDraft()) {
+            $article->applyDraft();
+
+            // Re-resolve category relation if draft changed category_id
+            if ($article->category_id !== $article->getOriginal('category_id')) {
+                $article->setRelation('category', Category::find($article->category_id));
+            }
+        }
+
         $categories = Category::tree()->get();
         $photos = Photo::published()->with('media')->latest()->limit(50)->get();
 
@@ -129,8 +139,8 @@ final class ArticleController extends Controller
         $article->update([
             'title' => $data['title'],
             'slug' => $data['slug'],
-            'content' => $data['content'] ?? $article->draft_content ?? $article->content,
-            'draft_content' => null,
+            'content' => $data['content'] ?? $article->content,
+            'draft' => null,
             'summary' => $data['summary'] ?? null,
             'status' => $data['status'],
             'published_at' => $data['published_at'] ?? $article->published_at,

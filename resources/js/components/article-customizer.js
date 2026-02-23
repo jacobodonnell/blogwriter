@@ -34,8 +34,8 @@ export default function articleCustomizer(config) {
         hasNewCategory: false,
         newCategoryName: '',
         updatedAt: 0,
+        hasDraft: config.hasDraft ?? false,
         hasChanges: config.hasDraft ?? false,
-        savedContent: config.committedContent,
         isNew: config.isNew ?? false,
 
         get isPlaceholderSlug() {
@@ -121,7 +121,8 @@ export default function articleCustomizer(config) {
                     onUpdate: (e) => {
                         this.updatedAt = Date.now();
                         this.content = e.getMarkdown();
-                        this.hasChanges = this.content.trim() !== this.savedContent.trim();
+                        this.hasChanges = true;
+                        this.hasDraft = true;
                         this.contentError = false;
                         this.$refs.customizerForm.dispatchEvent(
                             new Event('input', { bubbles: true })

@@ -8,7 +8,7 @@
          x-data="articleCustomizer({
             title: @js(old('title', $article->title ?? '')),
             slug: @js(old('slug', $article->slug ?? '')),
-            content: @js(old('content', $article->draft_content ?? $article->content ?? '')),
+            content: @js(old('content', $article->content ?? '')),
             summary: @js(old('summary', $article->summary ?? '')),
             selectedPhotoId: @js(old('photo_id', $article->photo_id ?? '')),
             featuredImageUrl: @js(old('featured_image', $article->meta['featured_image_url'] ?? '')),
@@ -22,7 +22,6 @@
             saveRoute: @js(($isNew ?? false) ? route('admin.articles.store') : route('admin.articles.update', $article)),
             isNew: @js($isNew ?? false),
             hasDraft: @js($article->exists && $article->hasDraft()),
-            committedContent: @js($article->content ?? ''),
          })">
 
         <form x-ref="customizerForm"
@@ -74,7 +73,7 @@
                         <input type="hidden" name="slug" :value="slug">
                         <div class="join w-full">
                             <span class="join-item btn btn-sm btn-disabled no-animation">/articles/</span>
-                            <input type="text" x-model="displaySlug"
+                            <input type="text" id="display-slug" x-model="displaySlug"
                                    class="join-item input input-bordered input-sm flex-1 @error('slug') input-error @enderror"
                                    placeholder="auto-generated from title">
                         </div>
@@ -180,7 +179,7 @@
 
                             {{-- Inline dialogs for link / image / youtube --}}
                             <div x-show="showLinkDialog" class="flex gap-2 mt-2 items-center">
-                                <input x-model="linkUrl" type="url" placeholder="https://..." class="input input-sm input-bordered flex-1" data-test="link-url-input" @keydown.enter.prevent="insertLink()">
+                                <input x-model="linkUrl" type="url" id="link-url" placeholder="https://..." class="input input-sm input-bordered flex-1" data-test="link-url-input" @keydown.enter.prevent="insertLink()">
                                 <button type="button" @click="insertLink()" class="btn btn-sm btn-primary" data-test="link-insert-btn">Insert</button>
                                 <button type="button" @click="showLinkDialog = false" class="btn btn-sm btn-ghost">Cancel</button>
                             </div>
@@ -189,11 +188,11 @@
                                     <span class="text-sm font-medium" x-text="editingImage ? 'Edit Image' : 'Insert Image'"></span>
                                 </div>
                                 <div class="flex gap-2 items-center">
-                                    <input x-model="imageUrl" type="url" placeholder="Image URL (https://...)" class="input input-sm input-bordered flex-1" data-test="image-url-input" @keydown.enter.prevent="insertImage()">
+                                    <input x-model="imageUrl" type="url" id="image-url" placeholder="Image URL (https://...)" class="input input-sm input-bordered flex-1" data-test="image-url-input" @keydown.enter.prevent="insertImage()">
                                 </div>
                                 <div class="flex gap-2">
-                                    <input x-model="imageAlt" type="text" placeholder="Alt text" class="input input-sm input-bordered flex-1" data-test="image-alt-input">
-                                    <input x-model="imageCaption" type="text" placeholder="Caption (optional)" class="input input-sm input-bordered flex-1" data-test="image-caption-input">
+                                    <input x-model="imageAlt" type="text" id="image-alt" placeholder="Alt text" class="input input-sm input-bordered flex-1" data-test="image-alt-input">
+                                    <input x-model="imageCaption" type="text" id="image-caption" placeholder="Caption (optional)" class="input input-sm input-bordered flex-1" data-test="image-caption-input">
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <div class="flex-1"></div>
@@ -204,7 +203,7 @@
                                 </div>
                             </div>
                             <div x-show="showYoutubeDialog" class="flex gap-2 mt-2 items-center">
-                                <input x-model="youtubeUrl" type="url" placeholder="YouTube URL..." class="input input-sm input-bordered flex-1" data-test="youtube-url-input" @keydown.enter.prevent="insertYoutube()">
+                                <input x-model="youtubeUrl" type="url" id="youtube-url" placeholder="YouTube URL..." class="input input-sm input-bordered flex-1" data-test="youtube-url-input" @keydown.enter.prevent="insertYoutube()">
                                 <button type="button" @click="insertYoutube()" class="btn btn-sm btn-primary" data-test="youtube-embed-btn">Embed</button>
                                 <button type="button" @click="showYoutubeDialog = false" class="btn btn-sm btn-ghost">Cancel</button>
                             </div>
@@ -429,14 +428,14 @@
                 <div class="space-y-3">
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">Name</legend>
-                        <input type="text" x-model="name" @blur="autoSlug()"
+                        <input type="text" id="new-category-name" x-model="name" @blur="autoSlug()"
                                class="input input-bordered w-full"
                                placeholder="e.g. Web Development">
                     </fieldset>
 
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">Slug (optional)</legend>
-                        <input type="text" x-model="slug" @input="slugManuallyEdited = true"
+                        <input type="text" id="new-category-slug" x-model="slug" @input="slugManuallyEdited = true"
                                class="input input-bordered w-full"
                                placeholder="auto-generated from name">
                         <p class="fieldset-label">Leave blank to auto-generate from name.</p>
@@ -453,7 +452,7 @@
 
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">Description (optional)</legend>
-                        <textarea x-model="description"
+                        <textarea id="new-category-description" x-model="description"
                                   class="textarea textarea-bordered w-full h-16 text-sm"
                                   placeholder="Brief description of this category"></textarea>
                     </fieldset>
@@ -492,7 +491,7 @@
                 <div class="space-y-3">
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">Image</legend>
-                        <input type="file" x-ref="filePicker" data-test="photo-file-picker"
+                        <input type="file" id="photo-file-picker" x-ref="filePicker" data-test="photo-file-picker"
                                class="file-input file-input-bordered w-full"
                                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                                @change="handleFileChange($event)">
@@ -504,14 +503,14 @@
 
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">Alt Text</legend>
-                        <input type="text" x-ref="altInput" data-test="photo-alt-text"
+                        <input type="text" id="photo-alt-text" x-ref="altInput" data-test="photo-alt-text"
                                class="input input-bordered w-full"
                                placeholder="Describe the image for accessibility">
                     </fieldset>
 
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">Caption (optional)</legend>
-                        <textarea x-ref="captionInput"
+                        <textarea id="photo-caption" x-ref="captionInput"
                                   class="textarea textarea-bordered w-full h-16 text-sm"
                                   placeholder="Photo caption"></textarea>
                     </fieldset>

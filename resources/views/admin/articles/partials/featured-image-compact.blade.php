@@ -8,10 +8,10 @@
     <input type="hidden" name="photo_id" :value="selectedPhotoId">
 
     {{-- Photo Select --}}
-    <select x-model="selectedPhotoId" data-test="photo-select"
+    <select id="photo-select" x-model="selectedPhotoId" data-test="photo-select"
             @change="selectPhoto()"
             class="select select-bordered select-sm w-full">
-        <option value="">No featured image</option>
+        <option value="" x-text="featuredImageUrl ? 'Using external URL' : 'No featured image'"></option>
         @foreach($photos as $photo)
             <option value="{{ $photo->id }}">
                 {{ $photo->alt_text }}
@@ -81,7 +81,7 @@
             {{-- Use Photo Caption toggle (only when a photo is selected, not URL/upload) --}}
             <div x-show="selectedPhotoId && !uploadedPhotoUrl && !featuredImageUrl" x-cloak>
                 <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" class="toggle toggle-sm" x-model="usePhotoCaption">
+                    <input type="checkbox" id="use-photo-caption" class="toggle toggle-sm" x-model="usePhotoCaption">
                     <span class="text-xs">Use photo's caption</span>
                 </label>
             </div>
@@ -94,7 +94,7 @@
 
             {{-- Custom caption textarea --}}
             <div x-show="!usePhotoCaption || !selectedPhotoId" x-cloak>
-                <textarea x-model="featuredImageCaption"
+                <textarea id="featured-image-caption" x-model="featuredImageCaption"
                           class="textarea textarea-bordered textarea-sm w-full h-16 text-sm"
                           placeholder="Image caption (optional)"></textarea>
             </div>

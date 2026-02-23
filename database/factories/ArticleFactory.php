@@ -111,6 +111,21 @@ final class ArticleFactory extends Factory
     }
 
     /**
+     * State for articles with a draft snapshot.
+     *
+     * @param  array<string, mixed>  $draftData
+     */
+    public function withDraft(array $draftData = []): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'draft' => array_merge([
+                'title' => 'Draft Title',
+                'content' => 'Draft content here',
+            ], $draftData),
+        ]);
+    }
+
+    /**
      * Generate a realistic blog post title.
      */
     protected function generateTitle(): string

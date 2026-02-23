@@ -20,6 +20,12 @@ final class Article extends Model
     /** @use HasFactory<\Database\Factories\ArticleFactory> */
     use HasFactory;
 
+    /** Fields that can be staged in a draft snapshot. */
+    private const DRAFTABLE_FIELDS = [
+        'title', 'slug', 'content', 'summary',
+        'category_id', 'photo_id', 'meta',
+    ];
+
     /**
      * Check if a slug matches the auto-generated placeholder pattern (e.g. "untitled-a1b2c3d4").
      */
@@ -96,7 +102,25 @@ final class Article extends Model
      */
     public function hasDraft(): bool
     {
-        return $this->draft_content !== null && $this->draft_content !== $this->content;
+        return ! empty($this->draft);
+    }
+
+    /**
+     * Overlay draft snapshot fields onto in-memory model attributes.
+     *
+     * Views stay completely draft-unaware — they just read normal attributes.
+     * Only whitelisted fields are applied to prevent accidental overwrites of
+     * sensitive attributes like `id`, `user_id`, or `created_at`.
+     */
+    public function applyDraft(): self
+    {
+        foreach ($this->draft ?? [] as $key => $value) {
+            if (in_array($key, self::DRAFTABLE_FIELDS, true)) {
+                $this->setAttribute($key, $value);
+            }
+        }
+
+        return $this;
     }
 
     protected static function booted(): void
@@ -137,6 +161,7 @@ final class Article extends Model
     protected function casts(): array
     {
         return [
+            'draft' => 'array',
             'meta' => 'array',
             'past_slugs' => 'array',
             'published_at' => 'datetime',
