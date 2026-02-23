@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\AppearanceController;
 use App\Http\Controllers\Admin\ArticleController;
 use App\Http\Controllers\Admin\ArticleExportController;
 use App\Http\Controllers\Admin\ArticleImportController;
+use App\Http\Controllers\Admin\ArticleLivePreviewController;
 use App\Http\Controllers\Admin\ArticlePreviewController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CategoryExploreController;
@@ -31,10 +32,10 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function (): v
 
     // Articles — existing articles
     Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
-    Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
     Route::get('/articles/{article}/edit', [ArticleController::class, 'edit'])->name('articles.edit');
     Route::put('/articles/{article}', [ArticleController::class, 'update'])->name('articles.update');
     Route::match(['post', 'put'], '/articles/{article}/preview', ArticlePreviewController::class)->name('articles.preview.update');
+    Route::get('/articles/{article}/preview/live', ArticleLivePreviewController::class)->name('articles.preview.live');
     Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy');
 
     // Photos

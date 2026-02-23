@@ -69,7 +69,9 @@
                                     </div>
                                     <div class="flex items-center gap-2 ml-4">
                                         <x-admin.icon-button tooltip="Edit" href="{{ route('admin.articles.edit', $article) }}" icon="pencil-simple" />
-                                        <x-admin.icon-button tooltip="View on Site" href="{{ $article->permalink() }}" icon="eye" />
+                                        @if($article->isPublished())
+                                            <x-admin.icon-button tooltip="View on Site" href="{{ $article->permalink() }}" icon="eye" />
+                                        @endif
                                     </div>
                                 </div>
                             @endforeach

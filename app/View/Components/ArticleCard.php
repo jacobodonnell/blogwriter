@@ -30,7 +30,9 @@ final class ArticleCard extends Component
     ) {
         $this->placeholderUrl ??= placeholder_image_url();
         $this->isStacked = $this->featured || $this->stacked;
-        $this->articleUrl = route('articles.show', $this->article->slug);
+        $this->articleUrl = $this->article->isPublished()
+            ? route('articles.show', $this->article->slug)
+            : route('admin.articles.edit', $this->article);
         $this->articleImage = $this->article->featured_image_url ?? $this->placeholderUrl ?? '';
         $this->titleClass = match (true) {
             $this->featured => 'text-2xl md:text-3xl',

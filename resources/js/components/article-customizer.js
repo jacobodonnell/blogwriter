@@ -37,6 +37,10 @@ export default function articleCustomizer(config) {
         hasDraft: config.hasDraft ?? false,
         hasChanges: config.hasDraft ?? false,
         isNew: config.isNew ?? false,
+        savedContent: config.savedContent ?? '',
+        savedTitle: config.savedTitle ?? '',
+        savedSlug: config.savedSlug ?? '',
+        savedSummary: config.savedSummary ?? '',
 
         get isPlaceholderSlug() {
             return /^untitled-[a-z0-9]{8}$/.test(this.slug);
@@ -55,6 +59,27 @@ export default function articleCustomizer(config) {
                     .replace(/[''`\u2018\u2019\u2032\u02BC]/g, '')
                     .replace(/[^a-z0-9]+/g, '-')
                     .replace(/^-+|-+$/g, '');
+            }
+        },
+
+        isClean() {
+            return this.content  === this.savedContent
+                && this.title    === this.savedTitle
+                && this.slug     === this.savedSlug
+                && this.summary  === this.savedSummary;
+        },
+
+        checkDirty() {
+            const dirty = !this.isClean();
+            this.hasChanges = dirty;
+            // Only clear hasDraft when there is no pre-existing persisted draft.
+            // If the DB already has a draft snapshot, the toggle stays visible even
+            // if the user edits back to the live values (those saved fields differ).
+            if (dirty || !config.hasDraft) {
+                this.hasDraft = dirty;
+            }
+            if (dirty && Alpine.store('preview').mode === 'live') {
+                Alpine.store('preview').mode = 'draft';
             }
         },
 
@@ -121,8 +146,7 @@ export default function articleCustomizer(config) {
                     onUpdate: (e) => {
                         this.updatedAt = Date.now();
                         this.content = e.getMarkdown();
-                        this.hasChanges = true;
-                        this.hasDraft = true;
+                        this.checkDirty();
                         this.contentError = false;
                         this.$refs.customizerForm.dispatchEvent(
                             new Event('input', { bubbles: true })
@@ -143,11 +167,13 @@ export default function articleCustomizer(config) {
             store.cssClass = this.buttonClass;
             store.action = this.buttonAction;
             store.ready = true;
+            store.hasDraft = this.hasDraft;
 
             this.$watch('buttonLabel', v => store.label = v);
             this.$watch('buttonIcon', v => store.icon = v);
             this.$watch('buttonClass', v => store.cssClass = v);
             this.$watch('buttonAction', v => store.action = v);
+            this.$watch('hasDraft', v => store.hasDraft = v);
 
             this._onSaveArticle = () => {
                 if (this.buttonAction === 'publish') { this.$refs.publishModal.showModal(); return; }

@@ -204,3 +204,12 @@ it('allows updating photo category', function (): void {
 
     expect($photo->fresh()->category_id)->toBe($category->id);
 });
+
+it('returns 404 for draft article regardless of auth', function (): void {
+    $user = User::factory()->create();
+    $article = Article::factory()->draft()->create();
+
+    $this->actingAs($user)
+        ->get(route('articles.show', $article->slug))
+        ->assertNotFound();
+});

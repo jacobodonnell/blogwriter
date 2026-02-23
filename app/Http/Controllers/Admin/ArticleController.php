@@ -71,18 +71,6 @@ final class ArticleController extends Controller
     }
 
     /**
-     * Display the full-page preview for an article.
-     */
-    public function show(Article $article): View
-    {
-        $article->load('category');
-
-        return view('admin.articles.preview-fullscreen', [
-            'article' => $article,
-        ]);
-    }
-
-    /**
      * Show the customizer editor for the specified article.
      */
     public function edit(Article $article): View
@@ -106,6 +94,10 @@ final class ArticleController extends Controller
             'categories' => $categories,
             'photos' => $photos,
             'isNew' => false,
+            'liveContent' => $article->getRawOriginal('content') ?? '',
+            'liveTitle' => $article->getRawOriginal('title') ?? '',
+            'liveSlug' => $article->getRawOriginal('slug') ?? '',
+            'liveSummary' => $article->getRawOriginal('summary') ?? '',
         ]);
     }
 

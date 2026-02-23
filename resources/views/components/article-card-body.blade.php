@@ -56,11 +56,13 @@
             Edit
         </a>
     @endauth
-    <a href="{{ $articleUrl }}"
-       class="btn btn-primary btn-sm">
-        Read More
-        <i class="ph ph-arrow-right"></i>
-    </a>
+    @if($article->isPublished())
+        <a href="{{ $articleUrl }}"
+           class="btn btn-primary btn-sm">
+            Read More
+            <i class="ph ph-arrow-right"></i>
+        </a>
+    @endif
 </div>
 
 {{-- Hidden author info for h-entry --}}

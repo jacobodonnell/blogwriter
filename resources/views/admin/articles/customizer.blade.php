@@ -1,7 +1,22 @@
 <x-layouts.customizer :title="($isNew ?? false) ? 'New Article' : 'Edit: ' . $article->title" :article="$article">
 
     <x-slot:preview>
-        @include('admin.articles.preview')
+        <div x-init="
+            $watch('$store.preview.mode', mode => {
+                if (mode === 'live') {
+                    fetch('{{ $article->exists ? route('admin.articles.preview.live', $article) : '#' }}', {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    }).then(r => r.text()).then(html => {
+                        const el = document.getElementById('preview-panel');
+                        if (el) el.outerHTML = html;
+                    });
+                } else {
+                    document.querySelector('[x-ref=\'customizerForm\']')?.requestSubmit();
+                }
+            })
+        ">
+            @include('admin.articles.preview')
+        </div>
     </x-slot:preview>
 
     <div @photo-attached="handlePhotoAttached($event.detail)"
@@ -22,6 +37,10 @@
             saveRoute: @js(($isNew ?? false) ? route('admin.articles.store') : route('admin.articles.update', $article)),
             isNew: @js($isNew ?? false),
             hasDraft: @js($article->exists && $article->hasDraft()),
+            savedContent: @js($liveContent ?? $article->content ?? ''),
+            savedTitle: @js($liveTitle ?? $article->title ?? ''),
+            savedSlug: @js($liveSlug ?? $article->slug ?? ''),
+            savedSummary: @js($liveSummary ?? $article->summary ?? ''),
          })">
 
         <form x-ref="customizerForm"
@@ -60,6 +79,7 @@
                         <legend class="fieldset-legend">Title</legend>
                         <input type="text" name="title" x-model="title"
                                @blur="generateSlug()"
+                               @input="checkDirty()"
                                class="input input-bordered w-full @error('title') input-error @enderror"
                                placeholder="Article title">
                         @error('title')
@@ -74,6 +94,7 @@
                         <div class="join w-full">
                             <span class="join-item btn btn-sm btn-disabled no-animation">/articles/</span>
                             <input type="text" id="display-slug" x-model="displaySlug"
+                                   @input="checkDirty()"
                                    class="join-item input input-bordered input-sm flex-1 @error('slug') input-error @enderror"
                                    placeholder="auto-generated from title">
                         </div>
@@ -236,6 +257,7 @@
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">Summary</legend>
                         <textarea name="summary" x-model="summary"
+                                  @input="checkDirty()"
                                   data-test="summary-field"
                                   class="textarea textarea-bordered w-full h-20 text-sm @error('summary') textarea-error @enderror"
                                   placeholder="Auto-generated if empty">{{ old('summary', $article->summary) }}</textarea>

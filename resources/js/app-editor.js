@@ -13,7 +13,10 @@ Alpine.store('saveButton', {
     cssClass: 'btn-primary',
     action: 'save',
     ready: false,
+    hasDraft: false,
 });
+
+Alpine.store('preview', { mode: 'draft' });
 
 Alpine.data('appearanceSettings', appearanceSettings);
 Alpine.data('sidebar', sidebar);

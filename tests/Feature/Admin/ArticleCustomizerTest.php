@@ -24,33 +24,6 @@ it('displays customizer layout for edit page', function (): void {
         ->assertViewIs('admin.articles.customizer');
 });
 
-it('shows full-page preview for draft articles', function (): void {
-    $article = Article::factory()->draft()->for($this->user)->create();
-
-    get(route('admin.articles.show', $article))
-        ->assertOk()
-        ->assertViewIs('admin.articles.preview-fullscreen')
-        ->assertSee('Preview Mode');
-});
-
-it('shows full-page preview for published articles', function (): void {
-    $article = Article::factory()->published()->for($this->user)->create();
-
-    get(route('admin.articles.show', $article))
-        ->assertOk()
-        ->assertViewIs('admin.articles.preview-fullscreen')
-        ->assertSee('Preview Mode');
-});
-
-it('requires auth for preview', function (): void {
-    auth()->logout();
-
-    $article = Article::factory()->draft()->create();
-
-    get(route('admin.articles.show', $article))
-        ->assertRedirect();
-});
-
 it('returns preview partial for ajax preview update', function (): void {
     $article = Article::factory()->draft()->for($this->user)->create([
         'title' => 'Original Title',
@@ -174,17 +147,6 @@ it('full save preserves existing featured image', function (): void {
     ])->assertRedirect();
 
     expect($article->fresh()->meta['featured_image_url'])->toBe('https://example.com/image.jpg');
-});
-
-it('index view button links to preview for drafts', function (): void {
-    $article = Article::factory()->draft()->for($this->user)->create([
-        'published_at' => null,
-    ]);
-
-    get(route('admin.articles.index'))
-        ->assertOk()
-        ->assertSee(route('admin.articles.show', $article))
-        ->assertSee('Preview Draft');
 });
 
 it('accepts POST with _method PUT for ajax preview update', function (): void {
@@ -452,4 +414,29 @@ it('preview renders draft content in preview pane', function (): void {
     ])
         ->assertOk()
         ->assertSee('Brand new draft text');
+});
+
+it('index edit button is shown for draft articles', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create();
+
+    get(route('admin.articles.index'))
+        ->assertOk()
+        ->assertSee(route('admin.articles.edit', $article))
+        ->assertDontSee('Preview Draft');
+});
+
+it('live preview route returns article without draft applied', function (): void {
+    $article = Article::factory()->published()->for($this->user)->withDraft([
+        'title' => 'Draft Title',
+        'content' => 'Draft content',
+    ])->create([
+        'title' => 'Live Title',
+        'content' => 'Live content',
+    ]);
+
+    get(route('admin.articles.preview.live', $article))
+        ->assertOk()
+        ->assertViewIs('admin.articles.preview')
+        ->assertSee('Live Title')
+        ->assertDontSee('Draft Title');
 });

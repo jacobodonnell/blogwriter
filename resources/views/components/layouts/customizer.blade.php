@@ -54,6 +54,27 @@
                     <i class="ph text-lg" :class="$store.saveButton.icon"></i>
                 </button>
 
+                {{-- View Live (only for published articles) --}}
+                @if($article->exists && $article->isPublished())
+                    <a href="{{ $article->permalink() }}"
+                       target="_blank"
+                       class="btn btn-ghost btn-sm btn-square tooltip tooltip-bottom hidden sm:inline-flex"
+                       data-tip="View Live">
+                        <i class="ph ph-arrow-square-out text-lg"></i>
+                    </a>
+                @endif
+
+                {{-- Draft/Live preview toggle — shown reactively when hasDraft is true --}}
+                <div class="hidden sm:flex items-center gap-1.5 tooltip tooltip-bottom"
+                     x-show="$store.saveButton.hasDraft"
+                     x-cloak
+                     :data-tip="$store.preview.mode === 'live' ? 'Switch to draft preview' : 'Switch to live preview'">
+                    <span class="text-xs text-base-content/50 select-none">Live</span>
+                    <input type="checkbox" class="toggle toggle-xs"
+                           :checked="$store.preview.mode === 'live'"
+                           @change="$store.preview.mode = $event.target.checked ? 'live' : 'draft'">
+                </div>
+
                 {{-- Viewport Presets --}}
                 <div class="join hidden sm:flex" x-show="!fullWidth" x-cloak>
                     <div class="tooltip tooltip-bottom" data-tip="Phone (375px)">
@@ -82,12 +103,6 @@
                     </div>
                 </div>
 
-                @if($article->exists)
-                    <a href="{{ route('admin.articles.show', $article) }}" class="btn btn-ghost btn-sm gap-1">
-                        <i class="ph ph-arrow-square-out text-lg"></i>
-                        <span class="hidden sm:inline">Preview</span>
-                    </a>
-                @endif
                 <x-theme-toggle size="sm" />
             </div>
         </header>

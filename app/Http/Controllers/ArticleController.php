@@ -43,27 +43,17 @@ final class ArticleController extends Controller
      */
     public function show(string $slug): View|RedirectResponse
     {
-        // Auth users can view any article, guests only published
-        $baseQuery = auth()->check()
-            ? Article::query()
-            : Article::published();
-
-        $article = $baseQuery->where('slug', $slug)
+        $article = Article::published()
+            ->where('slug', $slug)
             ->with('category')
             ->first();
 
         if ($article) {
-            return view('public.article', [
-                'article' => $article,
-            ]);
+            return view('public.article', ['article' => $article]);
         }
 
-        // Check past slugs for 301 redirect
-        $redirectQuery = auth()->check()
-            ? Article::query()
-            : Article::published();
-
-        $article = $redirectQuery->whereJsonContains('past_slugs', $slug)
+        $article = Article::published()
+            ->whereJsonContains('past_slugs', $slug)
             ->first();
 
         if ($article) {

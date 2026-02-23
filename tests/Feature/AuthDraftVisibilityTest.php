@@ -28,14 +28,13 @@ it('hides draft articles from guests on articles index', function (): void {
 
 // --- Article Show ---
 
-it('allows authenticated users to view draft articles', function (): void {
+it('returns 404 for draft articles regardless of auth', function (): void {
     $user = User::factory()->create();
     $draft = Article::factory()->draft()->create(['slug' => 'draft-article']);
 
     $this->actingAs($user)
         ->get('/articles/draft-article')
-        ->assertSuccessful()
-        ->assertSee($draft->title);
+        ->assertNotFound();
 });
 
 it('returns 404 for guests viewing draft articles', function (): void {
@@ -43,16 +42,6 @@ it('returns 404 for guests viewing draft articles', function (): void {
 
     $this->get('/articles/draft-article')
         ->assertNotFound();
-});
-
-it('shows draft badge on article show page for authenticated users', function (): void {
-    $user = User::factory()->create();
-    $draft = Article::factory()->draft()->create(['slug' => 'draft-article']);
-
-    $this->actingAs($user)
-        ->get('/articles/draft-article')
-        ->assertSuccessful()
-        ->assertSee('Draft');
 });
 
 // --- Photos Index ---
