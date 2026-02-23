@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Support\Markdown;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 final class FeedService
 {
@@ -48,11 +49,11 @@ final class FeedService
             ->limit(20)
             ->get()
             ->map(fn (Photo $photo): FeedItem => new FeedItem(
-                title: $photo->alt_text ?: ($photo->caption ? \Illuminate\Support\Str::limit(strip_tags(Markdown::render($photo->caption)), 80) : 'Photo'),
+                title: $this->resolvePhotoTitle($photo),
                 url: route('photos.show', $photo->slug),
                 id: route('photos.show', $photo->slug),
                 contentHtml: $this->buildPhotoHtml($photo),
-                summary: $photo->caption ? \Illuminate\Support\Str::limit(strip_tags(Markdown::render($photo->caption)), 255) : '',
+                summary: $this->resolvePhotoSummary($photo),
                 authorName: $authorName,
                 publishedAt: $photo->published_at,
                 categoryName: $photo->category?->name,
@@ -89,6 +90,34 @@ final class FeedService
     private function getAuthorName(): string
     {
         return User::first()?->name ?? config('app.name', 'BlogWriter');
+    }
+
+    /**
+     * Resolve the title for a photo feed item.
+     */
+    private function resolvePhotoTitle(Photo $photo): string
+    {
+        if ($photo->alt_text) {
+            return $photo->alt_text;
+        }
+
+        if ($photo->caption) {
+            return Str::limit(strip_tags(Markdown::render($photo->caption)), 80);
+        }
+
+        return 'Photo';
+    }
+
+    /**
+     * Resolve the summary for a photo feed item.
+     */
+    private function resolvePhotoSummary(Photo $photo): string
+    {
+        if (! $photo->caption) {
+            return '';
+        }
+
+        return Str::limit(strip_tags(Markdown::render($photo->caption)), 255);
     }
 
     /**

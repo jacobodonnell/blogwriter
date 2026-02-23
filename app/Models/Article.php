@@ -218,27 +218,21 @@ final class Article extends Model
 
     /**
      * Scope for published articles.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
      */
     #[Scope]
-    protected function published($query)
+    protected function published(\Illuminate\Database\Eloquent\Builder $query): void
     {
-        return $query->where('status', Status::Published)
+        $query->where('status', Status::Published)
             ->where('published_at', '<=', now());
     }
 
     /**
      * Scope for draft articles.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
      */
     #[Scope]
-    protected function draft($query)
+    protected function draft(\Illuminate\Database\Eloquent\Builder $query): void
     {
-        return $query->where('status', Status::Draft);
+        $query->where('status', Status::Draft);
     }
 
     /**
