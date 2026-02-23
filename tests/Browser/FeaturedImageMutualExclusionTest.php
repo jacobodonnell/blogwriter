@@ -96,8 +96,8 @@ it('clears upload state when selecting a photo', function (): void {
     $page->select('@photo-select', (string) $photo->id)
         ->wait(0.5);
 
-    // Save button should revert (upload state cleared)
-    $page->assertSeeIn('@save-button-label', 'Saved');
+    // Save button should show dirty state (selecting a photo is a real change)
+    $page->assertSeeIn('@save-button-label', 'Save Draft');
 })->group('slow');
 
 it('clears upload state when entering an external URL', function (): void {
@@ -123,6 +123,6 @@ it('clears upload state when entering an external URL', function (): void {
         ->type('@featured-image-url', 'https://example.com/image.jpg')
         ->wait(0.5);
 
-    // Save button should revert (upload state cleared)
-    $page->assertSeeIn('@save-button-label', 'Saved');
+    // Save button should show dirty state (entering a URL is a real change)
+    $page->assertSeeIn('@save-button-label', 'Save Draft');
 })->group('slow');

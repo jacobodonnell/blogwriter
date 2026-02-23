@@ -9,7 +9,7 @@
 
     {{-- Photo Select --}}
     <select id="photo-select" x-model="selectedPhotoId" data-test="photo-select"
-            @change="selectPhoto()"
+            @change="selectPhoto(); checkDirty(); $refs.customizerForm.dispatchEvent(new Event('input', { bubbles: true }))"
             class="select select-bordered select-sm w-full">
         <option value="" x-text="featuredImageUrl ? 'Using external URL' : 'No featured image'"></option>
         @foreach($photos as $photo)
@@ -50,7 +50,7 @@
                data-test="featured-image-url"
                class="input input-bordered input-sm w-full"
                placeholder="https://example.com/image.jpg"
-               @input="setExternalUrl()">
+               @input="setExternalUrl(); checkDirty()">
         <p class="text-xs text-base-content/50 mt-1">External URL overrides photo selection.</p>
     </div>
 
@@ -81,7 +81,7 @@
             {{-- Use Photo Caption toggle (only when a photo is selected, not URL/upload) --}}
             <div x-show="selectedPhotoId && !uploadedPhotoUrl && !featuredImageUrl" x-cloak>
                 <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" id="use-photo-caption" class="toggle toggle-sm" x-model="usePhotoCaption">
+                    <input type="checkbox" id="use-photo-caption" class="toggle toggle-sm" x-model="usePhotoCaption" @change="checkDirty(); $refs.customizerForm.dispatchEvent(new Event('input', { bubbles: true }))">
                     <span class="text-xs">Use photo's caption</span>
                 </label>
             </div>
@@ -95,6 +95,7 @@
             {{-- Custom caption textarea --}}
             <div x-show="!usePhotoCaption || !selectedPhotoId" x-cloak>
                 <textarea id="featured-image-caption" x-model="featuredImageCaption"
+                          @input="checkDirty()"
                           class="textarea textarea-bordered textarea-sm w-full h-16 text-sm"
                           placeholder="Image caption (optional)"></textarea>
             </div>

@@ -25,6 +25,10 @@
             slug: @js(old('slug', $article->slug ?? '')),
             content: @js(old('content', $article->content ?? '')),
             summary: @js(old('summary', $article->summary ?? '')),
+            categoryId: @js(old('category_id', $article->category_id) ?? ''),
+            metaTitle: @js(old('meta.meta_title', $article->meta['meta_title'] ?? '')),
+            metaDescription: @js(old('meta.meta_description', $article->meta['meta_description'] ?? '')),
+            ogImage: @js(old('meta.og_image', $article->meta['og_image'] ?? '')),
             selectedPhotoId: @js(old('photo_id', $article->photo_id ?? '')),
             featuredImageUrl: @js(old('featured_image', $article->meta['featured_image_url'] ?? '')),
             showUrlField: @js(!empty(old('featured_image', $article->meta['featured_image_url'] ?? ''))),
@@ -41,6 +45,14 @@
             savedTitle: @js($liveTitle ?? $article->title ?? ''),
             savedSlug: @js($liveSlug ?? $article->slug ?? ''),
             savedSummary: @js($liveSummary ?? $article->summary ?? ''),
+            savedCategoryId: @js((string) ($liveCategoryId ?? $article->category_id ?? '')),
+            savedPhotoId: @js((string) ($livePhotoId ?? $article->photo_id ?? '')),
+            savedFeaturedImageUrl: @js($liveMeta['featured_image_url'] ?? ''),
+            savedFeaturedImageCaption: @js($liveMeta['featured_image_caption'] ?? ''),
+            savedUsePhotoCaption: @js(!empty($liveMeta['use_photo_caption'] ?? false)),
+            savedMetaTitle: @js($liveMeta['meta_title'] ?? ''),
+            savedMetaDescription: @js($liveMeta['meta_description'] ?? ''),
+            savedOgImage: @js($liveMeta['og_image'] ?? ''),
          })">
 
         <form x-ref="customizerForm"
@@ -297,7 +309,8 @@
                         <x-category-select :categories="$categories ?? collect()"
                             :selected="$article->category_id"
                             x-show="!hasNewCategory"
-                            @change="hasChanges = true"
+                            x-model="categoryId"
+                            @change="checkDirty(); $refs.customizerForm.dispatchEvent(new Event('input', { bubbles: true }))"
                             @category-attached.window="
                                 $refs.newCategoryNameInput.value = $event.detail.name;
                                 $refs.newCategorySlugInput.value = $event.detail.slug ?? '';
@@ -345,32 +358,31 @@
 
                     {{-- SEO Settings --}}
                     <details class="collapse collapse-arrow bg-base-200 rounded-lg">
-                        <summary class="collapse-title text-sm font-medium">
+                        <summary class="collapse-title text-sm font-medium" data-test="seo-toggle">
                             <i class="ph ph-magnifying-glass mr-1"></i> SEO Settings
                         </summary>
                         <div class="collapse-content space-y-3">
-                            @php $meta = old('meta', $article->meta ?? []); @endphp
-
                             <fieldset class="fieldset">
                                 <legend class="fieldset-legend text-xs">Meta Title</legend>
-                                <input type="text" name="meta[meta_title]"
+                                <input type="text" name="meta[meta_title]" x-model="metaTitle"
+                                       @input="checkDirty()"
                                        class="input input-bordered input-sm w-full"
-                                       value="{{ $meta['meta_title'] ?? '' }}"
                                        placeholder="Custom search title">
                             </fieldset>
 
                             <fieldset class="fieldset">
                                 <legend class="fieldset-legend text-xs">Meta Description</legend>
-                                <textarea name="meta[meta_description]"
+                                <textarea name="meta[meta_description]" x-model="metaDescription"
+                                          @input="checkDirty()"
                                           class="textarea textarea-bordered w-full h-16 text-sm"
-                                          placeholder="Search result description">{{ $meta['meta_description'] ?? '' }}</textarea>
+                                          placeholder="Search result description"></textarea>
                             </fieldset>
 
                             <fieldset class="fieldset">
                                 <legend class="fieldset-legend text-xs">OG Image URL</legend>
-                                <input type="url" name="meta[og_image]"
+                                <input type="url" name="meta[og_image]" x-model="ogImage"
+                                       @input="checkDirty()"
                                        class="input input-bordered input-sm w-full"
-                                       value="{{ $meta['og_image'] ?? '' }}"
                                        placeholder="https://example.com/og-image.jpg">
                             </fieldset>
                         </div>

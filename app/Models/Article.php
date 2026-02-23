@@ -115,7 +115,15 @@ final class Article extends Model
     public function applyDraft(): self
     {
         foreach ($this->draft ?? [] as $key => $value) {
-            if (in_array($key, self::DRAFTABLE_FIELDS, true)) {
+            if (! in_array($key, self::DRAFTABLE_FIELDS, true)) {
+                continue;
+            }
+
+            if ($key === 'meta') {
+                // Merge draft meta keys into live meta (don't replace)
+                $liveMeta = $this->meta ?? [];
+                $this->setAttribute('meta', array_merge($liveMeta, $value ?? []));
+            } else {
                 $this->setAttribute($key, $value);
             }
         }

@@ -98,6 +98,9 @@ final class ArticleController extends Controller
             'liveTitle' => $article->getRawOriginal('title') ?? '',
             'liveSlug' => $article->getRawOriginal('slug') ?? '',
             'liveSummary' => $article->getRawOriginal('summary') ?? '',
+            'liveCategoryId' => $article->getOriginal('category_id'),
+            'livePhotoId' => $article->getOriginal('photo_id'),
+            'liveMeta' => $article->getOriginal('meta') ?? [],
         ]);
     }
 

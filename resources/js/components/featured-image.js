@@ -15,22 +15,22 @@ export default function featuredImage(config) {
         },
 
         selectPhoto() {
+            this.hasNewPhoto = false;
+            this.uploadedPhotoUrl = null;
+            this.clearFileInput();
             if (!this.selectedPhotoId) return;
             this.featuredImageUrl = '';
-            this.uploadedPhotoUrl = null;
-            this.hasNewPhoto = false;
             this.usePhotoCaption = false;
             this.featuredImageCaption = '';
-            this.clearFileInput();
         },
 
         setExternalUrl() {
+            this.hasNewPhoto = false;
+            this.uploadedPhotoUrl = null;
+            this.clearFileInput();
             if (!this.featuredImageUrl) return;
             this.selectedPhotoId = '';
-            this.uploadedPhotoUrl = null;
-            this.hasNewPhoto = false;
             this.usePhotoCaption = false;
-            this.clearFileInput();
         },
     };
 }

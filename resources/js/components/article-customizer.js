@@ -8,6 +8,10 @@ export default function articleCustomizer(config) {
         slug: config.slug,
         content: config.content,
         summary: config.summary,
+        categoryId: String(config.categoryId ?? ''),
+        metaTitle: config.metaTitle ?? '',
+        metaDescription: config.metaDescription ?? '',
+        ogImage: config.ogImage ?? '',
         selectedPhotoId: config.selectedPhotoId,
         uploadedPhotoUrl: null,
         uploading: false,
@@ -41,6 +45,14 @@ export default function articleCustomizer(config) {
         savedTitle: config.savedTitle ?? '',
         savedSlug: config.savedSlug ?? '',
         savedSummary: config.savedSummary ?? '',
+        savedCategoryId: String(config.savedCategoryId ?? ''),
+        savedPhotoId: String(config.savedPhotoId ?? ''),
+        savedFeaturedImageUrl: config.savedFeaturedImageUrl ?? '',
+        savedFeaturedImageCaption: config.savedFeaturedImageCaption ?? '',
+        savedUsePhotoCaption: config.savedUsePhotoCaption ?? false,
+        savedMetaTitle: config.savedMetaTitle ?? '',
+        savedMetaDescription: config.savedMetaDescription ?? '',
+        savedOgImage: config.savedOgImage ?? '',
 
         get isPlaceholderSlug() {
             return /^untitled-[a-z0-9]{8}$/.test(this.slug);
@@ -63,10 +75,18 @@ export default function articleCustomizer(config) {
         },
 
         isClean() {
-            return this.content  === this.savedContent
-                && this.title    === this.savedTitle
-                && this.slug     === this.savedSlug
-                && this.summary  === this.savedSummary;
+            return this.content                          === this.savedContent
+                && this.title                            === this.savedTitle
+                && this.slug                             === this.savedSlug
+                && this.summary                          === this.savedSummary
+                && String(this.categoryId || '')          === this.savedCategoryId
+                && String(this.selectedPhotoId || '')     === this.savedPhotoId
+                && (this.featuredImageUrl || '')          === this.savedFeaturedImageUrl
+                && (this.featuredImageCaption || '')      === this.savedFeaturedImageCaption
+                && this.usePhotoCaption                  === this.savedUsePhotoCaption
+                && (this.metaTitle || '')                 === this.savedMetaTitle
+                && (this.metaDescription || '')           === this.savedMetaDescription
+                && (this.ogImage || '')                   === this.savedOgImage;
         },
 
         checkDirty() {
@@ -158,7 +178,9 @@ export default function articleCustomizer(config) {
                 });
 
                 this.editorReady = true;
-                this.savedContent = editor.getMarkdown(); // capture normalised baseline after parse round-trip
+                const normalised = editor.getMarkdown();
+                this.savedContent = normalised; // capture normalised baseline after parse round-trip
+                this.content = normalised;      // sync so isClean() starts true
                 this.updatedAt = Date.now();
             });
 
