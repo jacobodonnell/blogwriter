@@ -9,9 +9,11 @@ final readonly class ParsedImport
     /**
      * @param  array<int, array{frontmatter: array<string, mixed>, content: string}>  $articles
      * @param  array<int, array<string, mixed>>|null  $categoriesYaml
+     * @param  array<string, mixed>|null  $settingsYaml
      */
     public function __construct(
         public array $articles,
         public ?array $categoriesYaml,
+        public ?array $settingsYaml = null,
     ) {}
 }

@@ -357,6 +357,74 @@ it('returns ok with zero imported and zero skipped for a zip with no md files', 
     ])->assertJson(['status' => 'ok', 'imported' => 0, 'skipped' => 0]);
 });
 
+// ---------------------------------------------------------------------------
+// settings.yaml import
+// ---------------------------------------------------------------------------
+
+it('applies settings from settings.yaml on import', function (): void {
+    $settingsYaml = Yaml::dump([
+        'profile_name' => 'Imported User',
+        'theme_light' => 'lofi',
+        'theme_dark' => 'dracula',
+        'theme_font' => 'inter',
+        'profile_bio' => 'An imported bio.',
+        'page_home_subtitle' => 'Hello from import!',
+    ], 2, 2);
+
+    $zip = makeImportZip(['settings.yaml' => $settingsYaml]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok']);
+
+    expect(User::query()->value('name'))->toBe('Imported User')
+        ->and(App\Models\Setting::get('theme_light'))->toBe('lofi')
+        ->and(App\Models\Setting::get('theme_dark'))->toBe('dracula')
+        ->and(App\Models\Setting::get('theme_font'))->toBe('inter')
+        ->and(App\Models\Setting::get('profile_bio'))->toBe('An imported bio.')
+        ->and(App\Models\Setting::get('page_home_subtitle'))->toBe('Hello from import!');
+});
+
+it('ignores unknown theme_light value on import', function (): void {
+    App\Models\Setting::set('theme_light', 'lofi');
+
+    $settingsYaml = Yaml::dump(['theme_light' => 'totally-fake-theme'], 2, 2);
+
+    $zip = makeImportZip(['settings.yaml' => $settingsYaml]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok']);
+
+    expect(App\Models\Setting::get('theme_light'))->toBe('lofi');
+});
+
+it('ignores unknown theme_font value on import', function (): void {
+    App\Models\Setting::set('theme_font', 'noto-sans');
+
+    $settingsYaml = Yaml::dump(['theme_font' => 'comic-sans-ms'], 2, 2);
+
+    $zip = makeImportZip(['settings.yaml' => $settingsYaml]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok']);
+
+    expect(App\Models\Setting::get('theme_font'))->toBe('noto-sans');
+});
+
+it('silently succeeds when settings.yaml is absent from zip', function (): void {
+    $zip = makeImportZip([]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok']);
+});
+
 it('restores created_at from frontmatter', function (): void {
     $md = makeArticleMd([
         'title' => 'Old Post',

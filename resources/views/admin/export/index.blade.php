@@ -90,10 +90,10 @@
             <div class="card-body">
                 <h2 class="card-title font-admin">
                     <i class="ph ph-upload-simple text-xl"></i>
-                    Import Articles
+                    Import Site Data
                 </h2>
                 <p class="text-sm text-base-content/60 font-admin">
-                    Upload a BlogWriter ZIP export to import articles and categories.
+                    Upload a BlogWriter ZIP export to restore articles, categories, and settings (theme, profile, page subtitles).
                     Articles with duplicate slugs will be skipped or overwritten based on your choice.
                 </p>
 
@@ -241,6 +241,11 @@
                         <code class="font-mono text-xs bg-base-200 px-1 py-0.5 rounded">draft</code>,
                         <code class="font-mono text-xs bg-base-200 px-1 py-0.5 rounded">category</code>,
                         <code class="font-mono text-xs bg-base-200 px-1 py-0.5 rounded">past_slugs</code>, and SEO fields.
+                    </p>
+                    <p>
+                        The ZIP also includes <code class="font-mono text-xs bg-base-200 px-1 py-0.5 rounded">settings.yaml</code>
+                        with your appearance preferences (theme, font), profile details (name, bio, social links), and page subtitles.
+                        These are restored automatically when importing into a fresh BlogWriter installation.
                     </p>
                     <p class="text-base-content/50">
                         Photos and uploaded media are not included in this export.

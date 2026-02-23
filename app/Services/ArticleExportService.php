@@ -7,6 +7,8 @@ namespace App\Services;
 use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\Yaml\Yaml;
 use ZipStream\ZipStream;
@@ -45,6 +47,31 @@ final class ArticleExportService
         ])->values()->all();
 
         $zip->addFile('categories.yaml', Yaml::dump($data, 2, 2));
+    }
+
+    /**
+     * Stream site settings as a settings.yaml file into the given ZipStream.
+     */
+    public function streamSettingsToZip(ZipStream $zip): void
+    {
+        $settingKeys = [
+            'theme_light', 'theme_dark', 'theme_font',
+            'profile_email', 'profile_avatar', 'profile_bio',
+            'profile_github', 'profile_mastodon', 'profile_bluesky',
+            'page_home_subtitle', 'page_articles_subtitle', 'page_photos_subtitle',
+        ];
+
+        $data = ['profile_name' => User::query()->value('name')];
+
+        $settings = Setting::query()->whereIn('key', $settingKeys)->pluck('value', 'key')->all();
+
+        foreach ($settingKeys as $key) {
+            if (isset($settings[$key])) {
+                $data[$key] = $settings[$key];
+            }
+        }
+
+        $zip->addFile('settings.yaml', Yaml::dump($data, 2, 2));
     }
 
     /**

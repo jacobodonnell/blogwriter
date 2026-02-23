@@ -30,6 +30,7 @@ final class ArticleExportController extends Controller
 
             $exportService->streamToZip($zip, $articles);
             $exportService->streamCategoriesToZip($zip);
+            $exportService->streamSettingsToZip($zip);
 
             $zip->finish();
         }, $filename, [

@@ -287,6 +287,64 @@ it('categories.yaml lists categories with correct slug and name', function (): v
         ->and($childEntry['parent_slug'])->toBe('technology');
 });
 
+it('zip contains settings.yaml', function (): void {
+    $stream = fopen('php://memory', 'r+');
+    $zip = new ZipStream(outputName: null, sendHttpHeaders: false, outputStream: $stream);
+
+    $service = new ArticleExportService();
+    $service->streamSettingsToZip($zip);
+    $zip->finish();
+
+    rewind($stream);
+    $zipBytes = stream_get_contents($stream);
+    fclose($stream);
+
+    $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
+    file_put_contents($tmpFile, $zipBytes);
+
+    $za = new ZipArchive();
+    $za->open($tmpFile, ZipArchive::RDONLY);
+    $contents = $za->getFromName('settings.yaml');
+    $za->close();
+    unlink($tmpFile);
+
+    expect($contents)->not->toBeFalse();
+});
+
+it('settings.yaml includes expected keys from settings and user', function (): void {
+    $this->user->update(['name' => 'Jane Doe']);
+    App\Models\Setting::set('theme_light', 'lofi');
+    App\Models\Setting::set('page_home_subtitle', 'Welcome!');
+    App\Models\Setting::set('profile_bio', 'A test bio.');
+
+    $stream = fopen('php://memory', 'r+');
+    $zip = new ZipStream(outputName: null, sendHttpHeaders: false, outputStream: $stream);
+
+    $service = new ArticleExportService();
+    $service->streamSettingsToZip($zip);
+    $zip->finish();
+
+    rewind($stream);
+    $zipBytes = stream_get_contents($stream);
+    fclose($stream);
+
+    $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
+    file_put_contents($tmpFile, $zipBytes);
+
+    $za = new ZipArchive();
+    $za->open($tmpFile, ZipArchive::RDONLY);
+    $yamlContent = $za->getFromName('settings.yaml');
+    $za->close();
+    unlink($tmpFile);
+
+    $data = Yaml::parse($yamlContent);
+
+    expect($data['profile_name'])->toBe('Jane Doe')
+        ->and($data['theme_light'])->toBe('lofi')
+        ->and($data['page_home_subtitle'])->toBe('Welcome!')
+        ->and($data['profile_bio'])->toBe('A test bio.');
+});
+
 it('streams articles as markdown files to a zip', function (): void {
     $article = Article::factory()->published()->create([
         'title' => 'Hello World',
@@ -295,7 +353,6 @@ it('streams articles as markdown files to a zip', function (): void {
     ]);
     $article->load('user', 'category', 'featuredPhoto.media');
 
-    $captured = '';
     $stream = fopen('php://memory', 'r+');
 
     $zip = new ZipStream(outputName: null, sendHttpHeaders: false, outputStream: $stream);

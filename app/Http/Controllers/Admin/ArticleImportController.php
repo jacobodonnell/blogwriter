@@ -34,6 +34,10 @@ final class ArticleImportController extends Controller
             ]);
         }
 
+        if ($parsed->settingsYaml !== null) {
+            $importService->importSettings($parsed->settingsYaml);
+        }
+
         $result = $importService->import($parsed, $request->input('duplicate_strategy'), auth()->id());
 
         return response()->json([
@@ -59,6 +63,10 @@ final class ArticleImportController extends Controller
         }
 
         session()->forget($sessionKey);
+
+        if ($parsed->settingsYaml !== null) {
+            $importService->importSettings($parsed->settingsYaml);
+        }
 
         $result = $importService->import($parsed, $request->input('duplicate_strategy'), auth()->id());
 

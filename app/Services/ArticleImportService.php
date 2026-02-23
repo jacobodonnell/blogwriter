@@ -7,6 +7,8 @@ namespace App\Services;
 use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\Setting;
+use App\Models\User;
 use App\Support\ImportResult;
 use App\Support\ParsedImport;
 use App\Support\PreflightResult;
@@ -36,6 +38,16 @@ final class ArticleImportService
             }
         }
 
+        $settingsYaml = null;
+        $settingsRaw = $za->getFromName('settings.yaml');
+        if ($settingsRaw !== false) {
+            try {
+                $settingsYaml = Yaml::parse($settingsRaw) ?? [];
+            } catch (ParseException) {
+                $settingsYaml = [];
+            }
+        }
+
         $articles = [];
         for ($i = 0; $i < $za->numFiles; $i++) {
             $name = $za->getNameIndex($i);
@@ -60,7 +72,7 @@ final class ArticleImportService
 
         $za->close();
 
-        return new ParsedImport(articles: $articles, categoriesYaml: $categoriesYaml);
+        return new ParsedImport(articles: $articles, categoriesYaml: $categoriesYaml, settingsYaml: $settingsYaml);
     }
 
     /**
@@ -193,6 +205,46 @@ final class ArticleImportService
         }
 
         return new ImportResult(imported: $imported, skipped: $skipped, errors: $errors);
+    }
+
+    /**
+     * Apply settings from a parsed settings.yaml array with graceful degradation.
+     *
+     * @param  array<string, mixed>  $settingsYaml
+     */
+    public function importSettings(array $settingsYaml): void
+    {
+        $validThemesLight = config('appearance.themes_light');
+        $validThemesDark = config('appearance.themes_dark');
+        $validFonts = array_keys(config('appearance.fonts'));
+
+        if (isset($settingsYaml['theme_light']) && in_array($settingsYaml['theme_light'], $validThemesLight, true)) {
+            Setting::set('theme_light', $settingsYaml['theme_light']);
+        }
+
+        if (isset($settingsYaml['theme_dark']) && in_array($settingsYaml['theme_dark'], $validThemesDark, true)) {
+            Setting::set('theme_dark', $settingsYaml['theme_dark']);
+        }
+
+        if (isset($settingsYaml['theme_font']) && in_array($settingsYaml['theme_font'], $validFonts, true)) {
+            Setting::set('theme_font', $settingsYaml['theme_font']);
+        }
+
+        if (! empty($settingsYaml['profile_name'])) {
+            User::query()->update(['name' => $settingsYaml['profile_name']]);
+        }
+
+        $stringKeys = [
+            'profile_email', 'profile_avatar', 'profile_bio',
+            'profile_github', 'profile_mastodon', 'profile_bluesky',
+            'page_home_subtitle', 'page_articles_subtitle', 'page_photos_subtitle',
+        ];
+
+        foreach ($stringKeys as $key) {
+            if (isset($settingsYaml[$key])) {
+                Setting::set($key, $settingsYaml[$key]);
+            }
+        }
     }
 
     /**
