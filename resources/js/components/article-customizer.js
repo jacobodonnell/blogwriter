@@ -120,6 +120,7 @@ export default function articleCustomizer(config) {
                 });
 
                 this.editorReady = true;
+                this.updatedAt = Date.now();
             });
 
             const store = Alpine.store('saveButton');
