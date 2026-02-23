@@ -32,7 +32,7 @@ final class FeedService
                 title: $article->title,
                 url: $article->permalink(),
                 id: $article->permalink(),
-                contentHtml: Markdown::render($article->getRawOriginal('content') ?? ''),
+                contentHtml: Markdown::render($article->content ?? ''),
                 summary: $article->excerpt,
                 authorName: $authorName,
                 publishedAt: $article->published_at,

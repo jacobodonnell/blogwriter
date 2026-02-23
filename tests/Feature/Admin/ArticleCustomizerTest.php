@@ -228,7 +228,7 @@ it('stores content submitted from tiptap editor', function (): void {
         'status' => Status::Draft->value,
     ])->assertRedirect(route('admin.articles.edit', $article));
 
-    expect($article->fresh()->content)->toBe("## Hello\nThis is a paragraph.");
+    expect($article->fresh()->content)->toBe("## Hello\n\nThis is a paragraph.");
 });
 
 it('stores bold and italic markdown content correctly', function (): void {

@@ -4,52 +4,35 @@ declare(strict_types=1);
 
 use App\Models\Article;
 
-it('expands single newlines to double newlines on save', function (): void {
-    $article = Article::factory()->create(['content' => "Line one\nLine two\nLine three"]);
+it('stores content as-is (no newline transformation)', function (): void {
+    $article = Article::factory()->create(['content' => "Line one\n\nLine two\n\nLine three"]);
 
-    expect($article->getRawOriginal('content'))->toBe("Line one\n\nLine two\n\nLine three");
+    expect($article->content)->toBe("Line one\n\nLine two\n\nLine three");
 });
 
-it('does not double existing double newlines', function (): void {
-    $article = Article::factory()->create(['content' => "Line one\n\nLine two"]);
+it('round-trips CommonMark content unchanged', function (): void {
+    $content = "First paragraph\n\nSecond paragraph";
+    $article = Article::factory()->create(['content' => $content]);
 
-    expect($article->getRawOriginal('content'))->toBe("Line one\n\nLine two");
+    expect($article->content)->toBe($content);
 });
 
 it('preserves fenced code blocks untouched', function (): void {
-    $content = "Text before\n```\ncode\nline\n```\nText after";
+    $content = "Text before\n\n```\ncode\nline\n```\n\nText after";
     $article = Article::factory()->create(['content' => $content]);
 
-    $raw = $article->getRawOriginal('content');
-
-    expect($raw)->toContain("```\ncode\nline\n```");
+    expect($article->content)->toBe($content);
+    expect($article->content)->toContain("```\ncode\nline\n```");
 });
 
-it('collapses double newlines to single on read', function (): void {
-    $article = Article::factory()->create(['content' => "Line one\nLine two"]);
-
-    expect($article->content)->toBe("Line one\nLine two");
-});
-
-it('preserves triple newlines as intentional blank lines', function (): void {
-    $article = Article::factory()->create(['content' => "Para one\n\n\nPara two"]);
-
-    $raw = $article->getRawOriginal('content');
-    // Triple+ newlines in input should remain as intentional spacing (at least double after processing)
-    expect($raw)->toContain("\n\n");
-
-    // On read, the intentional blank line should be preserved as double newline
-    expect($article->content)->toContain("\n\n");
-});
-
-it('returns null for null content via accessor', function (): void {
+it('returns null for null content', function (): void {
     $article = Article::factory()->make(['content' => null]);
 
     expect($article->content)->toBeNull();
 });
 
 it('renders correct paragraphs from stored double newlines', function (): void {
-    $article = Article::factory()->create(['content' => "First paragraph\nSecond paragraph"]);
+    $article = Article::factory()->create(['content' => "First paragraph\n\nSecond paragraph"]);
 
     $html = $article->content_html;
 
@@ -57,9 +40,8 @@ it('renders correct paragraphs from stored double newlines', function (): void {
     expect($html)->toContain('<p>Second paragraph</p>');
 });
 
-it('round-trips content correctly', function (): void {
-    $original = "Line one\nLine two\nLine three";
-    $article = Article::factory()->create(['content' => $original]);
+it('stores single newlines as-is without expansion', function (): void {
+    $article = Article::factory()->create(['content' => "Line one\nLine two"]);
 
-    expect($article->content)->toBe($original);
+    expect($article->content)->toBe("Line one\nLine two");
 });
