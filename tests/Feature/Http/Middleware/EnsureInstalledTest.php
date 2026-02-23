@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Middleware\EnsureInstalled;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 beforeEach(function (): void {
     @unlink(storage_path('installed.lock'));
@@ -28,6 +29,16 @@ function runMiddleware(Request $request): mixed
     $middleware = app(EnsureInstalled::class);
 
     return $middleware->handle($request, fn ($req) => response('passed'));
+}
+
+function expectAbort(int $status, string $uri): void
+{
+    try {
+        runMiddleware(createMiddlewareRequest($uri));
+        test()->fail("Expected {$status} HttpException was not thrown");
+    } catch (HttpException $e) {
+        expect($e->getStatusCode())->toBe($status);
+    }
 }
 
 it('allows install route through when not installed', function (): void {
@@ -64,21 +75,11 @@ it('redirects admin sub-routes to install when not installed', function (): void
 });
 
 it('returns 503 for public frontend when not installed', function (): void {
-    try {
-        runMiddleware(createMiddlewareRequest('/'));
-        $this->fail('Expected HttpException was not thrown');
-    } catch (Symfony\Component\HttpKernel\Exception\HttpException $e) {
-        expect($e->getStatusCode())->toBe(503);
-    }
+    expectAbort(503, '/');
 });
 
 it('returns 503 for articles when not installed', function (): void {
-    try {
-        runMiddleware(createMiddlewareRequest('/articles'));
-        $this->fail('Expected HttpException was not thrown');
-    } catch (Symfony\Component\HttpKernel\Exception\HttpException $e) {
-        expect($e->getStatusCode())->toBe(503);
-    }
+    expectAbort(503, '/articles');
 });
 
 it('passes through when installed with healthy database', function (): void {
