@@ -41,6 +41,12 @@
             <input type="file" x-ref="featuredImageFileInput" name="featured_image_file" class="hidden">
             <input type="hidden" x-ref="featuredImageAltInput" name="featured_image_alt" value="">
             <input type="hidden" x-ref="featuredImageCaptionInput" name="featured_image_caption" value="">
+
+            {{-- Hidden inputs for staged new category --}}
+            <input type="hidden" name="new_category_name" x-ref="newCategoryNameInput">
+            <input type="hidden" name="new_category_slug" x-ref="newCategorySlugInput">
+            <input type="hidden" name="new_category_parent_id" x-ref="newCategoryParentIdInput">
+            <input type="hidden" name="new_category_description" x-ref="newCategoryDescriptionInput">
             <input type="hidden" name="meta[featured_image_caption]" :value="usePhotoCaption ? '' : featuredImageCaption">
             <input type="hidden" name="meta[use_photo_caption]" :value="usePhotoCaption ? '1' : ''">
 
@@ -268,7 +274,45 @@
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">Category</legend>
                         <x-category-select :categories="$categories ?? collect()"
-                            :selected="$article->category_id" />
+                            :selected="$article->category_id"
+                            x-show="!hasNewCategory"
+                            @category-attached.window="
+                                $refs.newCategoryNameInput.value = $event.detail.name;
+                                $refs.newCategorySlugInput.value = $event.detail.slug ?? '';
+                                $refs.newCategoryParentIdInput.value = $event.detail.parentId ?? '';
+                                $refs.newCategoryDescriptionInput.value = $event.detail.description ?? '';
+                                newCategoryName = $event.detail.name;
+                                hasNewCategory = true;
+                            " />
+                        {{-- Staged new category badge --}}
+                        <div x-show="hasNewCategory" x-cloak
+                             class="flex items-center justify-between gap-2 mt-2 px-2 py-1.5 bg-success/10 border border-success/30 rounded-field text-sm">
+                            <span class="flex items-center gap-1.5 text-success font-medium">
+                                <i class="ph ph-tag"></i>
+                                <span x-text="newCategoryName"></span>
+                            </span>
+                            <button type="button"
+                                    class="btn btn-ghost btn-xs text-base-content/50 hover:text-error"
+                                    aria-label="Remove staged category"
+                                    @click="
+                                        hasNewCategory = false;
+                                        newCategoryName = '';
+                                        $refs.newCategoryNameInput.value = '';
+                                        $refs.newCategorySlugInput.value = '';
+                                        $refs.newCategoryParentIdInput.value = '';
+                                        $refs.newCategoryDescriptionInput.value = '';
+                                    ">
+                                <i class="ph ph-x"></i>
+                            </button>
+                        </div>
+
+                        <button type="button"
+                                x-show="!hasNewCategory"
+                                class="btn btn-ghost btn-sm mt-2 gap-1 w-full justify-start"
+                                @click="$refs.newCategoryModal.showModal()">
+                            <i class="ph ph-plus"></i>
+                            New Category
+                        </button>
                     </fieldset>
 
                     {{-- Featured Image --}}
@@ -360,6 +404,86 @@
                     Unpublish
                 </button>
             </x-slot:actions>
+        </x-editor-modal>
+
+        {{-- New Category Modal — stages data client-side, submits with main form --}}
+        <x-editor-modal x-ref="newCategoryModal" title="New Category">
+            <div x-data="{
+                name: '',
+                slug: '',
+                description: '',
+                parentId: '',
+                slugManuallyEdited: false,
+                autoSlug() {
+                    if (!this.slugManuallyEdited) {
+                        this.slug = this.name.toLowerCase()
+                            .replace(/[^a-z0-9]+/g, '-')
+                            .replace(/^-+|-+$/g, '');
+                    }
+                },
+                reset() {
+                    this.name = ''; this.slug = ''; this.description = '';
+                    this.parentId = ''; this.slugManuallyEdited = false;
+                },
+            }">
+                <div class="space-y-3">
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">Name</legend>
+                        <input type="text" x-model="name" @blur="autoSlug()"
+                               class="input input-bordered w-full"
+                               placeholder="e.g. Web Development">
+                    </fieldset>
+
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">Slug (optional)</legend>
+                        <input type="text" x-model="slug" @input="slugManuallyEdited = true"
+                               class="input input-bordered w-full"
+                               placeholder="auto-generated from name">
+                        <p class="fieldset-label">Leave blank to auto-generate from name.</p>
+                    </fieldset>
+
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">Parent Category (optional)</legend>
+                        <x-category-select :categories="$categories ?? collect()"
+                            :selected="null"
+                            name="_modal_parent_id"
+                            emptyLabel="None (top-level)"
+                            x-model="parentId" />
+                    </fieldset>
+
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">Description (optional)</legend>
+                        <textarea x-model="description"
+                                  class="textarea textarea-bordered w-full h-16 text-sm"
+                                  placeholder="Brief description of this category"></textarea>
+                    </fieldset>
+
+                    <div class="alert alert-info text-sm">
+                        <i class="ph ph-info"></i>
+                        <span>This category will be created when you save the article.</span>
+                    </div>
+                </div>
+
+                <div class="modal-action">
+                    <button type="button" class="btn btn-primary"
+                            @click="
+                                if (!name.trim()) return;
+                                $dispatch('category-attached', {
+                                    name: name.trim(),
+                                    slug: slug.trim() || null,
+                                    parentId: parentId || null,
+                                    description: description.trim() || null,
+                                });
+                                $el.closest('dialog').close();
+                                reset();
+                            ">
+                        Attach Category
+                    </button>
+                    <form method="dialog">
+                        <button class="btn" @click="reset()">Cancel</button>
+                    </form>
+                </div>
+            </div>
         </x-editor-modal>
 
         {{-- Upload Photo Modal — stages file client-side, submits with main form --}}

@@ -31,6 +31,8 @@ export default function articleCustomizer(config) {
         contentError: false,
         editorReady: false,
         hasNewPhoto: false,
+        hasNewCategory: false,
+        newCategoryName: '',
         updatedAt: 0,
         hasChanges: config.hasDraft ?? false,
         savedContent: config.committedContent,
@@ -56,6 +58,12 @@ export default function articleCustomizer(config) {
             }
         },
 
+        get stagedItemPrefix() {
+            if (this.hasNewPhoto) return 'Upload Photo';
+            if (this.hasNewCategory) return 'Create Category';
+            return '';
+        },
+
         get buttonAction() {
             if (this.currentStatus === 'published' && this.initialStatus === 'draft' && !this.wasEverPublished) return 'publish';
             if (this.currentStatus === 'published' && this.initialStatus === 'draft' && this.wasEverPublished) return 'republish';
@@ -63,15 +71,19 @@ export default function articleCustomizer(config) {
             return 'save';
         },
         get buttonLabel() {
-            const a = this.buttonAction;
-            const p = this.hasNewPhoto;
-            if (a === 'publish') return p ? 'Upload Photo & Publish' : 'Publish Article';
-            if (a === 'republish') return p ? 'Upload Photo & Republish' : 'Republish Article';
-            if (a === 'unpublish') return 'Unpublish Article';
+            const action = this.buttonAction;
+            const suffix = this.stagedItemPrefix;
+
+            if (action === 'publish') return suffix ? `${suffix} & Publish` : 'Publish Article';
+            if (action === 'republish') return suffix ? `${suffix} & Republish` : 'Republish Article';
+            if (action === 'unpublish') return 'Unpublish Article';
             if (this.isNew) return 'Save to keep';
-            if (p) return this.initialStatus === 'published' ? 'Upload Photo & Publish' : 'Upload Photo & Save Draft';
-            if (this.hasChanges) return this.initialStatus === 'published' ? 'Publish Updates' : 'Save Draft';
-            return this.initialStatus === 'published' ? 'Published' : 'Saved';
+
+            const isPublished = this.initialStatus === 'published';
+
+            if (suffix) return isPublished ? `${suffix} & Publish` : `${suffix} & Save Draft`;
+            if (this.hasChanges) return isPublished ? 'Publish Updates' : 'Save Draft';
+            return isPublished ? 'Published' : 'Saved';
         },
         get buttonIcon() {
             const a = this.buttonAction;
@@ -79,6 +91,7 @@ export default function articleCustomizer(config) {
             if (a === 'unpublish') return 'ph-arrow-u-up-left';
             if (this.isNew) return 'ph-warning';
             if (this.hasNewPhoto) return 'ph-upload-simple';
+            if (this.hasNewCategory) return 'ph-tag';
             if (this.hasChanges) return this.initialStatus === 'published' ? 'ph-cloud-arrow-up' : 'ph-floppy-disk';
             return 'ph-check';
         },
@@ -87,7 +100,7 @@ export default function articleCustomizer(config) {
             if (a === 'publish' || a === 'republish') return 'btn-success';
             if (a === 'unpublish') return 'btn-error btn-outline';
             if (this.isNew) return 'btn-warning';
-            if (this.hasNewPhoto) return 'btn-success';
+            if (this.hasNewPhoto || this.hasNewCategory) return 'btn-success';
             if (!this.hasChanges) return 'btn-ghost opacity-60';
             return 'btn-primary';
         },

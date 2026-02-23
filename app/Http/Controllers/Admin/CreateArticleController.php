@@ -63,6 +63,16 @@ final class CreateArticleController extends Controller
                 ->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
         }
 
+        if (filled($data['new_category_name'] ?? null)) {
+            $category = Category::create([
+                'name' => $data['new_category_name'],
+                'slug' => $data['new_category_slug'] ?? null,
+                'parent_id' => $data['new_category_parent_id'] ?? null,
+                'description' => filled($data['new_category_description'] ?? null) ? $data['new_category_description'] : null,
+            ]);
+            $data['category_id'] = $category->id;
+        }
+
         $article = Article::create([
             'user_id' => auth()->id(),
             'title' => $data['title'] ?? 'Untitled Article',
