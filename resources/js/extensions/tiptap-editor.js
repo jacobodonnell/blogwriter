@@ -35,7 +35,7 @@ const MarkdownPaste = Extension.create({
                         if (!clipboardData) return false;
                         const html = clipboardData.getData('text/html');
                         const text = clipboardData.getData('text/plain');
-                        if (html || !text) return false;
+                        if (!text) return false;
                         const { $from } = view.state.selection;
                         if ($from.parent.type.spec.code) return false;
                         const json = this.editor.markdown.parse(normalizeMarkdown(text));
