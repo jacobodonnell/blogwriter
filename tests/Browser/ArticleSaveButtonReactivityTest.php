@@ -44,7 +44,7 @@ it('shows Upload Photo & Save Draft after uploading a photo on draft article', f
 
     $page = loginAndVisitEditor($article);
 
-    $page->assertSeeIn('@save-button-label', 'Save Draft');
+    $page->assertSeeIn('@save-button-label', 'Saved');
 
     uploadPhotoViaModal($page);
 
@@ -68,8 +68,8 @@ it('reverts to Save Draft when selecting an existing photo after upload', functi
     $page->select('@photo-select', (string) $photo->id)
         ->wait(0.5);
 
-    $page->assertSeeIn('@save-button-label', 'Save Draft')
-        ->assertAttributeContains('@save-button', 'class', 'btn-primary');
+    $page->assertSeeIn('@save-button-label', 'Saved')
+        ->assertAttributeContains('@save-button', 'class', 'btn-ghost');
 })->group('slow');
 
 it('shows Upload Photo & Save Changes for published article with photo', function (): void {
@@ -83,11 +83,11 @@ it('shows Upload Photo & Save Changes for published article with photo', functio
         ->assertPathIs('/');
 
     $page->navigate('/admin/articles/'.$article->id.'/edit')
-        ->assertSeeIn('@save-button-label', 'Save Changes');
+        ->assertSeeIn('@save-button-label', 'Published');
 
     uploadPhotoViaModal($page);
 
-    $page->assertSeeIn('@save-button-label', 'Upload Photo & Save Changes')
+    $page->assertSeeIn('@save-button-label', 'Upload Photo & Publish')
         ->assertAttributeContains('@save-button', 'class', 'btn-success');
 })->group('slow');
 
@@ -118,7 +118,7 @@ it('has btn-success class when photo uploaded and btn-primary when not', functio
 
     $page = loginAndVisitEditor($article);
 
-    $page->assertAttributeContains('@save-button', 'class', 'btn-primary');
+    $page->assertAttributeContains('@save-button', 'class', 'btn-ghost');
 
     uploadPhotoViaModal($page);
 

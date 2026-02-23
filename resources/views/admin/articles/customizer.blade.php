@@ -20,6 +20,9 @@
             wasEverPublished: @js($article->published_at !== null),
             originalPublishedAt: @js($article->published_at?->format('F j, Y')),
             saveRoute: @js(($isNew ?? false) ? route('admin.articles.store') : route('admin.articles.update', $article)),
+            isNew: @js($isNew ?? false),
+            hasDraft: @js($article->exists && $article->hasDraft()),
+            committedContent: @js($article->content ?? ''),
          })">
 
         <form x-ref="customizerForm"
@@ -27,7 +30,6 @@
               enctype="multipart/form-data"
               action="{{ ($isNew ?? false) ? route('admin.articles.preview.store') : route('admin.articles.preview.update', $article) }}"
               x-target="preview-panel"
-              @ajax:success="saved = true; setTimeout(() => saved = false, 2000)"
               @input.debounce.300ms="$el.requestSubmit()"
               novalidate>
             @csrf

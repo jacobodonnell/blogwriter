@@ -32,6 +32,9 @@ export default function articleCustomizer(config) {
         editorReady: false,
         hasNewPhoto: false,
         updatedAt: 0,
+        hasChanges: config.hasDraft ?? false,
+        savedContent: config.committedContent,
+        isNew: config.isNew ?? false,
 
         get isPlaceholderSlug() {
             return /^untitled-[a-z0-9]{8}$/.test(this.slug);
@@ -65,19 +68,27 @@ export default function articleCustomizer(config) {
             if (a === 'publish') return p ? 'Upload Photo & Publish' : 'Publish Article';
             if (a === 'republish') return p ? 'Upload Photo & Republish' : 'Republish Article';
             if (a === 'unpublish') return 'Unpublish Article';
-            if (this.initialStatus === 'published') return p ? 'Upload Photo & Save Changes' : 'Save Changes';
-            return p ? 'Upload Photo & Save Draft' : 'Save Draft';
+            if (this.isNew) return 'Save to keep';
+            if (p) return this.initialStatus === 'published' ? 'Upload Photo & Publish' : 'Upload Photo & Save Draft';
+            if (this.hasChanges) return this.initialStatus === 'published' ? 'Publish Updates' : 'Save Draft';
+            return this.initialStatus === 'published' ? 'Published' : 'Saved';
         },
         get buttonIcon() {
+            const a = this.buttonAction;
+            if (a === 'publish' || a === 'republish') return 'ph-rocket-launch';
+            if (a === 'unpublish') return 'ph-arrow-u-up-left';
+            if (this.isNew) return 'ph-warning';
             if (this.hasNewPhoto) return 'ph-upload-simple';
-            if (this.buttonAction === 'publish' || this.buttonAction === 'republish') return 'ph-rocket-launch';
-            if (this.buttonAction === 'unpublish') return 'ph-arrow-u-up-left';
-            return 'ph-floppy-disk';
+            if (this.hasChanges) return this.initialStatus === 'published' ? 'ph-cloud-arrow-up' : 'ph-floppy-disk';
+            return 'ph-check';
         },
         get buttonClass() {
+            const a = this.buttonAction;
+            if (a === 'publish' || a === 'republish') return 'btn-success';
+            if (a === 'unpublish') return 'btn-error btn-outline';
+            if (this.isNew) return 'btn-warning';
             if (this.hasNewPhoto) return 'btn-success';
-            if (this.buttonAction === 'publish' || this.buttonAction === 'republish') return 'btn-success';
-            if (this.buttonAction === 'unpublish') return 'btn-error btn-outline';
+            if (!this.hasChanges) return 'btn-ghost opacity-60';
             return 'btn-primary';
         },
 
@@ -97,6 +108,7 @@ export default function articleCustomizer(config) {
                     onUpdate: (e) => {
                         this.updatedAt = Date.now();
                         this.content = e.getMarkdown();
+                        this.hasChanges = this.content.trim() !== this.savedContent.trim();
                         this.contentError = false;
                         this.$refs.customizerForm.dispatchEvent(
                             new Event('input', { bubbles: true })
