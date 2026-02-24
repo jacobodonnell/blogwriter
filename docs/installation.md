@@ -41,6 +41,11 @@ login credential and public identity (h-card), not for sending mail.
   the `storage/` and `bootstrap/cache/` directories.
 </x-callout>
 
+<x-callout type="info" title="Deploying to Production?">
+  This guide covers the install command. For a step-by-step Forge deployment guide — including the SQLite
+  shared path configuration that prevents data loss on zero-downtime deployments — see [Deployment](deployment.md).
+</x-callout>
+
 ## CLI Installer
 
 If you have SSH access to your server (or access to the web-based terminal in Laravel Forge), use the CLI installer:
@@ -165,4 +170,4 @@ root.
 **Accidentally locked out** — Re-run the installer (`php artisan blogwriter:install`). When prompted, choose "Yes" to
 reset if you want a fresh start, or "No" to cancel if your data is still accessible.
 
-#### [Up Next: *Writing Content*](writing-content.md)
+#### [Up Next: *Deployment*](deployment.md)

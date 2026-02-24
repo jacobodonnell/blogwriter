@@ -136,8 +136,10 @@ npm run build
   or run `npm run build` to compile assets.
 </x-callout>
 
-## Deploying to Laravel Forge
+<x-callout type="info" title="Ready to Deploy?">
+  Once you've verified BlogWriter locally, see the [Deployment](deployment.md) guide for step-by-step
+  instructions to get your site live on Laravel Forge — including the shared path configuration that
+  keeps your database safe across zero-downtime deployments.
+</x-callout>
 
-1. Create a new site on Forge pointing to your repository
-2. Set the web root to `/public`
-3. In your deploy script, add: `php artisan blogwriter:install --non-interactive`
+#### [Up Next: *Deployment*](deployment.md)

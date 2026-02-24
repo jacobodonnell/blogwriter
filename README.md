@@ -77,6 +77,8 @@ Full documentation is in the [`docs/`](docs/) directory:
 
 - [Introduction](docs/introduction.md) --- Overview
 - [Installation](docs/installation.md) --- Get BlogWriter running
+- [Local Development](docs/local-development.md) --- Set up on your local machine
+- [Deployment](docs/deployment.md) --- Deploy to production with Laravel Forge
 - [Writing Content](docs/writing-content.md) --- Articles and photos
 - [Appearance](docs/appearance.md) --- Themes and fonts
 - [Settings](docs/settings.md) --- Configuration

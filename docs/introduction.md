@@ -73,6 +73,8 @@ See the [Roadmap](roadmap.md) for planned features including Notes, Tags, IndieA
 ## Documentation
 
 - [Installation](installation.md) — Get BlogWriter running on your server
+- [Local Development](local-development.md) — Set up BlogWriter on your local machine
+- [Deployment](deployment.md) — Deploy to production with Laravel Forge
 - [Writing Content](writing-content.md) — Create articles and photos
 - [Appearance](appearance.md) — Customize your theme and font
 - [Settings](settings.md) — Configure your site and profile
