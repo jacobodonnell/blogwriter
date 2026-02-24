@@ -9,11 +9,13 @@ use App\Models\Article;
 use App\Models\Category;
 use App\Models\Photo;
 use App\Models\User;
+use Database\Seeders\Concerns\AttachesDemoImages;
 use Database\Seeders\Concerns\ChecksExternalUrls;
 use Illuminate\Database\Seeder;
 
 final class FullArticleSeeder extends Seeder
 {
+    use AttachesDemoImages;
     use ChecksExternalUrls;
 
     /**
@@ -49,26 +51,26 @@ final class FullArticleSeeder extends Seeder
                 } else {
                     // Use local demo images
                     $demoImageNum = $demoImages[$imageCounter % count($demoImages)];
-                    $photo = Photo::factory()
-                        ->state([
-                            'user_id' => $user->id,
-                            'status' => $status,
-                            'published_at' => $status === Status::Published ? now()->subDays(random_int(1, 30)) : null,
-                        ])
-                        ->withDemoImage($demoImageNum)
-                        ->create([
-                            'alt_text' => $data['title'].' featured image',
-                        ]);
+                    $photo = Photo::create([
+                        'user_id' => $user->id,
+                        'filename' => 'demo-image-'.$demoImageNum.'.jpg',
+                        'slug' => 'article-photo-'.($imageCounter + 1),
+                        'caption' => null,
+                        'alt_text' => $data['title'].' featured image',
+                        'status' => $status,
+                        'published_at' => $status === Status::Published ? now()->subDays(random_int(1, 30)) : null,
+                        'taken_at' => null,
+                        'meta' => [],
+                    ]);
+                    $this->attachDemoImage($photo, $demoImageNum);
                     $photoId = $photo->id;
                     $imageCounter++;
                 }
             }
 
-            // Use the first category as the single category
-            $categoryId = null;
-            if (isset($data['categories']) && count($data['categories']) > 0) {
-                $categoryId = Category::where('name', $data['categories'][0])->value('id');
-            }
+            $categoryId = empty($data['categories'])
+                ? null
+                : Category::where('name', $data['categories'][0])->value('id');
 
             Article::firstOrCreate(
                 ['slug' => $data['slug']],

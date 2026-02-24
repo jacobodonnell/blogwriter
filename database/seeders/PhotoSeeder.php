@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Enums\Status;
 use App\Models\Photo;
 use App\Models\User;
+use Database\Seeders\Concerns\AttachesDemoImages;
 use Illuminate\Database\Seeder;
 
 final class PhotoSeeder extends Seeder
 {
+    use AttachesDemoImages;
+
     /**
      * Seed demo photos (5 photos with demo images).
      */
@@ -37,11 +41,18 @@ final class PhotoSeeder extends Seeder
         ];
 
         foreach ($photos as $index => $metadata) {
-            Photo::factory()
-                ->state(['user_id' => $user->id])
-                ->published()
-                ->withDemoImage($index)
-                ->create($metadata);
+            $photo = Photo::create([
+                'user_id' => $user->id,
+                'filename' => 'demo-image-'.$index.'.jpg',
+                'slug' => 'demo-photo-'.$index,
+                'caption' => $metadata['caption'],
+                'alt_text' => $metadata['alt_text'],
+                'status' => Status::Published,
+                'published_at' => now(),
+                'taken_at' => null,
+                'meta' => [],
+            ]);
+            $this->attachDemoImage($photo, $index);
         }
     }
 }
