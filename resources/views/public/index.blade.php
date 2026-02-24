@@ -85,20 +85,7 @@
                 @if($photos->isNotEmpty())
                     <div class="flex flex-col gap-1 rounded-lg overflow-hidden">
                         @foreach($photos as $photo)
-                            <article class="h-entry">
-                                <a href="{{ route('photos.show', $photo->slug) }}"
-                                   class="block aspect-square overflow-hidden">
-                                    <img src="{{ $photo->image_url }}"
-                                         alt="{{ $photo->alt_text }}"
-                                         class="u-photo w-full h-full object-cover hover:brightness-75 transition-all duration-200">
-                                </a>
-                                <span class="hidden">
-                                    <span class="p-name">{{ $photo->alt_text }}</span>
-                                    <time class="dt-published" datetime="{{ $photo->published_at->toIso8601String() }}">{{ $photo->published_at->format('F j, Y') }}</time>
-                                    <a class="u-url" href="{{ route('photos.show', $photo->slug) }}">Permalink</a>
-                                    <span class="p-author h-card"><span class="p-name">{{ $authorName }}</span></span>
-                                </span>
-                            </article>
+                            <x-photo-card :photo="$photo" :author-name="$authorName" :show-auth-overlays="false" />
                         @endforeach
                     </div>
 
