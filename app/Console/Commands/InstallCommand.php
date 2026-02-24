@@ -312,18 +312,22 @@ final class InstallCommand extends Command
         info('✓ Admin user created');
 
         if ($config['seed']) {
-            info('Verifying demo images...');
-            $imagesValid = $this->verifyDemoImages();
-            if (! $imagesValid) {
-                info('⚠️  Proceeding with seeding, but some images may be skipped.');
-            }
+            if (! class_exists(\Faker\Generator::class)) {
+                warning('Skipping demo seed — Faker is not installed (production mode).');
+            } else {
+                info('Verifying demo images...');
+                $imagesValid = $this->verifyDemoImages();
+                if (! $imagesValid) {
+                    info('⚠️  Proceeding with seeding, but some images may be skipped.');
+                }
 
-            info('Seeding demo content...');
-            info('Processing demo images and content (this may take 30-60 seconds)...');
-            $this->newLine();
-            Artisan::call('blogwriter:seed', ['--state' => 'demo', '--no-interaction' => true], $this->output);
-            $this->newLine();
-            info('✓ Demo content added');
+                info('Seeding demo content...');
+                info('Processing demo images and content (this may take 30-60 seconds)...');
+                $this->newLine();
+                Artisan::call('blogwriter:seed', ['--state' => 'demo', '--no-interaction' => true], $this->output);
+                $this->newLine();
+                info('✓ Demo content added');
+            }
         }
 
         $this->seedPlaceholderImage();
@@ -395,6 +399,10 @@ final class InstallCommand extends Command
 
     private function determineSeedOption(): bool
     {
+        if (! class_exists(\Faker\Generator::class)) {
+            return false;
+        }
+
         if ($this->option('seed')) {
             return true;
         }
@@ -446,7 +454,6 @@ final class InstallCommand extends Command
             'demo-image-2.jpg',
             'demo-image-3.jpg',
             'demo-image-4.jpg',
-            'demo-image-5.jpg',
         ];
 
         $missingOrInvalid = [];
