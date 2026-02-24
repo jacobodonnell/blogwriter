@@ -30,10 +30,12 @@ final class ArticlePreviewController extends Controller
 
         // Only store fields that differ from the live DB values
         foreach ($data as $key => $value) {
-            if ($key === 'status' || $key === 'meta') {
+            if ($key === 'status') {
                 continue;
             }
-
+            if ($key === 'meta') {
+                continue;
+            }
             if ($this->valuesDiffer($value, $article->getOriginal($key))) {
                 $draft[$key] = $value;
             }
@@ -72,7 +74,7 @@ final class ArticlePreviewController extends Controller
             $draft['external_featured_img_url'] = null;
         }
 
-        if (! empty($draftMeta)) {
+        if ($draftMeta !== []) {
             $draft['meta'] = $draftMeta;
         }
 
@@ -95,7 +97,7 @@ final class ArticlePreviewController extends Controller
             }
         }
 
-        $article->update(['draft' => ! empty($draft) ? $draft : null]);
+        $article->update(['draft' => $draft === [] ? null : $draft]);
 
         $article->refresh()->load('category')->applyDraft();
 

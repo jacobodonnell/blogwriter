@@ -103,6 +103,85 @@ export default function articleCustomizer(config) {
             }
         },
 
+        isDraftField(field) {
+            const map = {
+                title:                [this.title, this.savedTitle],
+                slug:                 [this.slug, this.savedSlug],
+                content:              [this.content, this.savedContent],
+                summary:              [this.summary, this.savedSummary],
+                categoryId:           [String(this.categoryId || ''), this.savedCategoryId],
+                featuredImage:        [
+                    String(this.selectedPhotoId || '') + '|' + (this.featuredImageUrl || '') + '|' + (this.featuredImageCaption || '') + '|' + this.usePhotoCaption,
+                    this.savedPhotoId + '|' + this.savedFeaturedImageUrl + '|' + this.savedFeaturedImageCaption + '|' + this.savedUsePhotoCaption,
+                ],
+                metaTitle:            [(this.metaTitle || ''), this.savedMetaTitle],
+                metaDescription:      [(this.metaDescription || ''), this.savedMetaDescription],
+                ogImage:              [(this.ogImage || ''), this.savedOgImage],
+            };
+            const pair = map[field];
+            if (!pair) return false;
+            return pair[0] !== pair[1];
+        },
+
+        revertField(field) {
+            const revertMap = {
+                title:           () => { this.title = this.savedTitle; },
+                slug:            () => { this.slug = this.savedSlug; },
+                content:         () => {
+                    this.content = this.savedContent;
+                    if (editor) editor.setContent(this.savedContent);
+                },
+                summary:         () => { this.summary = this.savedSummary; },
+                categoryId:      () => {
+                    this.categoryId = this.savedCategoryId;
+                    this.hasNewCategory = false;
+                    this.newCategoryName = '';
+                },
+                metaTitle:       () => { this.metaTitle = this.savedMetaTitle; },
+                metaDescription: () => { this.metaDescription = this.savedMetaDescription; },
+                ogImage:         () => { this.ogImage = this.savedOgImage; },
+            };
+            const fn = revertMap[field];
+            if (fn) {
+                fn();
+                this.checkDirty();
+                this.$refs.customizerForm.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        },
+
+        revertFeaturedImage() {
+            // Restore common saved values
+            this.featuredImageCaption = this.savedFeaturedImageCaption;
+            this.usePhotoCaption = this.savedUsePhotoCaption;
+            this.uploadedPhotoUrl = null;
+            this.hasNewPhoto = false;
+
+            // Clear the staged file input DOM element
+            const fi = this.$refs.featuredImageFileInput;
+            if (fi) fi.value = '';
+
+            // Enforce mutual exclusion based on saved state
+            if (this.savedFeaturedImageUrl) {
+                // Reverting to external URL mode
+                this.selectedPhotoId = '';
+                this.featuredImageUrl = this.savedFeaturedImageUrl;
+                this.showUrlField = true;
+            } else if (this.savedPhotoId) {
+                // Reverting to photo mode
+                this.selectedPhotoId = this.savedPhotoId;
+                this.featuredImageUrl = '';
+                this.showUrlField = false;
+            } else {
+                // Reverting to no image
+                this.selectedPhotoId = '';
+                this.featuredImageUrl = '';
+                this.showUrlField = false;
+            }
+
+            this.checkDirty();
+            this.$refs.customizerForm.dispatchEvent(new Event('input', { bubbles: true }));
+        },
+
         get stagedItemPrefix() {
             if (this.hasNewPhoto) return 'Upload Photo';
             if (this.hasNewCategory) return 'Create Category';

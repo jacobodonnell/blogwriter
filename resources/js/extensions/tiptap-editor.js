@@ -150,6 +150,13 @@ export function createTiptapEditor({ element, content, onUpdate, onSelectionUpda
             editor?.chain().focus().setYoutubeVideo(attrs).run();
         },
 
+        setContent(markdown) {
+            if (!editor) return;
+            const normalized = normalizeMarkdown(markdown) ?? '';
+            const json = editor.markdown.parse(normalized);
+            editor.commands.setContent(json, false);
+        },
+
         get wordCount() {
             const text = editor?.state.doc.textContent.trim();
             if (!text) return 0;

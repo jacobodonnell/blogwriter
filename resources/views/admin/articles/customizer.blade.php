@@ -88,7 +88,10 @@
 
                     {{-- Title --}}
                     <fieldset class="fieldset">
-                        <legend class="fieldset-legend">Title</legend>
+                        <legend class="fieldset-legend">
+                            Title
+                            <x-draft-revert-button field="title" />
+                        </legend>
                         <input type="text" name="title" x-model="title"
                                @blur="generateSlug()"
                                @input="checkDirty()"
@@ -101,7 +104,10 @@
 
                     {{-- Slug --}}
                     <fieldset class="fieldset">
-                        <legend class="fieldset-legend">Slug</legend>
+                        <legend class="fieldset-legend">
+                            Slug
+                            <x-draft-revert-button field="slug" />
+                        </legend>
                         <input type="hidden" name="slug" :value="slug">
                         <div class="join w-full">
                             <span class="join-item btn btn-sm btn-disabled no-animation">/articles/</span>
@@ -117,7 +123,10 @@
 
                     {{-- Content --}}
                     <fieldset class="fieldset">
-                        <legend class="fieldset-legend">Content</legend>
+                        <legend class="fieldset-legend">
+                            Content
+                            <x-draft-revert-button field="content" />
+                        </legend>
 
                         {{-- Hidden field for form submission --}}
                         <input type="hidden" name="content" :value="content">
@@ -267,7 +276,10 @@
 
                     {{-- Summary --}}
                     <fieldset class="fieldset">
-                        <legend class="fieldset-legend">Summary</legend>
+                        <legend class="fieldset-legend">
+                            Summary
+                            <x-draft-revert-button field="summary" />
+                        </legend>
                         <textarea name="summary" x-model="summary"
                                   @input="checkDirty()"
                                   data-test="summary-field"
@@ -305,7 +317,10 @@
 
                     {{-- Category --}}
                     <fieldset class="fieldset">
-                        <legend class="fieldset-legend">Category</legend>
+                        <legend class="fieldset-legend">
+                            Category
+                            <span x-show="!hasNewCategory"><x-draft-revert-button field="categoryId" /></span>
+                        </legend>
                         <x-category-select :categories="$categories ?? collect()"
                             :selected="$article->category_id"
                             x-show="!hasNewCategory"
@@ -352,7 +367,10 @@
 
                     {{-- Featured Image --}}
                     <fieldset class="fieldset">
-                        <legend class="fieldset-legend">Featured Image</legend>
+                        <legend class="fieldset-legend">
+                            Featured Image
+                            <x-draft-revert-button field="featuredImage" method="revertFeaturedImage()" />
+                        </legend>
                         @include('admin.articles.partials.featured-image-compact')
                     </fieldset>
 
@@ -363,7 +381,10 @@
                         </summary>
                         <div class="collapse-content space-y-3">
                             <fieldset class="fieldset">
-                                <legend class="fieldset-legend text-xs">Meta Title</legend>
+                                <legend class="fieldset-legend text-xs">
+                                    Meta Title
+                                    <x-draft-revert-button field="metaTitle" />
+                                </legend>
                                 <input type="text" name="meta[meta_title]" x-model="metaTitle"
                                        @input="checkDirty()"
                                        class="input input-bordered input-sm w-full"
@@ -371,7 +392,10 @@
                             </fieldset>
 
                             <fieldset class="fieldset">
-                                <legend class="fieldset-legend text-xs">Meta Description</legend>
+                                <legend class="fieldset-legend text-xs">
+                                    Meta Description
+                                    <x-draft-revert-button field="metaDescription" />
+                                </legend>
                                 <textarea name="meta[meta_description]" x-model="metaDescription"
                                           @input="checkDirty()"
                                           class="textarea textarea-bordered w-full h-16 text-sm"
@@ -379,7 +403,10 @@
                             </fieldset>
 
                             <fieldset class="fieldset">
-                                <legend class="fieldset-legend text-xs">OG Image URL</legend>
+                                <legend class="fieldset-legend text-xs">
+                                    OG Image URL
+                                    <x-draft-revert-button field="ogImage" />
+                                </legend>
                                 <input type="url" name="meta[og_image]" x-model="ogImage"
                                        @input="checkDirty()"
                                        class="input input-bordered input-sm w-full"
