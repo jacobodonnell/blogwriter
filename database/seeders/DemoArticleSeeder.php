@@ -21,7 +21,7 @@ final class DemoArticleSeeder extends Seeder
      */
     public function run(): void
     {
-        $jsonPath = storage_path('app/blogwriter/test-data/demo/articles.json');
+        $jsonPath = database_path('seeders/test-data/demo/articles.json');
         $articles = json_decode(file_get_contents($jsonPath), true);
 
         $user = User::firstOrFail();

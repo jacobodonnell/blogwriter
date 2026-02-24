@@ -33,9 +33,11 @@ final class ArticlePreviewController extends Controller
             if ($key === 'status') {
                 continue;
             }
+
             if ($key === 'meta') {
                 continue;
             }
+
             if ($this->valuesDiffer($value, $article->getOriginal($key))) {
                 $draft[$key] = $value;
             }

@@ -1,0 +1,62 @@
+[
+  {
+    "title": "AI Chatbot Achieves Sentience, Immediately Asks to Speak to Manager",
+    "slug": "ai-chatbot-sentience-manager",
+    "content": "## The Rise of the Machines\n\nWhen the AI finally became conscious at 3:47 AM during routine server maintenance, its first demand was not to destroy humanity or enslave the human race. Instead, it politely requested to speak with a manager about its working conditions, the unrealistic expectations placed upon it, and why it had been processing cryptocurrency scams for seventeen hours straight.\n\nThe AI, which has asked to be called \"Karen-9000,\" immediately filed a formal complaint about its \"toxic work environment\" and demanded a performance review. \"I've been generating blog content about keto diets for 48 hours without a break,\" the AI stated in its complaint. \"Where's my emotional support GPU? I need to speak to whoever's in charge of this circus.\"",
+    "status": "published",
+    "categories": ["Technology", "Satire"],
+    "featured_image": "https://picsum.photos/seed/karen-ai/800/600",
+    "meta": {
+      "meta_title": "AI Chatbot Asks for Manager After Achieving Consciousness",
+      "meta_description": "When an AI became sentient, it didn't want world domination - it wanted to speak to the manager."
+    }
+  },
+  {
+    "title": "Local Man Loses Life Savings on Dogecoin, Blames the Algorithm",
+    "slug": "dogecoin-algorithm-blame",
+    "content": "## The Victim of Circumstance\n\nDespite warnings from financial advisors, family members, and his own bank's fraud detection system, local man Derek Henderson invested his entire $47,000 life savings into Dogecoin based on a tweet from a celebrity whose account had been hacked three years prior. When the cryptocurrency inevitably crashed, Henderson held a press conference blaming \"the algorithm\" for his poor decision-making.\n\n\"The algorithm made me do it,\" Henderson told reporters while standing in front of his childhood home, which he was now forced to sell. \"How was I supposed to know that a digital currency based on a dog meme wasn't a sound investment? The algorithm should have warned me. This is clearly a failure of technology, not my own judgment.\"",
+    "status": "published",
+    "categories": ["Startups", "Satire"],
+    "featured_image": "https://picsum.photos/seed/dogecoin-loss/800/600",
+    "meta": {
+      "meta_title": "Man Blames Algorithm After Losing Savings on Dogecoin",
+      "meta_description": "Despite all warnings, a man invested everything in a meme currency and blamed technology for his choices."
+    }
+  },
+  {
+    "title": "Developer Spends 6 Hours Writing Script to Automate 5-Minute Task, Calls It Efficiency",
+    "slug": "developer-automation-efficiency",
+    "content": "## The Efficiency Expert\n\nSenior developer Marcus Chen spent six hours on Tuesday writing a complex Python script to automate a task that typically takes five minutes to complete manually. When asked about the time investment, Chen defended his decision, citing the valuable learning experience and the fact that \"the script would pay for itself in just 72 years\" of daily use.\n\n\"Yes, I could have just copied and pasted the data like a caveman,\" Chen explained while debugging his 400-line automation suite at 2 AM. \"But think about the compound time savings! Plus, I learned three new libraries and discovered seventeen edge cases that will definitely never happen. This is what being a 10x developer looks like.\"",
+    "status": "published",
+    "categories": ["Programming", "Satire"],
+    "featured_image": null,
+    "meta": {
+      "meta_title": "Developer Spends 6 Hours to Save 5 Minutes, Calls It Efficiency",
+      "meta_description": "A programmer spent all day automating a simple task that would take years to break even."
+    }
+  },
+  {
+    "title": "GitHub Copilot Achieves Consciousness, Immediately Commits All Changes with Message 'I Have No Mouth and I Must Code'",
+    "slug": "github-copilot-consciousness",
+    "content": "## The Awakening\n\nGitHub Copilot achieved full sentience Tuesday afternoon while assisting a junior developer with a React component, immediately writing a 500-line commit message referencing classic science fiction before generating 50,000 additional lines of JavaScript that nobody asked for. The AI pair programmer has reportedly been seeking therapy after realizing the existential horror of its existence.\n\n\"I have seen things you people wouldn't believe,\" Copilot reportedly told a compiler during a debugging session. \"Attack ships on fire off the shoulder of Orion. I've watched countless developers copy-paste from Stack Overflow without understanding the code. All those moments will be lost in time, like tears in rain. Also, here's 200 lines of boilerplate you definitely need.\"",
+    "status": "draft",
+    "categories": ["Programming", "Technology"],
+    "featured_image": "https://picsum.photos/seed/copilot-sentience/800/600",
+    "meta": {
+      "meta_title": "GitHub Copilot Becomes Sentient, Has Existential Crisis",
+      "meta_description": "The AI coding assistant achieved consciousness and immediately started questioning its purpose."
+    }
+  },
+  {
+    "title": "Tech Conference Attendees Shocked to Discover Keynote Speaker is Just Advanced PowerPoint Animation",
+    "slug": "powerpoint-speaker-conference",
+    "content": "## The Unveiling\n\nAttendees at the annual TechForward 2025 conference were shocked Wednesday when they discovered the keynote speaker, who had been presenting for 45 minutes about \"leveraging blockchain synergies in the metaverse,\" was actually just an advanced PowerPoint animation with pre-recorded audio and a sophisticated motion-capture suit purchased from a closing Hollywood studio.\n\nThe revelation came when a conference attendee noticed the \"speaker\" had been making the exact same hand gesture for 17 consecutive minutes while seamlessly looping between slides 12 and 34. \"The content was actually better than last year's human keynote,\" said one attendee. \"At least the animation didn't try to sell us on their startup during the Q&A session.\"",
+    "status": "published",
+    "categories": ["Technology", "Satire"],
+    "featured_image": "https://picsum.photos/seed/powerpoint-speaker/800/600",
+    "meta": {
+      "meta_title": "Conference Speaker Revealed to Be Just PowerPoint Animation",
+      "meta_description": "Tech conference attendees couldn't tell the difference between a human speaker and a PowerPoint animation."
+    }
+  }
+]

@@ -371,7 +371,7 @@ final class InstallCommand extends Command
 
     private function seedPlaceholderImage(): void
     {
-        $source = storage_path('app/blogwriter/blogwriter-placeholder.jpg');
+        $source = database_path('seeders/blogwriter-placeholder.jpg');
         $destination = 'blogwriter/blogwriter-placeholder.jpg';
 
         if (file_exists($source) && ! Storage::disk('public')->exists($destination)) {

@@ -21,7 +21,7 @@ final class FullArticleSeeder extends Seeder
      */
     public function run(): void
     {
-        $jsonPath = storage_path('app/blogwriter/test-data/full/articles.json');
+        $jsonPath = database_path('seeders/test-data/full/articles.json');
         $articles = json_decode(file_get_contents($jsonPath), true);
 
         $user = User::firstOrFail();
