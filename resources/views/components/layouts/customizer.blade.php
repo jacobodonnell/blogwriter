@@ -57,7 +57,6 @@
                 {{-- View Live (only for published articles) --}}
                 @if($article->exists && $article->isPublished())
                     <a href="{{ $article->permalink() }}"
-                       target="_blank"
                        class="btn btn-ghost btn-sm btn-square tooltip tooltip-bottom hidden sm:inline-flex"
                        data-tip="View Live">
                         <i class="ph ph-arrow-square-out text-lg"></i>
@@ -103,11 +102,11 @@
                     </div>
                 </div>
 
-                <x-theme-toggle size="sm" />
+                <x-theme-toggle size="sm"/>
             </div>
         </header>
 
-        <x-flash-messages />
+        <x-flash-messages/>
 
         {{-- Main Content Area --}}
         <div class="flex-1 overflow-hidden flex relative">
