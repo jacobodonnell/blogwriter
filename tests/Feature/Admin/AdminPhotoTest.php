@@ -113,6 +113,32 @@ it('does not detach articles when publishing a draft photo', function (): void {
     expect($article->fresh()->photo_id)->toBe($photo->id);
 });
 
+it('sets published_at when uploading a published photo', function (): void {
+    $file = UploadedFile::fake()->image('published-photo.jpg');
+
+    $this->post(route('admin.photos.store'), [
+        'alt_text' => 'Test photo',
+        'status' => Status::Published->value,
+        'image_file' => $file,
+    ]);
+
+    $photo = Photo::where('filename', 'published-photo.jpg')->firstOrFail();
+    expect($photo->published_at)->not->toBeNull();
+});
+
+it('leaves published_at null when uploading a draft photo', function (): void {
+    $file = UploadedFile::fake()->image('draft-photo.jpg');
+
+    $this->post(route('admin.photos.store'), [
+        'alt_text' => 'Draft photo',
+        'status' => Status::Draft->value,
+        'image_file' => $file,
+    ]);
+
+    $photo = Photo::where('filename', 'draft-photo.jpg')->firstOrFail();
+    expect($photo->published_at)->toBeNull();
+});
+
 it('passes articleCount to the edit view', function (): void {
     $photo = Photo::factory()->published()->create();
     Article::factory()->published()->create(['photo_id' => $photo->id]);

@@ -24,14 +24,18 @@ final readonly class CreatePhotoFromUploadAction
         $exifData = $this->extractExif->handle($file);
 
         return DB::transaction(function () use ($file, $attributes, $filename, $baseSlug, $exifData): Photo {
+            $status = $attributes['status'] instanceof Status
+                ? $attributes['status']
+                : Status::from($attributes['status'] ?? Status::Draft->value);
+
             $photo = Photo::create([
                 'user_id' => $attributes['user_id'] ?? auth()->id(),
                 'filename' => $filename,
                 'slug' => $this->generateSlug->handle($baseSlug, Photo::class),
                 'alt_text' => $attributes['alt_text'] ?? null,
                 'caption' => $attributes['caption'] ?? null,
-                'status' => $attributes['status'] ?? Status::Draft,
-                'published_at' => ($attributes['status'] ?? Status::Draft) === Status::Published ? now() : null,
+                'status' => $status,
+                'published_at' => $status === Status::Published ? now() : null,
                 'taken_at' => $attributes['taken_at'] ?? null,
                 'category_id' => $attributes['category_id'] ?? null,
                 'meta' => $exifData,
