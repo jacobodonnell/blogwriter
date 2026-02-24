@@ -38,7 +38,7 @@ final readonly class HandleArticlePhotoUploadAction
                 'error' => $exception->getMessage(),
             ]);
 
-            throw new PhotoUploadFailedException($exception->getMessage(), previous: $exception);
+            throw new PhotoUploadFailedException($exception->getMessage(), $exception->getCode(), previous: $exception);
         }
     }
 }
