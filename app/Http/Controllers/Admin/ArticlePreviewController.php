@@ -30,11 +30,7 @@ final class ArticlePreviewController extends Controller
 
         // Only store fields that differ from the live DB values
         foreach ($data as $key => $value) {
-            if ($key === 'status') {
-                continue;
-            }
-
-            if ($key === 'meta') {
+            if (in_array($key, ['status', 'meta'], true)) {
                 continue;
             }
 
@@ -113,9 +109,8 @@ final class ArticlePreviewController extends Controller
 
     private function valuesDiffer(mixed $incoming, mixed $live): bool
     {
-        $a = $incoming === null || $incoming === '' ? '' : $incoming;
-        $b = $live === null || $live === '' ? '' : $live;
+        $normalized = static fn (mixed $value): string => (string) ($value ?? '');
 
-        return (string) $a !== (string) $b;
+        return $normalized($incoming) !== $normalized($live);
     }
 }
