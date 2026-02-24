@@ -51,7 +51,7 @@ final class CategoryFactory extends Factory
 
         return [
             'name' => $name,
-            'description' => fake()->optional(0.7)->sentence(10),
+            'description' => $this->faker->optional(0.7)->sentence(10),
         ];
     }
 

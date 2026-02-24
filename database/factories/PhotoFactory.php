@@ -26,13 +26,13 @@ final class PhotoFactory extends Factory
     {
         return [
             'user_id' => User::first()?->id ?? User::factory(),
-            'filename' => fake()->word().'.jpg',
-            'slug' => fake()->unique()->slug(),
-            'caption' => fake()->optional(0.7)->paragraph(),
-            'alt_text' => fake()->sentence(),
+            'filename' => $this->faker->word().'.jpg',
+            'slug' => $this->faker->unique()->slug(),
+            'caption' => $this->faker->optional(0.7)->paragraph(),
+            'alt_text' => $this->faker->sentence(),
             'status' => Status::Published,
             'published_at' => now(),
-            'taken_at' => fake()->optional(0.5)->dateTimeBetween('-1 year'),
+            'taken_at' => $this->faker->optional(0.5)->dateTimeBetween('-1 year'),
             'meta' => [],
         ];
     }

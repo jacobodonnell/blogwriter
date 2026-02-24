@@ -26,8 +26,8 @@ final class DemoArticleSeeder extends Seeder
 
         $user = User::firstOrFail();
 
-        // Demo image counter for cycling through 5 demo images
-        $demoImages = [1, 2, 3, 4, 5];
+        // Demo image counter for cycling through 4 demo images
+        $demoImages = [1, 2, 3, 4];
         $imageCounter = 0;
 
         foreach ($articles as $data) {

@@ -71,7 +71,7 @@ final class ArticleFactory extends Factory
         return [
             'user_id' => User::first()?->id ?? User::factory(),
             'title' => $title,
-            'summary' => fake()->optional(0.8)->paragraph(2),
+            'summary' => $this->faker->optional(0.8)->paragraph(2),
             'content' => $this->generateMarkdownContent(),
             'status' => $status,
             'published_at' => $this->getPublishedAtForStatus($status),
@@ -106,7 +106,7 @@ final class ArticleFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'status' => Status::Draft,
-            'published_at' => fake()->optional(0.3)->dateTimeBetween('-6 months', '+6 months'),
+            'published_at' => $this->faker->optional(0.3)->dateTimeBetween('-6 months', '+6 months'),
         ]);
     }
 
@@ -156,7 +156,7 @@ final class ArticleFactory extends Factory
      */
     protected function getWeightedStatus(): Status
     {
-        $rand = fake()->randomFloat(2, 0, 1);
+        $rand = $this->faker->randomFloat(2, 0, 1);
 
         return match (true) {
             $rand <= 0.8 => Status::Published,
@@ -172,10 +172,10 @@ final class ArticleFactory extends Factory
         $sections = [];
 
         // Introduction
-        $sections[] = fake()->paragraph(3);
+        $sections[] = $this->faker->paragraph(3);
 
         // Main sections with headers
-        $numSections = fake()->numberBetween(2, 4);
+        $numSections = $this->faker->numberBetween(2, 4);
 
         for ($i = 0; $i < $numSections; $i++) {
             $sections[] = '';
@@ -194,14 +194,14 @@ final class ArticleFactory extends Factory
             $sections[] = '';
 
             // Add paragraphs
-            $numParagraphs = fake()->numberBetween(1, 3);
+            $numParagraphs = $this->faker->numberBetween(1, 3);
             for ($p = 0; $p < $numParagraphs; $p++) {
-                $paragraph = fake()->paragraph(fake()->numberBetween(3, 6));
+                $paragraph = $this->faker->paragraph($this->faker->numberBetween(3, 6));
 
                 // Occasionally add emphasis
-                if (fake()->boolean(30)) {
+                if ($this->faker->boolean(30)) {
                     $words = explode(' ', $paragraph);
-                    $emphasisIndex = fake()->numberBetween(0, count($words) - 2);
+                    $emphasisIndex = $this->faker->numberBetween(0, count($words) - 2);
                     $words[$emphasisIndex] = '**'.$words[$emphasisIndex].'**';
                     $paragraph = implode(' ', $words);
                 }
@@ -210,33 +210,33 @@ final class ArticleFactory extends Factory
             }
 
             // Occasionally add a list
-            if (fake()->boolean(40)) {
+            if ($this->faker->boolean(40)) {
                 $sections[] = '';
-                $isOrdered = fake()->boolean(30);
-                $numItems = fake()->numberBetween(3, 5);
+                $isOrdered = $this->faker->boolean(30);
+                $numItems = $this->faker->numberBetween(3, 5);
 
                 for ($li = 0; $li < $numItems; $li++) {
-                    $item = fake()->sentence(6);
+                    $item = $this->faker->sentence(6);
 
                     $sections[] = $isOrdered ? ($li + 1).'. '.$item : '- '.$item;
                 }
             }
 
             // Occasionally add a code block
-            if (fake()->boolean(20)) {
+            if ($this->faker->boolean(20)) {
                 $sections[] = '';
                 $sections[] = '```php';
                 $sections[] = '// Example code';
-                $sections[] = '$'.fake()->word.' = '."'".fake()->word."';";
+                $sections[] = '$'.$this->faker->word.' = '."'".$this->faker->word."';";
                 $sections[] = '';
-                $sections[] = 'return $'.fake()->word.';';
+                $sections[] = 'return $'.$this->faker->word.';';
                 $sections[] = '```';
             }
 
             // Occasionally add a link
-            if (fake()->boolean(30)) {
+            if ($this->faker->boolean(30)) {
                 $sections[] = '';
-                $sections[] = 'Read more about ['.fake()->words(3, true).']('.fake()->url().').';
+                $sections[] = 'Read more about ['.$this->faker->words(3, true).']('.$this->faker->url().').';
             }
         }
 
@@ -244,7 +244,7 @@ final class ArticleFactory extends Factory
         $sections[] = '';
         $sections[] = '## '.\Illuminate\Support\Arr::random(['Wrapping Up', 'In Summary', 'Takeaways']);
         $sections[] = '';
-        $sections[] = fake()->paragraph(2);
+        $sections[] = $this->faker->paragraph(2);
 
         return implode("\n", $sections);
     }
@@ -255,8 +255,8 @@ final class ArticleFactory extends Factory
     protected function getPublishedAtForStatus(Status $status): ?DateTimeImmutable
     {
         $date = match ($status) {
-            Status::Published => fake()->dateTimeBetween('-1 year', 'now'),
-            Status::Draft => fake()->optional(0.3)?->dateTimeBetween('-6 months', '+6 months'),
+            Status::Published => $this->faker->dateTimeBetween('-1 year', 'now'),
+            Status::Draft => $this->faker->optional(0.3)?->dateTimeBetween('-6 months', '+6 months'),
         };
 
         if ($date === null) {
@@ -273,14 +273,14 @@ final class ArticleFactory extends Factory
      */
     protected function generateMeta(string $title): ?array
     {
-        if (fake()->boolean(40)) {
+        if ($this->faker->boolean(40)) {
             return null;
         }
 
         return [
-            'meta_title' => fake()->optional(0.5)->words(6, true) ?? $title,
-            'meta_description' => fake()->optional(0.6)->sentence(12),
-            'og_image' => fake()->optional(0.7)->url(),
+            'meta_title' => $this->faker->optional(0.5)->words(6, true) ?? $title,
+            'meta_description' => $this->faker->optional(0.6)->sentence(12),
+            'og_image' => $this->faker->optional(0.7)->url(),
         ];
     }
 }

@@ -173,6 +173,8 @@ final class InstallService
         $envPath = base_path('.env');
 
         if (file_exists($envPath)) {
+            $this->enforceSqliteConnection($envPath);
+
             return;
         }
 
@@ -289,6 +291,23 @@ final class InstallService
         } catch (Exception) {
             return false;
         }
+    }
+
+    /**
+     * Ensure DB_CONNECTION is set to sqlite in an existing .env file.
+     *
+     * Forge pre-populates .env with MySQL defaults, but BlogWriter only supports SQLite.
+     */
+    private function enforceSqliteConnection(string $envPath): void
+    {
+        $content = file_get_contents($envPath);
+
+        if (preg_match('/^DB_CONNECTION=sqlite$/m', $content)) {
+            return;
+        }
+
+        $content = $this->updateEnvValue($content, 'DB_CONNECTION', 'sqlite');
+        file_put_contents($envPath, $content);
     }
 
     /**
