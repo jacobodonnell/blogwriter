@@ -293,7 +293,7 @@ export default function articleCustomizer(config) {
             };
 
             this._onBeforeUnload = (e) => {
-                if (this.hasChanges) { e.preventDefault(); }
+                if (this.isNew && this.hasChanges) { e.preventDefault(); }
             };
 
             window.addEventListener('save-article', this._onSaveArticle);
