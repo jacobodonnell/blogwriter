@@ -30,35 +30,9 @@ final class ArticleImportService
         $za = new ZipArchive();
         $za->open($zip->getRealPath(), ZipArchive::RDONLY);
 
-        $categoriesYaml = null;
-        $categoriesRaw = $za->getFromName('categories.yaml');
-        if ($categoriesRaw !== false) {
-            try {
-                $categoriesYaml = Yaml::parse($categoriesRaw) ?? [];
-            } catch (ParseException) {
-                $categoriesYaml = [];
-            }
-        }
-
-        $settingsYaml = null;
-        $settingsRaw = $za->getFromName('settings.yaml');
-        if ($settingsRaw !== false) {
-            try {
-                $settingsYaml = Yaml::parse($settingsRaw) ?? [];
-            } catch (ParseException) {
-                $settingsYaml = [];
-            }
-        }
-
-        $photosYaml = null;
-        $photosRaw = $za->getFromName('photos.yaml');
-        if ($photosRaw !== false) {
-            try {
-                $photosYaml = Yaml::parse($photosRaw) ?? [];
-            } catch (ParseException) {
-                $photosYaml = [];
-            }
-        }
+        $categoriesYaml = $this->extractYaml($za, 'categories.yaml');
+        $settingsYaml = $this->extractYaml($za, 'settings.yaml');
+        $photosYaml = $this->extractYaml($za, 'photos.yaml');
 
         $articles = [];
         $imagesTempDir = null;
@@ -294,7 +268,7 @@ final class ArticleImportService
                 'filename' => $row['filename'] ?? $slug,
                 'caption' => $row['caption'] ?? null,
                 'alt_text' => $row['alt_text'] ?? '',
-                'status' => $row['status'] ?? 'draft',
+                'status' => Status::tryFrom($row['status'] ?? '') ?? Status::Draft,
                 'published_at' => empty($row['published_at']) ? null : Carbon::parse($row['published_at']),
                 'taken_at' => empty($row['taken_at']) ? null : Carbon::parse($row['taken_at']),
                 'category_id' => isset($row['category']) ? ($categoryMap[$row['category']] ?? null) : null,
@@ -389,6 +363,26 @@ final class ArticleImportService
         }
 
         return ['frontmatter' => $frontmatter, 'content' => $body];
+    }
+
+    /**
+     * Extract and parse a YAML file from the ZIP archive.
+     *
+     * @return array<mixed>|null
+     */
+    private function extractYaml(ZipArchive $za, string $filename): ?array
+    {
+        $raw = $za->getFromName($filename);
+
+        if ($raw === false) {
+            return null;
+        }
+
+        try {
+            return Yaml::parse($raw) ?? [];
+        } catch (ParseException) {
+            return [];
+        }
     }
 
     /**

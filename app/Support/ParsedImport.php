@@ -16,7 +16,7 @@ final readonly class ParsedImport
         public array $articles,
         public ?array $categoriesYaml,
         public ?array $settingsYaml = null,
-        public readonly ?array $photosYaml = null,
-        public readonly ?string $imagesTempDir = null,
+        public ?array $photosYaml = null,
+        public ?string $imagesTempDir = null,
     ) {}
 }
