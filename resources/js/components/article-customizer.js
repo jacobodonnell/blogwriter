@@ -414,6 +414,11 @@ export default function articleCustomizer(config) {
             const form = this.$refs.customizerForm;
             form.removeAttribute('x-target');
             form.action = config.saveRoute;
+            const removing = !this.selectedPhotoId && !this.featuredImageUrl && !this.hasNewPhoto;
+            this.$refs.removeFeaturedImageInput.value = removing ? '1' : '0';
+            if (!this.hasNewPhoto) {
+                form.enctype = 'application/x-www-form-urlencoded';
+            }
             form.submit();
         },
 
