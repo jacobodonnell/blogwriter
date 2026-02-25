@@ -134,7 +134,7 @@
                  x-transition:leave="transition ease-in duration-150"
                  x-transition:leave-start="opacity-100 translate-x-0"
                  x-transition:leave-end="opacity-0 -translate-x-4"
-                 class="shrink-0 overflow-y-auto bg-base-100 sm:max-w-none max-w-full relative"
+                 class="shrink-0 overflow-y-auto overflow-x-hidden bg-base-100 sm:max-w-none max-w-full relative"
                  :style="{ width: window.innerWidth < 640 || fullWidth ? '100%' : panelWidth + 'px' }"
                  x-cloak>
 
