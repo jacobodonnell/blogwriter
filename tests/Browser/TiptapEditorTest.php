@@ -162,3 +162,67 @@ it('pasting markdown with single newlines normalizes to separate paragraphs', fu
     expect($value)->toContain('First paragraph.')
         ->and($value)->toContain('Second paragraph.');
 })->group('slow');
+
+it('editor height syncs to markdown textarea when switching modes', function (): void {
+    $page = loginToAdmin();
+
+    $page->navigate('/admin/articles/create')
+        ->wait(3);
+
+    // Set a taller height via Alpine data (simulating a drag resize)
+    $page->script("(() => {
+        const el = document.querySelector('[data-test=\"content-editor\"]');
+        const alpineEl = el ? el.closest('[x-data]') : null;
+        if (alpineEl) { Alpine.\$data(alpineEl).editorHeight = '700px'; }
+    })()");
+
+    $page->wait(0.5);
+
+    // Switch to markdown mode
+    $page->click('[data-test="toolbar-markdown-source"]')
+        ->wait(0.5);
+
+    // Assert textarea has the same height via inline style binding
+    $height = $page->script("(() => {
+        const ta = document.querySelector('textarea[spellcheck=\"false\"]');
+        return ta ? ta.style.height : '';
+    })()");
+
+    expect($height)->toBe('700px');
+
+    // Switch back to rich text mode
+    $page->click('[data-test="toolbar-markdown-source"]')
+        ->wait(0.5);
+
+    $editorHeight = $page->script("(() => {
+        const el = document.querySelector('[data-test=\"content-editor\"]');
+        return el ? el.style.height : '';
+    })()");
+
+    expect($editorHeight)->toBe('700px');
+})->group('slow');
+
+it('editor height persists across page navigation', function (): void {
+    $page = loginToAdmin();
+
+    $page->navigate('/admin/articles/create')
+        ->wait(3);
+
+    // Persist a custom height to localStorage so it is restored after navigation
+    $page->script("localStorage.setItem('editorHeight', JSON.stringify('650px'))");
+
+    $page->wait(0.3);
+
+    // Navigate away and back
+    $page->navigate('/admin/articles')
+        ->wait(1)
+        ->navigate('/admin/articles/create')
+        ->wait(3);
+
+    $editorHeight = $page->script("(() => {
+        const el = document.querySelector('[data-test=\"content-editor\"]');
+        return el ? el.style.height : '';
+    })()");
+
+    expect($editorHeight)->toBe('650px');
+})->group('slow');

@@ -198,7 +198,7 @@
                                 </template>
                                 <button type="button"
                                         @click="toggleMarkdownMode()"
-                                        :class="markdownMode ? 'btn-active' : ''"
+                                        :class="[markdownMode ? 'btn-active' : '', markdownMode ? 'tooltip-right' : 'tooltip-left']"
                                         class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Markdown Source" data-test="toolbar-markdown-source">
                                     <i class="ph ph-code"></i>
                                 </button>
@@ -219,26 +219,6 @@
                                     <i class="ph ph-pencil-simple"></i> Edit
                                 </button>
                             </div>
-
-                            {{-- Tiptap editor mount point --}}
-                            <div x-show="!markdownMode">
-                                <div x-ref="contentEditor" data-test="content-editor"
-                                     class="tiptap-editor @error('content') ring-2 ring-error @enderror border border-base-content/20 bg-base-100 min-h-64 h-96 max-h-[80vh] overflow-y-auto resize-y focus-within:outline-2 focus-within:outline-primary/20"></div>
-
-                                {{-- Word count status bar --}}
-                                <div class="flex justify-end px-2 py-1 border border-base-content/20 border-t-0 bg-base-200 rounded-b-field text-xs text-base-content/50"
-                                     x-show="editorReady" x-cloak>
-                                    <span x-text="wordCount + ' words'"></span>
-                                </div>
-                            </div>
-
-                            {{-- Raw markdown textarea (shown in source mode) --}}
-                            <textarea x-show="markdownMode"
-                                      x-model="content"
-                                      @input="checkDirty(); $refs.customizerForm.dispatchEvent(new Event('input', { bubbles: true }))"
-                                      class="textarea textarea-bordered font-mono text-sm w-full h-96 rounded-t-none"
-                                      spellcheck="false"
-                                      x-cloak></textarea>
 
                             {{-- Inline dialogs for link / image / youtube --}}
                             <div x-show="showLinkDialog" class="flex gap-2 mt-2 items-center">
@@ -270,6 +250,28 @@
                                 <button type="button" @click="insertYoutube()" class="btn btn-sm btn-primary" data-test="youtube-embed-btn">Embed</button>
                                 <button type="button" @click="showYoutubeDialog = false" class="btn btn-sm btn-ghost">Cancel</button>
                             </div>
+
+                            {{-- Tiptap editor mount point --}}
+                            <div x-show="!markdownMode">
+                                <div x-ref="contentEditor" data-test="content-editor"
+                                     :style="{ height: editorHeight }"
+                                     class="tiptap-editor @error('content') ring-2 ring-error @enderror border border-base-content/20 bg-base-100 min-h-64 max-h-[80vh] overflow-y-auto resize-y focus-within:outline-2 focus-within:outline-primary/20"></div>
+
+                                {{-- Word count status bar --}}
+                                <div class="flex justify-end px-2 py-1 border border-base-content/20 border-t-0 bg-base-200 rounded-b-field text-xs text-base-content/50"
+                                     x-show="editorReady" x-cloak>
+                                    <span x-text="wordCount + ' words'"></span>
+                                </div>
+                            </div>
+
+                            {{-- Raw markdown textarea (shown in source mode) --}}
+                            <textarea x-show="markdownMode"
+                                      x-model="content"
+                                      @input="checkDirty(); $refs.customizerForm.dispatchEvent(new Event('input', { bubbles: true }))"
+                                      :style="{ height: editorHeight }"
+                                      class="textarea textarea-bordered font-mono text-sm w-full rounded-t-none"
+                                      spellcheck="false"
+                                      x-cloak></textarea>
                         </div>
 
                         @error('content')

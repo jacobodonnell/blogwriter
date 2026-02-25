@@ -19,6 +19,7 @@ export default function articleCustomizer(config) {
         showUrlField: config.showUrlField,
         featuredImageCaption: config.featuredImageCaption,
         usePhotoCaption: config.usePhotoCaption,
+        editorHeight: this.$persist('32rem').as('editorHeight'),
         showLinkDialog: false,
         linkUrl: '',
         showImageDialog: false,
@@ -262,6 +263,15 @@ export default function articleCustomizer(config) {
                 this.savedContent = normalised; // capture normalised baseline after parse round-trip
                 this.content = normalised;      // sync so isClean() starts true
                 this.updatedAt = Date.now();
+
+                const ro = new ResizeObserver(entries => {
+                    for (const entry of entries) {
+                        if (entry.target.style.height) {
+                            this.editorHeight = entry.target.style.height;
+                        }
+                    }
+                });
+                ro.observe(el);
             });
 
             const store = Alpine.store('saveButton');
