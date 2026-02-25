@@ -32,7 +32,7 @@
         <x-breadcrumb :items="[
             ['label' => 'Articles', 'url' => route('articles.index')],
             ['label' => $article->title],
-        ]" class="overflow-x-auto mb-6" />
+        ]" class="mb-6" />
 
         {{-- Category --}}
         @if($article->category)
