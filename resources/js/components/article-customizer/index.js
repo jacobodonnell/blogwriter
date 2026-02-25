@@ -48,6 +48,9 @@ export default function articleCustomizer(config) {
             newCategoryName: '',
             updatedAt: 0,
             isNew: config.isNew ?? false,
+            contentHistory: config.contentHistory?.entries ?? [],
+            historyPointer: config.contentHistory?.pointer ?? 0,
+            _snapshotHead: null,
 
             get isPlaceholderSlug() {
                 return /^untitled-[a-z0-9]{8}$/.test(this.slug);

@@ -166,6 +166,7 @@ final class Article extends Model
     protected function casts(): array
     {
         return [
+            'content_history' => 'array',
             'draft' => 'array',
             'meta' => 'array',
             'past_slugs' => 'array',

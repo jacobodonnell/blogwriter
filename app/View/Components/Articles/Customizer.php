@@ -64,6 +64,7 @@ final class Customizer extends Component
             'savedMetaTitle' => $this->liveMeta['meta_title'] ?? '',
             'savedMetaDescription' => $this->liveMeta['meta_description'] ?? '',
             'savedOgImage' => $this->liveMeta['og_image'] ?? '',
+            'contentHistory' => $this->article->content_history ?? ['entries' => [], 'pointer' => 0],
         ];
     }
 

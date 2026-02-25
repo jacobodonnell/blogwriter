@@ -86,5 +86,61 @@ export function makeTiptapCommands(getEditor) {
             getEditor().setYoutubeVideo({ src: this.youtubeUrl });
             this.showYoutubeDialog = false;
         },
+
+        // --- Hybrid undo/redo: ProseMirror first, snapshot fallback ---
+
+        canUndo() {
+            void this.updatedAt;
+            const editor = getEditor();
+            if (editor?.canUndo()) return true;
+            return this.historyPointer > 0;
+        },
+
+        canRedo() {
+            void this.updatedAt;
+            const editor = getEditor();
+            if (editor?.canRedo()) return true;
+            return this.historyPointer < this.contentHistory.length;
+        },
+
+        undo() {
+            const editor = getEditor();
+            if (editor?.canUndo()) {
+                editor.undo();
+                return;
+            }
+            if (this.historyPointer <= 0) return;
+
+            // Before stepping back, save current content as the "future" entry if needed
+            if (this.historyPointer === this.contentHistory.length) {
+                this._snapshotHead = this.content;
+            }
+
+            this.historyPointer--;
+            const snapshot = this.contentHistory[this.historyPointer];
+            this.content = snapshot;
+            editor?.setContent(snapshot);
+            this.checkDirty();
+            this.updatedAt = Date.now();
+        },
+
+        redo() {
+            const editor = getEditor();
+            if (editor?.canRedo()) {
+                editor.redo();
+                return;
+            }
+            if (this.historyPointer >= this.contentHistory.length) return;
+
+            this.historyPointer++;
+            const snapshot = this.historyPointer === this.contentHistory.length
+                ? this._snapshotHead
+                : this.contentHistory[this.historyPointer];
+            if (snapshot === undefined) return;
+            this.content = snapshot;
+            editor?.setContent(snapshot);
+            this.checkDirty();
+            this.updatedAt = Date.now();
+        },
     };
 }

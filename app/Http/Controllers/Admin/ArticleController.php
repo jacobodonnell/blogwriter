@@ -131,6 +131,7 @@ final class ArticleController extends Controller
             'slug' => $data['slug'],
             'content' => $data['content'] ?? $article->content,
             'draft' => null,
+            'content_history' => null,
             'summary' => $data['summary'] ?? null,
             'status' => $data['status'],
             'published_at' => $data['published_at'] ?? $article->published_at,

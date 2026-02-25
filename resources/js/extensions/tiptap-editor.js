@@ -150,6 +150,11 @@ export function createTiptapEditor({ element, content, onUpdate, onSelectionUpda
             editor?.chain().focus().setYoutubeVideo(attrs).run();
         },
 
+        undo() { editor?.commands.undo(); },
+        redo() { editor?.commands.redo(); },
+        canUndo() { return editor?.can().undo() ?? false; },
+        canRedo() { return editor?.can().redo() ?? false; },
+
         setContent(markdown) {
             if (!editor) return;
             const normalized = normalizeMarkdown(markdown) ?? '';

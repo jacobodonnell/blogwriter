@@ -58,6 +58,15 @@
             <div class="tiptap-toolbar flex flex-wrap items-center gap-1 p-2 bg-base-200 border border-base-content/20 border-b-0 rounded-t-field">
                 <template x-if="!markdownMode">
                     <div class="flex flex-wrap items-center gap-1 flex-1">
+                        <button type="button" @click="undo()" :disabled="!canUndo()"
+                                class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Undo" data-test="toolbar-undo">
+                            <i class="ph ph-arrow-counter-clockwise"></i>
+                        </button>
+                        <button type="button" @click="redo()" :disabled="!canRedo()"
+                                class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Redo" data-test="toolbar-redo">
+                            <i class="ph ph-arrow-clockwise"></i>
+                        </button>
+                        <div class="divider divider-horizontal mx-0"></div>
                         <button type="button" @click="command('bold')" :class="isActive('bold') && 'btn-active'"
                                 class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Bold" data-test="toolbar-bold">
                             <i class="ph ph-text-b"></i>

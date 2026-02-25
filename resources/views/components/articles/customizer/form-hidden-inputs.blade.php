@@ -18,3 +18,4 @@
 <input type="hidden" name="meta[featured_image_caption]" :value="usePhotoCaption ? '' : featuredImageCaption">
 <input type="hidden" name="meta[use_photo_caption]" :value="usePhotoCaption ? '1' : ''">
 <input type="hidden" name="remove_featured_image" x-ref="removeFeaturedImageInput" value="0">
+<input type="hidden" name="history_pointer" :value="historyPointer">

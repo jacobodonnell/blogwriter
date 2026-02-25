@@ -95,7 +95,20 @@ final class ArticlePreviewController extends Controller
             }
         }
 
-        $article->update(['draft' => $draft === [] ? null : $draft]);
+        // Build content history snapshot before updating (captures pre-mutation state)
+        $contentHistory = $this->buildContentHistory(
+            $article,
+            $data['content'] ?? null,
+            $article->draft['content'] ?? null,
+            $request->integer('history_pointer', -1),
+        );
+
+        $updateData = ['draft' => $draft === [] ? null : $draft];
+        if ($contentHistory !== null) {
+            $updateData['content_history'] = $contentHistory;
+        }
+
+        $article->update($updateData);
 
         $article->refresh()->load('category')->applyDraft();
 
@@ -105,6 +118,55 @@ final class ArticlePreviewController extends Controller
         }
 
         return view('admin.articles.preview', ['article' => $article]);
+    }
+
+    /**
+     * Build updated content history if content changed, or null if no update needed.
+     *
+     * Snapshots record the content *before* each change, so undo can restore it.
+     * The pointer tracks how far forward in the timeline we are.
+     *
+     * @return array{entries: list<string>, pointer: int}|null
+     */
+    private function buildContentHistory(Article $article, ?string $incomingContent, ?string $previousDraftContent, int $requestPointer): ?array
+    {
+        if ($incomingContent === null) {
+            return null;
+        }
+
+        $history = $article->content_history ?? ['entries' => [], 'pointer' => 0];
+        $entries = $history['entries'];
+        $pointer = $history['pointer'];
+
+        // If the client sent a pointer (from snapshot undo), prune future entries
+        if ($requestPointer >= 0 && $requestPointer < count($entries)) {
+            $entries = array_slice($entries, 0, $requestPointer);
+            $pointer = $requestPointer;
+        }
+
+        // The content before this auto-save: draft content (pre-update) or live DB content
+        $currentContent = $previousDraftContent ?? $article->getOriginal('content');
+
+        // No change — nothing to snapshot
+        if ($incomingContent === $currentContent) {
+            return null;
+        }
+
+        // Avoid duplicating if the last entry is identical
+        if ($entries === [] || end($entries) !== $currentContent) {
+            $entries[] = $currentContent;
+        }
+
+        $pointer = count($entries);
+
+        // Cap at 50 entries — drop oldest
+        if (count($entries) > 50) {
+            $drop = count($entries) - 50;
+            $entries = array_slice($entries, $drop);
+            $pointer = max(0, $pointer - $drop);
+        }
+
+        return ['entries' => array_values($entries), 'pointer' => $pointer];
     }
 
     private function valuesDiffer(mixed $incoming, mixed $live): bool
