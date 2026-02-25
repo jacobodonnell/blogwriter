@@ -101,6 +101,42 @@ it('reverts typed content on undo click', function (): void {
     $page->assertNoJavaScriptErrors();
 })->group('slow');
 
+it('reverts typed content on Cmd+Z keyboard shortcut', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'content' => '## Keyboard Undo',
+        'published_at' => null,
+    ]);
+
+    $page = loginAndVisitUndoRedoEditor($article);
+
+    $page->wait(3);
+
+    // Confirm initial content
+    $page->assertScript(
+        "document.querySelector('[data-test=\"content-editor\"] .tiptap').innerText.includes('Keyboard Undo')",
+        true,
+    );
+
+    // Type new text
+    $page->click('[data-test="content-editor"] .tiptap')
+        ->type('[data-test="content-editor"] .tiptap', ' extra text');
+
+    $page->wait(1);
+
+    // Press Cmd+Z (Meta+Z) to undo
+    $page->keys('[data-test="content-editor"] .tiptap', 'Meta+z');
+
+    $page->wait(1);
+
+    // Original content should still be present
+    $page->assertScript(
+        "document.querySelector('[data-test=\"content-editor\"] .tiptap').innerText.includes('Keyboard Undo')",
+        true,
+    );
+
+    $page->assertNoJavaScriptErrors();
+})->group('slow');
+
 it('enables redo after an undo', function (): void {
     $article = Article::factory()->draft()->for($this->user)->create([
         'content' => '## Redo Test',

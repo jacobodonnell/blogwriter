@@ -173,6 +173,20 @@ export default function articleCustomizer(config) {
                         e.preventDefault();
                         window.dispatchEvent(new CustomEvent('save-article'));
                     }
+                    if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !this.markdownMode) {
+                        const ed = getEditor();
+                        if (e.shiftKey) {
+                            if (!ed?.canRedo() && this.historyPointer < this.contentHistory.length) {
+                                e.preventDefault();
+                                this.redo();
+                            }
+                        } else {
+                            if (!ed?.canUndo() && this.historyPointer > 0) {
+                                e.preventDefault();
+                                this.undo();
+                            }
+                        }
+                    }
                 };
 
                 this._onBeforeUnload = (e) => {
