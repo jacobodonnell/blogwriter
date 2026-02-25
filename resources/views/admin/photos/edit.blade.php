@@ -27,10 +27,16 @@
                 <h1 class="text-3xl font-bold">Edit Photo</h1>
                 <p class="text-base-content/70 mt-1">Update photo details and metadata.</p>
             </div>
-            <a href="{{ route('admin.photos.index') }}" class="btn btn-ghost btn-sm gap-2">
-                <i class="ph ph-arrow-left text-lg"></i>
-                Back
-            </a>
+            <div class="flex gap-2">
+                <a href="{{ route('admin.photos.download', $photo) }}" class="btn btn-ghost btn-sm gap-2">
+                    <i class="ph ph-download-simple text-lg"></i>
+                    Download
+                </a>
+                <a href="{{ route('admin.photos.index') }}" class="btn btn-ghost btn-sm gap-2">
+                    <i class="ph ph-arrow-left text-lg"></i>
+                    Back
+                </a>
+            </div>
         </div>
 
         {{-- Validation Errors --}}

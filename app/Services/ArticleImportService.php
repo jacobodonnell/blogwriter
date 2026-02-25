@@ -114,6 +114,8 @@ final class ArticleImportService
      * Import categories from a parsed categories.yaml array.
      * Creates missing categories by slug; skips existing ones.
      * Processes root categories first, then children.
+     *
+     * @param  array<int, array{slug: string, name?: string, description?: string|null, parent_slug?: string|null}>  $categoriesYaml
      */
     public function importCategories(array $categoriesYaml): void
     {

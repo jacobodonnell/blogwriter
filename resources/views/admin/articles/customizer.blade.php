@@ -438,6 +438,15 @@
                         </div>
                     </details>
 
+                    @unless($isNew ?? false)
+                        {{-- Download --}}
+                        <a href="{{ route('admin.articles.download', $article) }}"
+                           class="btn btn-ghost btn-sm gap-2 w-full justify-start"
+                           data-test="article-download-btn">
+                            <i class="ph ph-download-simple text-lg"></i>
+                            Download Markdown
+                        </a>
+                    @endunless
 
                 </div>
 

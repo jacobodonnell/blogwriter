@@ -18,6 +18,10 @@
                     <i class="ph ph-pencil-simple"></i>
                     Edit
                 </a>
+                <a href="{{ route('admin.photos.download', $photo) }}" class="btn btn-ghost btn-sm gap-2">
+                    <i class="ph ph-download-simple"></i>
+                    Download
+                </a>
                 @if($photo->status === \App\Enums\Status::Draft)
                     <span class="badge badge-warning">Draft</span>
                 @endif

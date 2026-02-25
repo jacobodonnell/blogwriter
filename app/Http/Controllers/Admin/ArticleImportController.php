@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ArticleImportRequest;
 use App\Services\ArticleImportService;
+use App\Support\ParsedImport;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -34,19 +35,7 @@ final class ArticleImportController extends Controller
             ]);
         }
 
-        if ($parsed->settingsYaml !== null) {
-            $importService->importSettings($parsed->settingsYaml);
-        }
-
-        $photosImported = $importService->importPhotos($parsed, $request->input('duplicate_strategy'), auth()->id());
-        $result = $importService->import($parsed, $request->input('duplicate_strategy'), auth()->id());
-
-        return response()->json([
-            'status' => 'ok',
-            'imported' => $result->imported,
-            'skipped' => $result->skipped,
-            'photos_imported' => $photosImported,
-        ]);
+        return $this->performImport($parsed, $request->input('duplicate_strategy'), auth()->id(), $importService);
     }
 
     public function confirm(Request $request, ArticleImportService $importService): JsonResponse
@@ -66,12 +55,21 @@ final class ArticleImportController extends Controller
 
         session()->forget($sessionKey);
 
+        return $this->performImport($parsed, $request->input('duplicate_strategy'), auth()->id(), $importService);
+    }
+
+    private function performImport(
+        ParsedImport $parsed,
+        string $duplicateStrategy,
+        int $userId,
+        ArticleImportService $importService,
+    ): JsonResponse {
         if ($parsed->settingsYaml !== null) {
             $importService->importSettings($parsed->settingsYaml);
         }
 
-        $photosImported = $importService->importPhotos($parsed, $request->input('duplicate_strategy'), auth()->id());
-        $result = $importService->import($parsed, $request->input('duplicate_strategy'), auth()->id());
+        $photosImported = $importService->importPhotos($parsed, $duplicateStrategy, $userId);
+        $result = $importService->import($parsed, $duplicateStrategy, $userId);
 
         return response()->json([
             'status' => 'ok',

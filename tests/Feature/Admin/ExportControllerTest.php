@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Photo;
 use App\Models\User;
 use App\Services\ArticleExportService;
+use App\Services\PhotoExportService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -378,7 +379,7 @@ it('zip contains photos.yaml', function (): void {
     $stream = fopen('php://memory', 'r+');
     $zip = new ZipStream(outputName: null, sendHttpHeaders: false, outputStream: $stream);
 
-    $service = new ArticleExportService();
+    $service = new PhotoExportService();
     $service->streamPhotosToZip($zip);
     $zip->finish();
 
@@ -410,7 +411,7 @@ it('photos.yaml contains expected photo fields', function (): void {
     $stream = fopen('php://memory', 'r+');
     $zip = new ZipStream(outputName: null, sendHttpHeaders: false, outputStream: $stream);
 
-    $service = new ArticleExportService();
+    $service = new PhotoExportService();
     $service->streamPhotosToZip($zip);
     $zip->finish();
 
@@ -452,7 +453,7 @@ it('images/ directory contains photo image files when photos have media', functi
     $stream = fopen('php://memory', 'r+');
     $zip = new ZipStream(outputName: null, sendHttpHeaders: false, outputStream: $stream);
 
-    $service = new ArticleExportService();
+    $service = new PhotoExportService();
     $service->streamPhotoImagesToZip($zip);
     $zip->finish();
 
@@ -494,7 +495,7 @@ it('photos.yaml includes image_file key for photos with media', function (): voi
     $stream = fopen('php://memory', 'r+');
     $zip = new ZipStream(outputName: null, sendHttpHeaders: false, outputStream: $stream);
 
-    $service = new ArticleExportService();
+    $service = new PhotoExportService();
     $service->streamPhotosToZip($zip);
     $zip->finish();
 
