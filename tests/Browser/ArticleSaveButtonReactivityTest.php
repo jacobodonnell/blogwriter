@@ -65,7 +65,9 @@ it('clears upload prefix and shows Save Draft when selecting existing photo afte
 
     $page->assertSeeIn('@save-button-label', 'Upload Photo & Save Draft');
 
-    $page->select('@photo-select', (string) $photo->id)
+    $page->click('[data-test="photo-select-trigger"]')
+        ->wait(0.3)
+        ->click('[data-test="photo-option-'.$photo->id.'"]')
         ->wait(1);
 
     $page->assertSeeIn('@save-button-label', 'Save Draft')

@@ -2,22 +2,56 @@
     $featuredPhoto = $article->exists ? $article->featuredPhoto : null;
     $photoMap = $photos->mapWithKeys(fn ($p) => [$p->id => $p->image_url])->toArray();
     $captionMap = $photos->mapWithKeys(fn ($p) => [$p->id => $p->caption])->toArray();
+    $labelMap = $photos->mapWithKeys(fn ($p) => [$p->id => $p->alt_text ?: 'Photo #' . $p->id])->toArray();
 @endphp
 
-<div x-data="featuredImage({ photoUrls: @js($photoMap), photoCaptions: @js($captionMap) })">
+<div x-data="featuredImage({ photoUrls: @js($photoMap), photoCaptions: @js($captionMap), photoLabels: @js($labelMap) })">
     <input type="hidden" name="photo_id" :value="selectedPhotoId">
 
-    {{-- Photo Select --}}
-    <select id="photo-select" x-model="selectedPhotoId" data-test="photo-select"
-            @change="selectPhoto(); checkDirty(); $refs.customizerForm.dispatchEvent(new Event('input', { bubbles: true }))"
-            class="select select-bordered select-sm w-full">
-        <option value="" x-text="featuredImageUrl ? 'Using external URL' : 'No featured image'"></option>
-        @foreach($photos as $photo)
-            <option value="{{ $photo->id }}">
-                {{ $photo->alt_text }}
-            </option>
-        @endforeach
-    </select>
+    {{-- Photo Select — custom thumbnail dropdown --}}
+    <div class="dropdown w-full" x-data="{ open: false }">
+        <button type="button" @click="open = !open"
+                data-test="photo-select-trigger"
+                class="btn btn-bordered btn-sm w-full justify-start gap-2 text-left">
+            <template x-if="selectedPhotoId && photoUrls[selectedPhotoId]">
+                <img :src="photoUrls[selectedPhotoId]" class="w-6 h-6 rounded object-cover shrink-0" alt="">
+            </template>
+            <span class="truncate flex-1"
+                  x-text="selectedPhotoId && photoLabels[selectedPhotoId] ? photoLabels[selectedPhotoId] : (featuredImageUrl ? 'Using external URL' : 'No featured image')"></span>
+            <i class="ph ph-caret-down ml-auto shrink-0"></i>
+        </button>
+        <ul x-show="open" @click.away="open = false" x-cloak
+            class="absolute z-20 mt-1 w-full bg-base-100 rounded-box shadow-lg border border-base-300 max-h-52 overflow-y-auto p-1 space-y-0.5">
+            <li>
+                <button type="button"
+                        data-test="photo-option-none"
+                        class="w-full text-left px-2 py-1.5 text-sm rounded hover:bg-base-200 flex items-center gap-2"
+                        @click="selectedPhotoId = ''; open = false; selectPhoto(); checkDirty(); $refs.customizerForm.dispatchEvent(new Event('input', { bubbles: true }))">
+                    <span class="w-8 h-8 rounded bg-base-300 flex items-center justify-center shrink-0">
+                        <i class="ph ph-image text-base-content/40"></i>
+                    </span>
+                    No featured image
+                </button>
+            </li>
+            @foreach($photos as $photo)
+            <li>
+                <button type="button"
+                        data-test="photo-option-{{ $photo->id }}"
+                        class="w-full text-left px-2 py-1.5 text-sm rounded hover:bg-base-200 flex items-center gap-2"
+                        @click="selectedPhotoId = '{{ $photo->id }}'; open = false; selectPhoto(); checkDirty(); $refs.customizerForm.dispatchEvent(new Event('input', { bubbles: true }))">
+                    @if($photo->thumbnail_url)
+                        <img src="{{ $photo->thumbnail_url }}" class="w-8 h-8 rounded object-cover shrink-0" alt="">
+                    @else
+                        <span class="w-8 h-8 rounded bg-base-300 flex items-center justify-center shrink-0">
+                            <i class="ph ph-image text-base-content/40"></i>
+                        </span>
+                    @endif
+                    <span class="truncate">{{ $photo->alt_text ?: 'Photo #' . $photo->id }}</span>
+                </button>
+            </li>
+            @endforeach
+        </ul>
+    </div>
 
     <div class="flex gap-2 mt-2">
         {{-- Upload New Button --}}

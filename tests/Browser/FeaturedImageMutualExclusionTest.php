@@ -43,7 +43,9 @@ it('clears external URL when selecting a photo', function (): void {
         ->wait(0.3);
 
     // Select a photo from dropdown
-    $page->select('@photo-select', (string) $photo->id)
+    $page->click('[data-test="photo-select-trigger"]')
+        ->wait(0.3)
+        ->click('[data-test="photo-option-'.$photo->id.'"]')
         ->wait(0.5);
 
     // URL input should be cleared
@@ -60,7 +62,9 @@ it('clears photo selection when entering an external URL', function (): void {
     $page = loginAndVisitArticleEditor($article);
 
     // Select a photo first
-    $page->select('@photo-select', (string) $photo->id)
+    $page->click('[data-test="photo-select-trigger"]')
+        ->wait(0.3)
+        ->click('[data-test="photo-option-'.$photo->id.'"]')
         ->wait(0.3);
 
     // Open URL field and type a URL
@@ -69,8 +73,8 @@ it('clears photo selection when entering an external URL', function (): void {
         ->type('@featured-image-url', 'https://example.com/image.jpg')
         ->wait(0.5);
 
-    // Photo select should be reset to empty
-    $page->assertValue('@photo-select', '');
+    // Dropdown trigger should show no photo selected (external URL takes over)
+    $page->assertSeeIn('[data-test="photo-select-trigger"]', 'Using external URL');
 })->group('slow');
 
 it('clears upload state when selecting a photo', function (): void {
@@ -93,7 +97,9 @@ it('clears upload state when selecting a photo', function (): void {
     $page->assertSeeIn('@save-button-label', 'Upload Photo & Save Draft');
 
     // Select an existing photo
-    $page->select('@photo-select', (string) $photo->id)
+    $page->click('[data-test="photo-select-trigger"]')
+        ->wait(0.3)
+        ->click('[data-test="photo-option-'.$photo->id.'"]')
         ->wait(0.5);
 
     // Save button should show dirty state (selecting a photo is a real change)

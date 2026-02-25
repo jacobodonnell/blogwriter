@@ -104,14 +104,14 @@ it('reverts featured image from photo back to external URL', function (): void {
     $page->wait(3);
 
     // Photo should be selected in dropdown (draft state)
-    $page->assertValue('@photo-select', (string) $photo->id);
+    $page->assertSeeIn('[data-test="photo-select-trigger"]', $photo->alt_text ?: 'Photo #'.$photo->id);
 
     // Click revert button for featured image
     $page->click('[data-test="revert-featuredImage"]')
         ->wait(0.5);
 
-    // Dropdown should be reset to empty (external URL mode)
-    $page->assertValue('@photo-select', '');
+    // Dropdown trigger should show no photo selected (external URL mode)
+    $page->assertSeeIn('[data-test="photo-select-trigger"]', 'Using external URL');
 
     // URL field should be visible with the original URL
     $page->assertVisible('@featured-image-url');
