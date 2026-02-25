@@ -162,7 +162,7 @@ final class ArticleExportService
     private function photoImageFilename(Photo $photo): ?string
     {
         $media = $photo->getFirstMedia('image');
-        if ($media === null) {
+        if (! $media instanceof \Spatie\MediaLibrary\MediaCollections\Models\Media) {
             return null;
         }
 
