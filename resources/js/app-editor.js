@@ -3,7 +3,7 @@ import './utilities';
 import appearanceSettings from './components/appearance-settings';
 import sidebar from './components/sidebar';
 import customizerLayout from './components/customizer-layout';
-import articleCustomizer from './components/article-customizer';
+import articleCustomizer from './components/article-customizer/index';
 import featuredImage from './components/featured-image';
 import uploadPhotoModal from './components/upload-photo-modal';
 
