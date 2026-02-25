@@ -112,8 +112,8 @@ export default function articleCustomizer(config) {
                 summary:              [this.summary, this.savedSummary],
                 categoryId:           [String(this.categoryId || ''), this.savedCategoryId],
                 featuredImage:        [
-                    String(this.selectedPhotoId || '') + '|' + (this.featuredImageUrl || '') + '|' + (this.featuredImageCaption || '') + '|' + this.usePhotoCaption,
-                    this.savedPhotoId + '|' + this.savedFeaturedImageUrl + '|' + this.savedFeaturedImageCaption + '|' + this.savedUsePhotoCaption,
+                    JSON.stringify({ photoId: String(this.selectedPhotoId || ''), url: this.featuredImageUrl || '', caption: this.featuredImageCaption || '', useCaption: this.usePhotoCaption }),
+                    JSON.stringify({ photoId: String(this.savedPhotoId || ''), url: this.savedFeaturedImageUrl || '', caption: this.savedFeaturedImageCaption || '', useCaption: this.savedUsePhotoCaption }),
                 ],
                 metaTitle:            [(this.metaTitle || ''), this.savedMetaTitle],
                 metaDescription:      [(this.metaDescription || ''), this.savedMetaDescription],

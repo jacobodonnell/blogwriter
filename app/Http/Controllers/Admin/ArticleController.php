@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Actions\ApplyArticleFeaturedImageAction;
+use App\Actions\CreateCategoryFromArticleAction;
 use App\Exceptions\PhotoUploadFailedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateArticleRequest;
@@ -25,6 +26,7 @@ final class ArticleController extends Controller
 
     public function __construct(
         private readonly ApplyArticleFeaturedImageAction $applyFeaturedImage,
+        private readonly CreateCategoryFromArticleAction $createCategory,
         private readonly ContentFilterService $contentFilter,
     ) {}
 
@@ -122,15 +124,7 @@ final class ArticleController extends Controller
                 ->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
         }
 
-        if (filled($data['new_category_name'] ?? null)) {
-            $category = Category::create([
-                'name' => $data['new_category_name'],
-                'slug' => filled($data['new_category_slug'] ?? null) ? $data['new_category_slug'] : null,
-                'parent_id' => $data['new_category_parent_id'] ?? null,
-                'description' => filled($data['new_category_description'] ?? null) ? $data['new_category_description'] : null,
-            ]);
-            $data['category_id'] = $category->id;
-        }
+        $this->createCategory->handle($data);
 
         $article->update([
             'title' => $data['title'],
