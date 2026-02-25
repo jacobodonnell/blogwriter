@@ -135,7 +135,7 @@
                  x-transition:leave-start="opacity-100 translate-x-0"
                  x-transition:leave-end="opacity-0 -translate-x-4"
                  :class="classicEditor ? 'shrink-0 overflow-y-auto md:overflow-hidden bg-base-100 w-full relative' : 'shrink-0 overflow-y-auto overflow-x-hidden bg-base-100 md:max-w-none max-w-full relative'"
-                 :style="{ width: window.innerWidth < 768 || classicEditor ? '100%' : panelWidth + 'px' }"
+                 :style="{ width: isMobile || classicEditor ? '100%' : panelWidth + 'px' }"
                  x-cloak>
 
                 {{-- Mobile close button --}}
@@ -175,7 +175,7 @@
             <div class="flex-1 overflow-hidden bg-base-300 hidden md:flex items-stretch"
                  data-test="preview-panel"
                  x-show="!(classicEditor && drawerOpen)"
-                 :class="{ '!flex': !drawerOpen || window.innerWidth >= 768 }">
+                 :class="{ '!flex': !drawerOpen || !isMobile }">
 
                 {{-- Preview wrapper: gutter-left + preview + gutter-right --}}
                 <div class="flex mx-auto items-stretch"
