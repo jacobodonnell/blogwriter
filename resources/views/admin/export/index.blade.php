@@ -1,7 +1,7 @@
 <x-settings-layout active="export">
     <div class="space-y-6">
 
-        {{-- Import Articles Card --}}
+        {{-- Import Card --}}
         <div class="card bg-base-100 shadow"
              x-data="{
                 state: 'idle',
@@ -70,7 +70,7 @@
 
                 handleSuccess(json) {
                     $dispatch('toast:show', {
-                        message: 'Imported ' + json.imported + ' article' + (json.imported !== 1 ? 's' : '') + '. Skipped ' + json.skipped + '.',
+                        message: 'Site data imported. ' + json.imported + ' article' + (json.imported !== 1 ? 's' : '') + ' imported, ' + json.skipped + ' skipped.',
                         type: 'success',
                     });
                     this.reset();
@@ -96,8 +96,8 @@
                     Import Site Data
                 </h2>
                 <p class="text-sm text-base-content/60 font-admin">
-                    Upload a BlogWriter ZIP export to restore articles, categories, and settings (theme, profile, page subtitles).
-                    Articles with duplicate slugs will be skipped or overwritten based on your choice.
+                    Upload a BlogWriter ZIP export to restore your full site — articles, photos, categories, and settings.
+                    Existing content with matching slugs will be skipped or overwritten based on your choice.
                 </p>
 
                 {{-- Idle / Upload form --}}
@@ -115,14 +115,14 @@
                     </div>
 
                     <fieldset class="fieldset">
-                        <legend class="fieldset-legend font-admin text-xs">Duplicate articles</legend>
+                        <legend class="fieldset-legend font-admin text-xs">Duplicate content</legend>
                         <label class="label gap-2 cursor-pointer justify-start font-admin text-sm">
                             <input type="radio" name="duplicate_strategy" value="skip" class="radio radio-sm" x-model="duplicateStrategy">
-                            <span>Skip — keep existing articles unchanged</span>
+                            <span>Skip — keep existing content unchanged</span>
                         </label>
                         <label class="label gap-2 cursor-pointer justify-start font-admin text-sm">
                             <input type="radio" name="duplicate_strategy" value="overwrite" class="radio radio-sm" x-model="duplicateStrategy">
-                            <span>Overwrite — replace existing articles with imported data</span>
+                            <span>Overwrite — replace existing content with imported data</span>
                         </label>
                     </fieldset>
 
@@ -134,7 +134,7 @@
                     >
                         <span x-show="state !== 'uploading'">
                             <i class="ph ph-upload-simple text-lg"></i>
-                            Import Articles
+                            Import Site Data
                         </span>
                         <span x-show="state === 'uploading'" x-cloak class="flex items-center gap-2">
                             <span class="loading loading-spinner loading-sm"></span>
@@ -184,7 +184,7 @@
             </div>
         </div>
 
-        {{-- Export Articles Card --}}
+        {{-- Export Card --}}
         <div class="card bg-base-100 shadow"
              x-data="{
                 exporting: false,
@@ -196,11 +196,11 @@
             <div class="card-body">
                 <h2 class="card-title font-admin">
                     <i class="ph ph-file-text text-xl"></i>
-                    Export Articles
+                    Export Site Data
                 </h2>
                 <p class="text-sm text-base-content/60 font-admin">
-                    Export all {{ $articleCount }} {{ Str::plural('article', $articleCount) }} as Markdown files with YAML frontmatter.
-                    Each article is saved as <code class="font-mono text-xs bg-base-200 px-1 py-0.5 rounded">{slug}.md</code>.
+                    Download a full backup of your site as a ZIP — includes all {{ $articleCount }} {{ Str::plural('article', $articleCount) }},
+                    photos, categories, and settings.
                 </p>
 
                 <form method="POST" action="{{ route('admin.export.articles') }}" @submit="startExport()" class="mt-4">
@@ -213,7 +213,7 @@
                     >
                         <span x-show="!exporting">
                             <i class="ph ph-download-simple text-lg"></i>
-                            Export Articles
+                            Export Site Data
                         </span>
                         <span x-show="exporting" x-cloak class="flex items-center gap-2">
                             <span class="loading loading-spinner loading-sm"></span>
