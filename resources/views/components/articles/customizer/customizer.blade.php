@@ -17,8 +17,8 @@
 
             <x-articles.customizer.form-hidden-inputs :is-new="$isNew" />
 
-            <div :class="fullWidth && 'max-w-5xl mx-auto w-full'">
-            <div :class="fullWidth ? 'grid grid-cols-[1fr_320px] gap-6 items-start' : 'space-y-4'">
+            <div :class="classicEditor && 'max-w-5xl mx-auto w-full'">
+            <div :class="classicEditor ? 'grid grid-cols-[1fr_320px] gap-6 items-start' : 'space-y-4'">
 
                 <x-articles.customizer.editor-panel :article="$article" />
 
@@ -33,7 +33,7 @@
             </div>
 
             {{-- Sticky bottom save button (normal mode only) --}}
-            <template x-if="!fullWidth">
+            <template x-if="!classicEditor">
                 <div class="sticky bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-base-100 from-60% to-transparent pt-8">
                     <x-article-save-button :article="$article"/>
                 </div>

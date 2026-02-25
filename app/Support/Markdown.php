@@ -177,12 +177,24 @@ final class Markdown
             match ($key) {
                 'align' => $align = in_array($value, $allowedAligns, true) ? $value : null,
                 'width' => $width = self::parseWidth($value),
-                'caption' => $caption = urldecode($value),
+                'caption' => $caption = self::stripBackticks(urldecode($value)),
                 default => null,
             };
         }
 
         return ['alt' => $alt, 'align' => $align, 'width' => $width, 'caption' => $caption];
+    }
+
+    /**
+     * Strip one leading and one trailing backtick if both are present.
+     */
+    private static function stripBackticks(string $value): string
+    {
+        if (str_starts_with($value, '`') && str_ends_with($value, '`') && mb_strlen($value) >= 2) {
+            return mb_substr($value, 1, -1);
+        }
+
+        return $value;
     }
 
     /**

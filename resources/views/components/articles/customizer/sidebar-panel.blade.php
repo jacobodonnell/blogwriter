@@ -1,9 +1,9 @@
 @props(['article', 'categories', 'photos', 'isNew'])
 
-<div class="space-y-4" :class="fullWidth && 'pt-6'">
+<div class="space-y-4" :class="classicEditor && 'pt-6'">
 
-    {{-- Save button (full-width mode only) --}}
-    <template x-if="fullWidth">
+    {{-- Save button (classic editor mode only) --}}
+    <template x-if="classicEditor">
         <div>
             <x-article-save-button :article="$article"/>
         </div>

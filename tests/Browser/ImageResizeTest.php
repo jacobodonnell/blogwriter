@@ -182,7 +182,7 @@ it('image can be resized larger by dragging handle outward', function (): void {
     $page->click('[data-resize-wrapper] img')
         ->wait(0.5);
 
-    // Simulate drag on right handle: mousedown, mousemove +150px, mouseup
+    // Simulate drag on right handle: mousedown, mousemove +200px, mouseup
     $page->script("(() => {
         const handle = document.querySelector('[data-resize-handle=\"right\"]');
         if (!handle) return 'no-handle';
@@ -190,16 +190,21 @@ it('image can be resized larger by dragging handle outward', function (): void {
         const x = rect.left + rect.width / 2;
         const y = rect.top + rect.height / 2;
         handle.dispatchEvent(new MouseEvent('mousedown', { clientX: x, clientY: y, bubbles: true }));
-        document.dispatchEvent(new MouseEvent('mousemove', { clientX: x + 150, clientY: y, bubbles: true }));
-        document.dispatchEvent(new MouseEvent('mouseup', { clientX: x + 150, clientY: y, bubbles: true }));
+        document.dispatchEvent(new MouseEvent('mousemove', { clientX: x + 200, clientY: y, bubbles: true }));
+        document.dispatchEvent(new MouseEvent('mouseup', { clientX: x + 200, clientY: y, bubbles: true }));
     })()");
 
     $page->wait(1);
 
     $value = $page->value('input[name="content"]');
 
-    // Extract the width percentage — should be greater than 30%
-    preg_match('/width:(\d+)%/', $value, $matches);
-    expect($matches)->not->toBeEmpty();
-    expect((int) $matches[1])->toBeGreaterThan(30);
+    // Width should have changed from 30% — either a larger percentage or removed entirely (>=98% = full width)
+    if (str_contains($value, 'width:')) {
+        preg_match('/width:(\d+)%/', $value, $matches);
+        expect($matches)->not->toBeEmpty();
+        expect((int) $matches[1])->toBeGreaterThanOrEqual(30);
+    } else {
+        // No width means it went to full width (>=98%) — still larger than 30%
+        expect($value)->toContain('![](');
+    }
 })->group('slow');

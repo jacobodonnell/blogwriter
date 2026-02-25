@@ -6,7 +6,6 @@ export function makeTiptapCommands(getEditor) {
         editingImage: false,
         imageUrl: '',
         imageAlt: '',
-        imageCaption: '',
         showYoutubeDialog: false,
         youtubeUrl: '',
 
@@ -18,7 +17,7 @@ export function makeTiptapCommands(getEditor) {
                 this.linkUrl = '';
                 this.showLinkDialog = true;
             } else if (signal === 'image') {
-                if (editor.isActive('image')) {
+                if (editor.isActive('figure')) {
                     this.openEditImage();
                 } else {
                     this.resetImageDialog();
@@ -43,11 +42,10 @@ export function makeTiptapCommands(getEditor) {
 
         openEditImage() {
             const editor = getEditor();
-            if (!editor || !editor.isActive('image')) return;
-            const attrs = editor.getAttributes('image');
-            this.imageUrl     = attrs.src     ?? '';
-            this.imageAlt     = attrs.alt     ?? '';
-            this.imageCaption = attrs.caption ?? '';
+            if (!editor || !editor.isActive('figure')) return;
+            const attrs = editor.getAttributes('figure');
+            this.imageUrl     = attrs.src ?? '';
+            this.imageAlt     = attrs.alt ?? '';
             this.editingImage = true;
             this.showImageDialog = true;
         },
@@ -56,14 +54,13 @@ export function makeTiptapCommands(getEditor) {
             if (!this.imageUrl) return;
             const editor = getEditor();
             const attrs = {
-                src:     this.imageUrl,
-                alt:     this.imageAlt     || undefined,
-                caption: this.imageCaption || undefined,
+                src: this.imageUrl,
+                alt: this.imageAlt || undefined,
             };
             if (this.editingImage) {
-                editor.updateImageAttributes(attrs);
+                editor.updateFigureAttributes(attrs);
             } else {
-                editor.setImage(attrs);
+                editor.setFigure(attrs);
             }
             this.showImageDialog = false;
             this.resetImageDialog();
@@ -71,13 +68,12 @@ export function makeTiptapCommands(getEditor) {
 
         isImageFullWidth() {
             void this.updatedAt;
-            return getEditor()?.getAttributes('image')?.width == null;
+            return getEditor()?.getAttributes('figure')?.width == null;
         },
 
         resetImageDialog() {
             this.imageUrl     = '';
             this.imageAlt     = '';
-            this.imageCaption = '';
             this.editingImage = false;
         },
 

@@ -24,14 +24,14 @@
                     <i class="ph ph-sidebar-simple text-lg"></i>
                 </button>
 
-                <button @click="fullWidth = !fullWidth"
+                <button @click="classicEditor = !classicEditor"
                         x-show="drawerOpen"
                         class="btn btn-ghost btn-sm btn-square tooltip tooltip-right hidden sm:inline-flex"
-                        :class="{ 'btn-active': fullWidth }"
-                        :data-tip="fullWidth ? 'Exit full width' : 'Full width editor'"
-                        aria-label="Toggle full width editor"
+                        :class="{ 'btn-active': classicEditor }"
+                        :data-tip="classicEditor ? 'Exit classic editor' : 'Classic editor'"
+                        aria-label="Toggle classic editor"
                         x-cloak>
-                    <i class="ph text-lg" :class="fullWidth ? 'ph-arrows-in-simple' : 'ph-frame-corners'"></i>
+                    <i class="ph text-lg" :class="classicEditor ? 'ph-arrows-in-simple' : 'ph-frame-corners'"></i>
                 </button>
 
                 <div class="divider divider-horizontal mx-0 hidden sm:flex"></div>
@@ -75,7 +75,7 @@
                 </div>
 
                 {{-- Viewport Presets --}}
-                <div class="join hidden sm:flex" x-show="!fullWidth" x-cloak>
+                <div class="join hidden sm:flex" x-show="!classicEditor" x-cloak>
                     <div class="tooltip tooltip-bottom" data-tip="Phone (375px)">
                         <button @click="setPreset(375)" class="btn btn-ghost btn-xs join-item"
                                 :class="{ 'btn-active': previewWidth === 375 }">
@@ -135,7 +135,7 @@
                  x-transition:leave-start="opacity-100 translate-x-0"
                  x-transition:leave-end="opacity-0 -translate-x-4"
                  class="shrink-0 overflow-y-auto overflow-x-hidden bg-base-100 sm:max-w-none max-w-full relative"
-                 :style="{ width: window.innerWidth < 640 || fullWidth ? '100%' : panelWidth + 'px' }"
+                 :style="{ width: window.innerWidth < 640 || classicEditor ? '100%' : panelWidth + 'px' }"
                  x-cloak>
 
                 {{-- Mobile close button --}}
@@ -158,13 +158,13 @@
                 @endif
 
                 {{-- Scrollable form content with bottom padding for sticky save button --}}
-                <div :class="fullWidth ? 'p-4 pb-4' : 'p-4 pb-20'">
+                <div :class="classicEditor ? 'p-4 pb-4' : 'p-4 pb-20'">
                     {{ $slot }}
                 </div>
             </div>
 
             {{-- Gutter: Right edge of drawer --}}
-            <div x-show="drawerOpen && !fullWidth"
+            <div x-show="drawerOpen && !classicEditor"
                  class="shrink-0 w-2 bg-base-300 cursor-col-resize hover:bg-primary/20 transition-colors items-center justify-center hidden sm:flex"
                  @pointerdown.prevent="startDrag('drawer', $event)"
                  x-cloak>
@@ -174,7 +174,7 @@
             {{-- Preview Area --}}
             <div class="flex-1 overflow-hidden bg-base-300 hidden sm:flex items-stretch"
                  data-test="preview-panel"
-                 x-show="!(fullWidth && drawerOpen)"
+                 x-show="!(classicEditor && drawerOpen)"
                  :class="{ '!flex': !drawerOpen || window.innerWidth >= 640 }">
 
                 {{-- Preview wrapper: gutter-left + preview + gutter-right --}}

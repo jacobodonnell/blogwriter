@@ -1,7 +1,7 @@
 export default function customizerLayout() {
     return {
         drawerOpen: JSON.parse(localStorage.getItem('customizerDrawerOpen') ?? 'true'),
-        fullWidth: JSON.parse(localStorage.getItem('customizerFullWidth') ?? 'false'),
+        classicEditor: JSON.parse(localStorage.getItem('customizerClassicEditor') ?? 'false'),
         panelWidth: parseInt(localStorage.getItem('customizerWidth')) || 480,
         previewWidth: parseInt(localStorage.getItem('customizerPreviewWidth')) || 0,
         dragging: false,
@@ -11,7 +11,7 @@ export default function customizerLayout() {
 
         init() {
             this.$watch('drawerOpen', v => localStorage.setItem('customizerDrawerOpen', JSON.stringify(v)));
-            this.$watch('fullWidth', v => localStorage.setItem('customizerFullWidth', JSON.stringify(v)));
+            this.$watch('classicEditor', v => localStorage.setItem('customizerClassicEditor', JSON.stringify(v)));
             this.$watch('panelWidth', w => localStorage.setItem('customizerWidth', w));
             this.$watch('previewWidth', w => localStorage.setItem('customizerPreviewWidth', w));
         },
@@ -26,8 +26,8 @@ export default function customizerLayout() {
         },
 
         closeDrawer() {
-            if (this.fullWidth) {
-                this.fullWidth = false;
+            if (this.classicEditor) {
+                this.classicEditor = false;
             }
             this.drawerOpen = false;
         },

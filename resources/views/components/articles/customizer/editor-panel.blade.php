@@ -129,8 +129,8 @@
                 </button>
             </div>
 
-            {{-- Contextual image toolbar (shows when image is selected) --}}
-            <div x-show="isActive('image') && !markdownMode" x-cloak
+            {{-- Contextual image toolbar (shows when figure is selected) --}}
+            <div x-show="isActive('figure') && !markdownMode" x-cloak
                  class="flex items-center gap-1 px-2 py-1 bg-base-200 border border-base-content/20 border-t-0 border-b-0">
                 <span class="text-xs text-base-content/50 mr-1">Image:</span>
                 <button type="button" @click="command('imageFullWidth')"
@@ -160,7 +160,6 @@
                 </div>
                 <div class="flex gap-2">
                     <input x-model="imageAlt" type="text" id="image-alt" placeholder="Alt text" class="input input-sm input-bordered flex-1" data-test="image-alt-input">
-                    <input x-model="imageCaption" type="text" id="image-caption" placeholder="Caption (optional)" class="input input-sm input-bordered flex-1" data-test="image-caption-input">
                 </div>
                 <div class="flex items-center gap-2">
                     <div class="flex-1"></div>

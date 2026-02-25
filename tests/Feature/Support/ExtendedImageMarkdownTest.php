@@ -96,6 +96,22 @@ it('handles plain alt text with no extended attributes gracefully', function () 
         ->not->toContain('img-align-');
 });
 
+it('strips backtick wrappers from caption', function () {
+    $caption = urlencode('`A caption`');
+    $html = Markdown::render("![Image|caption:{$caption}](https://example.com/img.jpg)");
+    expect($html)->toContain('<figcaption>A caption</figcaption>')
+        ->not->toContain('`');
+});
+
+it('strips backtick-wrapped caption with quotes inside', function () {
+    $caption = urlencode('`Photo: "Mountain & Valley"`');
+    $html = Markdown::render("![Image|caption:{$caption}](https://example.com/img.jpg)");
+    expect($html)->toContain('<figcaption>')
+        ->toContain('Mountain')
+        ->not->toContain('`Photo')
+        ->not->toContain('`</figcaption>');
+});
+
 it('decodes URL-encoded captions with special characters', function () {
     $caption = urlencode('Photo: "Mountain & Valley"');
     $html = Markdown::render("![Image|caption:{$caption}](https://example.com/img.jpg)");

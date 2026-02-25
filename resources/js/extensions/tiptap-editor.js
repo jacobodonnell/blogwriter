@@ -4,7 +4,7 @@ import { Slice } from '@tiptap/pm/model';
 import StarterKit from '@tiptap/starter-kit';
 import Youtube from '@tiptap/extension-youtube';
 import { Markdown } from '@tiptap/markdown';
-import { createResizableImage } from './resizable-image';
+import { createResizableFigure } from './resizable-figure';
 
 /**
  * Normalize markdown text: collapse CRLF, normalize excessive newlines,
@@ -59,7 +59,7 @@ export function createTiptapEditor({ element, content, onUpdate, onSelectionUpda
                 codeBlock: { languageClassPrefix: 'language-' },
                 link: { openOnClick: false },
             }),
-            createResizableImage(() => editor),
+            createResizableFigure(() => editor),
             Youtube.configure({ controls: true }).extend({
                 renderMarkdown: (node) => {
                     return `@[youtube](${node.attrs?.src || ''})`;
@@ -102,7 +102,7 @@ export function createTiptapEditor({ element, content, onUpdate, onSelectionUpda
         code: () => editor.chain().focus().toggleCode().run(),
         codeBlock: () => editor.chain().focus().toggleCodeBlock().run(),
         horizontalRule: () => editor.chain().focus().setHorizontalRule().run(),
-        imageFullWidth: () => editor.chain().focus().updateAttributes('image', { width: null }).run(),
+        imageFullWidth: () => editor.chain().focus().updateAttributes('figure', { width: null }).run(),
     };
 
     return {
@@ -138,12 +138,12 @@ export function createTiptapEditor({ element, content, onUpdate, onSelectionUpda
             editor?.chain().focus().setLink(attrs).run();
         },
 
-        setImage(attrs) {
-            editor?.chain().focus().setImage(attrs).run();
+        setFigure(attrs) {
+            editor?.chain().focus().setFigure(attrs).run();
         },
 
-        updateImageAttributes(attrs) {
-            editor?.chain().focus().updateAttributes('image', attrs).run();
+        updateFigureAttributes(attrs) {
+            editor?.chain().focus().updateAttributes('figure', attrs).run();
         },
 
         setYoutubeVideo(attrs) {
