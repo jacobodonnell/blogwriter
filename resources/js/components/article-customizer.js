@@ -400,6 +400,7 @@ export default function articleCustomizer(config) {
                 editor?.focus();
                 return;
             }
+            this.hasChanges = false;
             const form = this.$refs.customizerForm;
             form.removeAttribute('x-target');
             form.action = config.saveRoute;
