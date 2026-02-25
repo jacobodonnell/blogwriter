@@ -26,7 +26,7 @@
 
                 <button @click="classicEditor = !classicEditor"
                         x-show="drawerOpen"
-                        class="btn btn-ghost btn-sm btn-square tooltip tooltip-right hidden sm:inline-flex"
+                        class="btn btn-ghost btn-sm btn-square tooltip tooltip-right hidden md:inline-flex"
                         :class="{ 'btn-active': classicEditor }"
                         :data-tip="classicEditor ? 'Exit classic editor' : 'Classic editor'"
                         aria-label="Toggle classic editor"
@@ -34,20 +34,20 @@
                     <i class="ph text-lg" :class="classicEditor ? 'ph-arrows-in-simple' : 'ph-frame-corners'"></i>
                 </button>
 
-                <div class="divider divider-horizontal mx-0 hidden sm:flex"></div>
+                <div class="divider divider-horizontal mx-0 hidden md:flex"></div>
 
                 <a href="{{ route('admin.articles.index') }}" class="btn btn-ghost btn-sm gap-2">
                     <i class="ph ph-arrow-left text-lg"></i>
-                    <span class="hidden sm:inline">Articles</span>
+                    <span class="hidden md:inline">Articles</span>
                 </a>
                 <span
-                    class="text-sm text-base-content/60 truncate max-w-xs hidden sm:inline">{{ $article->title }}</span>
+                    class="text-sm text-base-content/60 truncate max-w-xs hidden md:inline">{{ $article->title }}</span>
             </div>
             <div class="flex items-center gap-1 min-w-0">
                 {{-- Compact save button (desktop) --}}
                 <button x-show="$store.saveButton.ready"
                         @click="window.dispatchEvent(new CustomEvent('save-article'))"
-                        class="btn btn-sm btn-square hidden sm:inline-flex tooltip tooltip-bottom"
+                        class="btn btn-sm btn-square hidden md:inline-flex tooltip tooltip-bottom"
                         :class="$store.saveButton.cssClass"
                         :data-tip="$store.saveButton.label"
                         x-cloak>
@@ -57,14 +57,14 @@
                 {{-- View Live (only for published articles) --}}
                 @if($article->exists && $article->isPublished())
                     <a href="{{ $article->permalink() }}"
-                       class="btn btn-ghost btn-sm btn-square tooltip tooltip-bottom hidden sm:inline-flex"
+                       class="btn btn-ghost btn-sm btn-square tooltip tooltip-bottom hidden md:inline-flex"
                        data-tip="View Live">
                         <i class="ph ph-arrow-square-out text-lg"></i>
                     </a>
                 @endif
 
                 {{-- Draft/Live preview toggle — shown reactively when hasDraft is true --}}
-                <div class="hidden sm:flex items-center gap-1.5 tooltip tooltip-bottom"
+                <div class="hidden md:flex items-center gap-1.5 tooltip tooltip-bottom"
                      x-show="$store.saveButton.hasDraft && !classicEditor"
                      x-cloak
                      :data-tip="$store.preview.mode === 'live' ? 'Switch to draft preview' : 'Switch to live preview'">
@@ -75,7 +75,7 @@
                 </div>
 
                 {{-- Viewport Presets --}}
-                <div class="join hidden sm:flex" x-show="!classicEditor" x-cloak>
+                <div class="join hidden md:flex" x-show="!classicEditor" x-cloak>
                     <div class="tooltip tooltip-bottom" data-tip="Phone (375px)">
                         <button @click="setPreset(375)" class="btn btn-ghost btn-xs join-item"
                                 :class="{ 'btn-active': previewWidth === 375 }">
@@ -134,12 +134,12 @@
                  x-transition:leave="transition ease-in duration-150"
                  x-transition:leave-start="opacity-100 translate-x-0"
                  x-transition:leave-end="opacity-0 -translate-x-4"
-                 class="shrink-0 overflow-y-auto overflow-x-hidden bg-base-100 sm:max-w-none max-w-full relative"
-                 :style="{ width: window.innerWidth < 640 || classicEditor ? '100%' : panelWidth + 'px' }"
+                 :class="classicEditor ? 'shrink-0 overflow-y-auto md:overflow-hidden bg-base-100 w-full relative' : 'shrink-0 overflow-y-auto overflow-x-hidden bg-base-100 md:max-w-none max-w-full relative'"
+                 :style="{ width: window.innerWidth < 768 || classicEditor ? '100%' : panelWidth + 'px' }"
                  x-cloak>
 
                 {{-- Mobile close button --}}
-                <div class="sm:hidden flex justify-between items-center p-4 pb-0">
+                <div class="md:hidden flex justify-between items-center p-4 pb-0">
                     <span class="font-medium text-sm">Editor</span>
                     <button @click="closeDrawer()" class="btn btn-ghost btn-xs btn-circle" aria-label="Close editor">
                         <i class="ph ph-x text-lg"></i>
@@ -158,24 +158,24 @@
                 @endif
 
                 {{-- Scrollable form content with bottom padding for sticky save button --}}
-                <div :class="classicEditor ? 'p-4 pb-4' : 'p-4 pb-20'">
+                <div :class="classicEditor ? '' : 'p-4 pb-20'">
                     {{ $slot }}
                 </div>
             </div>
 
             {{-- Gutter: Right edge of drawer --}}
             <div x-show="drawerOpen && !classicEditor"
-                 class="shrink-0 w-2 bg-base-300 cursor-col-resize hover:bg-primary/20 transition-colors items-center justify-center hidden sm:flex"
+                 class="shrink-0 w-2 bg-base-300 cursor-col-resize hover:bg-primary/20 transition-colors items-center justify-center hidden md:flex"
                  @pointerdown.prevent="startDrag('drawer', $event)"
                  x-cloak>
                 <div class="w-0.5 h-8 bg-base-content/20 rounded-full"></div>
             </div>
 
             {{-- Preview Area --}}
-            <div class="flex-1 overflow-hidden bg-base-300 hidden sm:flex items-stretch"
+            <div class="flex-1 overflow-hidden bg-base-300 hidden md:flex items-stretch"
                  data-test="preview-panel"
                  x-show="!(classicEditor && drawerOpen)"
-                 :class="{ '!flex': !drawerOpen || window.innerWidth >= 640 }">
+                 :class="{ '!flex': !drawerOpen || window.innerWidth >= 768 }">
 
                 {{-- Preview wrapper: gutter-left + preview + gutter-right --}}
                 <div class="flex mx-auto items-stretch"
@@ -216,7 +216,7 @@
                 x-transition:leave="transition ease-in duration-150"
                 x-transition:leave-start="opacity-100 translate-y-0"
                 x-transition:leave-end="opacity-0 translate-y-4"
-                class="fixed bottom-4 right-4 z-40 btn gap-2 shadow-lg sm:hidden"
+                class="fixed bottom-4 right-4 z-40 btn gap-2 shadow-lg md:hidden"
                 :class="$store.saveButton.cssClass"
                 x-cloak>
             <i class="ph" :class="$store.saveButton.icon"></i>

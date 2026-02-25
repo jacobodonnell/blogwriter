@@ -99,6 +99,28 @@ body {
     display: none;
 }
 
+/* Scrollbar only visible while scrolling / on hover */
+.scroll-fade {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 150ms ease;
+}
+.scroll-fade:hover,
+.scroll-fade:focus-within {
+    scrollbar-color: color-mix(in oklch, var(--color-base-content) 25%, transparent) transparent;
+}
+.scroll-fade::-webkit-scrollbar { width: 6px; }
+.scroll-fade::-webkit-scrollbar-track { background: transparent; }
+.scroll-fade::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 9999px;
+    transition: background 150ms ease;
+}
+.scroll-fade:hover::-webkit-scrollbar-thumb,
+.scroll-fade:focus-within::-webkit-scrollbar-thumb {
+    background: color-mix(in oklch, var(--color-base-content) 25%, transparent);
+}
+
 /* Tiptap editor */
 .tiptap-editor .ProseMirror {
     outline: none;

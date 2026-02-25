@@ -1,6 +1,6 @@
 @props(['article', 'categories', 'photos', 'isNew'])
 
-<div class="space-y-4" :class="classicEditor && 'pt-6'">
+<div class="space-y-4" :class="classicEditor && 'md:pt-6'">
 
     {{-- Save button (classic editor mode only) --}}
     <template x-if="classicEditor">
@@ -26,21 +26,21 @@
     <fieldset class="fieldset">
         <legend class="fieldset-legend">
             Category
-            <span x-show="!hasNewCategory"><x-draft-revert-button field="categoryId" /></span>
+            <span x-show="!hasNewCategory"><x-draft-revert-button field="categoryId"/></span>
         </legend>
         <x-category-select :categories="$categories ?? collect()"
-            :selected="$article->category_id"
-            x-show="!hasNewCategory"
-            x-model="categoryId"
-            @change="checkDirty(); $refs.customizerForm.dispatchEvent(new Event('input', { bubbles: true }))"
-            @category-attached.window="
+                           :selected="$article->category_id"
+                           x-show="!hasNewCategory"
+                           x-model="categoryId"
+                           @change="checkDirty(); $refs.customizerForm.dispatchEvent(new Event('input', { bubbles: true }))"
+                           @category-attached.window="
                 $refs.newCategoryNameInput.value = $event.detail.name;
                 $refs.newCategorySlugInput.value = $event.detail.slug ?? '';
                 $refs.newCategoryParentIdInput.value = $event.detail.parentId ?? '';
                 $refs.newCategoryDescriptionInput.value = $event.detail.description ?? '';
                 newCategoryName = $event.detail.name;
                 hasNewCategory = true;
-            " />
+            "/>
         {{-- Staged new category badge --}}
         <div x-show="hasNewCategory" x-cloak
              class="flex items-center justify-between gap-2 mt-2 px-2 py-1.5 bg-success/10 border border-success/30 rounded-field text-sm">
@@ -76,7 +76,7 @@
     <fieldset class="fieldset">
         <legend class="fieldset-legend">
             Featured Image
-            <x-draft-revert-button field="featuredImage" method="revertFeaturedImage()" />
+            <x-draft-revert-button field="featuredImage" method="revertFeaturedImage()"/>
         </legend>
         @include('admin.articles.partials.featured-image-compact')
     </fieldset>
@@ -90,7 +90,7 @@
             <fieldset class="fieldset">
                 <legend class="fieldset-legend text-xs">
                     Meta Title
-                    <x-draft-revert-button field="metaTitle" />
+                    <x-draft-revert-button field="metaTitle"/>
                 </legend>
                 <input type="text" name="meta[meta_title]" x-model="metaTitle"
                        @input="checkDirty()"
@@ -101,7 +101,7 @@
             <fieldset class="fieldset">
                 <legend class="fieldset-legend text-xs">
                     Meta Description
-                    <x-draft-revert-button field="metaDescription" />
+                    <x-draft-revert-button field="metaDescription"/>
                 </legend>
                 <textarea name="meta[meta_description]" x-model="metaDescription"
                           @input="checkDirty()"
@@ -112,7 +112,7 @@
             <fieldset class="fieldset">
                 <legend class="fieldset-legend text-xs">
                     OG Image URL
-                    <x-draft-revert-button field="ogImage" />
+                    <x-draft-revert-button field="ogImage"/>
                 </legend>
                 <input type="url" name="meta[og_image]" x-model="ogImage"
                        @input="checkDirty()"
