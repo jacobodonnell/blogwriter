@@ -43,7 +43,7 @@
                 <span
                     class="text-sm text-base-content/60 truncate max-w-xs hidden sm:inline">{{ $article->title }}</span>
             </div>
-            <div class="flex items-center gap-1">
+            <div class="flex items-center gap-1 min-w-0">
                 {{-- Compact save button (desktop) --}}
                 <button x-show="$store.saveButton.ready"
                         @click="window.dispatchEvent(new CustomEvent('save-article'))"
@@ -65,7 +65,7 @@
 
                 {{-- Draft/Live preview toggle — shown reactively when hasDraft is true --}}
                 <div class="hidden sm:flex items-center gap-1.5 tooltip tooltip-bottom"
-                     x-show="$store.saveButton.hasDraft"
+                     x-show="$store.saveButton.hasDraft && !classicEditor"
                      x-cloak
                      :data-tip="$store.preview.mode === 'live' ? 'Switch to draft preview' : 'Switch to live preview'">
                     <span class="text-xs text-base-content/50 select-none">Live</span>
