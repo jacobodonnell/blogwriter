@@ -121,6 +121,24 @@ it('reverts featured image from photo back to external URL', function (): void {
     $page->assertNoJavaScriptErrors();
 })->group('slow');
 
+it('shows content revert button on page load when article has draft content', function (): void {
+    $article = Article::factory()
+        ->published()
+        ->for($this->user)
+        ->withDraft(['content' => 'Draft content that differs from live'])
+        ->create(['content' => '## Live Published Content']);
+
+    $page = loginAndVisitRevertEditor($article);
+
+    $page->wait(3);
+
+    // The content revert button should be visible because draft content differs from live
+    $page->assertVisible('[data-test="revert-content"]');
+
+    // No JS errors
+    $page->assertNoJavaScriptErrors();
+})->group('slow');
+
 it('reverts all dirty fields and clears draft state', function (): void {
     $article = Article::factory()->draft()->for($this->user)->create([
         'title' => 'Original Title',

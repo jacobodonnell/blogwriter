@@ -128,8 +128,10 @@ export default function articleCustomizer(config) {
 
                     this.editorReady = true;
                     const normalised = editor.getMarkdown();
-                    this.savedContent = normalised;
                     this.content = normalised;
+                    if (!config.hasDraft) {
+                        this.savedContent = normalised;
+                    }
                     this.updatedAt = Date.now();
 
                     const ro = new ResizeObserver(entries => {

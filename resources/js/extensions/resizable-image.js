@@ -80,7 +80,7 @@ export function createResizableImage(getEditor) {
             const { src = '', alt = '', title, width, caption } = node.attrs ?? {};
             const parts = [alt];
             if (width) parts.push(`width:${width}%`);
-            if (caption) parts.push(`caption:${encodeURIComponent(caption)}`);
+            if (caption) parts.push(`caption:\`${caption}\``);
             const altStr = parts.join('|');
             return title ? `![${altStr}](${src} "${title}")` : `![${altStr}](${src})`;
         },
@@ -95,7 +95,11 @@ export function createResizableImage(getEditor) {
                 const key = part.slice(0, colonIdx).trim();
                 const value = part.slice(colonIdx + 1).trim();
                 if (key === 'width') attrs.width = parseInt(value, 10) || null;
-                if (key === 'caption') attrs.caption = decodeURIComponent(value);
+                if (key === 'caption') {
+                    attrs.caption = value.startsWith('`') && value.endsWith('`')
+                        ? value.slice(1, -1)
+                        : value;
+                }
             }
             return h.createNode('image', attrs, []);
         },
