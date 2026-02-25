@@ -5,9 +5,12 @@ declare(strict_types=1);
 use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\Photo;
 use App\Models\User;
 use App\Services\ArticleExportService;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Yaml\Yaml;
 use ZipStream\ZipStream;
 
@@ -343,6 +346,176 @@ it('settings.yaml includes expected keys from settings and user', function (): v
         ->and($data['theme_light'])->toBe('lofi')
         ->and($data['page_home_subtitle'])->toBe('Welcome!')
         ->and($data['profile_bio'])->toBe('A test bio.');
+});
+
+it('exports photo_slug in frontmatter when article has a featured photo', function (): void {
+    $photo = Photo::factory()->create(['slug' => 'my-photo']);
+    $article = Article::factory()->published()->create([
+        'slug' => 'photo-article',
+        'photo_id' => $photo->id,
+    ]);
+    $article->load('user', 'category', 'featuredPhoto.media');
+
+    $service = new ArticleExportService();
+    $frontmatter = $service->buildFrontmatter($article);
+
+    expect($frontmatter['photo_slug'])->toBe('my-photo');
+});
+
+it('omits photo_slug from frontmatter when article has no featured photo', function (): void {
+    $article = Article::factory()->published()->create(['photo_id' => null]);
+    $article->load('user', 'category', 'featuredPhoto.media');
+
+    $service = new ArticleExportService();
+    $frontmatter = $service->buildFrontmatter($article);
+
+    expect($frontmatter)->not->toHaveKey('photo_slug');
+});
+
+it('zip contains photos.yaml', function (): void {
+    Photo::factory()->count(2)->create();
+
+    $stream = fopen('php://memory', 'r+');
+    $zip = new ZipStream(outputName: null, sendHttpHeaders: false, outputStream: $stream);
+
+    $service = new ArticleExportService();
+    $service->streamPhotosToZip($zip);
+    $zip->finish();
+
+    rewind($stream);
+    $zipBytes = stream_get_contents($stream);
+    fclose($stream);
+
+    $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
+    file_put_contents($tmpFile, $zipBytes);
+
+    $za = new ZipArchive();
+    $za->open($tmpFile, ZipArchive::RDONLY);
+    $contents = $za->getFromName('photos.yaml');
+    $za->close();
+    unlink($tmpFile);
+
+    expect($contents)->not->toBeFalse();
+});
+
+it('photos.yaml contains expected photo fields', function (): void {
+    $category = Category::factory()->create(['slug' => 'landscape']);
+    $photo = Photo::factory()->withCategory($category)->create([
+        'slug' => 'sunset-photo',
+        'caption' => 'A beautiful sunset.',
+        'alt_text' => 'Sunset over the hills',
+        'status' => Status::Published,
+    ]);
+
+    $stream = fopen('php://memory', 'r+');
+    $zip = new ZipStream(outputName: null, sendHttpHeaders: false, outputStream: $stream);
+
+    $service = new ArticleExportService();
+    $service->streamPhotosToZip($zip);
+    $zip->finish();
+
+    rewind($stream);
+    $zipBytes = stream_get_contents($stream);
+    fclose($stream);
+
+    $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
+    file_put_contents($tmpFile, $zipBytes);
+
+    $za = new ZipArchive();
+    $za->open($tmpFile, ZipArchive::RDONLY);
+    $yamlContent = $za->getFromName('photos.yaml');
+    $za->close();
+    unlink($tmpFile);
+
+    $data = Yaml::parse($yamlContent);
+    $entry = collect($data)->firstWhere('slug', 'sunset-photo');
+
+    expect($entry)->not->toBeNull()
+        ->and($entry['caption'])->toBe('A beautiful sunset.')
+        ->and($entry['alt_text'])->toBe('Sunset over the hills')
+        ->and($entry['status'])->toBe('published')
+        ->and($entry['category'])->toBe('landscape');
+});
+
+it('images/ directory contains photo image files when photos have media', function (): void {
+    Storage::fake('public');
+    $photo = Photo::factory()->create(['slug' => 'with-image']);
+
+    // Attach a fake image via MediaLibrary
+    $fakeFile = UploadedFile::fake()->image('test-photo.jpg', 100, 100);
+    $photo->addMedia($fakeFile->getRealPath())
+        ->usingFileName('test-photo.jpg')
+        ->toMediaCollection('image', 'public');
+
+    $photo->load('media');
+
+    $stream = fopen('php://memory', 'r+');
+    $zip = new ZipStream(outputName: null, sendHttpHeaders: false, outputStream: $stream);
+
+    $service = new ArticleExportService();
+    $service->streamPhotoImagesToZip($zip);
+    $zip->finish();
+
+    rewind($stream);
+    $zipBytes = stream_get_contents($stream);
+    fclose($stream);
+
+    $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
+    file_put_contents($tmpFile, $zipBytes);
+
+    $za = new ZipArchive();
+    $za->open($tmpFile, ZipArchive::RDONLY);
+
+    $found = false;
+    for ($i = 0; $i < $za->numFiles; $i++) {
+        $name = $za->getNameIndex($i);
+        if (str_starts_with($name, 'images/') && str_ends_with($name, 'test-photo.jpg')) {
+            $found = true;
+            break;
+        }
+    }
+    $za->close();
+    unlink($tmpFile);
+
+    expect($found)->toBeTrue();
+});
+
+it('photos.yaml includes image_file key for photos with media', function (): void {
+    Storage::fake('public');
+    $photo = Photo::factory()->create(['slug' => 'has-media']);
+
+    $fakeFile = UploadedFile::fake()->image('my-image.jpg', 100, 100);
+    $photo->addMedia($fakeFile->getRealPath())
+        ->usingFileName('my-image.jpg')
+        ->toMediaCollection('image', 'public');
+
+    $photo->load('media');
+
+    $stream = fopen('php://memory', 'r+');
+    $zip = new ZipStream(outputName: null, sendHttpHeaders: false, outputStream: $stream);
+
+    $service = new ArticleExportService();
+    $service->streamPhotosToZip($zip);
+    $zip->finish();
+
+    rewind($stream);
+    $zipBytes = stream_get_contents($stream);
+    fclose($stream);
+
+    $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
+    file_put_contents($tmpFile, $zipBytes);
+
+    $za = new ZipArchive();
+    $za->open($tmpFile, ZipArchive::RDONLY);
+    $yamlContent = $za->getFromName('photos.yaml');
+    $za->close();
+    unlink($tmpFile);
+
+    $data = Yaml::parse($yamlContent);
+    $entry = collect($data)->firstWhere('slug', 'has-media');
+
+    expect($entry)->toHaveKey('image_file')
+        ->and($entry['image_file'])->toEndWith('my-image.jpg');
 });
 
 it('streams articles as markdown files to a zip', function (): void {

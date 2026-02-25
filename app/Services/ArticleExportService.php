@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\Photo;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
@@ -96,6 +97,7 @@ final class ArticleExportService
             'meta_title' => $article->meta['meta_title'] ?? null,
             'meta_description' => $article->meta['meta_description'] ?? null,
             'featured_image_url' => $article->external_featured_img_url,
+            'photo_slug' => $article->featuredPhoto?->slug,
             'featured_image_caption' => $article->featured_image_caption ?: null,
             'featured_image_alt' => $article->meta['featured_image_alt']
                                         ?? $article->featuredPhoto?->alt_text
@@ -104,5 +106,66 @@ final class ArticleExportService
         ];
 
         return array_filter($frontmatter, fn ($value): bool => $value !== null);
+    }
+
+    /**
+     * Stream all photos as a photos.yaml file into the given ZipStream.
+     */
+    public function streamPhotosToZip(ZipStream $zip): void
+    {
+        $photos = Photo::query()->with('category', 'media')->orderBy('id')->get();
+
+        $data = $photos->map(fn (Photo $photo): array => array_filter([
+            'slug' => $photo->slug,
+            'filename' => $photo->filename,
+            'caption' => $photo->caption,
+            'alt_text' => $photo->alt_text,
+            'status' => $photo->status->value,
+            'published_at' => $photo->published_at?->utc()->toIso8601String(),
+            'taken_at' => $photo->taken_at?->utc()->toIso8601String(),
+            'category' => $photo->category?->slug,
+            'meta' => $photo->meta ?: null,
+            'image_file' => $this->photoImageFilename($photo),
+        ], fn ($v): bool => $v !== null))->values()->all();
+
+        $zip->addFile('photos.yaml', Yaml::dump($data, 3, 2));
+    }
+
+    /**
+     * Stream original photo image files into the images/ directory in the ZipStream.
+     */
+    public function streamPhotoImagesToZip(ZipStream $zip): void
+    {
+        $photos = Photo::query()->with('media')->get();
+
+        foreach ($photos as $photo) {
+            $media = $photo->getFirstMedia('image');
+            if ($media === null) {
+                continue;
+            }
+
+            $path = $media->getPath();
+            if (! file_exists($path)) {
+                continue;
+            }
+
+            $zip->addFileFromPath(
+                'images/'.$this->photoImageFilename($photo),
+                $path,
+            );
+        }
+    }
+
+    /**
+     * Build the filename used for a photo's image file in the export.
+     */
+    private function photoImageFilename(Photo $photo): ?string
+    {
+        $media = $photo->getFirstMedia('image');
+        if ($media === null) {
+            return null;
+        }
+
+        return $media->uuid.'-'.$media->file_name;
     }
 }

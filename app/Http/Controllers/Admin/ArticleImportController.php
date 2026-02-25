@@ -38,6 +38,7 @@ final class ArticleImportController extends Controller
             $importService->importSettings($parsed->settingsYaml);
         }
 
+        $importService->importPhotos($parsed, $request->input('duplicate_strategy'), auth()->id());
         $result = $importService->import($parsed, $request->input('duplicate_strategy'), auth()->id());
 
         return response()->json([
@@ -68,6 +69,7 @@ final class ArticleImportController extends Controller
             $importService->importSettings($parsed->settingsYaml);
         }
 
+        $importService->importPhotos($parsed, $request->input('duplicate_strategy'), auth()->id());
         $result = $importService->import($parsed, $request->input('duplicate_strategy'), auth()->id());
 
         return response()->json([

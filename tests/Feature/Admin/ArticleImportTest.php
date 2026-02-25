@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\Photo;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Yaml\Yaml;
 
 beforeEach(function (): void {
@@ -455,6 +457,142 @@ it('silently converts H1 headings to H2 during import', function (): void {
 
     // Ensure no bare H1s remain (a single # not followed by #)
     expect($article->content)->not->toMatch('/^# (?!#)/m');
+});
+
+// ---------------------------------------------------------------------------
+// photos.yaml import
+// ---------------------------------------------------------------------------
+
+it('creates photos from photos.yaml on import', function (): void {
+    $photosYaml = Yaml::dump([
+        [
+            'slug' => 'imported-photo',
+            'filename' => 'imported.jpg',
+            'caption' => 'An imported caption.',
+            'alt_text' => 'Alt text here',
+            'status' => 'published',
+            'published_at' => '2024-06-01T12:00:00+00:00',
+        ],
+    ], 3, 2);
+
+    $zip = makeImportZip(['photos.yaml' => $photosYaml]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok']);
+
+    $photo = Photo::query()->where('slug', 'imported-photo')->first();
+    expect($photo)->not->toBeNull()
+        ->and($photo->caption)->toBe('An imported caption.')
+        ->and($photo->alt_text)->toBe('Alt text here')
+        ->and($photo->status->value)->toBe('published');
+});
+
+it('skips existing photos when strategy is skip', function (): void {
+    Photo::factory()->create(['slug' => 'existing-photo', 'caption' => 'Original caption']);
+
+    $photosYaml = Yaml::dump([
+        ['slug' => 'existing-photo', 'filename' => 'photo.jpg', 'alt_text' => 'Alt', 'status' => 'published'],
+    ], 3, 2);
+
+    $zip = makeImportZip(['photos.yaml' => $photosYaml]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok']);
+
+    expect(Photo::query()->where('slug', 'existing-photo')->value('caption'))->toBe('Original caption');
+});
+
+it('overwrites existing photos when strategy is overwrite', function (): void {
+    Photo::factory()->create(['slug' => 'existing-photo', 'caption' => 'Old caption']);
+
+    $photosYaml = Yaml::dump([
+        ['slug' => 'existing-photo', 'filename' => 'photo.jpg', 'alt_text' => 'Alt', 'status' => 'published', 'caption' => 'New caption'],
+    ], 3, 2);
+
+    $zip = makeImportZip(['photos.yaml' => $photosYaml]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'overwrite',
+    ])->assertJson(['status' => 'ok']);
+
+    expect(Photo::query()->where('slug', 'existing-photo')->value('caption'))->toBe('New caption');
+});
+
+it('silently succeeds when photos.yaml is absent from zip', function (): void {
+    $zip = makeImportZip([]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok']);
+
+    expect(Photo::query()->count())->toBe(0);
+});
+
+it('attaches image file to photo from images/ directory in zip', function (): void {
+    Storage::fake('public');
+
+    $fakeImageContent = UploadedFile::fake()->image('photo.jpg', 50, 50)->get();
+    $fakeUuid = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
+    $imageFilename = $fakeUuid.'-photo.jpg';
+
+    $photosYaml = Yaml::dump([
+        [
+            'slug' => 'photo-with-image',
+            'filename' => 'photo.jpg',
+            'alt_text' => 'Test image',
+            'status' => 'published',
+            'image_file' => $imageFilename,
+        ],
+    ], 3, 2);
+
+    $zip = makeImportZip([
+        'photos.yaml' => $photosYaml,
+        'images/'.$imageFilename => $fakeImageContent,
+    ]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok']);
+
+    $photo = Photo::query()->where('slug', 'photo-with-image')->first();
+    expect($photo)->not->toBeNull()
+        ->and($photo->getFirstMedia('image'))->not->toBeNull();
+});
+
+it('reconnects photo_id on articles via photo_slug frontmatter', function (): void {
+    $photo = Photo::factory()->create(['slug' => 'my-hero-photo']);
+
+    $photosYaml = Yaml::dump([
+        ['slug' => 'my-hero-photo', 'filename' => 'hero.jpg', 'alt_text' => 'Hero', 'status' => 'published'],
+    ], 3, 2);
+
+    $md = makeArticleMd([
+        'title' => 'Photo Article',
+        'slug' => 'photo-article',
+        'draft' => false,
+        'date' => '2024-01-01T00:00:00+00:00',
+        'photo_slug' => 'my-hero-photo',
+    ]);
+
+    $zip = makeImportZip([
+        'photos.yaml' => $photosYaml,
+        'articles/photo-article.md' => $md,
+    ]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok']);
+
+    $article = Article::query()->where('slug', 'photo-article')->first();
+    expect($article->photo_id)->toBe($photo->id);
 });
 
 it('restores created_at from frontmatter', function (): void {

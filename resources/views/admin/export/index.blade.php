@@ -14,7 +14,10 @@
                     event.preventDefault();
                     const form = event.target;
                     const file = form.querySelector('input[type=file]').files[0];
-                    if (!file) return;
+                    if (!file) {
+                        $dispatch('toast:show', { message: 'Please select a ZIP file to import.', type: 'error' });
+                        return;
+                    }
 
                     this.state = 'uploading';
                     const data = new FormData(form);
@@ -247,8 +250,11 @@
                         with your appearance preferences (theme, font), profile details (name, bio, social links), and page subtitles.
                         These are restored automatically when importing into a fresh BlogWriter installation.
                     </p>
-                    <p class="text-base-content/50">
-                        Photos and uploaded media are not included in this export.
+                    <p>
+                        Photos and their original image files are included in
+                        <code class="font-mono text-xs bg-base-200 px-1 py-0.5 rounded">photos.yaml</code>
+                        + <code class="font-mono text-xs bg-base-200 px-1 py-0.5 rounded">images/</code>.
+                        Conversions (thumbnail, medium, large) are regenerated automatically on import.
                     </p>
                 </div>
             </div>

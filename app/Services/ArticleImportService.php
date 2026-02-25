@@ -7,11 +7,13 @@ namespace App\Services;
 use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\Photo;
 use App\Models\Setting;
 use App\Models\User;
 use App\Support\ImportResult;
 use App\Support\ParsedImport;
 use App\Support\PreflightResult;
+use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
@@ -48,9 +50,35 @@ final class ArticleImportService
             }
         }
 
+        $photosYaml = null;
+        $photosRaw = $za->getFromName('photos.yaml');
+        if ($photosRaw !== false) {
+            try {
+                $photosYaml = Yaml::parse($photosRaw) ?? [];
+            } catch (ParseException) {
+                $photosYaml = [];
+            }
+        }
+
         $articles = [];
+        $imagesTempDir = null;
+
         for ($i = 0; $i < $za->numFiles; $i++) {
             $name = $za->getNameIndex($i);
+
+            if (str_starts_with($name, 'images/')) {
+                $basename = basename($name);
+                if ($basename !== '') {
+                    if ($imagesTempDir === null) {
+                        $imagesTempDir = sys_get_temp_dir().'/bw-import-'.uniqid();
+                        mkdir($imagesTempDir);
+                    }
+                    file_put_contents($imagesTempDir.'/'.$basename, $za->getFromIndex($i));
+                }
+
+                continue;
+            }
+
             if (! str_starts_with($name, 'articles/')) {
                 continue;
             }
@@ -72,7 +100,13 @@ final class ArticleImportService
 
         $za->close();
 
-        return new ParsedImport(articles: $articles, categoriesYaml: $categoriesYaml, settingsYaml: $settingsYaml);
+        return new ParsedImport(
+            articles: $articles,
+            categoriesYaml: $categoriesYaml,
+            settingsYaml: $settingsYaml,
+            photosYaml: $photosYaml,
+            imagesTempDir: $imagesTempDir,
+        );
     }
 
     /**
@@ -162,7 +196,7 @@ final class ArticleImportService
 
                 $publishedAt = null;
                 if (! $isDraft && ! empty($frontmatter['date'])) {
-                    $publishedAt = \Carbon\Carbon::parse($frontmatter['date'])->startOfSecond();
+                    $publishedAt = Carbon::parse($frontmatter['date'])->startOfSecond();
                 }
 
                 $meta = array_filter([
@@ -183,10 +217,10 @@ final class ArticleImportService
                     'published_at' => $publishedAt,
                     'last_edited_at' => empty($frontmatter['last_edited_at'])
                         ? null
-                        : \Carbon\Carbon::parse($frontmatter['last_edited_at'])->startOfSecond(),
+                        : Carbon::parse($frontmatter['last_edited_at'])->startOfSecond(),
                     'created_at' => empty($frontmatter['created_at'])
                         ? now()
-                        : \Carbon\Carbon::parse($frontmatter['created_at']),
+                        : Carbon::parse($frontmatter['created_at']),
                     'past_slugs' => $frontmatter['past_slugs'] ?? [],
                     'category_id' => isset($frontmatter['category'])
                         ? ($categoryMap[$frontmatter['category']] ?? null)
@@ -209,7 +243,81 @@ final class ArticleImportService
             }
         }
 
+        // Reconnect featured photos by photo_slug after all articles are saved
+        foreach ($parsed->articles as $entry) {
+            $photoSlug = $entry['frontmatter']['photo_slug'] ?? null;
+            if (empty($photoSlug)) {
+                continue;
+            }
+
+            $slug = $entry['frontmatter']['slug'] ?? null;
+            if (empty($slug)) {
+                continue;
+            }
+
+            $article = Article::query()->where('slug', $slug)->first();
+            $photo = Photo::query()->where('slug', $photoSlug)->first();
+            if ($article !== null && $photo !== null) {
+                $article->forceFill(['photo_id' => $photo->id])->save();
+            }
+        }
+
         return new ImportResult(imported: $imported, skipped: $skipped, errors: $errors);
+    }
+
+    /**
+     * Import photos from a parsed photos.yaml + extracted image files.
+     */
+    public function importPhotos(ParsedImport $parsed, string $duplicateStrategy, int $userId): void
+    {
+        if ($parsed->photosYaml === null) {
+            return;
+        }
+
+        $categoryMap = Category::query()->pluck('id', 'slug')->all();
+
+        foreach ($parsed->photosYaml as $row) {
+            $slug = $row['slug'] ?? null;
+            if (empty($slug)) {
+                continue;
+            }
+
+            $existing = Photo::query()->where('slug', $slug)->first();
+            if ($existing !== null && $duplicateStrategy === 'skip') {
+                continue;
+            }
+
+            $photo = $existing ?? new Photo();
+            $photo->forceFill([
+                'user_id' => $userId,
+                'slug' => $slug,
+                'filename' => $row['filename'] ?? $slug,
+                'caption' => $row['caption'] ?? null,
+                'alt_text' => $row['alt_text'] ?? '',
+                'status' => $row['status'] ?? 'draft',
+                'published_at' => empty($row['published_at']) ? null : Carbon::parse($row['published_at']),
+                'taken_at' => empty($row['taken_at']) ? null : Carbon::parse($row['taken_at']),
+                'category_id' => isset($row['category']) ? ($categoryMap[$row['category']] ?? null) : null,
+                'meta' => $row['meta'] ?? null,
+            ])->save();
+
+            if (! empty($row['image_file']) && $parsed->imagesTempDir !== null) {
+                $filePath = $parsed->imagesTempDir.'/'.$row['image_file'];
+                if (file_exists($filePath) && ($existing === null || $duplicateStrategy === 'overwrite')) {
+                    if ($existing !== null) {
+                        $photo->clearMediaCollection('image');
+                    }
+                    $photo->addMedia($filePath)
+                        ->preservingOriginal()
+                        ->toMediaCollection('image');
+                }
+            }
+        }
+
+        if ($parsed->imagesTempDir !== null && is_dir($parsed->imagesTempDir)) {
+            array_map('unlink', glob($parsed->imagesTempDir.'/*') ?: []);
+            rmdir($parsed->imagesTempDir);
+        }
     }
 
     /**
