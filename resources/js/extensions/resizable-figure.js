@@ -54,9 +54,9 @@ export function createResizableFigure(getEditor) {
             return ['figure', {}, ['img', imgAttrs], ['figcaption', 0]];
         },
 
-        renderMarkdown(node) {
+        renderMarkdown(node, { renderChildren }) {
             const { src = '', alt = '', title, width } = node.attrs ?? {};
-            const captionText = node.textContent ?? '';
+            const captionText = (node.content ? renderChildren(node.content) : node.textContent ?? '').trim();
             const parts = [alt];
             if (width) parts.push(`width:${width}%`);
             if (captionText) parts.push(`caption:\`${captionText}\``);
