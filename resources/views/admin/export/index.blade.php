@@ -69,8 +69,10 @@
                 },
 
                 handleSuccess(json) {
+                    const articles = json.imported + ' article' + (json.imported !== 1 ? 's' : '');
+                    const photos = json.photos_imported + ' photo' + (json.photos_imported !== 1 ? 's' : '');
                     $dispatch('toast:show', {
-                        message: 'Site data imported. ' + json.imported + ' article' + (json.imported !== 1 ? 's' : '') + ' imported, ' + json.skipped + ' skipped.',
+                        message: 'Imported ' + articles + ' and ' + photos + '. ' + json.skipped + ' skipped.',
                         type: 'success',
                     });
                     this.reset();
@@ -199,8 +201,10 @@
                     Export Site Data
                 </h2>
                 <p class="text-sm text-base-content/60 font-admin">
-                    Download a full backup of your site as a ZIP — includes all {{ $articleCount }} {{ Str::plural('article', $articleCount) }},
-                    photos, categories, and settings.
+                    Download a full backup of your site as a ZIP — includes
+                    {{ $articleCount }} {{ Str::plural('article', $articleCount) }},
+                    {{ $photoCount }} {{ Str::plural('photo', $photoCount) }},
+                    categories, and settings.
                 </p>
 
                 <form method="POST" action="{{ route('admin.export.articles') }}" @submit="startExport()" class="mt-4">

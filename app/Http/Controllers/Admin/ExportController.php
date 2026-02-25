@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Article;
+use App\Models\Photo;
 use Illuminate\View\View;
 
 final class ExportController extends Controller
@@ -14,6 +15,7 @@ final class ExportController extends Controller
     {
         return view('admin.export.index', [
             'articleCount' => Article::query()->count(),
+            'photoCount' => Photo::query()->count(),
         ]);
     }
 }

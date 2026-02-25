@@ -47,6 +47,7 @@ final class ArticleImportService
                         $imagesTempDir = sys_get_temp_dir().'/bw-import-'.uniqid();
                         mkdir($imagesTempDir);
                     }
+
                     file_put_contents($imagesTempDir.'/'.$basename, $za->getFromIndex($i));
                 }
 
@@ -241,13 +242,15 @@ final class ArticleImportService
 
     /**
      * Import photos from a parsed photos.yaml + extracted image files.
+     * Returns the number of photos imported (created or overwritten).
      */
-    public function importPhotos(ParsedImport $parsed, string $duplicateStrategy, int $userId): void
+    public function importPhotos(ParsedImport $parsed, string $duplicateStrategy, int $userId): int
     {
         if ($parsed->photosYaml === null) {
-            return;
+            return 0;
         }
 
+        $imported = 0;
         $categoryMap = Category::query()->pluck('id', 'slug')->all();
 
         foreach ($parsed->photosYaml as $row) {
@@ -275,12 +278,15 @@ final class ArticleImportService
                 'meta' => $row['meta'] ?? null,
             ])->save();
 
+            $imported++;
+
             if (! empty($row['image_file']) && $parsed->imagesTempDir !== null) {
                 $filePath = $parsed->imagesTempDir.'/'.$row['image_file'];
                 if (file_exists($filePath) && ($existing === null || $duplicateStrategy === 'overwrite')) {
                     if ($existing !== null) {
                         $photo->clearMediaCollection('image');
                     }
+
                     $photo->addMedia($filePath)
                         ->preservingOriginal()
                         ->toMediaCollection('image');
@@ -289,9 +295,11 @@ final class ArticleImportService
         }
 
         if ($parsed->imagesTempDir !== null && is_dir($parsed->imagesTempDir)) {
-            array_map('unlink', glob($parsed->imagesTempDir.'/*') ?: []);
+            array_map(unlink(...), glob($parsed->imagesTempDir.'/*') ?: []);
             rmdir($parsed->imagesTempDir);
         }
+
+        return $imported;
     }
 
     /**

@@ -38,13 +38,14 @@ final class ArticleImportController extends Controller
             $importService->importSettings($parsed->settingsYaml);
         }
 
-        $importService->importPhotos($parsed, $request->input('duplicate_strategy'), auth()->id());
+        $photosImported = $importService->importPhotos($parsed, $request->input('duplicate_strategy'), auth()->id());
         $result = $importService->import($parsed, $request->input('duplicate_strategy'), auth()->id());
 
         return response()->json([
             'status' => 'ok',
             'imported' => $result->imported,
             'skipped' => $result->skipped,
+            'photos_imported' => $photosImported,
         ]);
     }
 
@@ -69,13 +70,14 @@ final class ArticleImportController extends Controller
             $importService->importSettings($parsed->settingsYaml);
         }
 
-        $importService->importPhotos($parsed, $request->input('duplicate_strategy'), auth()->id());
+        $photosImported = $importService->importPhotos($parsed, $request->input('duplicate_strategy'), auth()->id());
         $result = $importService->import($parsed, $request->input('duplicate_strategy'), auth()->id());
 
         return response()->json([
             'status' => 'ok',
             'imported' => $result->imported,
             'skipped' => $result->skipped,
+            'photos_imported' => $photosImported,
         ]);
     }
 }
