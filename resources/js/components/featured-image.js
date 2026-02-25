@@ -2,6 +2,7 @@ export default function featuredImage(config) {
     return {
         photoUrls: config.photoUrls,
         photoCaptions: config.photoCaptions,
+        photoLabels: config.photoLabels ?? {},
 
         get previewUrl() {
             if (this.uploadedPhotoUrl) return this.uploadedPhotoUrl;

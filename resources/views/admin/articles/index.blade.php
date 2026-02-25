@@ -16,7 +16,8 @@
             },
             toggle(col) {
                 this.columns[col] = !this.columns[col];
-            }
+            },
+            deleteAction: '',
          }">
         {{-- Header --}}
         <div class="flex flex-wrap justify-between items-center gap-2">
@@ -86,5 +87,17 @@
 
         {{-- Articles List --}}
         @include('admin.articles._table')
+
+        {{-- Delete Confirmation Modal --}}
+        <x-editor-modal x-ref="deleteModal" title="Delete this article?">
+            <p class="text-base-content/70">This action cannot be undone.</p>
+            <x-slot:actions>
+                <form method="POST" :action="deleteAction">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-error">Delete</button>
+                </form>
+            </x-slot:actions>
+        </x-editor-modal>
     </div>
 </x-layouts.admin>

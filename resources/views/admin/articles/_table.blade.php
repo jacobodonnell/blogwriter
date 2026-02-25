@@ -90,11 +90,12 @@
                                         @if($article->isPublished())
                                             <x-admin.icon-button tooltip="View Published" href="{{ $article->permalink() }}" icon="eye" />
                                         @endif
-                                        <form method="POST" action="{{ route('admin.articles.destroy', $article) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this article?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <x-admin.icon-button-submit tooltip="Delete" icon="trash" class="text-error" />
-                                        </form>
+                                        <button type="button"
+                                                @click="deleteAction = '{{ route('admin.articles.destroy', $article) }}'; $refs.deleteModal.showModal()"
+                                                class="btn btn-ghost btn-sm btn-square text-error"
+                                                data-tip="Delete">
+                                            <i class="ph ph-trash"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>

@@ -140,61 +140,72 @@
                         <div :class="!editorReady && 'h-0 overflow-hidden'">
                             {{-- Tiptap toolbar --}}
                             <div class="tiptap-toolbar flex flex-wrap items-center gap-1 p-2 bg-base-200 border border-base-content/20 border-b-0 rounded-t-field">
-                                <button type="button" @click="command('bold')" :class="isActive('bold') && 'btn-active'"
-                                        class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Bold" data-test="toolbar-bold">
-                                    <i class="ph ph-text-b"></i>
-                                </button>
-                                <button type="button" @click="command('italic')" :class="isActive('italic') && 'btn-active'"
-                                        class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Italic" data-test="toolbar-italic">
-                                    <i class="ph ph-text-italic"></i>
-                                </button>
-                                <div class="divider divider-horizontal mx-0"></div>
-                                <button type="button" @click="command('h2')" :class="isActive('heading', {level:2}) && 'btn-active'"
-                                        class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Heading 2" data-test="toolbar-h2">H2</button>
-                                <button type="button" @click="command('h3')" :class="isActive('heading', {level:3}) && 'btn-active'"
-                                        class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Heading 3">H3</button>
-                                <button type="button" @click="command('h4')" :class="isActive('heading', {level:4}) && 'btn-active'"
-                                        class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Heading 4">H4</button>
-                                <button type="button" @click="command('h5')" :class="isActive('heading', {level:5}) && 'btn-active'"
-                                        class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Heading 5">H5</button>
-                                <div class="divider divider-horizontal mx-0"></div>
-                                <button type="button" @click="command('blockquote')" :class="isActive('blockquote') && 'btn-active'"
-                                        class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Blockquote" data-test="toolbar-blockquote">
-                                    <i class="ph ph-quotes"></i>
-                                </button>
-                                <button type="button" @click="command('bulletList')" :class="isActive('bulletList') && 'btn-active'"
-                                        class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Bullet List" data-test="toolbar-bullet-list">
-                                    <i class="ph ph-list-bullets"></i>
-                                </button>
-                                <button type="button" @click="command('orderedList')" :class="isActive('orderedList') && 'btn-active'"
-                                        class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Ordered List" data-test="toolbar-ordered-list">
-                                    <i class="ph ph-list-numbers"></i>
-                                </button>
-                                <div class="divider divider-horizontal mx-0"></div>
-                                <button type="button" @click="command('link')"
-                                        class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Link">
-                                    <i class="ph ph-link"></i>
-                                </button>
-                                <button type="button" @click="command('image')"
-                                        class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Image">
-                                    <i class="ph ph-image"></i>
-                                </button>
-                                <button type="button" @click="command('code')" :class="isActive('code') && 'btn-active'"
-                                        class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Inline Code">
+                                <template x-if="!markdownMode">
+                                    <div class="flex flex-wrap items-center gap-1 flex-1">
+                                        <button type="button" @click="command('bold')" :class="isActive('bold') && 'btn-active'"
+                                                class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Bold" data-test="toolbar-bold">
+                                            <i class="ph ph-text-b"></i>
+                                        </button>
+                                        <button type="button" @click="command('italic')" :class="isActive('italic') && 'btn-active'"
+                                                class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Italic" data-test="toolbar-italic">
+                                            <i class="ph ph-text-italic"></i>
+                                        </button>
+                                        <div class="divider divider-horizontal mx-0"></div>
+                                        <button type="button" @click="command('h2')" :class="isActive('heading', {level:2}) && 'btn-active'"
+                                                class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Heading 2" data-test="toolbar-h2">H2</button>
+                                        <button type="button" @click="command('h3')" :class="isActive('heading', {level:3}) && 'btn-active'"
+                                                class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Heading 3">H3</button>
+                                        <button type="button" @click="command('h4')" :class="isActive('heading', {level:4}) && 'btn-active'"
+                                                class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Heading 4">H4</button>
+                                        <button type="button" @click="command('h5')" :class="isActive('heading', {level:5}) && 'btn-active'"
+                                                class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Heading 5">H5</button>
+                                        <div class="divider divider-horizontal mx-0"></div>
+                                        <button type="button" @click="command('blockquote')" :class="isActive('blockquote') && 'btn-active'"
+                                                class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Blockquote" data-test="toolbar-blockquote">
+                                            <i class="ph ph-quotes"></i>
+                                        </button>
+                                        <button type="button" @click="command('bulletList')" :class="isActive('bulletList') && 'btn-active'"
+                                                class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Bullet List" data-test="toolbar-bullet-list">
+                                            <i class="ph ph-list-bullets"></i>
+                                        </button>
+                                        <button type="button" @click="command('orderedList')" :class="isActive('orderedList') && 'btn-active'"
+                                                class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Ordered List" data-test="toolbar-ordered-list">
+                                            <i class="ph ph-list-numbers"></i>
+                                        </button>
+                                        <div class="divider divider-horizontal mx-0"></div>
+                                        <button type="button" @click="command('link')"
+                                                class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Link">
+                                            <i class="ph ph-link"></i>
+                                        </button>
+                                        <button type="button" @click="command('image')"
+                                                class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Image">
+                                            <i class="ph ph-image"></i>
+                                        </button>
+                                        <button type="button" @click="command('code')" :class="isActive('code') && 'btn-active'"
+                                                class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Inline Code">
+                                            <i class="ph ph-code"></i>
+                                        </button>
+                                        <button type="button" @click="command('horizontalRule')"
+                                                class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Horizontal Rule">
+                                            <i class="ph ph-minus"></i>
+                                        </button>
+                                        <button type="button" @click="command('youtube')"
+                                                class="btn btn-ghost btn-xs btn-square tooltip" data-tip="YouTube" data-test="toolbar-youtube">
+                                            <i class="ph ph-youtube-logo"></i>
+                                        </button>
+                                        <div class="divider divider-horizontal mx-0"></div>
+                                    </div>
+                                </template>
+                                <button type="button"
+                                        @click="toggleMarkdownMode()"
+                                        :class="markdownMode ? 'btn-active' : ''"
+                                        class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Markdown Source" data-test="toolbar-markdown-source">
                                     <i class="ph ph-code"></i>
-                                </button>
-                                <button type="button" @click="command('horizontalRule')"
-                                        class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Horizontal Rule">
-                                    <i class="ph ph-minus"></i>
-                                </button>
-                                <button type="button" @click="command('youtube')"
-                                        class="btn btn-ghost btn-xs btn-square tooltip" data-tip="YouTube" data-test="toolbar-youtube">
-                                    <i class="ph ph-youtube-logo"></i>
                                 </button>
                             </div>
 
                             {{-- Contextual image toolbar (shows when image is selected) --}}
-                            <div x-show="isActive('image')" x-cloak
+                            <div x-show="isActive('image') && !markdownMode" x-cloak
                                  class="flex items-center gap-1 px-2 py-1 bg-base-200 border border-base-content/20 border-t-0 border-b-0">
                                 <span class="text-xs text-base-content/50 mr-1">Image:</span>
                                 <button type="button" @click="command('imageFullWidth')"
@@ -210,14 +221,24 @@
                             </div>
 
                             {{-- Tiptap editor mount point --}}
-                            <div x-ref="contentEditor" data-test="content-editor"
-                                 class="tiptap-editor @error('content') ring-2 ring-error @enderror border border-base-content/20 bg-base-100 min-h-64 h-96 max-h-[80vh] overflow-y-auto resize-y focus-within:outline-2 focus-within:outline-primary/20"></div>
+                            <div x-show="!markdownMode">
+                                <div x-ref="contentEditor" data-test="content-editor"
+                                     class="tiptap-editor @error('content') ring-2 ring-error @enderror border border-base-content/20 bg-base-100 min-h-64 h-96 max-h-[80vh] overflow-y-auto resize-y focus-within:outline-2 focus-within:outline-primary/20"></div>
 
-                            {{-- Word count status bar --}}
-                            <div class="flex justify-end px-2 py-1 border border-base-content/20 border-t-0 bg-base-200 rounded-b-field text-xs text-base-content/50"
-                                 x-show="editorReady" x-cloak>
-                                <span x-text="wordCount + ' words'"></span>
+                                {{-- Word count status bar --}}
+                                <div class="flex justify-end px-2 py-1 border border-base-content/20 border-t-0 bg-base-200 rounded-b-field text-xs text-base-content/50"
+                                     x-show="editorReady" x-cloak>
+                                    <span x-text="wordCount + ' words'"></span>
+                                </div>
                             </div>
+
+                            {{-- Raw markdown textarea (shown in source mode) --}}
+                            <textarea x-show="markdownMode"
+                                      x-model="content"
+                                      @input="checkDirty(); $refs.customizerForm.dispatchEvent(new Event('input', { bubbles: true }))"
+                                      class="textarea textarea-bordered font-mono text-sm w-full h-96 rounded-t-none"
+                                      spellcheck="false"
+                                      x-cloak></textarea>
 
                             {{-- Inline dialogs for link / image / youtube --}}
                             <div x-show="showLinkDialog" class="flex gap-2 mt-2 items-center">

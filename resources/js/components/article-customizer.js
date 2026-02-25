@@ -34,6 +34,7 @@ export default function articleCustomizer(config) {
         originalPublishedAt: config.originalPublishedAt,
         contentError: false,
         editorReady: false,
+        markdownMode: false,
         hasNewPhoto: false,
         hasNewCategory: false,
         newCategoryName: '',
@@ -201,7 +202,7 @@ export default function articleCustomizer(config) {
             if (action === 'publish') return suffix ? `${suffix} & Publish` : 'Publish Article';
             if (action === 'republish') return suffix ? `${suffix} & Republish` : 'Republish Article';
             if (action === 'unpublish') return 'Unpublish Article';
-            if (this.isNew) return 'Save to keep';
+            if (this.isNew) return 'Save Draft';
 
             const isPublished = this.initialStatus === 'published';
 
@@ -213,7 +214,7 @@ export default function articleCustomizer(config) {
             const a = this.buttonAction;
             if (a === 'publish' || a === 'republish') return 'ph-rocket-launch';
             if (a === 'unpublish') return 'ph-arrow-u-up-left';
-            if (this.isNew) return 'ph-warning';
+            if (this.isNew) return 'ph-floppy-disk';
             if (this.hasNewPhoto) return 'ph-upload-simple';
             if (this.hasNewCategory) return 'ph-tag';
             if (this.hasChanges) return this.initialStatus === 'published' ? 'ph-cloud-arrow-up' : 'ph-floppy-disk';
@@ -291,8 +292,13 @@ export default function articleCustomizer(config) {
                 }
             };
 
+            this._onBeforeUnload = (e) => {
+                if (this.hasChanges) { e.preventDefault(); }
+            };
+
             window.addEventListener('save-article', this._onSaveArticle);
             window.addEventListener('keydown', this._onKeydown);
+            window.addEventListener('beforeunload', this._onBeforeUnload);
         },
 
         command(name) {
@@ -400,9 +406,20 @@ export default function articleCustomizer(config) {
             form.submit();
         },
 
+        toggleMarkdownMode() {
+            if (!this.markdownMode) {
+                this.content = editor.getMarkdown();
+            } else {
+                editor.setContent(this.content);
+            }
+            this.markdownMode = !this.markdownMode;
+            this.checkDirty();
+        },
+
         destroy() {
             window.removeEventListener('save-article', this._onSaveArticle);
             window.removeEventListener('keydown', this._onKeydown);
+            window.removeEventListener('beforeunload', this._onBeforeUnload);
             editor?.destroy();
             editor = null;
         },
