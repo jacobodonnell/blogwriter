@@ -123,19 +123,17 @@ it('shows placeholder in articles listing when no featured image', function (): 
         ->assertSee(Storage::disk('public')->url('blogwriter/placeholder.jpg'), false);
 });
 
-it('shows placeholder in admin articles table when no featured image', function (): void {
-    Storage::fake('public');
-    Storage::disk('public')->put('blogwriter/placeholder.jpg', 'fake-image-data');
-    Setting::set('site_placeholder_image', 'blogwriter/placeholder.jpg');
-
+it('shows no-image placeholder in admin articles table when no featured image', function (): void {
     Article::factory()->published()->create([
         'meta' => [],
+        'photo_id' => null,
     ]);
 
     $this->actingAs($this->user)
         ->get(route('admin.articles.index'))
         ->assertSuccessful()
-        ->assertSee('opacity-40', false);
+        ->assertSee('No featured image', false)
+        ->assertSee('ph-image', false);
 });
 
 // --- Placeholder image upload ---

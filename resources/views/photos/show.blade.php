@@ -1,4 +1,4 @@
-<x-layouts.public :title="$photo->alt_text . ' - ' . config('app.name')">
+<x-layouts.public :title="$photo->alt_text">
 
     <x-slot:seo>
         <x-seo-meta :photo="$photo" />

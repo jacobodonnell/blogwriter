@@ -15,7 +15,7 @@ final class RobotsSettingsController extends Controller
     public function edit(): View
     {
         return view('admin.settings.robots', [
-            'robotsTxt' => setting('robots_txt', self::defaultContent()),
+            'robotsTxt' => setting('robots_txt', $this->defaultContent()),
         ]);
     }
 
@@ -26,7 +26,7 @@ final class RobotsSettingsController extends Controller
         return redirect()->route('admin.settings.robots')->with('success', 'Robots.txt updated.');
     }
 
-    private static function defaultContent(): string
+    private function defaultContent(): string
     {
         return "User-agent: *\nDisallow:\n";
     }

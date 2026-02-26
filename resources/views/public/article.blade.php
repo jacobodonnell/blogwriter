@@ -1,4 +1,4 @@
-<x-layouts.public :title="$article->meta_title . ' - ' . config('app.name')">
+<x-layouts.public :title="$article->meta_title">
 
     <x-slot:seo>
         <x-seo-meta :article="$article" />

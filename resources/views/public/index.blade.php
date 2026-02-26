@@ -1,7 +1,7 @@
-<x-layouts.public :title="'Home - ' . config('app.name', 'BlogWriter')">
+<x-layouts.public>
 
     <x-slot:seo>
-        <x-seo-meta :title="'Home - ' . config('app.name', 'BlogWriter')" />
+        <x-seo-meta />
     </x-slot:seo>
 
     <div class="max-w-6xl mx-auto">

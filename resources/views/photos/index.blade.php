@@ -1,4 +1,4 @@
-<x-layouts.public :title="'Photos - ' . config('app.name')">
+<x-layouts.public title="Photos">
 
     {{-- h-feed for IndieWeb --}}
     <div class="h-feed max-w-6xl mx-auto">

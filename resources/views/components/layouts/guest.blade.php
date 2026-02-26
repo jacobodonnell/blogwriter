@@ -1,5 +1,5 @@
 <x-layouts.base 
-    :title="(isset($title) ? $title . ' - ' : '') . config('app.name', 'BlogWriter')"
+    :title="(!empty($title) ? $title . ' - ' : '') . config('app.name', 'BlogWriter')"
     :dark-mode="false"
     icon-weight="regular">
 

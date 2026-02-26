@@ -1,5 +1,4 @@
-<x-layouts.guest>
-    @section('title', 'Log In')
+<x-layouts.guest title="Log In">
 
     <div class="card bg-base-100 shadow-xl" id="login-card">
         <div class="card-body">

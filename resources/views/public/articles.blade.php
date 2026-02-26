@@ -1,7 +1,7 @@
-<x-layouts.public :title="'Articles - ' . config('app.name', 'BlogWriter')">
+<x-layouts.public title="Articles">
 
     <x-slot:seo>
-        <x-seo-meta :title="'Articles - ' . config('app.name', 'BlogWriter')" :description="setting('page_articles_subtitle', 'All articles')" />
+        <x-seo-meta title="Articles" :description="setting('page_articles_subtitle', 'All articles')" />
     </x-slot:seo>
 
     {{-- h-feed for IndieWeb --}}

@@ -1,5 +1,5 @@
 <x-layouts.base
-    :title="$title ?? config('app.name', 'BlogWriter')"
+    :title="(!empty($title) ? $title . ' - ' : '') . config('app.name', 'BlogWriter')"
     :dark-mode="true"
     icon-weight="regular"
     :js-entry="auth()->check() ? 'resources/js/app-admin.js' : 'resources/js/app-guest.js'">
@@ -7,7 +7,6 @@
     <x-slot:head>
         <x-feed-discovery />
         {{ $seo ?? '' }}
-        @yield('head')
     </x-slot:head>
 
     @auth
