@@ -45,14 +45,14 @@
                                             </span>
                                         </a>
                                     @elseif($article->external_featured_img_url)
-                                        <div class="relative w-20 h-14 rounded overflow-hidden bg-base-300">
+                                        <a href="{{ $article->external_featured_img_url }}" target="_blank" rel="noopener noreferrer" class="relative block w-20 h-14 rounded overflow-hidden bg-base-300">
                                             <img src="{{ $article->external_featured_img_url }}"
                                                  alt=""
                                                  class="w-full h-full object-contain" />
                                             <span class="absolute bottom-1 right-1 bg-info/80 text-info-content rounded p-0.5 leading-none" title="External">
                                                 <i class="ph ph-arrow-square-out text-xs"></i>
                                             </span>
-                                        </div>
+                                        </a>
                                     @else
                                         <div class="w-20 h-14 rounded bg-base-300 flex items-center justify-center" title="No featured image">
                                             <i class="ph ph-image text-xl text-base-content/30"></i>
