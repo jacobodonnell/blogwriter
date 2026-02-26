@@ -10,7 +10,7 @@ didn't write, no risk of your work disappearing because a company pivoted. Your 
 **Content:**
 
 - **Articles** --- Long-form posts with Tiptap WYSIWYG editor, live preview customizer, categories, featured images, and permalink slug redirects
-- **Photos** --- Image posts with captions, alt text, EXIF display, and automatic image conversions (thumbnail, medium, large) via Spatie MediaLibrary
+- **Photos** --- Image posts with captions, alt text, EXIF display, categories, permalink slug redirects, and automatic image conversions (thumbnail, medium, large) via Spatie MediaLibrary
 
 **Appearance:**
 
@@ -91,7 +91,7 @@ Full documentation is in the [`docs/`](docs/) directory:
 BlogWriter is in pre-alpha. Expect breaking changes. I'll still do my best to prevent them, but back up your data
 regularly.
 
-**Built:** Articles, Photos, Categories, Appearance (35 themes, 11 fonts), Admin panel, CLI Installer, Auth,
+**Built:** Articles, Photos, Categories (hierarchical), Appearance (35 themes, 11 fonts), Admin panel, CLI Installer, Auth,
 MediaLibrary, Microformats (h-card, h-entry, h-feed, rel="me"), RSS/Atom/JSON Feeds, Import & Export, PWA
 
 **Planned:** Notes, Tags, IndieAuth, Webmentions

@@ -35,6 +35,12 @@ See the [Appearance](appearance.md) guide for details on available themes and fo
 
 Site-level settings (site name, tagline, domain, and author info) are managed via the **Site Settings** tab in the admin settings panel. These values are stored in the `settings` database table via the `Setting` model.
 
+## Robots.txt Settings
+
+Manage your site's `robots.txt` file from **Settings → Robots.txt** in the admin panel. The content is stored in the database and served dynamically via `RobotsController` at `/robots.txt`.
+
+This lets you control search engine crawling behavior without editing files on the server.
+
 ## Developer Settings
 
 For developers who prefer working with configuration files:

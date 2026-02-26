@@ -82,71 +82,124 @@ Photos use conditional disk assignment based on publish status. Draft photos are
 blogwriter/
 ├── app/
 │   ├── Actions/
-│   │   ├── Fortify/                        # Fortify auth actions
-│   │   ├── Photos/                         # Photo-related actions
-│   │   ├── NormalizeCaptionMetaAction.php
+│   │   ├── Photos/
+│   │   │   ├── CreatePhotoFromUploadAction.php
+│   │   │   ├── ExtractExifDataAction.php
+│   │   │   └── HandleArticlePhotoUploadAction.php
+│   │   ├── ApplyArticleFeaturedImageAction.php
+│   │   ├── CreateCategoryFromArticleAction.php
 │   │   ├── GenerateUniqueSlugAction.php
-│   │   └── UpdatePublishedStatusAction.php
+│   │   └── NormalizeCaptionMetaAction.php
 │   ├── Console/
 │   │   └── Commands/
-│   │       ├── InstallCommand.php          # php artisan blogwriter:install
-│   │       ├── UninstallCommand.php        # php artisan blogwriter:uninstall
+│   │       ├── Concerns/
+│   │       │   ├── PromptsForPassword.php
+│   │       │   └── ValidatesInput.php
 │   │       ├── CreateUserCommand.php
-│   │       ├── SeedCommand.php
 │   │       ├── DiagnoseCommand.php
-│   │       └── ProfileCommand.php
-│   ├── Exceptions/
-│   │   └── SingleUserViolationException.php
+│   │       ├── InstallCommand.php          # php artisan blogwriter:install
+│   │       ├── ProfileCommand.php
+│   │       ├── ResetPasswordCommand.php
+│   │       ├── SeedCommand.php
+│   │       └── UninstallCommand.php        # php artisan blogwriter:uninstall
 │   ├── DTOs/
 │   │   └── FeedItem.php                    # Typed DTO for feed entries
+│   ├── Enums/
+│   │   └── Status.php                      # Draft / Published
+│   ├── Exceptions/
+│   │   ├── PhotoUploadFailedException.php
+│   │   └── SingleUserViolationException.php
 │   ├── Http/
 │   │   ├── Controllers/
+│   │   │   ├── Admin/
+│   │   │   │   ├── AdminPhotoController.php
+│   │   │   │   ├── AppearanceController.php
+│   │   │   │   ├── ArticleController.php   # Article CRUD
+│   │   │   │   ├── ArticleDownloadController.php
+│   │   │   │   ├── ArticleExportController.php
+│   │   │   │   ├── ArticleImportController.php
+│   │   │   │   ├── ArticleLivePreviewController.php
+│   │   │   │   ├── ArticlePreviewController.php
+│   │   │   │   ├── CategoryController.php
+│   │   │   │   ├── CategoryExploreController.php
+│   │   │   │   ├── CreateArticleController.php
+│   │   │   │   ├── CreateArticlePreviewController.php
+│   │   │   │   ├── DashboardController.php
+│   │   │   │   ├── ExportController.php
+│   │   │   │   ├── MediaController.php     # Serves draft media from private disk
+│   │   │   │   ├── PhotoDownloadController.php
+│   │   │   │   ├── PlaceholderImageController.php
+│   │   │   │   ├── ProfileSettingsController.php
+│   │   │   │   ├── RobotsSettingsController.php
+│   │   │   │   └── SiteSettingsController.php
 │   │   │   ├── AboutController.php         # Public about page
 │   │   │   ├── ArticleController.php       # Public article display
-│   │   │   ├── PhotoController.php         # Public photo display
-│   │   │   ├── CategoryController.php
-│   │   │   ├── CategoryContentController.php
 │   │   │   ├── FeedController.php          # RSS, Atom, JSON Feed
 │   │   │   ├── HomeController.php          # Public homepage
 │   │   │   ├── InstallController.php       # Install page (shows CLI instructions)
-│   │   │   └── Admin/
-│   │   │       ├── ArticleController.php   # Article CRUD
-│   │   │       ├── CreateArticleController.php
-│   │   │       ├── ArticlePreviewController.php
-│   │   │       ├── CreateArticlePreviewController.php
-│   │   │       ├── AdminPhotoController.php
-│   │   │       ├── CategoryController.php
-│   │   │       ├── DashboardController.php
-│   │   │       ├── PlaceholderImageController.php
-│   │   │       ├── ProfileSettingsController.php
-│   │   │       ├── SiteSettingsController.php
-│   │   │       ├── AppearanceController.php
-│   │   │       ├── ArticleExportController.php
-│   │   │       ├── ArticleImportController.php
-│   │   │       ├── ExportController.php
-│   │   │       └── MediaController.php     # Serves draft media from private disk
+│   │   │   ├── PhotoController.php         # Public photo display
+│   │   │   └── RobotsController.php        # Dynamic robots.txt
 │   │   └── Requests/
+│   │       ├── Admin/
+│   │       │   ├── StorePhotoRequest.php
+│   │       │   ├── UpdateAppearanceRequest.php
+│   │       │   ├── UpdatePageSettingsRequest.php
+│   │       │   ├── UpdatePhotoRequest.php
+│   │       │   ├── UpdatePlaceholderImageRequest.php
+│   │       │   ├── UpdateProfileRequest.php
+│   │       │   └── UpdateRobotsRequest.php
+│   │       ├── Concerns/
+│   │       │   ├── ArticleRules.php
+│   │       │   └── ValidatesFeaturedImage.php
+│   │       ├── ArticleImportRequest.php
+│   │       ├── CategoryRequest.php
 │   │       ├── StoreArticleRequest.php
-│   │       ├── UpdateArticleRequest.php
 │   │       ├── UpdateArticlePreviewRequest.php
-│   │       ├── StoreCategoryRequest.php
-│   │       └── Admin/                      # Admin-specific requests
+│   │       └── UpdateArticleRequest.php
 │   ├── Models/
+│   │   ├── Concerns/
+│   │   │   └── InvalidatesResponseCache.php
 │   │   ├── Article.php
-│   │   ├── Photo.php
 │   │   ├── Category.php
-│   │   ├── User.php
+│   │   ├── Photo.php
 │   │   ├── Setting.php
+│   │   └── User.php
+│   ├── Providers/
+│   │   ├── AppServiceProvider.php
+│   │   └── FortifyServiceProvider.php
 │   ├── Services/
-│   │   ├── FeedService.php                 # Merges articles + photos for feeds
 │   │   ├── ArticleExportService.php
-│   │   └── ArticleImportService.php
+│   │   ├── ArticleImportService.php
+│   │   ├── ContentFilterService.php
+│   │   ├── FeedService.php                 # Merges articles + photos for feeds
+│   │   ├── InstallService.php
+│   │   ├── PasswordGenerator.php
+│   │   ├── PasswordRules.php
+│   │   ├── PhotoExportService.php
+│   │   └── ResetService.php
 │   ├── Support/
+│   │   ├── ImportResult.php
+│   │   ├── Markdown.php                    # Custom Markdown renderer
 │   │   ├── ParsedImport.php
 │   │   ├── PreflightResult.php
-│   │   └── ImportResult.php
+│   │   └── ResponseCacheProfile.php
 │   └── View/
 │       └── Components/
+│           ├── Articles/
+│           │   └── Customizer.php
+│           ├── FilterBanner/
+│           │   ├── CategorySelect.php
+│           │   ├── FilterBanner.php
+│           │   ├── FilterField.php
+│           │   ├── PerPage.php
+│           │   ├── Search.php
+│           │   ├── Select.php
+│           │   └── Sort.php
+│           ├── Layouts/
+│           │   └── Base.php
+│           ├── ArticleCard.php
+│           ├── FlashMessages.php
+│           └── PhotoCard.php
 ├── config/
 │   └── appearance.php                      # Themes, fonts, defaults
 ├── database/
@@ -207,16 +260,19 @@ blogwriter/
 
 ### Photo
 
-- `filename`, `slug`, `caption` (Markdown), `alt_text`, `status`, `published_at`, `taken_at`, `meta` (JSON for EXIF)
-- `belongsTo(User)`
+- `filename`, `slug`, `past_slugs` (JSON), `caption` (Markdown), `alt_text`, `status`, `published_at`, `taken_at`, `meta` (JSON for EXIF)
+- `belongsTo(User)`, `belongsTo(Category)`
 - Uses Spatie MediaLibrary: `HasMedia` interface, `InteractsWithMedia` trait
 - Conversions: thumbnail (300×300), medium (768×768), large (1536×1536)
+- `past_slugs` enables 301 redirects when slugs change (same behavior as articles)
 
 ### Category
 
-- `name`, `slug`, `description`
-- `hasMany(Article)`
+- `name`, `slug`, `description`, `parent_id`
+- `belongsTo(Category)` (parent), `hasMany(Category)` (children) — hierarchical parent/child subcategories
+- `hasMany(Article)`, `hasMany(Photo)`
 - Slug auto-generated from name
+- Recursive CTEs for tree operations: `flatTree()` (ordered tree for dropdowns), `ancestors()` (breadcrumb path), `descendantIds()` (all nested children)
 
 ### User
 

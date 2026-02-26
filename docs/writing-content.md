@@ -104,6 +104,7 @@ MediaLibrary automatically generates three conversions:
 - **Image** (required) — The photo file, managed via MediaLibrary.
 - **Caption** (optional) — Markdown text displayed with the photo.
 - **Alt text** (required) — Describes the image for screen readers.
+- **Category** (optional) — Assign a category to organize photos.
 - **Slug** — Auto-generated, unique identifier.
 
 ### EXIF Data
@@ -126,13 +127,17 @@ Draft photos are stored on a private disk and served through a controller with a
 yourdomain.com/photos/your-photo-slug
 ```
 
-Photos use a slug in their URL.
+Photos use a slug in their URL. If you change a photo's slug, BlogWriter stores old slugs in a `past_slugs` JSON column and returns a **301 permanent redirect** from the old URL to the new one — the same behavior as articles.
 
 ---
 
 ## Categories
 
-Categories organize your articles into broad topics. An article belongs to one category.
+Categories organize your content into broad topics. Both articles and photos can belong to a category.
+
+### Hierarchy
+
+Categories support parent/child subcategories. A category can have a parent category, creating a tree structure. The admin panel includes a **Category Explorer** for browsing the hierarchy.
 
 ### Managing Categories
 
