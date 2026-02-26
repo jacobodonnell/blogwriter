@@ -25,7 +25,7 @@ final class FeedService
         $authorName = $this->getAuthorName();
 
         $articles = Article::published()
-            ->with('category')
+            ->with(['category', 'featuredPhoto'])
             ->orderBy('published_at', 'desc')
             ->limit(20)
             ->get()

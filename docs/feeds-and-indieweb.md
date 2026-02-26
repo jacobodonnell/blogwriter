@@ -9,7 +9,7 @@ order: 7
 
 # Feeds & IndieWeb
 
-BlogWriter implements IndieWeb microformats markup throughout its templates. Feed generation and additional IndieWeb protocols are planned.
+BlogWriter implements IndieWeb microformats markup and feed generation throughout its templates. Additional IndieWeb protocols (IndieAuth, Webmentions) are planned.
 
 ---
 

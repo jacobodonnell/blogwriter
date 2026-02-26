@@ -43,7 +43,7 @@ All posts support draft/published workflow, categories, tags, permalinks, and mi
 
 ## Current Goal
 
-Building V0.1 for personal use on Laravel Forge. See `.specs/v01.md` for complete implementation checklist.
+Building V0.1 for personal use on Laravel Forge. See `docs/roadmap.md` for the implementation checklist.
 
 **Success metric:** Personal site runs on BlogWriter and validates on IndieWeb validators.
 
@@ -57,4 +57,3 @@ BlogWriter's planned plugin architecture is inspired by the IBM PC's expansion b
 - **Three Install Methods** - UI store, direct Composer, manual filesystem
 - **No Lock-In** - Plugins will work regardless of store source
 
-See `.specs/plugins.md` for complete architecture details.
