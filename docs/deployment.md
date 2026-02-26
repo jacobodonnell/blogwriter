@@ -14,10 +14,20 @@ Deploy BlogWriter to your own server with Laravel Forge — the recommended way 
 
 **Prerequisites:**
 
-- A [Laravel Forge](https://forge.laravel.com) account with a provisioned PHP 8.4 server
+- A [Laravel Forge](https://forge.laravel.com) account
+- A **Web Server** provisioned with PHP 8.4 (see below)
 - Your BlogWriter repo pushed to GitHub
 - A domain pointed at your server's IP (Step 2 covers this)
 - Node 18+ installed on your server (Forge servers include this by default)
+
+### Which Forge Server Type to Choose
+
+Forge offers several server types. For BlogWriter, two are relevant:
+
+- **Web Server** *(recommended for new setups)* — Nginx + PHP + Node + Supervisor. No database or cache software. Because BlogWriter uses SQLite — a file, not a server — there's nothing to install or manage. File-based cache is perfectly adequate for a personal blog. This is the leaner, cheaper choice.
+- **App Server** *(fine if you already have one)* — All-in-one: Nginx + PHP + MySQL + Redis + Memcached + Node + Supervisor. If you've already provisioned an App Server, you can use it — just make sure your `.env` uses `DB_CONNECTION=sqlite`. The extra services run idle but cause no harm.
+
+A single Web Server can also host multiple BlogWriter sites — for family, friends, or side projects — each with its own isolated SQLite database, at no extra infrastructure cost.
 
 ---
 
@@ -110,7 +120,7 @@ LOG_CHANNEL=stack
 LOG_LEVEL=error
 ```
 
-Leave `APP_KEY` blank. The `blogwriter:install` command generates it on the first deploy.
+Leave `APP_KEY` blank. The `blogwriter:install` command generates it when you run it manually in Step 9.
 
 ---
 
@@ -133,13 +143,6 @@ $FORGE_PHP composer install --no-dev --no-interaction --prefer-dist --optimize-a
 npm ci
 npm run build
 
-$FORGE_PHP artisan blogwriter:install --non-interactive \
-  --site-name="Your Blog Name" \
-  --site-url="https://yourdomain.com" \
-  --admin-name="Your Name" \
-  --admin-email="you@example.com" \
-  --admin-password="CHANGE_ME_STRONG_PASSWORD"
-
 $FORGE_PHP artisan storage:link
 $FORGE_PHP artisan config:cache
 $FORGE_PHP artisan route:cache
@@ -154,16 +157,8 @@ $RESTART_QUEUES()
   The script runs in three phases:
 
   1. **Before `$CREATE_RELEASE()`** — Creates the shared SQLite file if it doesn't exist yet (first deploy only). This runs in the site root, not the release directory.
-  2. **Between `$CREATE_RELEASE()` and `$ACTIVATE_RELEASE()`** — Installs dependencies, builds frontend assets, runs the installer, and warms caches. This all happens in the new release directory before it goes live.
+  2. **Between `$CREATE_RELEASE()` and `$ACTIVATE_RELEASE()`** — Installs dependencies, builds frontend assets, and warms caches. This all happens in the new release directory before it goes live.
   3. **After `$ACTIVATE_RELEASE()`** — The new release is now live. Forge restarts queue workers (a no-op for sync queues, but safe to include).
-</x-callout>
-
-<x-callout type="info" title="First Deploy vs. Subsequent Deploys">
-  The <code>blogwriter:install</code> command is idempotent. On the first deploy it sets up your database, creates your admin account, and writes <code>storage/installed.lock</code>. On every subsequent deploy, it detects the lock file and exits immediately — no reinstallation, no data loss.
-</x-callout>
-
-<x-callout type="warning" title="Admin Password in the Deploy Script">
-  Your deploy script is visible to anyone with Forge access to your server. Use a strong, unique password. It's safe to leave in the script after the first deploy — subsequent runs are a no-op — but you can also remove the <code>--admin-password</code> flag after your site is live.
 </x-callout>
 
 ---
@@ -184,14 +179,44 @@ Wait for DNS to propagate before doing this — the cert request will fail if yo
 
 Click **Deploy Now** in Forge. The first deploy is slower than usual — Composer installs all dependencies and npm builds your frontend assets from scratch. Watch the deploy log in real-time to confirm everything completes.
 
+The site won't be fully usable yet — the installer hasn't run. That's Step 9.
+
+---
+
+## Step 9 — Run the Installer
+
+The installer is a one-time, interactive command. Run it after your first successful deploy.
+
+**Option A: Forge terminal** (easiest)
+
+In Forge: **Site → Commands**, run:
+
+```bash
+php artisan blogwriter:install
+```
+
+**Option B: SSH from your local machine**
+
+```bash
+ssh forge@your-server-ip "cd /home/forge/yourdomain.com/current && php artisan blogwriter:install"
+```
+
+The command will prompt you for your blog name, URL, and admin credentials. Once it completes, your site is live.
+
+<x-callout type="info" title="One-Time Only">
+  After the installer runs, it writes a <code>storage/installed.lock</code> file. If you ever accidentally run
+  <code>blogwriter:install</code> again, it will detect the lock file and exit immediately — no reinstallation,
+  no data loss.
+</x-callout>
+
 ---
 
 ## Verify Your Deployment
 
-Once the deploy finishes:
+Once the installer finishes:
 
 1. **Visit your domain** — the BlogWriter home page loads
-2. **Log in** at `/admin` with the credentials from your deploy script
+2. **Log in** at `/admin` with the credentials you set during the install step
 3. **Run a diagnostic** via Forge's **Commands** panel: `php artisan blogwriter:diagnose`
 4. **Upload a photo** — confirm it persists across a subsequent deploy (the real test of your shared paths config)
 
@@ -201,7 +226,7 @@ Once the deploy finishes:
 
 Push changes to GitHub. Forge can auto-deploy on push (enable in Site → Deployments), or you can click **Deploy Now** manually.
 
-Each deploy installs updated dependencies, rebuilds assets, refreshes caches, and activates the new release. The install command is a no-op after the first run. Your database and uploaded media are untouched.
+Each deploy installs updated dependencies, rebuilds assets, refreshes caches, and activates the new release. Your database and uploaded media are untouched.
 
 ---
 
