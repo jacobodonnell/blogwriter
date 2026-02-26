@@ -34,13 +34,46 @@
                             <p class="text-error text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-                    <div>
-                        <label for="profile_bio" class="block text-base font-medium font-admin mb-1">
+                    <div x-data="bioEditor({ content: @js(old('profile_bio', setting('profile_bio', ''))) })">
+                        <label class="block text-base font-medium font-admin mb-1">
                             <i class="ph ph-text-aa"></i>
                             Bio
                         </label>
-                        <textarea id="profile_bio" name="profile_bio" class="textarea w-full" rows="3">{{ old('profile_bio', setting('profile_bio', '')) }}</textarea>
-                        <p class="text-xs text-base-content/50 mt-1 font-admin">Supports Markdown (no headings)</p>
+                        <input type="hidden" name="profile_bio" :value="content">
+
+                        {{-- Toolbar --}}
+                        <div class="tiptap-toolbar flex items-center gap-1 p-2 bg-base-200 border border-base-content/20 border-b-0 rounded-t-field">
+                            <button type="button" @click="command('bold')" :class="isActive('bold') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Bold">
+                                <i class="ph ph-text-b"></i>
+                            </button>
+                            <button type="button" @click="command('italic')" :class="isActive('italic') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Italic">
+                                <i class="ph ph-text-italic"></i>
+                            </button>
+                            <div class="divider divider-horizontal mx-0"></div>
+                            <button type="button" @click="command('h2')" :class="isActive('heading', { level: 2 }) && 'btn-active'"
+                                    class="btn btn-ghost btn-xs tooltip" data-tip="Heading">
+                                H2
+                            </button>
+                            <div class="divider divider-horizontal mx-0"></div>
+                            <button type="button" @click="command('link')" :class="isActive('link') && 'btn-active'"
+                                    class="btn btn-ghost btn-xs btn-square tooltip" data-tip="Link">
+                                <i class="ph ph-link"></i>
+                            </button>
+                        </div>
+
+                        {{-- Link dialog --}}
+                        <div x-show="showLinkDialog" x-cloak class="flex items-center gap-2 px-2 py-1.5 bg-base-200 border border-base-content/20 border-t-0 border-b-0">
+                            <input type="url" x-model="linkUrl" @keydown.enter.prevent="insertLink()" placeholder="https://example.com"
+                                   class="input input-sm input-bordered grow" />
+                            <button type="button" @click="insertLink()" class="btn btn-sm btn-primary">Insert</button>
+                            <button type="button" @click="showLinkDialog = false" class="btn btn-sm btn-ghost">Cancel</button>
+                        </div>
+
+                        {{-- Editor --}}
+                        <div x-ref="bioEditor" class="tiptap-editor border border-base-content/20 rounded-b-field min-h-40"></div>
+
                         @error('profile_bio')
                             <p class="text-error text-sm mt-1">{{ $message }}</p>
                         @enderror
