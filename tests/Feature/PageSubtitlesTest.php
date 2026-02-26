@@ -72,15 +72,19 @@ it('requires authentication to update page subtitles', function (): void {
     ])->assertRedirect(route('login'));
 });
 
-it('validates subtitle max length', function (): void {
+it('validates subtitle max length', function (string $field): void {
     $user = User::factory()->create();
 
     $this->actingAs($user)
         ->put(route('admin.settings.site.update'), [
-            'page_home_subtitle' => str_repeat('a', 501),
+            $field => str_repeat('a', 501),
         ])
-        ->assertSessionHasErrors('page_home_subtitle');
-});
+        ->assertSessionHasErrors($field);
+})->with([
+    'page_home_subtitle',
+    'page_articles_subtitle',
+    'page_photos_subtitle',
+]);
 
 it('deletes setting when subtitle is cleared', function (): void {
     $user = User::factory()->create();
