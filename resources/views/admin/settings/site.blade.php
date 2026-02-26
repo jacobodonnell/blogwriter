@@ -45,19 +45,21 @@
             <p class="text-sm text-base-content/60 font-admin">Read-only values configured in your <code>.env</code> file.</p>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-admin font-medium">Site Name</span>
+                <div>
+                    <label for="site_name" class="block text-base font-medium font-admin mb-1">
+                        <i class="ph ph-text-t"></i>
+                        Site Name
                     </label>
-                    <input type="text" class="input input-bordered" value="{{ config('app.name') }}" disabled />
+                    <input id="site_name" type="text" class="input w-full" value="{{ config('app.name') }}" disabled />
                     <p class="text-xs text-base-content/50 mt-1 font-admin">Set as <code>APP_NAME</code> in <code>.env</code></p>
                 </div>
 
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-admin font-medium">Site URL</span>
+                <div>
+                    <label for="site_url" class="block text-base font-medium font-admin mb-1">
+                        <i class="ph ph-link"></i>
+                        Site URL
                     </label>
-                    <input type="text" class="input input-bordered" value="{{ config('app.url') }}" disabled />
+                    <input id="site_url" type="text" class="input w-full" value="{{ config('app.url') }}" disabled />
                     <p class="text-xs text-base-content/50 mt-1 font-admin">Set as <code>APP_URL</code> in <code>.env</code></p>
                 </div>
             </div>
@@ -77,40 +79,43 @@
                 @csrf
                 @method('PUT')
 
-                <div class="space-y-4 mt-3">
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text font-admin font-medium">Home Page</span>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                    <div>
+                        <label for="page_home_subtitle" class="block text-base font-medium font-admin mb-1">
+                            <i class="ph ph-house"></i>
+                            Home Page
                         </label>
-                        <textarea name="page_home_subtitle" class="textarea textarea-bordered" rows="2" maxlength="500" placeholder="Subtitle shown on the home page">{{ old('page_home_subtitle', setting('page_home_subtitle', '')) }}</textarea>
+                        <textarea id="page_home_subtitle" name="page_home_subtitle" class="textarea w-full" rows="2" maxlength="500" placeholder="Subtitle shown on the home page">{{ old('page_home_subtitle', setting('page_home_subtitle', '')) }}</textarea>
                         @error('page_home_subtitle')
                             <p class="text-error text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text font-admin font-medium">Articles Page</span>
+                    <div>
+                        <label for="page_articles_subtitle" class="block text-base font-medium font-admin mb-1">
+                            <i class="ph ph-article"></i>
+                            Articles Page
                         </label>
-                        <textarea name="page_articles_subtitle" class="textarea textarea-bordered" rows="2" maxlength="500" placeholder="Subtitle shown on the articles page">{{ old('page_articles_subtitle', setting('page_articles_subtitle', '')) }}</textarea>
+                        <textarea id="page_articles_subtitle" name="page_articles_subtitle" class="textarea w-full" rows="2" maxlength="500" placeholder="Subtitle shown on the articles page">{{ old('page_articles_subtitle', setting('page_articles_subtitle', '')) }}</textarea>
                         @error('page_articles_subtitle')
                             <p class="text-error text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text font-admin font-medium">Photos Page</span>
+                    <div>
+                        <label for="page_photos_subtitle" class="block text-base font-medium font-admin mb-1">
+                            <i class="ph ph-images"></i>
+                            Photos Page
                         </label>
-                        <textarea name="page_photos_subtitle" class="textarea textarea-bordered" rows="2" maxlength="500" placeholder="Subtitle shown on the photos page">{{ old('page_photos_subtitle', setting('page_photos_subtitle', '')) }}</textarea>
+                        <textarea id="page_photos_subtitle" name="page_photos_subtitle" class="textarea w-full" rows="2" maxlength="500" placeholder="Subtitle shown on the photos page">{{ old('page_photos_subtitle', setting('page_photos_subtitle', '')) }}</textarea>
                         @error('page_photos_subtitle')
                             <p class="text-error text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>
+                </div>
 
-                    <div class="form-control mt-6">
-                        <button type="submit" class="btn btn-primary font-admin">Save Subtitles</button>
-                    </div>
+                <div class="mt-6">
+                    <button type="submit" class="btn btn-primary font-admin">Save Subtitles</button>
                 </div>
             </form>
         </div>
