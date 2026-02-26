@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Cache;
+use PDOException;
 
 final class Setting extends Model
 {
@@ -14,9 +16,13 @@ final class Setting extends Model
      */
     public static function get(string $key, mixed $default = null): mixed
     {
-        $cacheKey = 'setting.'.$key;
+        try {
+            $cacheKey = 'setting.'.$key;
 
-        return Cache::remember($cacheKey, now()->addHour(), fn () => self::query()->where('key', $key)->value('value')) ?? $default;
+            return Cache::remember($cacheKey, now()->addHour(), fn () => self::query()->where('key', $key)->value('value')) ?? $default;
+        } catch (QueryException|PDOException) {
+            return $default;
+        }
     }
 
     /**

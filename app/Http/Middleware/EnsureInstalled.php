@@ -29,13 +29,7 @@ final readonly class EnsureInstalled
             return $next($request);
         }
 
-        // Not installed — tiered response:
-        // Auth/admin routes → redirect to installer (actionable for the site owner)
-        if ($request->is('login', 'logout', 'user/*', 'admin', 'admin/*')) {
-            return redirect('/install');
-        }
-
-        // Public frontend → 503 (app exists but is not yet operational)
-        abort(503);
+        // Not installed — redirect to installer
+        return redirect('/install');
     }
 }

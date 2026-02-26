@@ -9,9 +9,11 @@ use App\Models\Photo;
 use App\Models\User;
 use App\Observers\PhotoObserver;
 use App\Services\ResetService;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use PDOException;
 
 final class AppServiceProvider extends ServiceProvider
 {
@@ -20,6 +22,10 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        if (empty(config('app.key'))) {
+            config(['app.key' => 'base64:'.base64_encode(random_bytes(32))]);
+        }
+
         $this->app->bind(Resettable::class, ResetService::class);
     }
 
@@ -37,11 +43,17 @@ final class AppServiceProvider extends ServiceProvider
             'components.layouts.partials.public-footer',
             'admin.categories._explore-content',
         ], function ($view): void {
-            $view->with('authorName', Cache::remember(
-                'author_name',
-                now()->addHour(),
-                fn () => User::first()?->name ?? 'Author',
-            ));
+            try {
+                $authorName = Cache::remember(
+                    'author_name',
+                    now()->addHour(),
+                    fn () => User::first()?->name ?? 'Author',
+                );
+            } catch (QueryException|PDOException) {
+                $authorName = 'Author';
+            }
+
+            $view->with('authorName', $authorName);
         });
     }
 }

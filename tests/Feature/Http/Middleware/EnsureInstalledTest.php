@@ -74,36 +74,89 @@ it('redirects admin sub-routes to install when not installed', function (): void
         ->and($response->headers->get('Location'))->toContain('/install');
 });
 
-it('returns 503 for public frontend when not installed', function (): void {
-    expectAbort(503, '/');
+it('redirects public frontend to install when not installed', function (): void {
+    $response = runMiddleware(createMiddlewareRequest('/'));
+
+    expect($response->getStatusCode())->toBe(302)
+        ->and($response->headers->get('Location'))->toContain('/install');
 });
 
-it('returns 503 for articles when not installed', function (): void {
-    expectAbort(503, '/articles');
+it('redirects articles to install when not installed', function (): void {
+    $response = runMiddleware(createMiddlewareRequest('/articles'));
+
+    expect($response->getStatusCode())->toBe(302)
+        ->and($response->headers->get('Location'))->toContain('/install');
 });
 
 it('passes through when installed with healthy database', function (): void {
     User::factory()->create();
     file_put_contents(storage_path('installed.lock'), now());
 
-    $response = runMiddleware(createMiddlewareRequest('/admin'));
+    $envPath = base_path('.env');
+    $hadEnv = file_exists($envPath);
+    if (! $hadEnv) {
+        file_put_contents($envPath, 'APP_KEY=base64:'.base64_encode(random_bytes(32)));
+    }
 
-    expect($response->getContent())->toBe('passed');
+    try {
+        $response = runMiddleware(createMiddlewareRequest('/admin'));
+
+        expect($response->getContent())->toBe('passed');
+    } finally {
+        if (! $hadEnv) {
+            @unlink($envPath);
+        }
+    }
 });
 
 it('redirects admin to install when lock exists but database is empty', function (): void {
     file_put_contents(storage_path('installed.lock'), now());
+
+    $envPath = base_path('.env');
+    $hadEnv = file_exists($envPath);
+    if (! $hadEnv) {
+        file_put_contents($envPath, 'APP_KEY=base64:'.base64_encode(random_bytes(32)));
+    }
 
     // Point config at a temp empty file to simulate empty/missing database
     $tempDb = tempnam(sys_get_temp_dir(), 'bw_test_');
     file_put_contents($tempDb, '');
     config(['database.connections.sqlite.database' => $tempDb]);
 
-    $response = runMiddleware(createMiddlewareRequest('/admin'));
+    try {
+        $response = runMiddleware(createMiddlewareRequest('/admin'));
 
-    expect($response->getStatusCode())->toBe(302)
-        ->and($response->headers->get('Location'))->toContain('/install')
-        ->and(file_exists(storage_path('installed.lock')))->toBeFalse();
+        expect($response->getStatusCode())->toBe(302)
+            ->and($response->headers->get('Location'))->toContain('/install')
+            ->and(file_exists(storage_path('installed.lock')))->toBeFalse();
+    } finally {
+        if (! $hadEnv) {
+            @unlink($envPath);
+        }
+        @unlink($tempDb);
+    }
+});
 
-    @unlink($tempDb);
+it('redirects to install when .env is missing even with lock file and healthy database', function (): void {
+    User::factory()->create();
+    file_put_contents(storage_path('installed.lock'), now());
+
+    $envPath = base_path('.env');
+
+    // Ensure .env does not exist (test environment typically has no .env)
+    $hadEnv = file_exists($envPath);
+    if ($hadEnv) {
+        rename($envPath, $envPath.'.test-backup');
+    }
+
+    try {
+        $response = runMiddleware(createMiddlewareRequest('/admin'));
+
+        expect($response->getStatusCode())->toBe(302)
+            ->and($response->headers->get('Location'))->toContain('/install');
+    } finally {
+        if ($hadEnv) {
+            rename($envPath.'.test-backup', $envPath);
+        }
+    }
 });

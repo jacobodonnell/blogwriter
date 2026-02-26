@@ -27,5 +27,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->renderable(function (Illuminate\Database\QueryException $e) {
+            if (! file_exists(storage_path('installed.lock'))) {
+                return redirect('/install');
+            }
+        });
     })->create();

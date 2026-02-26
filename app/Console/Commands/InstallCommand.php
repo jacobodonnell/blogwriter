@@ -10,6 +10,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Services\InstallService;
 use App\Services\ResetService;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -145,6 +146,10 @@ final class InstallCommand extends Command
             $this->newLine();
 
             $didFreshInstall = true;
+        }
+
+        if ($this->canSelfHeal()) {
+            return $this->selfHeal();
         }
 
         $config = $this->gatherConfiguration();
@@ -444,6 +449,62 @@ final class InstallCommand extends Command
         warning('Composer install failed. See error output above.');
 
         return false;
+    }
+
+    private function canSelfHeal(): bool
+    {
+        if (file_exists(base_path('.env'))) {
+            return false;
+        }
+
+        try {
+            return User::exists();
+        } catch (Exception) {
+            return false;
+        }
+    }
+
+    private function selfHeal(): int
+    {
+        info('Detected missing .env file. Repairing installation...');
+        $this->newLine();
+
+        $this->installService->setupEnvironmentFile();
+        info('✓ Environment file restored from .env.example');
+
+        $this->installService->generateAppKey();
+        info('✓ Application key generated');
+
+        $this->installService->ensureStorageDirectories();
+        $this->installService->createStorageLink();
+
+        $siteName = text(
+            label: 'What is your site name?',
+            default: config('app.name', 'BlogWriter'),
+            required: true
+        );
+
+        $siteUrl = text(
+            label: 'What is your site URL?',
+            default: config('app.url', 'http://localhost'),
+            required: true,
+            validate: $this->validateUrl(...)
+        );
+
+        $this->installService->updateEnvironmentFile([
+            'site_name' => $siteName,
+            'site_url' => $siteUrl,
+        ]);
+        info('✓ Environment configured');
+
+        $this->installService->clearCaches();
+        $this->installService->createLockFile();
+        info('✓ Installation repaired');
+
+        $this->newLine();
+        info('Your BlogWriter site has been repaired. All existing content is preserved.');
+
+        return self::SUCCESS;
     }
 
     private function verifyDemoImages(): bool

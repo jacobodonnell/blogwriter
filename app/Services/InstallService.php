@@ -19,6 +19,10 @@ final class InstallService
      */
     public function isAlreadyInstalled(): bool
     {
+        if (! file_exists(base_path('.env'))) {
+            return false;
+        }
+
         if (file_exists(storage_path('installed.lock'))) {
             if ($this->isDatabaseHealthy()) {
                 return true;
