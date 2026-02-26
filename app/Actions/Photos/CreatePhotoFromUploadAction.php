@@ -42,7 +42,11 @@ final readonly class CreatePhotoFromUploadAction
             ]);
 
             $disk = $photo->status->isPublic() ? 'public' : 'private';
-            $photo->addMedia($file)->toMediaCollection('image', $disk);
+            $extension = $file->getClientOriginalExtension();
+            $photo->addMedia($file)
+                ->usingFileName($photo->slug.'.'.$extension)
+                ->usingName($photo->slug)
+                ->toMediaCollection('image', $disk);
 
             return $photo;
         });

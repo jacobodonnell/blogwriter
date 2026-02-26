@@ -139,6 +139,72 @@ it('leaves published_at null when uploading a draft photo', function (): void {
     expect($photo->published_at)->toBeNull();
 });
 
+it('updating slug populates past_slugs', function (): void {
+    $photo = Photo::factory()->published()->create(['slug' => 'old-slug', 'past_slugs' => []]);
+
+    $this->put(route('admin.photos.update', $photo), [
+        'slug' => 'new-slug',
+        'alt_text' => $photo->alt_text,
+        'status' => Status::Published->value,
+    ]);
+
+    $photo->refresh();
+    expect($photo->slug)->toBe('new-slug')
+        ->and($photo->past_slugs)->toContain('old-slug');
+});
+
+it('allows a photo to keep its own slug on update', function (): void {
+    $photo = Photo::factory()->published()->create(['slug' => 'my-slug']);
+
+    $response = $this->put(route('admin.photos.update', $photo), [
+        'slug' => 'my-slug',
+        'alt_text' => $photo->alt_text,
+        'status' => Status::Published->value,
+    ]);
+
+    $response->assertRedirect(route('admin.photos.edit', $photo));
+    $response->assertSessionHasNoErrors();
+});
+
+it('rejects slug that belongs to another photo on update', function (): void {
+    Photo::factory()->create(['slug' => 'taken-slug']);
+    $photo = Photo::factory()->published()->create(['slug' => 'my-slug']);
+
+    $response = $this->put(route('admin.photos.update', $photo), [
+        'slug' => 'taken-slug',
+        'alt_text' => $photo->alt_text,
+        'status' => Status::Published->value,
+    ]);
+
+    $response->assertSessionHasErrors('slug');
+});
+
+it('rejects slugs with uppercase letters', function (): void {
+    $file = UploadedFile::fake()->image('test.jpg');
+
+    $response = $this->post(route('admin.photos.store'), [
+        'slug' => 'My-Photo',
+        'alt_text' => 'Test',
+        'status' => Status::Draft->value,
+        'image_file' => $file,
+    ]);
+
+    $response->assertSessionHasErrors('slug');
+});
+
+it('rejects slugs with spaces', function (): void {
+    $file = UploadedFile::fake()->image('test.jpg');
+
+    $response = $this->post(route('admin.photos.store'), [
+        'slug' => 'bad slug',
+        'alt_text' => 'Test',
+        'status' => Status::Draft->value,
+        'image_file' => $file,
+    ]);
+
+    $response->assertSessionHasErrors('slug');
+});
+
 it('passes articleCount to the edit view', function (): void {
     $photo = Photo::factory()->published()->create();
     Article::factory()->published()->create(['photo_id' => $photo->id]);

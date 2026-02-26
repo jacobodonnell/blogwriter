@@ -37,6 +37,43 @@ it('has user relationship', function (): void {
     expect($photo->user->id)->toBe($user->id);
 });
 
+it('addPastSlug adds a slug to past_slugs', function (): void {
+    $photo = Photo::factory()->create(['past_slugs' => []]);
+
+    $photo->addPastSlug('old-slug');
+
+    expect($photo->past_slugs)->toContain('old-slug');
+});
+
+it('addPastSlug does not add duplicate slugs', function (): void {
+    $photo = Photo::factory()->create(['past_slugs' => ['existing-slug']]);
+
+    $photo->addPastSlug('existing-slug');
+
+    expect($photo->past_slugs)->toBe(['existing-slug']);
+});
+
+it('booted hook tracks old slug when slug changes', function (): void {
+    $photo = Photo::factory()->create(['slug' => 'original-slug', 'past_slugs' => []]);
+
+    $photo->slug = 'new-slug';
+    $photo->save();
+
+    $photo->refresh();
+    expect($photo->past_slugs)->toContain('original-slug');
+    expect($photo->slug)->toBe('new-slug');
+});
+
+it('booted hook does not add to past_slugs when slug is unchanged', function (): void {
+    $photo = Photo::factory()->create(['slug' => 'same-slug', 'past_slugs' => []]);
+
+    $photo->alt_text = 'Updated alt text';
+    $photo->save();
+
+    $photo->refresh();
+    expect($photo->past_slugs)->toBeEmpty();
+});
+
 it('articles relationship returns correct articles', function (): void {
     $user = User::factory()->create();
     $photo = Photo::factory()->published()->create(['user_id' => $user->id]);

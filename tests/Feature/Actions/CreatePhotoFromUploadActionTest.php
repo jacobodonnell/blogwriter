@@ -62,6 +62,32 @@ it('stores media on private disk for draft photos', function (): void {
     expect($photo->getFirstMedia('image')?->disk)->toBe('private');
 });
 
+it('names stored file after slug derived from filename', function (): void {
+    $file = UploadedFile::fake()->image('my-cool-photo.jpg');
+
+    $photo = $this->action->handle($file, [
+        'alt_text' => 'Slug from filename',
+        'status' => 'published',
+    ]);
+
+    $media = $photo->getFirstMedia('image');
+    expect($media?->file_name)->toStartWith($photo->slug.'.');
+});
+
+it('uses custom slug when provided and names file after it', function (): void {
+    $file = UploadedFile::fake()->image('original-name.jpg');
+
+    $photo = $this->action->handle($file, [
+        'slug' => 'custom-slug',
+        'alt_text' => 'Custom slug photo',
+        'status' => 'published',
+    ]);
+
+    expect($photo->slug)->toBe('custom-slug');
+    $media = $photo->getFirstMedia('image');
+    expect($media?->file_name)->toBe('custom-slug.jpg');
+});
+
 it('accepts a Status enum instance for status', function (): void {
     $file = UploadedFile::fake()->image('enum.jpg');
 

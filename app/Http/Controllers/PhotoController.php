@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Photo;
 use App\Services\ContentFilterService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -38,17 +39,22 @@ final class PhotoController extends Controller
     /**
      * Display the specified photo.
      */
-    public function show(Photo $photo): View
+    public function show(string $slug): View|RedirectResponse
     {
-        // Auth users can view any photo, guests only public
-        if (! auth()->check() && ! $photo->isPublic()) {
-            abort(404);
+        $query = auth()->check() ? Photo::query() : Photo::published();
+
+        $photo = $query->where('slug', $slug)->with('category')->first();
+
+        if ($photo) {
+            return view('photos.show', ['photo' => $photo]);
         }
 
-        $photo->load('category');
+        $photo = Photo::published()->whereJsonContains('past_slugs', $slug)->first();
 
-        return view('photos.show', [
-            'photo' => $photo,
-        ]);
+        if ($photo) {
+            return redirect()->route('photos.show', $photo->slug, 301);
+        }
+
+        abort(404);
     }
 }

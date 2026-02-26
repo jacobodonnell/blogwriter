@@ -31,6 +31,22 @@
         @enderror
     </fieldset>
 
+    {{-- Slug --}}
+    <fieldset class="fieldset">
+        <legend class="fieldset-legend">Slug (optional)</legend>
+        <input type="text"
+               name="slug"
+               class="input input-bordered w-full font-mono @error('slug') input-error @enderror"
+               value="{{ old('slug', $photo->slug) }}"
+               placeholder="Leave blank to derive from filename">
+        <p class="text-xs text-base-content/50 mt-1">
+            Used in the public URL: /photos/your-slug. Lowercase letters, numbers, and hyphens only (e.g. my-photo).
+        </p>
+        @error('slug')
+            <span class="text-error text-sm mt-1">{{ $message }}</span>
+        @enderror
+    </fieldset>
+
     {{-- Alt Text --}}
     <fieldset class="fieldset">
         <legend class="fieldset-legend">Alt Text (required)</legend>

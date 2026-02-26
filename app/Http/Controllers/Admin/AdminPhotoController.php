@@ -75,6 +75,7 @@ final class AdminPhotoController extends Controller
 
         try {
             $photo = $this->createPhotoFromUpload->handle($request->file('image_file'), [
+                'slug' => $data['slug'] ?? null,
                 'alt_text' => $data['alt_text'],
                 'caption' => $data['caption'] ?? null,
                 'status' => $data['status'],
@@ -144,6 +145,8 @@ final class AdminPhotoController extends Controller
         $photo->taken_at = $data['taken_at'] ?? null;
         $photo->category_id = $data['category_id'] ?? null;
 
+        $photo->slug = $data['slug'] ?? $photo->slug;
+
         if ($request->hasFile('image_file')) {
             try {
                 $exif = $this->extractExif->handle($request->file('image_file'));
@@ -166,8 +169,11 @@ final class AdminPhotoController extends Controller
 
             if ($request->hasFile('image_file')) {
                 $disk = $photo->status->isPublic() ? 'public' : 'private';
+                $extension = $request->file('image_file')->getClientOriginalExtension();
 
                 $photo->addMedia($request->file('image_file'))
+                    ->usingFileName($photo->slug.'.'.$extension)
+                    ->usingName($photo->slug)
                     ->toMediaCollection('image', $disk);
             }
         });

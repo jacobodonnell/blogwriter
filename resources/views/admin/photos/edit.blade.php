@@ -28,6 +28,18 @@
                 <p class="text-base-content/70 mt-1">Update photo details and metadata.</p>
             </div>
             <div class="flex gap-2">
+                @if($photo->isPublic())
+                    <a href="{{ route('photos.show', $photo->slug) }}"
+                       target="_blank"
+                       class="btn btn-ghost btn-sm gap-2">
+                        <i class="ph ph-arrow-square-out text-lg"></i>
+                        View on Site
+                    </a>
+                @endif
+                <a href="{{ route('admin.photos.show', $photo) }}" class="btn btn-ghost btn-sm gap-2">
+                    <i class="ph ph-info text-lg"></i>
+                    Details
+                </a>
                 <a href="{{ route('admin.photos.download', $photo) }}" class="btn btn-ghost btn-sm gap-2">
                     <i class="ph ph-download-simple text-lg"></i>
                     Download

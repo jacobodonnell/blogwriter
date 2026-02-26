@@ -43,6 +43,29 @@ it('returns 404 for non-existent photos', function (): void {
     $response->assertNotFound();
 });
 
+it('redirects old slug to current slug with 301', function (): void {
+    $photo = Photo::factory()->published()->create([
+        'slug' => 'new-slug',
+        'past_slugs' => ['old-slug'],
+    ]);
+
+    $response = $this->get(route('photos.show', 'old-slug'));
+
+    $response->assertRedirectToRoute('photos.show', 'new-slug');
+    expect($response->getStatusCode())->toBe(301);
+});
+
+it('returns 404 for old slug of draft photo', function (): void {
+    Photo::factory()->draft()->create([
+        'slug' => 'draft-current',
+        'past_slugs' => ['draft-old'],
+    ]);
+
+    $response = $this->get(route('photos.show', 'draft-old'));
+
+    $response->assertNotFound();
+});
+
 it('filters photos by search on alt_text', function (): void {
     Photo::factory()->published()->create(['alt_text' => 'Sunset over mountains']);
     Photo::factory()->published()->create(['alt_text' => 'City skyline at night']);

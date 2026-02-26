@@ -100,6 +100,28 @@ final class Photo extends Model implements HasMedia
             && $this->published_at <= now();
     }
 
+    /**
+     * Add a slug to the past_slugs array.
+     */
+    public function addPastSlug(string $slug): void
+    {
+        $pastSlugs = $this->past_slugs ?? [];
+
+        if (! in_array($slug, $pastSlugs)) {
+            $pastSlugs[] = $slug;
+            $this->past_slugs = $pastSlugs;
+        }
+    }
+
+    protected static function booted(): void
+    {
+        self::saving(function (self $photo): void {
+            if ($photo->isDirty('slug') && filled($photo->getOriginal('slug'))) {
+                $photo->addPastSlug($photo->getOriginal('slug'));
+            }
+        });
+    }
+
     protected function casts(): array
     {
         return [
@@ -107,6 +129,7 @@ final class Photo extends Model implements HasMedia
             'published_at' => 'datetime',
             'taken_at' => 'immutable_datetime',
             'meta' => 'array',
+            'past_slugs' => 'array',
         ];
     }
 

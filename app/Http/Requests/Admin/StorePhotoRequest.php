@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 final class StorePhotoRequest extends FormRequest
 {
@@ -22,6 +23,7 @@ final class StorePhotoRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'slug' => ['nullable', 'string', 'max:255', 'regex:/^[a-z0-9-]+$/', Rule::unique('photos', 'slug')],
             'image_file' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:10240'],
             'caption' => ['nullable', 'string', 'max:5000'],
             'alt_text' => ['required', 'string', 'max:500'],

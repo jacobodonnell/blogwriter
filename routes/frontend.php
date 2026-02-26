@@ -16,7 +16,7 @@ Route::middleware(CacheResponse::class)->group(function (): void {
     Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
     Route::get('/articles/{slug}', [ArticleController::class, 'show'])->name('articles.show');
     Route::get('/photos', [PhotoController::class, 'index'])->name('photos.index');
-    Route::get('/photos/{photo:slug}', [PhotoController::class, 'show'])->name('photos.show');
+    Route::get('/photos/{slug}', [PhotoController::class, 'show'])->name('photos.show');
     Route::get('/about', AboutController::class)->name('about');
 });
 
