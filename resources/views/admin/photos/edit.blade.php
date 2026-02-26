@@ -30,7 +30,6 @@
             <div class="flex gap-2">
                 @if($photo->isPublic())
                     <a href="{{ route('photos.show', $photo->slug) }}"
-                       target="_blank"
                        class="btn btn-ghost btn-sm gap-2">
                         <i class="ph ph-arrow-square-out text-lg"></i>
                         View on Site
