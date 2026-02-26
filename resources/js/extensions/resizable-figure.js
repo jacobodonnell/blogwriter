@@ -120,15 +120,11 @@ export function createResizableFigure(getEditor) {
                     node,
                     getPos,
                     onResize: (width) => {
-                        img.style.width = `${width}px`;
-                        img.style.height = 'auto';
-
-                        // Clamp to container width
                         const containerWidth = resizableNodeView.container.offsetWidth;
-                        if (width > containerWidth) {
-                            resizableNodeView.wrapper.style.width = `${containerWidth}px`;
-                            img.style.width = `${containerWidth}px`;
-                        }
+                        const clamped = Math.min(width, containerWidth);
+                        resizableNodeView.wrapper.style.width = `${clamped}px`;
+                        img.style.width = `${clamped}px`;
+                        img.style.height = 'auto';
                     },
                     onCommit: (finalWidth) => {
                         const containerWidth = resizableNodeView.container.offsetWidth;

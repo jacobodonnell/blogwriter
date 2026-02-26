@@ -202,7 +202,7 @@ it('image can be resized larger by dragging handle outward', function (): void {
     if (str_contains($value, 'width:')) {
         preg_match('/width:(\d+)%/', $value, $matches);
         expect($matches)->not->toBeEmpty();
-        expect((int) $matches[1])->toBeGreaterThanOrEqual(30);
+        expect((int) $matches[1])->toBeGreaterThan(30);
     } else {
         // No width means it went to full width (>=98%) — still larger than 30%
         expect($value)->toContain('![](');
