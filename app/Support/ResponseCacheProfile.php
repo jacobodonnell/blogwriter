@@ -11,11 +11,6 @@ final class ResponseCacheProfile extends CacheAllSuccessfulGetRequests
 {
     public function shouldCacheRequest(Request $request): bool
     {
-        return $request->isMethod('GET') && ! $request->user();
-    }
-
-    public function shouldServeAsCache(Request $request): bool
-    {
-        return ! $request->user();
+        return ! $request->user() && parent::shouldCacheRequest($request);
     }
 }

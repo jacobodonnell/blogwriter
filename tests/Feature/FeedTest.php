@@ -236,3 +236,22 @@ it('includes feed discovery links on public pages', function (): void {
         ->toContain('application/atom+xml')
         ->toContain('application/feed+json');
 });
+
+it('returns an ETag header on feed responses', function (string $url): void {
+    $this->get($url)
+        ->assertSuccessful()
+        ->assertHeader('ETag');
+})->with(['/feed', '/rss', '/atom', '/feed.json']);
+
+it('returns 304 Not Modified when ETag matches', function (string $url): void {
+    $first = $this->get($url);
+    $etag = $first->headers->get('ETag');
+
+    $this->get($url, ['If-None-Match' => $etag])
+        ->assertStatus(304);
+})->with(['/feed', '/rss', '/atom', '/feed.json']);
+
+it('returns 200 when ETag does not match', function (string $url): void {
+    $this->get($url, ['If-None-Match' => '"stale-value"'])
+        ->assertSuccessful();
+})->with(['/feed', '/rss', '/atom', '/feed.json']);

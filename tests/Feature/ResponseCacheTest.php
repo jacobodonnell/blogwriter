@@ -18,7 +18,6 @@ beforeEach(function (): void {
 
 afterEach(function (): void {
     ResponseCache::clear();
-    config(['responsecache.enabled' => false]);
 });
 
 it('caches the response for a guest on a second request', function (): void {
@@ -106,6 +105,15 @@ it('does not cache admin routes', function (): void {
 
     $this->actingAs($user)->get('/admin');
     $this->actingAs($user)->get('/admin');
+
+    Event::assertNotDispatched(ResponseCacheHitEvent::class);
+});
+
+it('does not cache feed routes via Spatie ResponseCache', function (): void {
+    Event::fake([ResponseCacheHitEvent::class]);
+
+    $this->get('/feed');
+    $this->get('/feed');
 
     Event::assertNotDispatched(ResponseCacheHitEvent::class);
 });
