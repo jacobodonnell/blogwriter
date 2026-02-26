@@ -34,25 +34,29 @@
                         @php $placeholderUrl = placeholder_image_url(); @endphp
                         @foreach($articles as $article)
                             <tr>
-                                <td x-show="columns.featuredImage" x-cloak>
+                                <td x-show="columns.featuredImage" x-cloak class="w-20">
                                     @if($article->photo_id && $article->featuredPhoto)
-                                        <a href="{{ route('admin.photos.edit', $article->featuredPhoto) }}" class="block">
+                                        <a href="{{ route('admin.photos.edit', $article->featuredPhoto) }}" class="relative block w-20 h-14 rounded overflow-hidden bg-base-300">
                                             <img src="{{ $article->featuredPhoto->getFirstMediaUrl('image', 'thumbnail') }}"
                                                  alt=""
-                                                 class="w-12 h-12 rounded object-cover" />
+                                                 class="w-full h-full object-contain" />
+                                            <span class="absolute bottom-1 right-1 bg-success/80 text-success-content rounded p-0.5 leading-none" title="Uploaded">
+                                                <i class="ph ph-upload-simple text-xs"></i>
+                                            </span>
                                         </a>
-                                        <span class="badge badge-success badge-xs mt-1">Uploaded</span>
                                     @elseif($article->external_featured_img_url)
-                                        <img src="{{ $article->external_featured_img_url }}"
-                                             alt=""
-                                             class="w-12 h-12 rounded object-cover" />
-                                        <span class="badge badge-info badge-xs mt-1">External</span>
-                                    @elseif($placeholderUrl)
-                                        <img src="{{ $placeholderUrl }}"
-                                             alt=""
-                                             class="w-12 h-12 rounded object-cover opacity-40" />
+                                        <div class="relative w-20 h-14 rounded overflow-hidden bg-base-300">
+                                            <img src="{{ $article->external_featured_img_url }}"
+                                                 alt=""
+                                                 class="w-full h-full object-contain" />
+                                            <span class="absolute bottom-1 right-1 bg-info/80 text-info-content rounded p-0.5 leading-none" title="External">
+                                                <i class="ph ph-arrow-square-out text-xs"></i>
+                                            </span>
+                                        </div>
                                     @else
-                                        <span class="text-base-content/40 text-sm">None</span>
+                                        <div class="w-20 h-14 rounded bg-base-300 flex items-center justify-center" title="No featured image">
+                                            <i class="ph ph-image text-xl text-base-content/30"></i>
+                                        </div>
                                     @endif
                                 </td>
                                 <td x-show="columns.title">
