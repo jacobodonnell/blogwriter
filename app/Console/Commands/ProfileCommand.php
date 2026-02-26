@@ -45,7 +45,6 @@ final class ProfileCommand extends Command
         if ($this->option('name') !== null) {
             $name = $this->option('name') ?: $user?->name;
             $user?->update(['name' => $name]);
-            $settings['name'] = $name;
         }
 
         if ($this->option('bio') !== null) {
@@ -105,7 +104,7 @@ final class ProfileCommand extends Command
             $settings['profile_email'] = $email;
         }
 
-        return $this->saveAndDisplay($settings);
+        return $this->saveAndDisplay($settings, $name ?? $user?->name ?? '');
     }
 
     private function handleInteractive(): int
@@ -158,7 +157,7 @@ final class ProfileCommand extends Command
         );
 
         $user?->update(['name' => $name]);
-        $settings = ['name' => $name];
+        $settings = [];
 
         if ($bio !== '') {
             $settings['profile_bio'] = $bio;
@@ -180,22 +179,20 @@ final class ProfileCommand extends Command
             $settings['profile_email'] = $email;
         }
 
-        return $this->saveAndDisplay($settings);
+        return $this->saveAndDisplay($settings, $name);
     }
 
-    private function saveAndDisplay(array $settings): int
+    private function saveAndDisplay(array $settings, string $name): int
     {
         foreach ($settings as $key => $value) {
-            if (str_starts_with((string) $key, 'profile_')) {
-                Setting::set($key, $value);
-            }
+            Setting::set($key, $value);
         }
 
         $this->newLine();
         info('Profile settings saved!');
         $this->newLine();
 
-        $rows = [];
+        $rows = [['name', $name]];
         foreach ($settings as $key => $value) {
             $rows[] = [$key, $value];
         }

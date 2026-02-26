@@ -94,8 +94,6 @@ return [
         'Monospace' => ['jetbrains-mono'],
     ],
 
-    'monospace_fonts' => ['jetbrains-mono'],
-
     /*
     |--------------------------------------------------------------------------
     | Defaults
