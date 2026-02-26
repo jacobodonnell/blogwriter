@@ -158,6 +158,21 @@
                 </div>
             </div>
 
+            @if(in_array(config('app.env'), ['local', 'dev']) && config('app.debug'))
+                <div role="alert" class="alert alert-warning mt-4">
+                    <i class="ph ph-warning text-xl"></i>
+                    <div>
+                        <p class="font-semibold">Development environment detected</p>
+                        <p class="text-sm mt-1">
+                            Your environment is <strong>{{ config('app.env') }}</strong> and debug mode is <strong>enabled</strong>.
+                            If you're seeing this on your <em>live website</em>, update your <code>.env</code> to set
+                            <code>APP_ENV=production</code> and <code>APP_DEBUG=false</code> before going live.
+                            Local developers can safely ignore this notice.
+                        </p>
+                    </div>
+                </div>
+            @endif
+
             <div class="mt-4 p-4 bg-base-200 rounded-lg">
                 <p class="text-sm text-base-content/60 font-admin">
                     <i class="ph ph-terminal text-lg mr-2"></i>
