@@ -29,7 +29,7 @@ That's it. No separate database server to set up. No Redis. No Node.js. BlogWrit
 database is just a simple file on your server.
 
 BlogWriter does not send or receive email out of the box — no mail server needed. Your email address is used as your
-login credential and public identity (h-card), not for sending mail.
+login credential (aka username) and public identity (h-card), not for sending mail.
 
 <x-callout type="warning" title="Shared Hosting">
   Shared hosting support (Softaculous, Installatron, one-click installers) is a planned goal.
