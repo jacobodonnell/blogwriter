@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\Status;
+use App\Models\Concerns\InvalidatesResponseCache;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,6 +22,7 @@ final class Photo extends Model implements HasMedia
     use HasFactory;
 
     use InteractsWithMedia;
+    use InvalidatesResponseCache;
 
     /**
      * The attributes that should be hidden for serialization.
@@ -130,27 +132,21 @@ final class Photo extends Model implements HasMedia
 
     /**
      * Scope for published photos.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
      */
     #[Scope]
-    protected function published($query)
+    protected function published(\Illuminate\Database\Eloquent\Builder $query): void
     {
-        return $query->where('status', Status::Published)
+        $query->where('status', Status::Published)
             ->where('published_at', '<=', now());
     }
 
     /**
      * Scope for draft photos.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
      */
     #[Scope]
-    protected function draft($query)
+    protected function draft(\Illuminate\Database\Eloquent\Builder $query): void
     {
-        return $query->where('status', Status::Draft);
+        $query->where('status', Status::Draft);
     }
 
     /**

@@ -7,17 +7,26 @@ namespace App\Models;
 use App\Actions\GenerateUniqueSlugAction;
 use App\Enums\Status;
 use App\Support\Markdown;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
+use Spatie\ResponseCache\Facades\ResponseCache;
 
 final class Article extends Model
 {
     /** @use HasFactory<\Database\Factories\ArticleFactory> */
     use HasFactory;
+
+    /** Public-facing columns that warrant a response cache flush when changed. */
+    private const PUBLIC_COLUMNS = [
+        'title', 'slug', 'content', 'status', 'published_at',
+        'summary', 'category_id', 'photo_id',
+        'external_featured_img_url', 'meta',
+    ];
 
     /** Fields that can be staged in a draft snapshot. */
     private const DRAFTABLE_FIELDS = [
@@ -161,6 +170,16 @@ final class Article extends Model
                 $article->last_edited_at = now()->startOfSecond();
             }
         });
+
+        self::created(fn () => ResponseCache::clear());
+
+        self::updated(function (Article $article): void {
+            if ($article->wasChanged(self::PUBLIC_COLUMNS)) {
+                ResponseCache::clear();
+            }
+        });
+
+        self::deleted(fn () => ResponseCache::clear());
     }
 
     protected function casts(): array
@@ -184,7 +203,7 @@ final class Article extends Model
         return Attribute::make(
             set: function (mixed $value): mixed {
                 if ($value !== null) {
-                    return \Carbon\Carbon::parse($value)->startOfSecond();
+                    return Carbon::parse($value)->startOfSecond();
                 }
 
                 return $value;

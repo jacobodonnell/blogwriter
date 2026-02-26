@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Actions\GenerateUniqueSlugAction;
+use App\Models\Concerns\InvalidatesResponseCache;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,6 +19,8 @@ final class Category extends Model
 {
     /** @use HasFactory<\Database\Factories\CategoryFactory> */
     use HasFactory;
+
+    use InvalidatesResponseCache;
 
     /**
      * Get all categories as a flat collection with depth for use in select dropdowns.
@@ -147,7 +151,7 @@ final class Category extends Model
     {
         self::saving(function ($category): void {
             if (empty($category->slug)) {
-                $category->slug = app(\App\Actions\GenerateUniqueSlugAction::class)
+                $category->slug = app(GenerateUniqueSlugAction::class)
                     ->handle($category->name, Category::class, $category->id);
             }
         });
