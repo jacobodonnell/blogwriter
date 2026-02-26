@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\PhotoDownloadController;
 use App\Http\Controllers\Admin\PlaceholderImageController;
 use App\Http\Controllers\Admin\ProfileSettingsController;
+use App\Http\Controllers\Admin\RobotsSettingsController;
 use App\Http\Controllers\Admin\SiteSettingsController;
 use Illuminate\Support\Facades\Route;
 
@@ -80,6 +81,10 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function (): v
     // Appearance
     Route::get('/settings/appearance', [AppearanceController::class, 'edit'])->name('settings.appearance');
     Route::put('/settings/appearance', [AppearanceController::class, 'update'])->name('settings.appearance.update');
+
+    // Robots
+    Route::get('/settings/robots', [RobotsSettingsController::class, 'edit'])->name('settings.robots');
+    Route::put('/settings/robots', [RobotsSettingsController::class, 'update'])->name('settings.robots.update');
 
     // Export
     Route::get('/settings/export', [ExportController::class, 'index'])->name('settings.export');

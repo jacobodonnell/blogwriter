@@ -7,6 +7,7 @@ use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PhotoController;
+use App\Http\Controllers\RobotsController;
 use Illuminate\Support\Facades\Route;
 
 // Home
@@ -28,3 +29,6 @@ Route::get('/feed', [FeedController::class, 'rss'])->name('feed.rss');
 Route::get('/rss', [FeedController::class, 'rss'])->name('feed.rss.alias');
 Route::get('/atom', [FeedController::class, 'atom'])->name('feed.atom');
 Route::get('/feed.json', [FeedController::class, 'json'])->name('feed.json');
+
+// Robots
+Route::get('/robots.txt', RobotsController::class)->name('robots.txt');

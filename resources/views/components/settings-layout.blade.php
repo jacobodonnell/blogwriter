@@ -7,6 +7,7 @@
             'profile' => 'Profile',
             'site' => 'Site',
             'appearance' => 'Appearance',
+            'robots' => 'Robots',
             'export' => 'Import & Export',
         } }}</li>
     </x-slot:breadcrumb>
@@ -30,6 +31,12 @@
                 <a href="{{ route('admin.settings.appearance') }}" class="{{ $active === 'appearance' ? 'menu-active' : '' }}">
                     <i class="ph ph-palette text-lg"></i>
                     Appearance
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.settings.robots') }}" class="{{ $active === 'robots' ? 'menu-active' : '' }}">
+                    <i class="ph ph-robot text-lg"></i>
+                    Robots
                 </a>
             </li>
             <li>
