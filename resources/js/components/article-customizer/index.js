@@ -30,6 +30,7 @@ export default function articleCustomizer(config) {
             uploading: false,
             featuredImageUrl: config.featuredImageUrl,
             showUrlField: config.showUrlField,
+            featuredImageAlt: config.featuredImageAlt ?? '',
             featuredImageCaption: config.featuredImageCaption,
             usePhotoCaption: config.usePhotoCaption,
             editorHeight: (() => {
@@ -83,7 +84,7 @@ export default function articleCustomizer(config) {
                 const dt = new DataTransfer();
                 dt.items.add(file);
                 this.$refs.featuredImageFileInput.files = dt.files;
-                this.$refs.featuredImageAltInput.value = alt.trim();
+                this.featuredImageAlt = alt.trim();
                 this.$refs.featuredImageCaptionInput.value = caption;
 
                 this.uploadedPhotoUrl = URL.createObjectURL(file);

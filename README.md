@@ -9,8 +9,10 @@ didn't write, no risk of your work disappearing because a company pivoted. Your 
 
 **Content:**
 
-- **Articles** --- Long-form posts with Tiptap WYSIWYG editor, live preview customizer, categories, featured images, and permalink slug redirects
-- **Photos** --- Image posts with captions, alt text, EXIF display, categories, permalink slug redirects, and automatic image conversions (thumbnail, medium, large) via Spatie MediaLibrary
+- **Articles** --- Long-form posts with Tiptap WYSIWYG editor, live preview customizer, categories, featured images, and
+  permalink slug redirects
+- **Photos** --- Image posts with captions, alt text, EXIF display, categories, permalink slug redirects, and automatic
+  image conversions (thumbnail, medium, large) via Spatie MediaLibrary
 
 **Appearance:**
 
@@ -60,16 +62,16 @@ The installer checks requirements, creates your database, sets up your admin acc
 
 ## Tech Stack
 
-| Layer | Technology | Why |
-|-------|-----------|-----|
-| Backend | Laravel 12 | Modern PHP framework |
-| Database | SQLite | Single file, zero config, runs anywhere |
-| Frontend | Alpine.js + Alpine AJAX | Reactive without the complexity |
-| CSS | Tailwind CSS v4 + DaisyUI | Utility-first with pre-built components |
-| Auth | Laravel Fortify | Headless auth, custom UI |
-| Media | Spatie MediaLibrary | Image handling and conversions |
-| Editor | Tiptap + tiptap-markdown | WYSIWYG editing, Markdown storage |
-| Testing | Pest 4 | Expressive, readable tests |
+| Layer    | Technology                | Why                                     |
+|----------|---------------------------|-----------------------------------------|
+| Backend  | Laravel 12                | Modern PHP framework                    |
+| Database | SQLite                    | Single file, zero config, runs anywhere |
+| Frontend | Alpine.js + Alpine AJAX   | Reactive without the complexity         |
+| CSS      | Tailwind CSS v4 + DaisyUI | Utility-first with pre-built components |
+| Auth     | Laravel Fortify           | Headless auth, custom UI                |
+| Media    | Spatie MediaLibrary       | Image handling and conversions          |
+| Editor   | Tiptap + tiptap-markdown  | WYSIWYG editing, Markdown storage       |
+| Testing  | Pest 4                    | Expressive, readable tests              |
 
 ## Documentation
 
@@ -89,9 +91,10 @@ Full documentation is in the [`docs/`](docs/) directory:
 ## Roadmap
 
 BlogWriter is in pre-alpha. Expect breaking changes. I'll still do my best to prevent them, but back up your data
-regularly.
+regularly. If you're not a fairly technical person, you should not be using this for the time being!
 
-**Built:** Articles, Photos, Categories (hierarchical), Appearance (35 themes, 11 fonts), Admin panel, CLI Installer, Auth,
+**Built:** Articles, Photos, Categories (hierarchical), Appearance (35 themes, 11 fonts), Admin panel, CLI Installer,
+Auth,
 MediaLibrary, Microformats (h-card, h-entry, h-feed, rel="me"), RSS/Atom/JSON Feeds, Import & Export, PWA
 
 **Planned:** Notes, Tags, IndieAuth, Webmentions

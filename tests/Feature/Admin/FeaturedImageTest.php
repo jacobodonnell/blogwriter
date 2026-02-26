@@ -187,3 +187,68 @@ it('prefers meta alt over photo alt text', function (): void {
 
     expect($article->featured_image_alt)->toBe('Meta alt');
 });
+
+it('saves featured_image_alt to meta when provided with external URL', function (): void {
+    $this->post(route('admin.articles.store'), [
+        'title' => 'Test',
+        'slug' => 'test',
+        'content' => 'Content',
+        'status' => Status::Draft->value,
+        'featured_image' => 'https://example.com/image.jpg',
+        'featured_image_alt' => 'A scenic mountain view',
+    ])->assertRedirect();
+
+    $article = Article::first();
+    expect($article->featured_image_alt)->toBe('A scenic mountain view');
+    expect($article->meta['featured_image_alt'])->toBe('A scenic mountain view');
+});
+
+it('silently saves title as featured_image_alt when external URL is set but alt is empty', function (): void {
+    $this->post(route('admin.articles.store'), [
+        'title' => 'My Great Post',
+        'slug' => 'my-great-post',
+        'content' => 'Content',
+        'status' => Status::Draft->value,
+        'featured_image' => 'https://example.com/image.jpg',
+        'featured_image_alt' => '',
+    ])->assertRedirect();
+
+    $article = Article::first();
+    expect($article->meta['featured_image_alt'])->toBe('My Great Post');
+    expect($article->featured_image_alt)->toBe('My Great Post');
+});
+
+it('does not save featured_image_alt to meta when photo is selected and alt is empty', function (): void {
+    $photo = Photo::factory()->published()->create(['alt_text' => 'Photo alt', 'user_id' => $this->user->id]);
+
+    $this->post(route('admin.articles.store'), [
+        'title' => 'Test',
+        'slug' => 'test',
+        'content' => 'Content',
+        'status' => Status::Draft->value,
+        'photo_id' => $photo->id,
+    ])->assertRedirect();
+
+    $article = Article::first();
+    expect($article->meta)->not->toHaveKey('featured_image_alt');
+    expect($article->featured_image_alt)->toBe('Photo alt');
+});
+
+it('clears featured_image_alt from meta when featured image is removed', function (): void {
+    $article = Article::factory()->create([
+        'user_id' => $this->user->id,
+        'external_featured_img_url' => 'https://example.com/image.jpg',
+        'meta' => ['featured_image_alt' => 'Old alt'],
+    ]);
+
+    $this->put(route('admin.articles.update', $article), [
+        'title' => $article->title,
+        'slug' => $article->slug,
+        'content' => $article->content,
+        'status' => $article->status->value,
+        'remove_featured_image' => '1',
+    ])->assertRedirect();
+
+    $article->refresh();
+    expect($article->meta)->not->toHaveKey('featured_image_alt');
+});

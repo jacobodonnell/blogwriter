@@ -23,6 +23,7 @@ export default function featuredImage(config) {
             this.featuredImageUrl = '';
             this.usePhotoCaption = false;
             this.featuredImageCaption = '';
+            this.featuredImageAlt = this.photoLabels[this.selectedPhotoId] ?? '';
         },
 
         setExternalUrl() {
@@ -32,6 +33,9 @@ export default function featuredImage(config) {
             if (!this.featuredImageUrl) return;
             this.selectedPhotoId = '';
             this.usePhotoCaption = false;
+            if (!this.featuredImageAlt) {
+                this.featuredImageAlt = this.title ?? '';
+            }
         },
 
         removeExternalUrl() {
@@ -41,6 +45,7 @@ export default function featuredImage(config) {
             this.hasNewPhoto = false;
             this.usePhotoCaption = false;
             this.featuredImageCaption = '';
+            this.featuredImageAlt = '';
         },
     };
 }

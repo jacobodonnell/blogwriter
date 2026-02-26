@@ -9,6 +9,7 @@ export function makeDirtyTracker(config, getEditor) {
         savedCategoryId: String(config.savedCategoryId ?? ''),
         savedPhotoId: String(config.savedPhotoId ?? ''),
         savedFeaturedImageUrl: config.savedFeaturedImageUrl ?? '',
+        savedFeaturedImageAlt: config.savedFeaturedImageAlt ?? '',
         savedFeaturedImageCaption: config.savedFeaturedImageCaption ?? '',
         savedUsePhotoCaption: config.savedUsePhotoCaption ?? false,
         savedMetaTitle: config.savedMetaTitle ?? '',
@@ -23,6 +24,7 @@ export function makeDirtyTracker(config, getEditor) {
                 && String(this.categoryId || '')          === this.savedCategoryId
                 && String(this.selectedPhotoId || '')     === this.savedPhotoId
                 && (this.featuredImageUrl || '')          === this.savedFeaturedImageUrl
+                && (this.featuredImageAlt || '')           === this.savedFeaturedImageAlt
                 && (this.featuredImageCaption || '')      === this.savedFeaturedImageCaption
                 && this.usePhotoCaption                  === this.savedUsePhotoCaption
                 && (this.metaTitle || '')                 === this.savedMetaTitle
@@ -42,23 +44,43 @@ export function makeDirtyTracker(config, getEditor) {
         },
 
         isDraftField(field) {
+            if (field === 'featuredImage') {
+                return this._featuredImageSnapshot() !== this._savedFeaturedImageSnapshot();
+            }
+
             const map = {
-                title:                [this.title, this.savedTitle],
-                slug:                 [this.slug, this.savedSlug],
-                content:              [this.content, this.savedContent],
-                summary:              [this.summary, this.savedSummary],
-                categoryId:           [String(this.categoryId || ''), this.savedCategoryId],
-                featuredImage:        [
-                    JSON.stringify({ photoId: String(this.selectedPhotoId || ''), url: this.featuredImageUrl || '', caption: this.featuredImageCaption || '', useCaption: this.usePhotoCaption }),
-                    JSON.stringify({ photoId: String(this.savedPhotoId || ''), url: this.savedFeaturedImageUrl || '', caption: this.savedFeaturedImageCaption || '', useCaption: this.savedUsePhotoCaption }),
-                ],
-                metaTitle:            [(this.metaTitle || ''), this.savedMetaTitle],
-                metaDescription:      [(this.metaDescription || ''), this.savedMetaDescription],
-                ogImage:              [(this.ogImage || ''), this.savedOgImage],
+                title:           [this.title, this.savedTitle],
+                slug:            [this.slug, this.savedSlug],
+                content:         [this.content, this.savedContent],
+                summary:         [this.summary, this.savedSummary],
+                categoryId:      [String(this.categoryId || ''), this.savedCategoryId],
+                metaTitle:       [(this.metaTitle || ''), this.savedMetaTitle],
+                metaDescription: [(this.metaDescription || ''), this.savedMetaDescription],
+                ogImage:         [(this.ogImage || ''), this.savedOgImage],
             };
             const pair = map[field];
             if (!pair) return false;
             return pair[0] !== pair[1];
+        },
+
+        _featuredImageSnapshot() {
+            return JSON.stringify({
+                photoId: String(this.selectedPhotoId || ''),
+                url: this.featuredImageUrl || '',
+                alt: this.featuredImageAlt || '',
+                caption: this.featuredImageCaption || '',
+                useCaption: this.usePhotoCaption,
+            });
+        },
+
+        _savedFeaturedImageSnapshot() {
+            return JSON.stringify({
+                photoId: String(this.savedPhotoId || ''),
+                url: this.savedFeaturedImageUrl || '',
+                alt: this.savedFeaturedImageAlt || '',
+                caption: this.savedFeaturedImageCaption || '',
+                useCaption: this.savedUsePhotoCaption,
+            });
         },
 
         revertField(field) {
@@ -89,6 +111,7 @@ export function makeDirtyTracker(config, getEditor) {
         },
 
         revertFeaturedImage() {
+            this.featuredImageAlt = this.savedFeaturedImageAlt;
             this.featuredImageCaption = this.savedFeaturedImageCaption;
             this.usePhotoCaption = this.savedUsePhotoCaption;
             this.uploadedPhotoUrl = null;

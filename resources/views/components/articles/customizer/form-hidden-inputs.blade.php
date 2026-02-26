@@ -7,7 +7,6 @@
 
 {{-- Hidden file inputs for staged photo upload --}}
 <input type="file" x-ref="featuredImageFileInput" name="featured_image_file" class="hidden">
-<input type="hidden" x-ref="featuredImageAltInput" name="featured_image_alt" value="">
 <input type="hidden" x-ref="featuredImageCaptionInput" name="featured_image_caption" value="">
 
 {{-- Hidden inputs for staged new category --}}

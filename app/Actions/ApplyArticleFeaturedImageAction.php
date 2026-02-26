@@ -33,7 +33,7 @@ final readonly class ApplyArticleFeaturedImageAction
         if ($request->boolean('remove_featured_image')) {
             $photoId = null;
             $externalUrl = null;
-            unset($meta['featured_image_caption'], $meta['use_photo_caption']);
+            unset($meta['featured_image_caption'], $meta['use_photo_caption'], $meta['featured_image_alt']);
         } elseif ($request->hasFile('featured_image_file')) {
             $photoId = $this->handlePhotoUpload->handle(
                 $request->file('featured_image_file'),
@@ -42,12 +42,15 @@ final readonly class ApplyArticleFeaturedImageAction
             );
 
             $externalUrl = null;
+            $meta = $this->syncAltTextMeta($meta, $data);
         } elseif ($request->filled('featured_image') && filter_var($request->featured_image, FILTER_VALIDATE_URL)) {
             $externalUrl = $request->featured_image;
             $photoId = null;
+            $meta['featured_image_alt'] = ($data['featured_image_alt'] ?? '') ?: ($data['title'] ?? '');
         } elseif ($request->filled('photo_id')) {
             $photoId = (int) $data['photo_id'];
             $externalUrl = null;
+            $meta = $this->syncAltTextMeta($meta, $data);
         }
 
         $meta = $this->normalizeCaptionMeta->handle($meta, $photoId, $externalUrl);
@@ -57,5 +60,23 @@ final readonly class ApplyArticleFeaturedImageAction
             'external_featured_img_url' => $externalUrl,
             'meta' => $meta,
         ];
+    }
+
+    /**
+     * Set or clear the featured_image_alt meta key from request data.
+     *
+     * @param  array<string, mixed>  $meta
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function syncAltTextMeta(array $meta, array $data): array
+    {
+        if (! empty($data['featured_image_alt'])) {
+            $meta['featured_image_alt'] = $data['featured_image_alt'];
+        } else {
+            unset($meta['featured_image_alt']);
+        }
+
+        return $meta;
     }
 }

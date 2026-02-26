@@ -120,6 +120,20 @@
         </div>
     @endif
 
+    {{-- Alt Text --}}
+    <template x-if="previewUrl || featuredImageUrl">
+        <div class="mt-2">
+            <input type="text"
+                   name="featured_image_alt"
+                   x-model="featuredImageAlt"
+                   @input="checkDirty()"
+                   class="input input-bordered input-sm w-full"
+                   :placeholder="selectedPhotoId && photoLabels[selectedPhotoId] ? photoLabels[selectedPhotoId] : (title || 'Alt text')"
+                   data-test="featured-image-alt">
+            <p class="text-xs text-base-content/50 mt-1">Describes the image. Defaults to article title if left blank.</p>
+        </div>
+    </template>
+
     {{-- Caption Section --}}
     <template x-if="previewUrl || featuredImageUrl">
         <div class="mt-3 space-y-2">
