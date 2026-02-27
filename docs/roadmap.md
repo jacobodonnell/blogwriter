@@ -79,46 +79,51 @@ BlogWriter is in pre-alpha. This roadmap shows what's built and what's planned.
 
 ## Planned
 
-### Installation
-
-- Shared hosting installers (Softaculous, Installatron, shell script for SSH)
-
 ### Content Types
 
 - Notes (short posts without titles)
 - Tags (polymorphic tagging across content types)
-
-### Feeds & Distribution
-
-- Markdown export (`.md` URLs per article)
+- Tag management interface
 
 ### IndieWeb Protocols
 
 - IndieAuth server (authorization, token, metadata endpoints)
 - Webmention support (send and receive)
 
-### Admin Improvements
+### Feeds & Distribution
 
-- Tag management interface
+- Markdown export (`.md` URLs per article)
+
+### CI/CD
+
+- GitHub Actions pipeline (Pest tests, Pint formatting, Rector analysis)
+
+### Installation
+
+- Shared hosting installers (Softaculous, Installatron, shell script for SSH)
 
 ---
 
 ## Future
 
-### V0.2 — Federation & Discovery
+### V0.2 — Social Reader
+
+An IndieWeb-agnostic social reader that builds social-media-style feeds around IndieAuth server content resources. Not BlogWriter-specific — works with any IndieWeb-compatible server.
+
+### V0.3 — Federation & Discovery
 
 - Micropub support (publish from third-party clients)
 - ActivityPub integration
 - Webmention dashboard
 - POSSE to Bluesky and Mastodon
 
-### V0.3 — Creator Monetization
+### V0.4 — Creator Monetization
 
 - Member-only content
 - Newsletter support (BYOK email relay)
 - Stripe integration
 
-### Beyond V0.3
+### Beyond V0.4
 
 - Podcast hosting (audio files + RSS podcast feed)
 - Video integration (Bunny.net or Vimeo API)
@@ -129,7 +134,7 @@ BlogWriter is in pre-alpha. This roadmap shows what's built and what's planned.
 
 ### BlogWriter Hosted
 
-A separate management application that provisions BlogWriter instances inside Docker containers. The management app makes artisan calls under the hood — the FOSS product requires CLI skills; the hosted version provides the GUI for non-technical users.
+Managed hosting for non-technical users who want BlogWriter without server administration. Initial offering: $200 one-time setup fee + $20/mo on a shared Laravel VPS, or setup on the customer's own Laravel Forge + VPS account. A self-service SaaS provisioning app is a future evolution.
 
 ---
 

@@ -16,11 +16,10 @@
 
 ### Tech Stack Decisions
 - Laravel 12 + PHP 8.4 + SQLite
-- Alpine.js + Alpine AJAX (no Livewire except auth)
+- Alpine.js + Alpine AJAX (no Livewire)
 - Blade + Tailwind CSS v4 + DaisyUI v5
-- Laravel Fortify for auth (custom Blade+Alpine UI)
-- Editor.js for articles (block editor)
-- Markdown for notes + backups
+- Laravel Fortify for auth (custom Blade+Alpine AJAX UI)
+- Tiptap WYSIWYG editor with tiptap-markdown (Markdown storage)
 
 ### Content Strategy
 - **Docs-first approach** - Comprehensive docs already written in Jigsaw SSG

@@ -9,9 +9,9 @@ Access BlogWriter documentation from the local `docs/` directory to understand s
 
 ## Critical Implementation Note
 
-**Many features documented are specifications for future implementation, not current state.** Documentation includes both:
-- ✅ **Implemented features** - Articles, Photos, Categories, Admin, Authentication, CLI Installer
-- 🚧 **Coming Soon features** - Notes, Tags, Themes, Feeds, IndieWeb, Web Installer UI
+**Some features documented are specifications for future implementation, not current state.** Documentation includes both:
+- ✅ **Implemented features** - Articles, Photos, Categories, Admin, Authentication, CLI Installer, Feeds, Microformats, Import/Export, Appearance System, PWA
+- 🚧 **Coming Soon features** - Notes, Tags, Themes, IndieWeb protocols, Web Installer UI
 
 **Always verify actual codebase implementation status before claiming a feature exists.**
 
@@ -25,15 +25,15 @@ All files use YAML frontmatter (HydePHP-compatible format for future static site
 - **`roadmap.md`** - Feature status, V0.1 progress, and future milestones
 
 ### Content & Writing
-- **`writing-content.md`** - Markdown editor (✅ current), Editor.js (🚧 coming soon), Notes (🚧 coming soon), Photos, Tags (🚧 coming soon)
+- **`writing-content.md`** - Tiptap WYSIWYG editor with Markdown storage (✅), Notes (🚧 coming soon), Photos (✅), Tags (🚧 coming soon)
 
 ### Customization (Planned)
 - **`themes.md`** - Theme system specification (🚧 coming soon - entire system not yet built)
 - **`components.md`** - Component library (stub, needs content or specification)
 
 ### Configuration
-- **`settings.md`** - Settings UI (minimal/read-only currently, extensive UI 🚧 coming soon)
-- **`feeds-and-indieweb.md`** - RSS/Atom/JSON feeds, microformats, IndieAuth, Webmentions (🚧 all coming soon)
+- **`settings.md`** - Settings UI (✅ functional)
+- **`feeds-and-indieweb.md`** - RSS/Atom/JSON feeds (✅), microformats (✅), IndieAuth (🚧 coming soon), Webmentions (🚧 coming soon)
 
 ### Architecture & Technical
 - **`architecture.md`** - Tech stack, models (Article ✅, Photo ✅, Note 🚧, Tag 🚧), database structure, design decisions
@@ -78,25 +78,25 @@ Read tool: docs/architecture.md
 ## Current Implementation vs Documentation
 
 **What's Actually Built (✅):**
-- Articles: Full CRUD, Markdown editor, categories, featured photos, draft/publish workflow
-- Photos: Full CRUD, Spatie MediaLibrary integration, image conversions, captions
+- Articles: Full CRUD, Tiptap WYSIWYG editor (Markdown storage), categories, featured photos, draft/publish workflow
+- Photos: Full CRUD, Spatie MediaLibrary integration, image conversions, EXIF extraction
 - Categories: Full CRUD, article relationships
-- Admin Panel: Dashboard, article/photo/category management
-- Authentication: Laravel Fortify with custom UI, email verification, 2FA columns
+- Admin Panel: Dashboard, article/photo/category management, sortable/filterable tables
+- Authentication: Laravel Fortify with custom Alpine AJAX UI, email verification, 2FA columns
 - CLI Installer: Fully working with interactive/non-interactive modes
+- Feeds: RSS 2.0, Atom 1.0, JSON Feed 1.1 with auto-discovery
+- Microformats2: h-card (footer, profile), h-entry (articles, photos), h-feed (indexes)
+- Import/Export: Markdown ZIP export and ZIP import with category/slug preservation
+- Appearance: 35 DaisyUI themes, 11 fonts, three-way theme cycling (light/dark/system)
+- PWA: Progressive Web App support
+- Response Caching: Performance optimization for public pages
+- Settings UI: Functional settings management
 
 **What's Documented But Missing (🚧):**
-- Notes: Model, controller, views, routes - completely missing
-- Tags: Model missing, no polymorphic tagging system
-- Theme System: No themes/ directory, no Folio routing, no Terminal/Starter themes
-- Feeds: No RSS/Atom/JSON feed generation
-- Microformats: No h-card/h-entry/h-feed markup
-- IndieAuth: No authentication endpoints
-- Webmentions: Not implemented
-- Web Installer UI: Documented terminal UI doesn't exist (only CLI works)
+- Notes: Model, controller, views, routes — not yet built
+- Tags: Polymorphic tagging system — not yet built
+- Theme System: Custom template/override system — not yet built
+- IndieAuth: Authorization/token/metadata endpoints — not yet built
+- Webmentions: Send and receive — not yet built
+- Web Installer UI: Only CLI installer works
 - Component Override System: Documented but not built
-
-**Technical Corrections Needed:**
-- Article Editor: Docs may say Editor.js blocks (`content_json`), actually stores Markdown in `content` column
-- Photo Storage: Uses Spatie MediaLibrary (not simple file storage)
-- Routing: Traditional controller routes (not Folio-based theme routing)
