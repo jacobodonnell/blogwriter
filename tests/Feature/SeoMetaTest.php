@@ -94,7 +94,7 @@ it('renders default meta tags on homepage', function (): void {
 
 // --- Placeholder image fallback ---
 
-it('shows placeholder image in article cards when no featured image', function (): void {
+it('shows placeholder image in article cards on home and articles listing', function (): void {
     Storage::fake('public');
     Storage::disk('public')->put('blogwriter/placeholder.jpg', 'fake-image-data');
     Setting::set('site_placeholder_image', 'blogwriter/placeholder.jpg');
@@ -104,23 +104,15 @@ it('shows placeholder image in article cards when no featured image', function (
         'meta' => [],
     ]);
 
+    $placeholderUrl = Storage::disk('public')->url('blogwriter/placeholder.jpg');
+
     $this->get(route('home'))
         ->assertSuccessful()
-        ->assertSee(Storage::disk('public')->url('blogwriter/placeholder.jpg'), false);
-});
-
-it('shows placeholder in articles listing when no featured image', function (): void {
-    Storage::fake('public');
-    Storage::disk('public')->put('blogwriter/placeholder.jpg', 'fake-image-data');
-    Setting::set('site_placeholder_image', 'blogwriter/placeholder.jpg');
-
-    Article::factory()->published()->create([
-        'meta' => [],
-    ]);
+        ->assertSee($placeholderUrl, false);
 
     $this->get(route('articles.index'))
         ->assertSuccessful()
-        ->assertSee(Storage::disk('public')->url('blogwriter/placeholder.jpg'), false);
+        ->assertSee($placeholderUrl, false);
 });
 
 it('shows no-image placeholder in admin articles table when no featured image', function (): void {

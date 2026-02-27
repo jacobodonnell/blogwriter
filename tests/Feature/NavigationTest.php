@@ -53,16 +53,6 @@ it('shows menu-active on guest desktop nav for current route', function (string 
     'about' => fn () => route('about'),
 ]);
 
-it('shows menu-active on guest mobile drawer for current route', function (string $url): void {
-    $this->get($url)
-        ->assertOk()
-        ->assertSee('menu-active', false);
-})->with([
-    'home' => fn () => route('home'),
-    'articles' => fn () => route('articles.index'),
-    'about' => fn () => route('about'),
-]);
-
 it('does not show Categories in guest public nav', function (): void {
     $response = $this->get(route('home'));
     $content = $response->getContent();

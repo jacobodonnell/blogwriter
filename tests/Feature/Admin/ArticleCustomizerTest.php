@@ -60,7 +60,7 @@ it('redirects normally for full save update requests', function (): void {
         ->assertSessionHas('success');
 });
 
-it('rejects update with empty content', function (): void {
+it('rejects update with empty or missing content', function (): void {
     $article = Article::factory()->draft()->for($this->user)->create();
 
     put(route('admin.articles.update', $article), [
@@ -69,10 +69,6 @@ it('rejects update with empty content', function (): void {
         'content' => '',
         'status' => Status::Private->value,
     ])->assertSessionHasErrors('content');
-});
-
-it('rejects update with missing content', function (): void {
-    $article = Article::factory()->draft()->for($this->user)->create();
 
     put(route('admin.articles.update', $article), [
         'title' => 'Updated Title',
@@ -189,33 +185,24 @@ it('index view button links to permalink for published', function (): void {
         ->assertSee('View Published');
 });
 
-it('stores content submitted from tiptap editor', function (): void {
+it('stores markdown content from tiptap editor with all formatting', function (): void {
     $article = Article::factory()->draft()->for($this->user)->create();
+
+    $content = "## Hello\n\n**bold** and _italic_ text\n\n> This is a quote\n\n[Visit example](https://example.com)";
 
     put(route('admin.articles.update', $article), [
         'title' => 'Tiptap Article',
         'slug' => $article->slug,
-        'content' => "## Hello\n\nThis is a paragraph.",
+        'content' => $content,
         'status' => Status::Private->value,
     ])->assertRedirect(route('admin.articles.edit', $article));
 
-    expect($article->fresh()->content)->toBe("## Hello\n\nThis is a paragraph.");
-});
-
-it('stores bold and italic markdown content correctly', function (): void {
-    $article = Article::factory()->draft()->for($this->user)->create();
-
-    put(route('admin.articles.update', $article), [
-        'title' => 'Formatting Test',
-        'slug' => $article->slug,
-        'content' => '**bold** and _italic_ text',
-        'status' => Status::Private->value,
-    ])->assertRedirect();
-
-    $content = $article->fresh()->content;
-
-    expect($content)->toContain('**bold**')
-        ->and($content)->toContain('_italic_');
+    $stored = $article->fresh()->content;
+    expect($stored)->toContain('## Hello')
+        ->and($stored)->toContain('**bold**')
+        ->and($stored)->toContain('_italic_')
+        ->and($stored)->toContain('> This is a quote')
+        ->and($stored)->toContain('[Visit example](https://example.com)');
 });
 
 it('rejects content containing an H1 heading submitted from editor', function (): void {
@@ -227,32 +214,6 @@ it('rejects content containing an H1 heading submitted from editor', function ()
         'content' => "# Top level heading\n\nContent",
         'status' => Status::Private->value,
     ])->assertSessionHasErrors('content');
-});
-
-it('stores blockquote markdown correctly', function (): void {
-    $article = Article::factory()->draft()->for($this->user)->create();
-
-    put(route('admin.articles.update', $article), [
-        'title' => 'Blockquote Test',
-        'slug' => $article->slug,
-        'content' => '> This is a quote',
-        'status' => Status::Private->value,
-    ])->assertRedirect();
-
-    expect($article->fresh()->content)->toContain('> This is a quote');
-});
-
-it('stores link markdown correctly', function (): void {
-    $article = Article::factory()->draft()->for($this->user)->create();
-
-    put(route('admin.articles.update', $article), [
-        'title' => 'Link Test',
-        'slug' => $article->slug,
-        'content' => '[Visit example](https://example.com)',
-        'status' => Status::Private->value,
-    ])->assertRedirect();
-
-    expect($article->fresh()->content)->toContain('[Visit example](https://example.com)');
 });
 
 // ---------------------------------------------------------------------------
