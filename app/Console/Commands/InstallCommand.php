@@ -317,22 +317,18 @@ final class InstallCommand extends Command
         info('✓ Admin user created');
 
         if ($config['seed']) {
-            if (! class_exists(\Faker\Generator::class)) {
-                warning('Skipping demo seed — Faker is not installed (production mode).');
-            } else {
-                info('Verifying demo images...');
-                $imagesValid = $this->verifyDemoImages();
-                if (! $imagesValid) {
-                    info('⚠️  Proceeding with seeding, but some images may be skipped.');
-                }
-
-                info('Seeding demo content...');
-                info('Processing demo images and content (this may take 30-60 seconds)...');
-                $this->newLine();
-                Artisan::call('blogwriter:seed', ['--state' => 'demo', '--no-interaction' => true], $this->output);
-                $this->newLine();
-                info('✓ Demo content added');
+            info('Verifying demo images...');
+            $imagesValid = $this->verifyDemoImages();
+            if (! $imagesValid) {
+                info('⚠️  Proceeding with seeding, but some images may be skipped.');
             }
+
+            info('Seeding demo content...');
+            info('Processing demo images and content (this may take 30-60 seconds)...');
+            $this->newLine();
+            Artisan::call('blogwriter:seed', ['--state' => 'demo', '--no-interaction' => true], $this->output);
+            $this->newLine();
+            info('✓ Demo content added');
         }
 
         $this->seedPlaceholderImage();
@@ -404,10 +400,6 @@ final class InstallCommand extends Command
 
     private function determineSeedOption(): bool
     {
-        if (! class_exists(\Faker\Generator::class)) {
-            return false;
-        }
-
         if ($this->option('seed')) {
             return true;
         }
