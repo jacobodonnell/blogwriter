@@ -43,8 +43,8 @@ final class ArticleController extends Controller
      */
     public function show(string $slug): View|RedirectResponse
     {
-        $article = Article::published()
-            ->where('slug', $slug)
+        $query = auth()->check() ? Article::query() : Article::published();
+        $article = $query->where('slug', $slug)
             ->with('category')
             ->first();
 

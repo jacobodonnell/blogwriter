@@ -28,13 +28,13 @@ it('hides draft articles from guests on articles index', function (): void {
 
 // --- Article Show ---
 
-it('returns 404 for draft articles regardless of auth', function (): void {
+it('allows authenticated users to view draft articles', function (): void {
     $user = User::factory()->create();
     $draft = Article::factory()->draft()->create(['slug' => 'draft-article']);
 
     $this->actingAs($user)
         ->get('/articles/draft-article')
-        ->assertNotFound();
+        ->assertSuccessful();
 });
 
 it('returns 404 for guests viewing draft articles', function (): void {
