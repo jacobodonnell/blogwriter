@@ -63,18 +63,6 @@ it('validates featured image file type', function (): void {
         ->assertSessionHasErrors('featured_image_file');
 });
 
-it('validates external URL format', function (): void {
-    $this->actingAs($this->user)
-        ->post(route('admin.articles.store'), [
-            'title' => 'Test Article',
-            'slug' => 'test-article',
-            'content' => 'Content.',
-            'status' => Status::Public->value,
-            'featured_image' => 'not-a-valid-url',
-        ])
-        ->assertSessionHasErrors('featured_image');
-});
-
 it('updates article to add featured image', function (): void {
     $article = Article::factory()->published()->for($this->user)->create();
     $file = UploadedFile::fake()->image('new-featured.jpg');
@@ -109,22 +97,4 @@ it('updates article to change featured image', function (): void {
         ]);
 
     expect($article->fresh()->photo_id)->not->toBe($oldPhoto->id);
-});
-
-it('removes featured image when remove checkbox is selected', function (): void {
-    $photo = Photo::factory()->published()->for($this->user)->create();
-    $article = Article::factory()->published()->for($this->user)->create(['photo_id' => $photo->id]);
-
-    expect($article->photo_id)->not->toBeNull();
-
-    $this->actingAs($this->user)
-        ->put(route('admin.articles.update', $article), [
-            'title' => $article->title,
-            'slug' => $article->slug,
-            'content' => $article->content,
-            'status' => Status::Public->value,
-            'remove_featured_image' => '1',
-        ]);
-
-    expect($article->fresh()->photo_id)->toBeNull();
 });

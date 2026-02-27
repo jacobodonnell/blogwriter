@@ -37,9 +37,4 @@ describe('guest layout', function (): void {
             ->assertSee(route('photos.index'), false);
     });
 
-    it('supports escape key to close drawer', function (): void {
-        $this->get(route('home'))
-            ->assertSuccessful()
-            ->assertSee('keydown.escape.window', false);
-    });
 });

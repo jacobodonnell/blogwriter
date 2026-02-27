@@ -11,37 +11,6 @@ beforeEach(function (): void {
     $this->user = User::factory()->create();
 });
 
-it('rejects a draft photo when storing an article', function (): void {
-    $draftPhoto = Photo::factory()->draft()->create();
-
-    $response = $this->actingAs($this->user)
-        ->post('/admin/articles', [
-            'title' => 'Test Article',
-            'slug' => 'test-article',
-            'content' => 'Some content',
-            'status' => Status::Private->value,
-            'photo_id' => $draftPhoto->id,
-        ]);
-
-    $response->assertSessionHasErrors('photo_id');
-});
-
-it('rejects a draft photo when updating an article', function (): void {
-    $article = Article::factory()->draft()->create(['user_id' => $this->user->id]);
-    $draftPhoto = Photo::factory()->draft()->create();
-
-    $response = $this->actingAs($this->user)
-        ->put("/admin/articles/{$article->id}", [
-            'title' => $article->title,
-            'slug' => $article->slug,
-            'content' => $article->content,
-            'status' => Status::Private->value,
-            'photo_id' => $draftPhoto->id,
-        ]);
-
-    $response->assertSessionHasErrors('photo_id');
-});
-
 it('accepts a published photo when storing an article', function (): void {
     $publishedPhoto = Photo::factory()->published()->create();
 

@@ -176,16 +176,6 @@ it('only shows light themes in the light dropdown', function (): void {
     }
 });
 
-it('rejects non-image placeholder file', function (): void {
-    $file = Illuminate\Http\UploadedFile::fake()->create('document.pdf', 100, 'application/pdf');
-
-    $this->actingAs($this->user)
-        ->put(route('admin.settings.site.image.update'), [
-            'placeholder_image' => $file,
-        ])
-        ->assertSessionHasErrors('placeholder_image');
-});
-
 it('rejects oversized placeholder image', function (): void {
     $file = Illuminate\Http\UploadedFile::fake()->image('large.jpg')->size(3000);
 

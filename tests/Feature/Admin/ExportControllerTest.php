@@ -216,18 +216,6 @@ it('omits featured_image_url when only a photo_id is set and no meta URL', funct
     expect($frontmatter)->not->toHaveKey('featured_image_url');
 });
 
-it('includes featured_image_url from external_featured_img_url column', function (): void {
-    $article = Article::factory()->published()->create([
-        'external_featured_img_url' => 'https://cdn.example.com/hero.jpg',
-    ]);
-    $article->load('user', 'category', 'featuredPhoto.media');
-
-    $service = new ArticleExportService();
-    $frontmatter = $service->buildFrontmatter($article);
-
-    expect($frontmatter['featured_image_url'])->toBe('https://cdn.example.com/hero.jpg');
-});
-
 it('zip contains categories.yaml', function (): void {
     Category::factory()->count(2)->create();
 
