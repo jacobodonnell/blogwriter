@@ -25,7 +25,7 @@ use App\Http\Controllers\Admin\SiteSettingsController;
 use Illuminate\Support\Facades\Route;
 use Spatie\ResponseCache\Middlewares\DoNotCacheResponse;
 
-Route::middleware(['auth', DoNotCacheResponse::class])->prefix('admin')->name('admin.')->group(function (): void {
+Route::middleware(['auth', 'auth.session', DoNotCacheResponse::class])->prefix('admin')->name('admin.')->group(function (): void {
     // Dashboard
     Route::get('/', DashboardController::class)->name('dashboard');
 

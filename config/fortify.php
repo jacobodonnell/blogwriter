@@ -149,8 +149,8 @@ return [
         // Features::registration(), // Disabled - single-user system, register via CLI only
         // Features::resetPasswords(), // Disabled — use: php artisan blogwriter:reset-password
         // Features::emailVerification(), // Disabled — BlogWriter does not send email out of the box
-        Features::updateProfileInformation(),
-        Features::updatePasswords(),
+        // Features::updateProfileInformation(), // Disabled — use: php artisan blogwriter:profile
+        // Features::updatePasswords(), // Disabled — use: php artisan blogwriter:reset-password
         // Features::twoFactorAuthentication([
         //     'confirm' => true,
         //     'confirmPassword' => true,
