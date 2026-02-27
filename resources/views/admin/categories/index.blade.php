@@ -15,7 +15,8 @@
             },
             toggle(col) {
                 this.columns[col] = !this.columns[col];
-            }
+            },
+            deleteAction: '',
          }">
         {{-- View Switching Tabs --}}
         <div class="flex items-center gap-2">
@@ -92,6 +93,18 @@
 
         {{-- Categories List --}}
         @include('admin.categories._table')
+
+        {{-- Delete Confirmation Modal --}}
+        <x-editor-modal x-ref="deleteModal" title="Delete Category">
+            <p>Are you sure you want to delete this category? This action cannot be undone.</p>
+            <x-slot:actions>
+                <form method="POST" :action="deleteAction" x-target="categories-table" @ajax:success="$refs.deleteModal.close()">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-error">Delete</button>
+                </form>
+            </x-slot:actions>
+        </x-editor-modal>
     </div>
 
     {{-- Add Category Modal --}}

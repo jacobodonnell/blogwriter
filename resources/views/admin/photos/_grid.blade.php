@@ -54,14 +54,13 @@
                                 <x-admin.icon-button tooltip="View" href="{{ route('photos.show', $photo->slug) }}" icon="eye" />
                             @endif
 
-                            <form method="POST"
-                                  action="{{ route('admin.photos.destroy', $photo) }}"
-                                  class="inline"
-                                  onsubmit="return confirm('Are you sure you want to delete this photo?{{ $photo->articles()->count() > 0 ? ' This photo is used in ' . $photo->articles()->count() . ' article(s).' : '' }}');">
-                                @csrf
-                                @method('DELETE')
-                                <x-admin.icon-button-submit tooltip="Delete" icon="trash" class="text-error" />
-                            </form>
+                            <div class="tooltip" data-tip="Delete">
+                                <button type="button"
+                                        class="btn btn-sm btn-ghost text-error"
+                                        @click="deleteAction = '{{ route('admin.photos.destroy', $photo) }}'; deleteArticleCount = {{ $photo->articles()->count() }}; $refs.deleteModal.showModal()">
+                                    <i class="ph ph-trash text-lg"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </article>

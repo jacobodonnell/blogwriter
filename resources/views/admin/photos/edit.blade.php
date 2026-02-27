@@ -99,54 +99,36 @@
         </form>
 
         {{-- Detach Warning Modal --}}
-        <dialog id="detach-modal" class="modal">
-            <div class="modal-box">
-                <h3 class="font-bold text-lg">Detach Photo from Articles</h3>
-                <p class="py-4">
-                    Switching this photo to private will remove it as the featured image from
-                    <span class="font-semibold" x-text="articleCount"></span>
-                    <span x-text="articleCount === 1 ? 'article' : 'articles'"></span>.
-                    Private photos are not publicly accessible, so the featured image would appear broken.
-                </p>
-                <div class="modal-action">
-                    <button type="button" class="btn btn-warning" @click="confirmDetach()">Switch to Private</button>
-                    <form method="dialog">
-                        <button class="btn">Cancel</button>
-                    </form>
-                </div>
-            </div>
-            <form method="dialog" class="modal-backdrop">
-                <button>close</button>
-            </form>
-        </dialog>
+        <x-editor-modal id="detach-modal" title="Detach Photo from Articles">
+            <p>
+                Switching this photo to private will remove it as the featured image from
+                <span class="font-semibold" x-text="articleCount"></span>
+                <span x-text="articleCount === 1 ? 'article' : 'articles'"></span>.
+                Private photos are not publicly accessible, so the featured image would appear broken.
+            </p>
+            <x-slot:actions>
+                <button type="button" class="btn btn-warning" @click="confirmDetach()">Switch to Private</button>
+            </x-slot:actions>
+        </x-editor-modal>
 
         {{-- Delete Confirmation Modal --}}
-        <dialog id="delete-modal" class="modal">
-            <div class="modal-box">
-                <h3 class="font-bold text-lg">Delete Photo</h3>
-                <p class="py-4">
-                    Are you sure you want to delete this photo?
-                    @if($articleCount > 0)
-                        <span class="text-error font-semibold">
-                            This photo is currently used in {{ $articleCount }} {{ Str::plural('article', $articleCount) }}.
-                        </span>
-                    @endif
-                    This action cannot be undone.
-                </p>
-                <div class="modal-action">
-                    <form method="POST" action="{{ route('admin.photos.destroy', $photo) }}">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-error">Delete</button>
-                    </form>
-                    <form method="dialog">
-                        <button class="btn">Cancel</button>
-                    </form>
-                </div>
-            </div>
-            <form method="dialog" class="modal-backdrop">
-                <button>close</button>
-            </form>
-        </dialog>
+        <x-editor-modal id="delete-modal" title="Delete Photo">
+            <p>
+                Are you sure you want to delete this photo?
+                @if($articleCount > 0)
+                    <span class="text-error font-semibold">
+                        This photo is currently used in {{ $articleCount }} {{ Str::plural('article', $articleCount) }}.
+                    </span>
+                @endif
+                This action cannot be undone.
+            </p>
+            <x-slot:actions>
+                <form method="POST" action="{{ route('admin.photos.destroy', $photo) }}">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-error">Delete</button>
+                </form>
+            </x-slot:actions>
+        </x-editor-modal>
     </div>
 </x-layouts.admin>

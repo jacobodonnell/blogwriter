@@ -3,7 +3,8 @@
         <li>Photos</li>
     </x-slot:breadcrumb>
 
-    <div class="space-y-6">
+    <div class="space-y-6"
+         x-data="{ deleteAction: '', deleteArticleCount: 0 }">
         {{-- Header --}}
         <div class="flex flex-wrap justify-between items-center gap-2">
             <div>
@@ -36,5 +37,21 @@
 
         {{-- Photos Grid --}}
         @include('admin.photos._grid')
+
+        {{-- Delete Confirmation Modal --}}
+        <x-editor-modal x-ref="deleteModal" title="Delete Photo">
+            <p>Are you sure you want to delete this photo?</p>
+            <p x-show="deleteArticleCount > 0" x-cloak class="text-error font-semibold mt-2">
+                This photo is used in <span x-text="deleteArticleCount"></span> <span x-text="deleteArticleCount === 1 ? 'article' : 'articles'"></span>.
+            </p>
+            <p class="mt-2">This action cannot be undone.</p>
+            <x-slot:actions>
+                <form method="POST" :action="deleteAction" x-target="photos-grid" @ajax:success="$refs.deleteModal.close()">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-error">Delete</button>
+                </form>
+            </x-slot:actions>
+        </x-editor-modal>
     </div>
 </x-layouts.admin>
