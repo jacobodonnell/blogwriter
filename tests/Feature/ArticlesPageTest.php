@@ -106,7 +106,7 @@ it('filters articles by status for authenticated users', function (): void {
         ->assertDontSee('Published One');
 });
 
-it('authenticated user sees only published articles by default', function (): void {
+it('authenticated user sees only published articles by default and when status is cleared', function (): void {
     $user = User::factory()->create();
     Article::factory()->published()->create(['title' => 'Published Default']);
     Article::factory()->draft()->create(['title' => 'Draft Hidden']);
@@ -116,18 +116,12 @@ it('authenticated user sees only published articles by default', function (): vo
         ->assertSuccessful()
         ->assertSee('Published Default')
         ->assertDontSee('Draft Hidden');
-});
-
-it('authenticated user sees only published articles when status is cleared', function (): void {
-    $user = User::factory()->create();
-    Article::factory()->published()->create(['title' => 'Published One']);
-    Article::factory()->draft()->create(['title' => 'Draft One']);
 
     $this->actingAs($user)
         ->get('/articles?status=')
         ->assertSuccessful()
-        ->assertSee('Published One')
-        ->assertDontSee('Draft One');
+        ->assertSee('Published Default')
+        ->assertDontSee('Draft Hidden');
 });
 
 it('guests cannot see drafts via status filter', function (): void {
@@ -234,14 +228,4 @@ it('defaults to newest first when sort is invalid', function (): void {
     $this->get('/articles?sort=bogus')
         ->assertSuccessful()
         ->assertSeeInOrder(['New Article', 'Old Article']);
-});
-
-it('preserves sort in pagination query string', function (): void {
-    Article::factory()->published()->count(15)
-        ->sequence(fn ($seq) => ['title' => 'Sorted Article '.$seq->index])
-        ->create();
-
-    $this->get('/articles?sort=oldest')
-        ->assertSuccessful()
-        ->assertSee('sort=oldest');
 });

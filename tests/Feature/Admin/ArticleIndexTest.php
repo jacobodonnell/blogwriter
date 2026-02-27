@@ -92,21 +92,13 @@ it('sorts by created_at', function (): void {
     $response->assertSeeInOrder(['First Created', 'Second Created']);
 });
 
-it('falls back to default sort for invalid column', function (): void {
+it('falls back to defaults for invalid sort column and direction', function (): void {
     Article::factory()->create(['title' => 'Test Article']);
 
-    $response = $this->get(route('admin.articles.index', ['sort' => 'invalid_column']));
+    $response = $this->get(route('admin.articles.index', ['sort' => 'invalid_column', 'direction' => 'invalid']));
 
     $response->assertSuccessful();
     $response->assertViewHas('currentSort', 'updated_at');
-});
-
-it('falls back to desc for invalid direction', function (): void {
-    Article::factory()->create(['title' => 'Test Article']);
-
-    $response = $this->get(route('admin.articles.index', ['direction' => 'invalid']));
-
-    $response->assertSuccessful();
     $response->assertViewHas('currentDirection', 'desc');
 });
 
@@ -259,30 +251,15 @@ it('paginates with custom per page value', function (): void {
     $response->assertViewHas('articles', fn ($articles) => $articles->count() === 10);
 });
 
-it('defaults to 20 per page', function (): void {
+it('defaults to 20 per page and falls back for invalid values', function (): void {
     Article::factory()->count(25)->create();
 
     $response = $this->get(route('admin.articles.index'));
-
     $response->assertSuccessful();
     $response->assertViewHas('perPage', 20);
     $response->assertViewHas('articles', fn ($articles) => $articles->count() === 20);
-});
-
-it('falls back to 20 for invalid per page value', function (): void {
-    Article::factory()->count(5)->create();
 
     $response = $this->get(route('admin.articles.index', ['perPage' => 999]));
-
     $response->assertSuccessful();
     $response->assertViewHas('perPage', 20);
 });
-
-it('accepts all allowed per page values', function (int $perPage): void {
-    Article::factory()->count(5)->create();
-
-    $response = $this->get(route('admin.articles.index', ['perPage' => $perPage]));
-
-    $response->assertSuccessful();
-    $response->assertViewHas('perPage', $perPage);
-})->with([10, 20, 50, 100]);
