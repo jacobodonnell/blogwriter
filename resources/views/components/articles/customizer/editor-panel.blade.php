@@ -143,6 +143,11 @@
                         class="btn btn-ghost btn-xs tooltip" data-tip="Edit image">
                     <i class="ph ph-pencil-simple"></i> Edit
                 </button>
+                <button type="button" @click="removeImage()"
+                        class="btn btn-ghost btn-xs btn-square tooltip text-error"
+                        data-tip="Remove image" data-test="toolbar-remove-image">
+                    <i class="ph ph-trash"></i>
+                </button>
             </div>
 
             {{-- Inline dialogs for link / image / youtube --}}
@@ -162,6 +167,12 @@
                     <input x-model="imageAlt" type="text" id="image-alt" placeholder="Alt text" class="input input-sm input-bordered flex-1" data-test="image-alt-input">
                 </div>
                 <div class="flex items-center gap-2">
+                    <template x-if="editingImage">
+                        <button type="button" @click="removeImage()"
+                                class="btn btn-sm btn-ghost text-error" data-test="image-remove-btn">
+                            <i class="ph ph-trash"></i> Remove
+                        </button>
+                    </template>
                     <div class="flex-1"></div>
                     <button type="button" @click="insertImage()" class="btn btn-sm btn-primary" data-test="image-insert-btn">
                         <span x-text="editingImage ? 'Update' : 'Insert'"></span>

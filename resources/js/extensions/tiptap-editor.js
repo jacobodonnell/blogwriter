@@ -103,6 +103,7 @@ export function createTiptapEditor({ element, content, onUpdate, onSelectionUpda
         codeBlock: () => editor.chain().focus().toggleCodeBlock().run(),
         horizontalRule: () => editor.chain().focus().setHorizontalRule().run(),
         imageFullWidth: () => editor.chain().focus().updateAttributes('figure', { width: null }).run(),
+        removeFigure: () => editor.chain().focus().deleteNode('figure').run(),
     };
 
     return {

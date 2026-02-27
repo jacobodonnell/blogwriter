@@ -66,6 +66,14 @@ export function makeTiptapCommands(getEditor) {
             this.resetImageDialog();
         },
 
+        removeImage() {
+            const editor = getEditor();
+            if (!editor || !editor.isActive('figure')) return;
+            editor.command('removeFigure');
+            this.showImageDialog = false;
+            this.resetImageDialog();
+        },
+
         isImageFullWidth() {
             void this.updatedAt;
             return getEditor()?.getAttributes('figure')?.width == null;

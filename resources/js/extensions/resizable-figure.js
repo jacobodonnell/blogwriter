@@ -110,6 +110,13 @@ export function createResizableFigure(getEditor) {
                 img.alt = HTMLAttributes.alt ?? '';
                 if (HTMLAttributes.title) img.title = HTMLAttributes.title;
 
+                img.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const pos = getPos();
+                    if (pos === undefined) return;
+                    editor.commands.setNodeSelection(pos);
+                });
+
                 const figcaption = document.createElement('figcaption');
                 figcaption.setAttribute('data-placeholder', 'Add a caption…');
 
