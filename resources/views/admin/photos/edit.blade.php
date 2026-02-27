@@ -117,7 +117,7 @@
                 Are you sure you want to delete this photo?
                 @if($articleCount > 0)
                     <span class="text-error font-semibold">
-                        This photo is currently used in {{ $articleCount }} {{ Str::plural('article', $articleCount) }}.
+                        This photo will be removed from {{ $articleCount }} {{ Str::plural('article', $articleCount) }} as a featured image.
                     </span>
                 @endif
                 This action cannot be undone.

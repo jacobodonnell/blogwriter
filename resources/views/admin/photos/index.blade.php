@@ -42,7 +42,10 @@
         <x-editor-modal x-ref="deleteModal" title="Delete Photo">
             <p>Are you sure you want to delete this photo?</p>
             <p x-show="deleteArticleCount > 0" x-cloak class="text-error font-semibold mt-2">
-                This photo is used in <span x-text="deleteArticleCount"></span> <span x-text="deleteArticleCount === 1 ? 'article' : 'articles'"></span>.
+                This photo will be removed from
+                <span x-text="deleteArticleCount"></span>
+                <span x-text="deleteArticleCount === 1 ? 'article' : 'articles'"></span>
+                as a featured image.
             </p>
             <p class="mt-2">This action cannot be undone.</p>
             <x-slot:actions>

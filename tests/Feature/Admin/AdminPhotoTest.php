@@ -48,14 +48,25 @@ it('updates photo metadata', function (): void {
     expect($photo->caption)->toBe('Updated caption');
 });
 
-it('prevents deletion when photo is used by articles', function (): void {
+it('deletes a photo and detaches it from articles', function (): void {
     $photo = Photo::factory()->published()->create();
-    Article::factory()->create(['photo_id' => $photo->id]);
+    $article = Article::factory()->create(['photo_id' => $photo->id]);
 
     $response = $this->delete(route('admin.photos.destroy', $photo));
 
-    $response->assertSessionHasErrors();
-    expect(Photo::find($photo->id))->not->toBeNull();
+    $response->assertRedirect(route('admin.photos.index'));
+    $response->assertSessionHas('success');
+    expect(Photo::find($photo->id))->toBeNull();
+    expect($article->fresh()->photo_id)->toBeNull();
+});
+
+it('includes article count in success message when deleting photo used by articles', function (): void {
+    $photo = Photo::factory()->published()->create();
+    Article::factory()->count(3)->create(['photo_id' => $photo->id]);
+
+    $response = $this->delete(route('admin.photos.destroy', $photo));
+
+    $response->assertSessionHas('success', 'Photo deleted successfully. Removed from 3 articles.');
 });
 
 it('requires unique slugs', function (): void {

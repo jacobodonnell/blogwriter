@@ -17,6 +17,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 final class AdminPhotoController extends Controller
@@ -187,20 +188,20 @@ final class AdminPhotoController extends Controller
      */
     public function destroy(Photo $photo): RedirectResponse
     {
-        if ($photo->articles()->exists()) {
+        try {
             $articleCount = $photo->articles()->count();
 
-            return redirect()->back()
-                ->withErrors([
-                    'photo' => sprintf('Cannot delete photo. It is being used by %d article(s). Remove it from articles first.', $articleCount),
-                ]);
-        }
+            DB::transaction(function () use ($photo): void {
+                $photo->articles()->update(['photo_id' => null]);
+                $photo->delete();
+            });
 
-        try {
-            $photo->delete();
+            $message = $articleCount > 0
+                ? sprintf('Photo deleted successfully. Removed from %d %s.', $articleCount, Str::plural('article', $articleCount))
+                : 'Photo deleted successfully.';
 
             return redirect()->route('admin.photos.index')
-                ->with('success', 'Photo deleted successfully.');
+                ->with('success', $message);
         } catch (Exception $exception) {
             Log::error('Failed to delete photo', [
                 'photo_id' => $photo->id,
