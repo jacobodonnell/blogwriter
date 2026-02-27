@@ -135,7 +135,7 @@ it('accepts every configured font', function (string $font): void {
         ->assertSessionHas('success');
 
     expect(Setting::get('theme_font'))->toBe($font);
-})->with('appearance fonts');
+})->with(['noto-sans', 'jetbrains-mono']);
 
 it('renders font categories on appearance page', function (): void {
     $response = $this->actingAs($this->user)
@@ -216,7 +216,7 @@ it('accepts every configured light theme', function (string $theme): void {
         ->assertSessionHas('success');
 
     expect(Setting::get('theme_light'))->toBe($theme);
-})->with('appearance light themes');
+})->with(['light', 'silk']);
 
 it('accepts every configured dark theme', function (string $theme): void {
     $this->actingAs($this->user)
@@ -229,4 +229,4 @@ it('accepts every configured dark theme', function (string $theme): void {
         ->assertSessionHas('success');
 
     expect(Setting::get('theme_dark'))->toBe($theme);
-})->with('appearance dark themes');
+})->with(['dark', 'abyss']);
