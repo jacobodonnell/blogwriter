@@ -64,11 +64,18 @@ The installer uses Laravel Prompts for an interactive terminal experience:
 - Seeds initial data
 - Configures site settings
 
-**Non-interactive mode** is also available for automated deployments:
+**Non-interactive mode** is also available for automated deployments — pass all five required options:
 
 ```bash
-php artisan blogwriter:install --non-interactive
+php artisan blogwriter:install \
+  --site-name="My Blog" \
+  --site-url="https://example.com" \
+  --admin-name="Jane Doe" \
+  --admin-email="jane@example.com" \
+  --admin-password="SecureP@ss1234"
 ```
+
+Add `--seed` to include demo content, `--no-seed` to skip it (defaults to seeding), or `--force` to reinstall over an existing installation.
 
 <x-callout type="info" title="Install Page">
   If you visit your site before running the installer, you'll see a page at `/install` with instructions to run the CLI command.
@@ -163,7 +170,7 @@ chmod -R 775 storage bootstrap/cache
 **"Install page shows 404"** — Make sure your web server points to BlogWriter's `public/` directory, not the project
 root.
 
-**Forgot your password?** — Run `php artisan blogwriter:user:reset-password` via SSH to reset your admin password.
+**Forgot your password?** — Run `php artisan blogwriter:reset-password` via SSH to reset your admin password.
 
 **Something not working?** — Run `php artisan blogwriter:diagnose` for health checks that identify common issues.
 

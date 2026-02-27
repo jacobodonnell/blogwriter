@@ -14,7 +14,7 @@ final class ResetPasswordCommand extends Command
 {
     use PromptsForPassword;
 
-    protected $signature = 'blogwriter:user:reset-password
+    protected $signature = 'blogwriter:reset-password
                             {--password= : New password (prompted if not provided)}';
 
     protected $description = 'Reset the user password';

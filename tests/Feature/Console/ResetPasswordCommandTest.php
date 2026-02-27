@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Hash;
 it('resets password non-interactively with --password', function (): void {
     $user = User::factory()->create();
 
-    $this->artisan('blogwriter:user:reset-password', [
+    $this->artisan('blogwriter:reset-password', [
         '--password' => 'NewSecureP@ss1234',
     ])->assertSuccessful();
 
@@ -16,7 +16,7 @@ it('resets password non-interactively with --password', function (): void {
 });
 
 it('fails when no user exists', function (): void {
-    $this->artisan('blogwriter:user:reset-password', [
+    $this->artisan('blogwriter:reset-password', [
         '--password' => 'NewSecureP@ss1234',
     ])->assertFailed();
 });
@@ -24,7 +24,7 @@ it('fails when no user exists', function (): void {
 it('validates password rules', function (): void {
     User::factory()->create();
 
-    $this->artisan('blogwriter:user:reset-password', [
+    $this->artisan('blogwriter:reset-password', [
         '--password' => 'short',
     ])->assertFailed();
 });

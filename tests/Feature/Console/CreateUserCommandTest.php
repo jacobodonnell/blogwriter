@@ -5,9 +5,9 @@ declare(strict_types=1);
 use App\Models\User;
 
 it('creates a user when none exists', function (): void {
-    $this->artisan('blogwriter:user:create', [
-        'name' => 'Test User',
-        'email' => 'test@example.com',
+    $this->artisan('blogwriter:create-user', [
+        '--name' => 'Test User',
+        '--email' => 'test@example.com',
         '--password' => 'SecurePass123!@#456',
     ])->assertSuccessful();
 
@@ -24,9 +24,9 @@ it('replaces existing user with --force', function (): void {
         'email' => 'old@example.com',
     ]);
 
-    $this->artisan('blogwriter:user:create', [
-        'name' => 'New User',
-        'email' => 'new@example.com',
+    $this->artisan('blogwriter:create-user', [
+        '--name' => 'New User',
+        '--email' => 'new@example.com',
         '--password' => 'SecurePass123!@#456',
         '--force' => true,
     ])->assertSuccessful();
@@ -39,9 +39,9 @@ it('replaces existing user with --force', function (): void {
 it('prompts for confirmation when replacing without --force', function (): void {
     User::factory()->create(['name' => 'Existing']);
 
-    $this->artisan('blogwriter:user:create', [
-        'name' => 'New User',
-        'email' => 'new@example.com',
+    $this->artisan('blogwriter:create-user', [
+        '--name' => 'New User',
+        '--email' => 'new@example.com',
         '--password' => 'SecurePass123!@#456',
     ])
         ->expectsConfirmation('Replace this user?', 'no')
@@ -55,9 +55,9 @@ it('prompts for confirmation when replacing without --force', function (): void 
 it('replaces user when confirmation is accepted', function (): void {
     User::factory()->create(['name' => 'Existing']);
 
-    $this->artisan('blogwriter:user:create', [
-        'name' => 'Replacement',
-        'email' => 'replacement@example.com',
+    $this->artisan('blogwriter:create-user', [
+        '--name' => 'Replacement',
+        '--email' => 'replacement@example.com',
         '--password' => 'SecurePass123!@#456',
     ])
         ->expectsConfirmation('Replace this user?', 'yes')
@@ -68,12 +68,54 @@ it('replaces user when confirmation is accepted', function (): void {
 });
 
 it('generates password when not provided', function (): void {
-    $this->artisan('blogwriter:user:create', [
-        'name' => 'Test User',
-        'email' => 'test@example.com',
+    $this->artisan('blogwriter:create-user', [
+        '--name' => 'Test User',
+        '--email' => 'test@example.com',
     ])
         ->expectsOutputToContain('Generated Password:')
         ->assertSuccessful();
 
     expect(User::count())->toBe(1);
+});
+
+it('prompts interactively when name and email are not provided', function (): void {
+    $this->artisan('blogwriter:create-user', [
+        '--password' => 'SecurePass123!@#456',
+    ])
+        ->expectsQuestion("What is the user's display name?", 'Prompted User')
+        ->expectsQuestion("What is the user's email address?", 'prompted@example.com')
+        ->assertSuccessful();
+
+    expect(User::count())->toBe(1);
+    $this->assertDatabaseHas('users', [
+        'name' => 'Prompted User',
+        'email' => 'prompted@example.com',
+    ]);
+});
+
+it('prompts for email when only name is provided', function (): void {
+    $this->artisan('blogwriter:create-user', [
+        '--name' => 'Partial User',
+        '--password' => 'SecurePass123!@#456',
+    ])
+        ->expectsQuestion("What is the user's email address?", 'partial@example.com')
+        ->assertSuccessful();
+
+    expect(User::count())->toBe(1);
+    $this->assertDatabaseHas('users', [
+        'name' => 'Partial User',
+        'email' => 'partial@example.com',
+    ]);
+});
+
+it('fails with invalid email via --email option', function (): void {
+    $this->artisan('blogwriter:create-user', [
+        '--name' => 'Test User',
+        '--email' => 'not-an-email',
+        '--password' => 'SecurePass123!@#456',
+    ])
+        ->expectsOutputToContain('Invalid email')
+        ->assertFailed();
+
+    expect(User::count())->toBe(0);
 });

@@ -10,6 +10,6 @@ final class SingleUserViolationException extends RuntimeException
 {
     public function __construct()
     {
-        parent::__construct('BlogWriter supports only one user. Use blogwriter:user:create to replace the existing user.');
+        parent::__construct('BlogWriter supports only one user. Use blogwriter:create-user to replace the existing user.');
     }
 }

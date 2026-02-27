@@ -96,7 +96,7 @@
                 {{-- Forgot Password Hint --}}
                 <div class="mt-4 text-center">
                     <p class="text-base-content/50 text-xs">
-                        Forgot your password? Run <code>php artisan blogwriter:user:reset-password</code> via SSH.
+                        Forgot your password? Run <code>php artisan blogwriter:reset-password</code> via SSH.
                     </p>
                 </div>
             </form>

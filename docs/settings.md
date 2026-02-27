@@ -56,7 +56,7 @@ php artisan config:clear
 
 ## Maintenance Commands
 
-- `php artisan blogwriter:user:reset-password` — Reset your admin password via SSH
+- `php artisan blogwriter:reset-password` — Reset your admin password via SSH
 - `php artisan blogwriter:diagnose` — Run health checks to identify common issues
 - `php artisan blogwriter:uninstall` — Full reset (destructive — removes database and configuration)
 

@@ -304,7 +304,7 @@ Fortify provides routes and controllers. Only `/login` and `/logout` are active 
 - `/login` --- POST to authenticate
 - `/logout` --- POST to destroy session
 
-Registration, password reset, and email verification are disabled. User creation and password resets are handled via CLI commands (`blogwriter:install`, `blogwriter:user:reset-password`).
+Registration, password reset, and email verification are disabled. User creation and password resets are handled via CLI commands (`blogwriter:install`, `blogwriter:reset-password`).
 
 BlogWriter does not send or receive email out of the box.
 

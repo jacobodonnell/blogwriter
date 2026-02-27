@@ -7,6 +7,8 @@ namespace App\Console\Commands;
 use App\Contracts\Resettable;
 use Illuminate\Console\Command;
 
+use function Laravel\Prompts\confirm;
+
 final class UninstallCommand extends Command
 {
     protected $signature = 'blogwriter:uninstall {--force : Skip confirmation}';
@@ -20,7 +22,7 @@ final class UninstallCommand extends Command
 
     public function handle(): int
     {
-        if (! $this->option('force') && ! $this->confirm('This will DELETE all content, users, and uploaded files. Are you sure?', false)) {
+        if (! $this->option('force') && ! confirm('This will DELETE all content, users, and uploaded files. Are you sure?', default: false)) {
             $this->info('Uninstall cancelled.');
 
             return self::SUCCESS;

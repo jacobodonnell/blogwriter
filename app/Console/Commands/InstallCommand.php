@@ -113,7 +113,7 @@ final class InstallCommand extends Command
             );
 
             if ($action === 'password') {
-                note('Run: php artisan blogwriter:user:reset-password');
+                note('Run: php artisan blogwriter:reset-password');
 
                 return self::SUCCESS;
             }

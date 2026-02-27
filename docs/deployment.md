@@ -242,7 +242,7 @@ Each deploy installs updated dependencies, rebuilds assets, refreshes caches, an
 
 **npm errors during deploy** — Confirm Node 18+ is installed. Run `node -v` in the Forge **Commands** panel.
 
-**Forgot your admin password** — Run `php artisan blogwriter:user:reset-password` in the Forge Commands panel.
+**Forgot your admin password** — Run `php artisan blogwriter:reset-password` in the Forge Commands panel.
 
 **General issues** — Run `php artisan blogwriter:diagnose` in the Forge Commands panel for a full health check.
 

@@ -284,7 +284,7 @@ describe('already installed detection', function (): void {
         $this->artisan('blogwriter:install')
             ->expectsOutputToContain('BlogWriter is already installed')
             ->expectsQuestion('What would you like to do?', 'password')
-            ->expectsOutputToContain('blogwriter:user:reset-password')
+            ->expectsOutputToContain('blogwriter:reset-password')
             ->assertSuccessful();
     });
 
