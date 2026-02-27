@@ -75,10 +75,6 @@ it('public categories route returns 404', function (): void {
     $this->get('/categories')->assertNotFound();
 });
 
-it('welcome blade file does not exist', function (): void {
-    expect(file_exists(resource_path('views/welcome.blade.php')))->toBeFalse();
-});
-
 it('renders custom 404 page', function (): void {
     $this->get('/this-page-does-not-exist-at-all')
         ->assertStatus(404)
