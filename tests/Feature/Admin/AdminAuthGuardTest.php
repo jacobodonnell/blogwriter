@@ -21,6 +21,7 @@ it('redirects unauthenticated users on admin GET routes', function (string $rout
     'photos create' => ['admin.photos.create', []],
     'categories index' => ['admin.categories.index', []],
     'categories explore' => ['admin.categories.explore', []],
+    'site settings' => ['admin.settings.site', []],
 ]);
 
 it('redirects unauthenticated users on admin article routes', function (): void {

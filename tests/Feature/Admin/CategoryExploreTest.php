@@ -11,13 +11,6 @@ beforeEach(function (): void {
     $this->user = User::factory()->create();
 });
 
-// --- Auth Guard ---
-
-it('redirects guests to login', function (): void {
-    $this->get(route('admin.categories.explore'))
-        ->assertRedirect(route('login'));
-});
-
 // --- Root Explore ---
 
 it('loads the explore index for authenticated users', function (): void {
