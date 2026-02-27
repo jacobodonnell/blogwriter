@@ -31,7 +31,7 @@ final class StoreArticleRequest extends FormRequest
         return array_merge($this->sharedRules(), [
             'title' => ['nullable', 'string', 'min:3', 'max:255'],
             'slug' => ['nullable', 'string', 'unique:articles', 'max:255', 'regex:/^[a-z0-9-]+$/'],
-            'status' => ['nullable', 'in:draft,published'],
+            'status' => ['nullable', 'in:private,public'],
         ]);
     }
 

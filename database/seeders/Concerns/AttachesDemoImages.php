@@ -29,7 +29,7 @@ trait AttachesDemoImages
             return;
         }
 
-        $disk = $model->status === Status::Published ? 'public' : 'private';
+        $disk = $model->status === Status::Public ? 'public' : 'private';
 
         try {
             $model->addMedia($imagePath)

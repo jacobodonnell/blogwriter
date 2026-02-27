@@ -8,12 +8,12 @@ use App\Models\User;
 
 // --- Articles Index ---
 
-it('shows draft articles to authenticated users via status=draft', function (): void {
+it('shows draft articles to authenticated users via status=private', function (): void {
     $user = User::factory()->create();
     $draft = Article::factory()->draft()->create();
 
     $this->actingAs($user)
-        ->get('/articles?status=draft')
+        ->get('/articles?status=private')
         ->assertSuccessful()
         ->assertSee($draft->title);
 });
@@ -46,12 +46,12 @@ it('returns 404 for guests viewing draft articles', function (): void {
 
 // --- Photos Index ---
 
-it('shows draft photos to authenticated users via status=draft', function (): void {
+it('shows draft photos to authenticated users via status=private', function (): void {
     $user = User::factory()->create();
     $draft = Photo::factory()->draft()->create(['alt_text' => 'Draft Photo Alt']);
 
     $this->actingAs($user)
-        ->get('/photos?status=draft')
+        ->get('/photos?status=private')
         ->assertSuccessful()
         ->assertSee('Draft Photo Alt');
 });

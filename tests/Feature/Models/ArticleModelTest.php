@@ -36,7 +36,7 @@ it('wasEdited returns false when last_edited_at is null', function (): void {
 it('isPublished returns true for published article with past published_at', function (): void {
     $article = new Article;
     $article->setRawAttributes([
-        'status' => Status::Published->value,
+        'status' => Status::Public->value,
         'published_at' => now()->subDay()->toDateTimeString(),
     ]);
 
@@ -46,7 +46,7 @@ it('isPublished returns true for published article with past published_at', func
 it('isPublished returns false for draft article', function (): void {
     $article = new Article;
     $article->setRawAttributes([
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'published_at' => now()->subDay()->toDateTimeString(),
     ]);
 
@@ -56,7 +56,7 @@ it('isPublished returns false for draft article', function (): void {
 it('isPublished returns false when published_at is in the future', function (): void {
     $article = new Article;
     $article->setRawAttributes([
-        'status' => Status::Published->value,
+        'status' => Status::Public->value,
         'published_at' => now()->addDay()->toDateTimeString(),
     ]);
 

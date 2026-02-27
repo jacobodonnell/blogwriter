@@ -27,7 +27,7 @@ it('creates a spatie media entry when image is attached', function (): void {
     $photo = $action->handle($file, [
         'user_id' => $this->user->id,
         'alt_text' => 'Test image',
-        'status' => Status::Published,
+        'status' => Status::Public,
     ]);
 
     expect($photo->getFirstMedia('image'))->not->toBeNull()
@@ -41,7 +41,7 @@ it('generates thumbnail, medium, and large conversions', function (): void {
     $photo = $action->handle($file, [
         'user_id' => $this->user->id,
         'alt_text' => 'Test image',
-        'status' => Status::Published,
+        'status' => Status::Public,
     ]);
 
     $media = $photo->getFirstMedia('image');
@@ -58,7 +58,7 @@ it('stores published photos on public disk', function (): void {
     $photo = $action->handle($file, [
         'user_id' => $this->user->id,
         'alt_text' => 'Test image',
-        'status' => Status::Published,
+        'status' => Status::Public,
     ]);
 
     expect($photo->getFirstMedia('image')->disk)->toBe('public');
@@ -71,7 +71,7 @@ it('stores draft photos on private disk', function (): void {
     $photo = $action->handle($file, [
         'user_id' => $this->user->id,
         'alt_text' => 'Test image',
-        'status' => Status::Draft,
+        'status' => Status::Private,
     ]);
 
     expect($photo->getFirstMedia('image')->disk)->toBe('private');

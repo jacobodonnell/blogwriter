@@ -16,8 +16,8 @@
         </a>
     @endif
     @auth
-        @if($article->status === \App\Enums\Status::Draft)
-            <span class="badge badge-warning badge-sm">Draft</span>
+        @if($article->status === \App\Enums\Status::Private)
+            <span class="badge badge-warning badge-sm">Private</span>
         @endif
     @endauth
 </div>

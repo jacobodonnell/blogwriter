@@ -33,7 +33,7 @@ final class CreateArticlePreviewController extends Controller
             'slug' => $slug,
             'content' => $data['content'] ?? '',
             'summary' => $data['summary'] ?? null,
-            'status' => $data['status'] ?? Status::Draft,
+            'status' => $data['status'] ?? Status::Private,
             'meta' => $data['meta'] ?? [],
         ]);
 

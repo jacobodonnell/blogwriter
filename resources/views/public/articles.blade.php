@@ -34,8 +34,8 @@
                 <x-filter-banner.search placeholder="Search by title or slug..." :colspan="auth()->check() ? 1 : 2" />
                 <x-filter-banner.category-select :categories="$categories" />
                 <x-filter-banner.select name="status" label="Status"
-                    :options="['published' => 'Published', 'draft' => 'Draft']"
-                    emptyLabel="All" default="published" :auth="true" />
+                    :options="['public' => 'Public', 'private' => 'Private']"
+                    emptyLabel="All" default="public" :auth="true" />
                 <x-filter-banner.sort />
             </x-filter-banner>
             @if($articles->isNotEmpty())

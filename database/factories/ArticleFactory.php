@@ -94,7 +94,7 @@ final class ArticleFactory extends Factory
     public function published(): static
     {
         return $this->state(fn (array $attributes): array => [
-            'status' => Status::Published,
+            'status' => Status::Public,
             'published_at' => now()->startOfSecond(),
         ]);
     }
@@ -105,7 +105,7 @@ final class ArticleFactory extends Factory
     public function draft(): static
     {
         return $this->state(fn (array $attributes): array => [
-            'status' => Status::Draft,
+            'status' => Status::Private,
             'published_at' => fake()->optional(0.3)->dateTimeBetween('-6 months', '+6 months'),
         ]);
     }
@@ -159,8 +159,8 @@ final class ArticleFactory extends Factory
         $rand = fake()->randomFloat(2, 0, 1);
 
         return match (true) {
-            $rand <= 0.8 => Status::Published,
-            default => Status::Draft,
+            $rand <= 0.8 => Status::Public,
+            default => Status::Private,
         };
     }
 
@@ -255,8 +255,8 @@ final class ArticleFactory extends Factory
     protected function getPublishedAtForStatus(Status $status): ?DateTimeImmutable
     {
         $date = match ($status) {
-            Status::Published => fake()->dateTimeBetween('-1 year', 'now'),
-            Status::Draft => fake()->optional(0.3)?->dateTimeBetween('-6 months', '+6 months'),
+            Status::Public => fake()->dateTimeBetween('-1 year', 'now'),
+            Status::Private => fake()->optional(0.3)?->dateTimeBetween('-6 months', '+6 months'),
         };
 
         if ($date === null) {

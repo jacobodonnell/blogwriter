@@ -28,7 +28,7 @@ final readonly class HandleArticlePhotoUploadAction
                 'slug' => $data['slug'] ?? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
                 'alt_text' => $data['featured_image_alt'] ?? $data['title'] ?? 'Featured image',
                 'caption' => $data['featured_image_caption'] ?? null,
-                'status' => Status::Published,
+                'status' => Status::Public,
             ]);
 
             return $photo->id;

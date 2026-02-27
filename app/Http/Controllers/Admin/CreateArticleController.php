@@ -36,7 +36,7 @@ final class CreateArticleController extends Controller
             'slug' => 'untitled-'.Str::lower(Str::random(8)),
             'content' => '',
             'summary' => '',
-            'status' => Status::Draft,
+            'status' => Status::Private,
             'category_id' => $request->input('category_id'),
         ]);
 
@@ -73,7 +73,7 @@ final class CreateArticleController extends Controller
             'slug' => $data['slug'] ?? 'untitled-'.Str::lower(Str::random(8)),
             'content' => $data['content'] ?? '',
             'summary' => $data['summary'] ?? null,
-            'status' => $data['status'] ?? Status::Draft,
+            'status' => $data['status'] ?? Status::Private,
             'published_at' => $data['published_at'] ?? null,
             'meta' => $imageResult['meta'],
             'photo_id' => $imageResult['photo_id'],

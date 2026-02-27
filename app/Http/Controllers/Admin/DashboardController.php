@@ -32,12 +32,12 @@ final class DashboardController extends Controller
 
         $stats = [
             'total_articles' => Article::count(),
-            'published_articles' => Article::where('status', Status::Published)->count(),
-            'draft_articles' => Article::where('status', Status::Draft)->count(),
+            'published_articles' => Article::where('status', Status::Public)->count(),
+            'draft_articles' => Article::where('status', Status::Private)->count(),
             'categories' => Category::count(),
             'total_photos' => Photo::count(),
-            'published_photos' => Photo::where('status', Status::Published)->count(),
-            'draft_photos' => Photo::where('status', Status::Draft)->count(),
+            'published_photos' => Photo::where('status', Status::Public)->count(),
+            'draft_photos' => Photo::where('status', Status::Private)->count(),
         ];
 
         return view('admin.dashboard', [

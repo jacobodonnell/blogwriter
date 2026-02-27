@@ -22,7 +22,7 @@ return new class extends Migration
             $table->text('summary')->nullable();
             $table->longText('content');
             $table->json('draft')->nullable();
-            $table->enum('status', ['draft', 'published'])->default('draft');
+            $table->enum('status', ['private', 'public'])->default('private');
             $table->timestamp('published_at')->nullable();
             $table->timestamp('last_edited_at')->nullable();
             $table->json('meta')->nullable();

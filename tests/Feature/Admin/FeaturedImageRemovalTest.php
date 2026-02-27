@@ -25,7 +25,7 @@ it('clears photo_id when remove_featured_image is sent', function (): void {
         'title' => $article->title,
         'slug' => $article->slug,
         'content' => $article->content,
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'remove_featured_image' => '1',
     ])->assertRedirect();
 
@@ -41,7 +41,7 @@ it('clears external_featured_img_url when remove_featured_image is sent', functi
         'title' => $article->title,
         'slug' => $article->slug,
         'content' => $article->content,
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'remove_featured_image' => '1',
     ])->assertRedirect();
 

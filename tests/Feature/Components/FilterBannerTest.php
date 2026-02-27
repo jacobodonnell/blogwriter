@@ -72,7 +72,7 @@ it('detects no active filters', function (): void {
 });
 
 it('detects active filters from request', function (): void {
-    $this->get('/articles?search=test&status=published');
+    $this->get('/articles?search=test&status=public');
 
     $component = new FilterBanner(
         action: '/test',
@@ -128,13 +128,13 @@ it('passes select props correctly', function (): void {
     $component = new Select(
         name: 'status',
         label: 'Status',
-        options: ['published' => 'Published'],
+        options: ['public' => 'Public'],
         emptyLabel: 'All Status',
     );
 
     expect($component->name)->toBe('status')
         ->and($component->label)->toBe('Status')
-        ->and($component->options)->toBe(['published' => 'Published'])
+        ->and($component->options)->toBe(['public' => 'Public'])
         ->and($component->emptyLabel)->toBe('All Status');
 });
 
@@ -175,7 +175,7 @@ it('renders filter banner with active filter badge', function (): void {
 it('hides auth-gated filter field for guests', function (): void {
     $view = $this->blade(
         '<x-filter-banner action="/test" target="results" clearRoute="/test">
-            <x-filter-banner.select name="status" label="Status" :options="[\'published\' => \'Published\']" :auth="true" />
+            <x-filter-banner.select name="status" label="Status" :options="[\'public\' => \'Public\']" :auth="true" />
         </x-filter-banner>'
     );
 
@@ -187,7 +187,7 @@ it('shows auth-gated filter field for logged-in users', function (): void {
 
     $view = $this->blade(
         '<x-filter-banner action="/test" target="results" clearRoute="/test">
-            <x-filter-banner.select name="status" label="Status" :options="[\'published\' => \'Published\']" :auth="true" />
+            <x-filter-banner.select name="status" label="Status" :options="[\'public\' => \'Public\']" :auth="true" />
         </x-filter-banner>'
     );
 

@@ -30,7 +30,7 @@ final class PhotoFactory extends Factory
             'slug' => fake()->unique()->slug(),
             'caption' => fake()->optional(0.7)->paragraph(),
             'alt_text' => fake()->sentence(),
-            'status' => Status::Published,
+            'status' => Status::Public,
             'published_at' => now(),
             'taken_at' => fake()->optional(0.5)->dateTimeBetween('-1 year'),
             'meta' => [],
@@ -42,7 +42,7 @@ final class PhotoFactory extends Factory
      */
     public function published(): static
     {
-        return $this->state(['status' => Status::Published, 'published_at' => now()]);
+        return $this->state(['status' => Status::Public, 'published_at' => now()]);
     }
 
     /**
@@ -50,7 +50,7 @@ final class PhotoFactory extends Factory
      */
     public function draft(): static
     {
-        return $this->state(['status' => Status::Draft, 'published_at' => null]);
+        return $this->state(['status' => Status::Private, 'published_at' => null]);
     }
 
     /**

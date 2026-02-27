@@ -47,7 +47,7 @@ it('creates photo with published status', function (): void {
     ]);
 
     $photo = Photo::find($photoId);
-    expect($photo->status)->toBe(Status::Published);
+    expect($photo->status)->toBe(Status::Public);
 });
 
 it('uses article title as alt text fallback', function (): void {

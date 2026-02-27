@@ -63,7 +63,7 @@
                                 <tr>
                                     <th class="w-1/3">Status</th>
                                     <td>
-                                        <span class="badge {{ $photo->status->value === 'published' ? 'badge-success' : 'badge-warning' }}">
+                                        <span class="badge {{ $photo->status->value === 'public' ? 'badge-success' : 'badge-warning' }}">
                                             {{ ucfirst($photo->status->value) }}
                                         </span>
                                     </td>

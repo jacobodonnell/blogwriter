@@ -73,6 +73,10 @@ final class PhotoExportService
 
     /**
      * Build the filename used for a photo's image file in the export.
+     *
+     * Uses the photo slug + original extension to keep names short and
+     * deterministic. Previous versions used uuid-file_name which caused
+     * filenames to compound on repeated export/import cycles.
      */
     public function photoImageFilename(Photo $photo): ?string
     {
@@ -81,7 +85,9 @@ final class PhotoExportService
             return null;
         }
 
-        return $media->uuid.'-'.$media->file_name;
+        $extension = pathinfo($media->file_name, PATHINFO_EXTENSION) ?: 'jpg';
+
+        return $photo->slug.'.'.$extension;
     }
 
     /**

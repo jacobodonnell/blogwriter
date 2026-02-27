@@ -21,7 +21,7 @@ it('stores external URL in article meta instead of creating a photo', function (
         'title' => 'Test Article',
         'slug' => 'test-article',
         'content' => 'Test content',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'featured_image' => 'https://example.com/image.jpg',
     ])->assertRedirect();
 
@@ -39,7 +39,7 @@ it('creates photo from file upload and links to article', function (): void {
         'title' => 'Test Article',
         'slug' => 'test-article',
         'content' => 'Test content',
-        'status' => Status::Published->value,
+        'status' => Status::Public->value,
         'featured_image_file' => $file,
     ])->assertRedirect();
 
@@ -47,7 +47,7 @@ it('creates photo from file upload and links to article', function (): void {
 
     expect($article->photo_id)->not->toBeNull();
     expect($article->featuredPhoto)->toBeInstanceOf(Photo::class);
-    expect($article->featuredPhoto->status->value)->toBe('published');
+    expect($article->featuredPhoto->status->value)->toBe('public');
     expect($article->featuredPhoto->getFirstMedia('image'))->not->toBeNull();
     expect($article->featuredPhoto->getFirstMedia('image')->disk)->toBe('public');
 });
@@ -59,15 +59,15 @@ it('creates a published photo even when article status is draft', function (): v
         'title' => 'Draft Article With Image',
         'slug' => 'draft-article-with-image',
         'content' => 'Draft content',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'featured_image_file' => $file,
     ])->assertRedirect();
 
     $article = Article::first();
 
-    expect($article->status->value)->toBe('draft');
+    expect($article->status->value)->toBe('private');
     expect($article->photo_id)->not->toBeNull();
-    expect($article->featuredPhoto->status->value)->toBe('published');
+    expect($article->featuredPhoto->status->value)->toBe('public');
     expect($article->featuredPhoto->getFirstMedia('image')->disk)->toBe('public');
 });
 
@@ -82,15 +82,15 @@ it('preserves featured photo when changing published article to draft', function
         'title' => $article->title,
         'slug' => $article->slug,
         'content' => $article->content,
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])->assertRedirect();
 
     $article->refresh();
     $photo->refresh();
 
-    expect($article->status->value)->toBe('draft');
+    expect($article->status->value)->toBe('private');
     expect($article->photo_id)->toBe($photo->id);
-    expect($photo->status->value)->toBe('published');
+    expect($photo->status->value)->toBe('public');
 });
 
 it('links existing photo to article', function (): void {
@@ -100,7 +100,7 @@ it('links existing photo to article', function (): void {
         'title' => 'Test Article',
         'slug' => 'test-article',
         'content' => 'Test content',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'photo_id' => $photo->id,
     ])->assertRedirect();
 
@@ -133,7 +133,7 @@ it('allows creating article without featured photo', function (): void {
         'title' => 'Test Article',
         'slug' => 'test-article',
         'content' => 'Test content',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])->assertRedirect();
 
     $article = Article::first();
@@ -193,7 +193,7 @@ it('saves featured_image_alt to meta when provided with external URL', function 
         'title' => 'Test',
         'slug' => 'test',
         'content' => 'Content',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'featured_image' => 'https://example.com/image.jpg',
         'featured_image_alt' => 'A scenic mountain view',
     ])->assertRedirect();
@@ -208,7 +208,7 @@ it('silently saves title as featured_image_alt when external URL is set but alt 
         'title' => 'My Great Post',
         'slug' => 'my-great-post',
         'content' => 'Content',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'featured_image' => 'https://example.com/image.jpg',
         'featured_image_alt' => '',
     ])->assertRedirect();
@@ -225,7 +225,7 @@ it('does not save featured_image_alt to meta when photo is selected and alt is e
         'title' => 'Test',
         'slug' => 'test',
         'content' => 'Content',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'photo_id' => $photo->id,
     ])->assertRedirect();
 

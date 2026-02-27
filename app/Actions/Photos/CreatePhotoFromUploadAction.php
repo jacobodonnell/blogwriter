@@ -26,7 +26,7 @@ final readonly class CreatePhotoFromUploadAction
         return DB::transaction(function () use ($file, $attributes, $filename, $baseSlug, $exifData): Photo {
             $status = $attributes['status'] instanceof Status
                 ? $attributes['status']
-                : Status::from($attributes['status'] ?? Status::Draft->value);
+                : Status::from($attributes['status'] ?? Status::Private->value);
 
             $photo = Photo::create([
                 'user_id' => $attributes['user_id'] ?? auth()->id(),
@@ -35,7 +35,7 @@ final readonly class CreatePhotoFromUploadAction
                 'alt_text' => $attributes['alt_text'] ?? null,
                 'caption' => $attributes['caption'] ?? null,
                 'status' => $status,
-                'published_at' => $status === Status::Published ? now() : null,
+                'published_at' => $status === Status::Public ? now() : null,
                 'taken_at' => $attributes['taken_at'] ?? null,
                 'category_id' => $attributes['category_id'] ?? null,
                 'meta' => $exifData,

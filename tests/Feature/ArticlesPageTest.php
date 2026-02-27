@@ -100,7 +100,7 @@ it('filters articles by status for authenticated users', function (): void {
     Article::factory()->draft()->create(['title' => 'Draft One']);
 
     $this->actingAs($user)
-        ->get('/articles?status=draft')
+        ->get('/articles?status=private')
         ->assertSuccessful()
         ->assertSee('Draft One')
         ->assertDontSee('Published One');
@@ -134,7 +134,7 @@ it('guests cannot see drafts via status filter', function (): void {
     Article::factory()->published()->create(['title' => 'Published Article']);
     Article::factory()->draft()->create(['title' => 'Secret Draft']);
 
-    $this->get('/articles?status=draft')
+    $this->get('/articles?status=private')
         ->assertSuccessful()
         ->assertDontSee('Secret Draft');
 });
@@ -166,7 +166,7 @@ it('combines multiple filters', function (): void {
     Article::factory()->draft()->create(['title' => 'Laravel Code Draft', 'category_id' => $category->id]);
 
     $this->actingAs($user)
-        ->get('/articles?search=Laravel&category='.$category->slug.'&status=published')
+        ->get('/articles?search=Laravel&category='.$category->slug.'&status=public')
         ->assertSuccessful()
         ->assertSee('Laravel Code Tips')
         ->assertDontSee('Laravel Other Tips')

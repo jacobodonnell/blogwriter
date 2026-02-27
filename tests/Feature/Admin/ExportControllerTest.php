@@ -103,7 +103,7 @@ it('marks draft articles as draft in frontmatter', function (): void {
     $frontmatter = $service->buildFrontmatter($article);
 
     expect($frontmatter['draft'])->toBeTrue()
-        ->and($frontmatter['draft'])->toBe($article->status === Status::Draft);
+        ->and($frontmatter['draft'])->toBe($article->status === Status::Private);
 });
 
 it('omits null frontmatter fields', function (): void {
@@ -405,7 +405,7 @@ it('photos.yaml contains expected photo fields', function (): void {
         'slug' => 'sunset-photo',
         'caption' => 'A beautiful sunset.',
         'alt_text' => 'Sunset over the hills',
-        'status' => Status::Published,
+        'status' => Status::Public,
     ]);
 
     $stream = fopen('php://memory', 'r+');
@@ -434,7 +434,7 @@ it('photos.yaml contains expected photo fields', function (): void {
     expect($entry)->not->toBeNull()
         ->and($entry['caption'])->toBe('A beautiful sunset.')
         ->and($entry['alt_text'])->toBe('Sunset over the hills')
-        ->and($entry['status'])->toBe('published')
+        ->and($entry['status'])->toBe('public')
         ->and($entry['category'])->toBe('landscape');
 });
 
@@ -470,7 +470,7 @@ it('images/ directory contains photo image files when photos have media', functi
     $found = false;
     for ($i = 0; $i < $za->numFiles; $i++) {
         $name = $za->getNameIndex($i);
-        if (str_starts_with($name, 'images/') && str_ends_with($name, 'test-photo.jpg')) {
+        if ($name === 'images/with-image.jpg') {
             $found = true;
             break;
         }
@@ -516,7 +516,7 @@ it('photos.yaml includes image_file key for photos with media', function (): voi
     $entry = collect($data)->firstWhere('slug', 'has-media');
 
     expect($entry)->toHaveKey('image_file')
-        ->and($entry['image_file'])->toEndWith('my-image.jpg');
+        ->and($entry['image_file'])->toBe('has-media.jpg');
 });
 
 it('streams articles as markdown files to a zip', function (): void {

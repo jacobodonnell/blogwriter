@@ -8,7 +8,7 @@
     @if($showAuthOverlays)
         @auth
             @if($isDraft)
-                <span class="absolute top-2 left-2 badge badge-warning badge-sm">Draft</span>
+                <span class="absolute top-2 left-2 badge badge-warning badge-sm">Private</span>
             @endif
             <a href="{{ route('admin.photos.edit', $photo) }}"
                class="absolute top-2 right-2 btn btn-circle btn-xs btn-ghost bg-base-100/80 opacity-0 group-hover:opacity-100 transition-opacity"

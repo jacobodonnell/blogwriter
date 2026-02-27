@@ -21,11 +21,11 @@ it('sets published_at when status is published', function (): void {
 
     $photo = $this->action->handle($file, [
         'alt_text' => 'Test photo',
-        'status' => 'published',
+        'status' => 'public',
     ]);
 
     expect($photo->published_at)->not->toBeNull()
-        ->and($photo->status)->toBe(Status::Published);
+        ->and($photo->status)->toBe(Status::Public);
 });
 
 it('leaves published_at null when status is draft', function (): void {
@@ -33,11 +33,11 @@ it('leaves published_at null when status is draft', function (): void {
 
     $photo = $this->action->handle($file, [
         'alt_text' => 'Draft photo',
-        'status' => 'draft',
+        'status' => 'private',
     ]);
 
     expect($photo->published_at)->toBeNull()
-        ->and($photo->status)->toBe(Status::Draft);
+        ->and($photo->status)->toBe(Status::Private);
 });
 
 it('stores media on public disk for published photos', function (): void {
@@ -45,7 +45,7 @@ it('stores media on public disk for published photos', function (): void {
 
     $photo = $this->action->handle($file, [
         'alt_text' => 'Public photo',
-        'status' => 'published',
+        'status' => 'public',
     ]);
 
     expect($photo->getFirstMedia('image')?->disk)->toBe('public');
@@ -56,7 +56,7 @@ it('stores media on private disk for draft photos', function (): void {
 
     $photo = $this->action->handle($file, [
         'alt_text' => 'Private photo',
-        'status' => 'draft',
+        'status' => 'private',
     ]);
 
     expect($photo->getFirstMedia('image')?->disk)->toBe('private');
@@ -67,7 +67,7 @@ it('names stored file after slug derived from filename', function (): void {
 
     $photo = $this->action->handle($file, [
         'alt_text' => 'Slug from filename',
-        'status' => 'published',
+        'status' => 'public',
     ]);
 
     $media = $photo->getFirstMedia('image');
@@ -80,7 +80,7 @@ it('uses custom slug when provided and names file after it', function (): void {
     $photo = $this->action->handle($file, [
         'slug' => 'custom-slug',
         'alt_text' => 'Custom slug photo',
-        'status' => 'published',
+        'status' => 'public',
     ]);
 
     expect($photo->slug)->toBe('custom-slug');
@@ -93,9 +93,9 @@ it('accepts a Status enum instance for status', function (): void {
 
     $photo = $this->action->handle($file, [
         'alt_text' => 'Enum photo',
-        'status' => Status::Published,
+        'status' => Status::Public,
     ]);
 
     expect($photo->published_at)->not->toBeNull()
-        ->and($photo->status)->toBe(Status::Published);
+        ->and($photo->status)->toBe(Status::Public);
 });

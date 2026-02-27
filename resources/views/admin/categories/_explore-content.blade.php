@@ -76,7 +76,7 @@
             emptyLabel="All Content" />
         <x-filter-banner.sort />
         <x-filter-banner.select name="status" label="Status"
-            :options="['published' => 'Published', 'draft' => 'Draft']"
+            :options="['public' => 'Public', 'private' => 'Private']"
             emptyLabel="All Status" />
     </x-filter-banner>
 
@@ -112,8 +112,8 @@
                                  class="u-photo w-full h-full object-cover group-hover:brightness-75 transition-all duration-200">
                         </a>
 
-                        @if($photo->status === \App\Enums\Status::Draft)
-                            <span class="absolute top-2 left-2 badge badge-warning badge-sm">Draft</span>
+                        @if($photo->status === \App\Enums\Status::Private)
+                            <span class="absolute top-2 left-2 badge badge-warning badge-sm">Private</span>
                         @endif
 
                         <span class="hidden">

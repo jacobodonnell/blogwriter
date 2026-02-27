@@ -89,7 +89,7 @@ final class Article extends Model
      */
     public function isPublished(): bool
     {
-        return $this->status === Status::Published && $this->published_at <= now();
+        return $this->status === Status::Public && $this->published_at <= now();
     }
 
     /**
@@ -154,7 +154,7 @@ final class Article extends Model
             // Set published_at when first published
             $newStatus = $article->status;
 
-            if ($article->isDirty('status') && $newStatus === Status::Published && is_null($article->published_at)) {
+            if ($article->isDirty('status') && $newStatus === Status::Public && is_null($article->published_at)) {
                 $article->published_at = now()->startOfSecond();
             }
 
@@ -164,7 +164,7 @@ final class Article extends Model
             }
 
             // Track edit time for previously-published articles
-            if ($newStatus === Status::Published
+            if ($newStatus === Status::Public
                 && ! is_null($article->getOriginal('published_at'))
                 && is_null($article->last_edited_at)) {
                 $article->last_edited_at = now()->startOfSecond();
@@ -272,7 +272,7 @@ final class Article extends Model
     #[Scope]
     protected function published(\Illuminate\Database\Eloquent\Builder $query): void
     {
-        $query->where('status', Status::Published)
+        $query->where('status', Status::Public)
             ->where('published_at', '<=', now());
     }
 
@@ -282,7 +282,7 @@ final class Article extends Model
     #[Scope]
     protected function draft(\Illuminate\Database\Eloquent\Builder $query): void
     {
-        $query->where('status', Status::Draft);
+        $query->where('status', Status::Private);
     }
 
     /**

@@ -149,7 +149,7 @@ it('combines search with category and status filters', function (): void {
     $response = $this->get(route('admin.articles.index', [
         'search' => 'Laravel',
         'category' => $category->slug,
-        'status' => Status::Published->value,
+        'status' => Status::Public->value,
     ]));
 
     $response->assertSuccessful();
@@ -170,7 +170,7 @@ it('combines sort with filters', function (): void {
     Article::factory()->draft()->create(['title' => 'Draft Article']);
 
     $response = $this->get(route('admin.articles.index', [
-        'status' => Status::Published->value,
+        'status' => Status::Public->value,
         'sort' => 'title',
         'direction' => 'asc',
     ]));
@@ -238,7 +238,7 @@ it('preserves query string in pagination', function (): void {
     Article::factory()->published()->count(25)->create();
 
     $response = $this->get(route('admin.articles.index', [
-        'status' => Status::Published->value,
+        'status' => Status::Public->value,
         'sort' => 'title',
         'direction' => 'asc',
     ]));
@@ -246,7 +246,7 @@ it('preserves query string in pagination', function (): void {
     $response->assertSuccessful();
     $response->assertSee('sort=title');
     $response->assertSee('direction=asc');
-    $response->assertSee('status=published');
+    $response->assertSee('status=public');
 });
 
 it('paginates with custom per page value', function (): void {

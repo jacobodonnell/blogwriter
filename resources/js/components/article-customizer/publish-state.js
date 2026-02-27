@@ -7,9 +7,9 @@ export function makePublishState() {
         },
 
         get buttonAction() {
-            if (this.currentStatus === 'published' && this.initialStatus === 'draft' && !this.wasEverPublished) return 'publish';
-            if (this.currentStatus === 'published' && this.initialStatus === 'draft' && this.wasEverPublished) return 'republish';
-            if (this.currentStatus === 'draft' && this.initialStatus === 'published') return 'unpublish';
+            if (this.currentStatus === 'public' && this.initialStatus === 'private' && !this.wasEverPublished) return 'publish';
+            if (this.currentStatus === 'public' && this.initialStatus === 'private' && this.wasEverPublished) return 'republish';
+            if (this.currentStatus === 'private' && this.initialStatus === 'public') return 'unpublish';
             return 'save';
         },
 
@@ -22,7 +22,7 @@ export function makePublishState() {
             if (action === 'unpublish') return 'Unpublish Article';
             if (this.isNew) return 'Save Draft';
 
-            const isPublished = this.initialStatus === 'published';
+            const isPublished = this.initialStatus === 'public';
 
             if (suffix) return isPublished ? `${suffix} & Publish` : `${suffix} & Save Draft`;
             if (this.hasChanges) return isPublished ? 'Publish Updates' : 'Save Draft';
@@ -36,7 +36,7 @@ export function makePublishState() {
             if (this.isNew) return 'ph-floppy-disk';
             if (this.hasNewPhoto) return 'ph-upload-simple';
             if (this.hasNewCategory) return 'ph-tag';
-            if (this.hasChanges) return this.initialStatus === 'published' ? 'ph-cloud-arrow-up' : 'ph-floppy-disk';
+            if (this.hasChanges) return this.initialStatus === 'public' ? 'ph-cloud-arrow-up' : 'ph-floppy-disk';
             return 'ph-check';
         },
 

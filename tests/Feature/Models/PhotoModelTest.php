@@ -23,7 +23,7 @@ it('isPublic returns false for draft photo', function (): void {
 
 it('isPublic returns false for published photo with future date', function (): void {
     $photo = Photo::factory()->create([
-        'status' => Status::Published,
+        'status' => Status::Public,
         'published_at' => now()->addDay(),
     ]);
 

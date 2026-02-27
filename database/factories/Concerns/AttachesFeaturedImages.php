@@ -30,7 +30,7 @@ trait AttachesFeaturedImages
         }
 
         // Determine disk based on model status
-        $disk = $model->status === \App\Enums\Status::Published ? 'public' : 'private';
+        $disk = $model->status === \App\Enums\Status::Public ? 'public' : 'private';
 
         try {
             $model->addMedia($imagePath)

@@ -24,7 +24,7 @@ final class PhotoCard extends Component
     ) {
         $this->photoUrl = route('photos.show', $photo->slug);
         $this->imageUrl = $photo->thumbnail_url ?? $photo->image_url ?? '';
-        $this->isDraft = $photo->status === Status::Draft;
+        $this->isDraft = $photo->status === Status::Private;
     }
 
     public function render(): View

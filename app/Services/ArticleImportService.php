@@ -36,6 +36,7 @@ final class ArticleImportService
 
         $articles = [];
         $imagesTempDir = null;
+        $imageNameMap = [];
 
         for ($i = 0; $i < $za->numFiles; $i++) {
             $name = $za->getNameIndex($i);
@@ -48,7 +49,16 @@ final class ArticleImportService
                         mkdir($imagesTempDir);
                     }
 
-                    file_put_contents($imagesTempDir.'/'.$basename, $za->getFromIndex($i));
+                    // Shorten filenames that exceed filesystem limits (255 bytes)
+                    $safeBasename = $basename;
+                    if (mb_strlen($basename) > 200) {
+                        $extension = pathinfo($basename, PATHINFO_EXTENSION);
+                        $hash = mb_substr(md5($basename), 0, 16);
+                        $safeBasename = $hash.'.'.$extension;
+                        $imageNameMap[$basename] = $safeBasename;
+                    }
+
+                    file_put_contents($imagesTempDir.'/'.$safeBasename, $za->getFromIndex($i));
                 }
 
                 continue;
@@ -81,6 +91,7 @@ final class ArticleImportService
             settingsYaml: $settingsYaml,
             photosYaml: $photosYaml,
             imagesTempDir: $imagesTempDir,
+            imageNameMap: $imageNameMap,
         );
     }
 
@@ -169,7 +180,7 @@ final class ArticleImportService
                 }
 
                 $isDraft = (bool) ($frontmatter['draft'] ?? false);
-                $status = $isDraft ? Status::Draft : Status::Published;
+                $status = $isDraft ? Status::Private : Status::Public;
 
                 $publishedAt = null;
                 if (! $isDraft && ! empty($frontmatter['date'])) {
@@ -273,7 +284,7 @@ final class ArticleImportService
                 'filename' => $row['filename'] ?? $slug,
                 'caption' => $row['caption'] ?? null,
                 'alt_text' => $row['alt_text'] ?? '',
-                'status' => Status::tryFrom($row['status'] ?? '') ?? Status::Draft,
+                'status' => $this->resolveImportStatus($row['status'] ?? ''),
                 'published_at' => empty($row['published_at']) ? null : Carbon::parse($row['published_at']),
                 'taken_at' => empty($row['taken_at']) ? null : Carbon::parse($row['taken_at']),
                 'category_id' => isset($row['category']) ? ($categoryMap[$row['category']] ?? null) : null,
@@ -283,7 +294,8 @@ final class ArticleImportService
             $imported++;
 
             if (! empty($row['image_file']) && $parsed->imagesTempDir !== null) {
-                $filePath = $parsed->imagesTempDir.'/'.$row['image_file'];
+                $diskName = $parsed->imageNameMap[$row['image_file']] ?? $row['image_file'];
+                $filePath = $parsed->imagesTempDir.'/'.$diskName;
                 if (file_exists($filePath) && ($existing === null || $duplicateStrategy === 'overwrite')) {
                     if ($existing !== null) {
                         $photo->clearMediaCollection('image');
@@ -393,6 +405,18 @@ final class ArticleImportService
         } catch (ParseException) {
             return [];
         }
+    }
+
+    /**
+     * Resolve a status string from import data, accepting both legacy and current values.
+     */
+    private function resolveImportStatus(string $value): Status
+    {
+        return match ($value) {
+            'public', 'published' => Status::Public,
+            'private', 'draft' => Status::Private,
+            default => Status::Private,
+        };
     }
 
     /**

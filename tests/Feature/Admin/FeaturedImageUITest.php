@@ -34,7 +34,7 @@ it('creates article with uploaded featured image file as published photo', funct
             'title' => 'Article With Featured Image',
             'slug' => 'article-with-featured-image',
             'content' => 'Content.',
-            'status' => Status::Published->value,
+            'status' => Status::Public->value,
             'featured_image_file' => $file,
         ]);
 
@@ -44,7 +44,7 @@ it('creates article with uploaded featured image file as published photo', funct
 
     $photo = Photo::find($article->photo_id);
     expect($photo)->not->toBeNull()
-        ->and($photo->status->value)->toBe('published')
+        ->and($photo->status->value)->toBe('public')
         ->and($photo->getFirstMedia('image'))->not->toBeNull()
         ->and($photo->getFirstMedia('image')->disk)->toBe('public');
 });
@@ -57,7 +57,7 @@ it('validates featured image file type', function (): void {
             'title' => 'Test Article',
             'slug' => 'test-article',
             'content' => 'Content.',
-            'status' => Status::Published->value,
+            'status' => Status::Public->value,
             'featured_image_file' => $file,
         ])
         ->assertSessionHasErrors('featured_image_file');
@@ -69,7 +69,7 @@ it('validates external URL format', function (): void {
             'title' => 'Test Article',
             'slug' => 'test-article',
             'content' => 'Content.',
-            'status' => Status::Published->value,
+            'status' => Status::Public->value,
             'featured_image' => 'not-a-valid-url',
         ])
         ->assertSessionHasErrors('featured_image');
@@ -86,7 +86,7 @@ it('updates article to add featured image', function (): void {
             'title' => $article->title,
             'slug' => $article->slug,
             'content' => $article->content,
-            'status' => Status::Published->value,
+            'status' => Status::Public->value,
             'featured_image_file' => $file,
         ]);
 
@@ -104,7 +104,7 @@ it('updates article to change featured image', function (): void {
             'title' => $article->title,
             'slug' => $article->slug,
             'content' => $article->content,
-            'status' => Status::Published->value,
+            'status' => Status::Public->value,
             'featured_image_file' => $file,
         ]);
 
@@ -122,7 +122,7 @@ it('removes featured image when remove checkbox is selected', function (): void 
             'title' => $article->title,
             'slug' => $article->slug,
             'content' => $article->content,
-            'status' => Status::Published->value,
+            'status' => Status::Public->value,
             'remove_featured_image' => '1',
         ]);
 

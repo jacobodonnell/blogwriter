@@ -95,7 +95,7 @@ it('shows Upload Photo & Publish when draft status changed to published with pho
 
     // Use script to change Alpine state directly, avoiding the form auto-submit
     // that triggers a broken AJAX preview request
-    $page->script("document.querySelector('[data-test=\"status-select\"]')._x_model.set('published')");
+    $page->script("document.querySelector('[data-test=\"status-select\"]')._x_model.set('public')");
     $page->wait(0.5);
 
     $page->assertSeeIn('@save-button-label', 'Publish Article');

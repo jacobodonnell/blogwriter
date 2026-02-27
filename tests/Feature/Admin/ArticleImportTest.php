@@ -470,7 +470,7 @@ it('creates photos from photos.yaml on import', function (): void {
             'filename' => 'imported.jpg',
             'caption' => 'An imported caption.',
             'alt_text' => 'Alt text here',
-            'status' => 'published',
+            'status' => 'public',
             'published_at' => '2024-06-01T12:00:00+00:00',
         ],
     ], 3, 2);
@@ -486,14 +486,14 @@ it('creates photos from photos.yaml on import', function (): void {
     expect($photo)->not->toBeNull()
         ->and($photo->caption)->toBe('An imported caption.')
         ->and($photo->alt_text)->toBe('Alt text here')
-        ->and($photo->status->value)->toBe('published');
+        ->and($photo->status->value)->toBe('public');
 });
 
 it('skips existing photos when strategy is skip', function (): void {
     Photo::factory()->create(['slug' => 'existing-photo', 'caption' => 'Original caption']);
 
     $photosYaml = Yaml::dump([
-        ['slug' => 'existing-photo', 'filename' => 'photo.jpg', 'alt_text' => 'Alt', 'status' => 'published'],
+        ['slug' => 'existing-photo', 'filename' => 'photo.jpg', 'alt_text' => 'Alt', 'status' => 'public'],
     ], 3, 2);
 
     $zip = makeImportZip(['photos.yaml' => $photosYaml]);
@@ -510,7 +510,7 @@ it('overwrites existing photos when strategy is overwrite', function (): void {
     Photo::factory()->create(['slug' => 'existing-photo', 'caption' => 'Old caption']);
 
     $photosYaml = Yaml::dump([
-        ['slug' => 'existing-photo', 'filename' => 'photo.jpg', 'alt_text' => 'Alt', 'status' => 'published', 'caption' => 'New caption'],
+        ['slug' => 'existing-photo', 'filename' => 'photo.jpg', 'alt_text' => 'Alt', 'status' => 'public', 'caption' => 'New caption'],
     ], 3, 2);
 
     $zip = makeImportZip(['photos.yaml' => $photosYaml]);
@@ -546,7 +546,7 @@ it('attaches image file to photo from images/ directory in zip', function (): vo
             'slug' => 'photo-with-image',
             'filename' => 'photo.jpg',
             'alt_text' => 'Test image',
-            'status' => 'published',
+            'status' => 'public',
             'image_file' => $imageFilename,
         ],
     ], 3, 2);
@@ -570,7 +570,7 @@ it('reconnects photo_id on articles via photo_slug frontmatter', function (): vo
     $photo = Photo::factory()->create(['slug' => 'my-hero-photo']);
 
     $photosYaml = Yaml::dump([
-        ['slug' => 'my-hero-photo', 'filename' => 'hero.jpg', 'alt_text' => 'Hero', 'status' => 'published'],
+        ['slug' => 'my-hero-photo', 'filename' => 'hero.jpg', 'alt_text' => 'Hero', 'status' => 'public'],
     ], 3, 2);
 
     $md = makeArticleMd([

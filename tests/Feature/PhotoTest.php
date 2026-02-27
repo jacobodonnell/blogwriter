@@ -103,7 +103,7 @@ it('filters photos by status for authenticated users', function (): void {
     Photo::factory()->draft()->create(['alt_text' => 'Draft Snap']);
 
     $this->actingAs($user)
-        ->get('/photos?status=draft')
+        ->get('/photos?status=private')
         ->assertSuccessful()
         ->assertSee('Draft Snap')
         ->assertDontSee('Published Snap');
@@ -137,7 +137,7 @@ it('guests cannot see draft photos via status filter', function (): void {
     Photo::factory()->published()->create(['alt_text' => 'Public Photo']);
     Photo::factory()->draft()->create(['alt_text' => 'Hidden Draft Photo']);
 
-    $this->get('/photos?status=draft')
+    $this->get('/photos?status=private')
         ->assertSuccessful()
         ->assertDontSee('Hidden Draft Photo');
 });

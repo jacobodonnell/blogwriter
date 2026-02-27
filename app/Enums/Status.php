@@ -6,23 +6,23 @@ namespace App\Enums;
 
 enum Status: string
 {
-    case Draft = 'draft';
-    case Published = 'published';
+    case Private = 'private';
+    case Public = 'public';
 
     /**
-     * Returns true only for Published status.
+     * Returns true only for Public status.
      */
     public function isPublic(): bool
     {
-        return $this === self::Published;
+        return $this === self::Public;
     }
 
     /**
-     * Returns true for Draft status.
+     * Returns true for Private status.
      */
     public function isPrivate(): bool
     {
-        return $this === self::Draft;
+        return $this === self::Private;
     }
 
     /**
@@ -31,8 +31,8 @@ enum Status: string
     public function label(): string
     {
         return match ($this) {
-            self::Draft => 'Draft',
-            self::Published => 'Published',
+            self::Private => 'Private',
+            self::Public => 'Public',
         };
     }
 }

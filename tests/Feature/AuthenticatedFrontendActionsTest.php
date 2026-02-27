@@ -102,7 +102,7 @@ it('allows auth user to upload a photo via AJAX', function (): void {
         ->postJson(route('admin.photos.store'), [
             'image_file' => UploadedFile::fake()->image('test-photo.jpg', 800, 600),
             'alt_text' => 'A beautiful sunset',
-            'status' => Status::Published->value,
+            'status' => Status::Public->value,
         ]);
 
     $response->assertSuccessful();
@@ -122,7 +122,7 @@ it('prevents guests from uploading photos', function (): void {
     $this->postJson(route('admin.photos.store'), [
         'image_file' => UploadedFile::fake()->image('test-photo.jpg'),
         'alt_text' => 'Test',
-        'status' => Status::Published->value,
+        'status' => Status::Public->value,
     ])->assertUnauthorized();
 });
 
@@ -169,7 +169,7 @@ it('allows auth user to upload a photo with category via AJAX', function (): voi
         ->postJson(route('admin.photos.store'), [
             'image_file' => UploadedFile::fake()->image('categorized.jpg', 800, 600),
             'alt_text' => 'Categorized photo',
-            'status' => Status::Published->value,
+            'status' => Status::Public->value,
             'category_id' => $category->id,
         ]);
 
@@ -198,7 +198,7 @@ it('allows updating photo category', function (): void {
     $this->actingAs($user)
         ->put(route('admin.photos.update', $photo), [
             'alt_text' => $photo->alt_text,
-            'status' => Status::Published->value,
+            'status' => Status::Public->value,
             'category_id' => $category->id,
         ]);
 

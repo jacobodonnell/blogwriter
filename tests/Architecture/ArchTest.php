@@ -43,7 +43,7 @@ it('does not use raw status strings in application code', function (): void {
         $basePath.'/database/seeders',
     ];
 
-    $pattern = "/['\"]status['\"]\s*=>\s*['\"](?:draft|published)['\"]/";
+    $pattern = "/['\"]status['\"]\s*=>\s*['\"](?:private|public)['\"]/";
     $violations = [];
 
     foreach ($directories as $directory) {

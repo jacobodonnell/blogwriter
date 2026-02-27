@@ -47,7 +47,7 @@ final class PhotoSeeder extends Seeder
                 'slug' => 'demo-photo-'.$index,
                 'caption' => $metadata['caption'],
                 'alt_text' => $metadata['alt_text'],
-                'status' => Status::Published,
+                'status' => Status::Public,
                 'published_at' => now(),
                 'taken_at' => null,
                 'meta' => [],

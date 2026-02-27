@@ -38,7 +38,7 @@ it('updates photo metadata', function (): void {
         'slug' => $photo->slug,
         'alt_text' => 'Updated alt text',
         'caption' => 'Updated caption',
-        'status' => Status::Published->value,
+        'status' => Status::Public->value,
     ]);
 
     $response->assertRedirect(route('admin.photos.edit', $photo));
@@ -67,7 +67,7 @@ it('requires unique slugs', function (): void {
         'filename' => 'test.jpg',
         'slug' => 'unique-photo',
         'alt_text' => 'Test',
-        'status' => Status::Published->value,
+        'status' => Status::Public->value,
         'image' => $file,
     ]);
 
@@ -82,7 +82,7 @@ it('detaches photo from articles when switching to draft', function (): void {
 
     $this->put(route('admin.photos.update', $photo), [
         'alt_text' => $photo->alt_text,
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ]);
 
     expect($article1->fresh()->photo_id)->toBeNull();
@@ -95,7 +95,7 @@ it('does not detach articles when photo stays published', function (): void {
 
     $this->put(route('admin.photos.update', $photo), [
         'alt_text' => 'Updated alt text',
-        'status' => Status::Published->value,
+        'status' => Status::Public->value,
     ]);
 
     expect($article->fresh()->photo_id)->toBe($photo->id);
@@ -107,7 +107,7 @@ it('does not detach articles when publishing a draft photo', function (): void {
 
     $this->put(route('admin.photos.update', $photo), [
         'alt_text' => $photo->alt_text,
-        'status' => Status::Published->value,
+        'status' => Status::Public->value,
     ]);
 
     expect($article->fresh()->photo_id)->toBe($photo->id);
@@ -118,7 +118,7 @@ it('sets published_at when uploading a published photo', function (): void {
 
     $this->post(route('admin.photos.store'), [
         'alt_text' => 'Test photo',
-        'status' => Status::Published->value,
+        'status' => Status::Public->value,
         'image_file' => $file,
     ]);
 
@@ -131,7 +131,7 @@ it('leaves published_at null when uploading a draft photo', function (): void {
 
     $this->post(route('admin.photos.store'), [
         'alt_text' => 'Draft photo',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'image_file' => $file,
     ]);
 
@@ -145,7 +145,7 @@ it('updating slug populates past_slugs', function (): void {
     $this->put(route('admin.photos.update', $photo), [
         'slug' => 'new-slug',
         'alt_text' => $photo->alt_text,
-        'status' => Status::Published->value,
+        'status' => Status::Public->value,
     ]);
 
     $photo->refresh();
@@ -159,7 +159,7 @@ it('allows a photo to keep its own slug on update', function (): void {
     $response = $this->put(route('admin.photos.update', $photo), [
         'slug' => 'my-slug',
         'alt_text' => $photo->alt_text,
-        'status' => Status::Published->value,
+        'status' => Status::Public->value,
     ]);
 
     $response->assertRedirect(route('admin.photos.edit', $photo));
@@ -173,7 +173,7 @@ it('rejects slug that belongs to another photo on update', function (): void {
     $response = $this->put(route('admin.photos.update', $photo), [
         'slug' => 'taken-slug',
         'alt_text' => $photo->alt_text,
-        'status' => Status::Published->value,
+        'status' => Status::Public->value,
     ]);
 
     $response->assertSessionHasErrors('slug');
@@ -185,7 +185,7 @@ it('rejects slugs with uppercase letters', function (): void {
     $response = $this->post(route('admin.photos.store'), [
         'slug' => 'My-Photo',
         'alt_text' => 'Test',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'image_file' => $file,
     ]);
 
@@ -198,7 +198,7 @@ it('rejects slugs with spaces', function (): void {
     $response = $this->post(route('admin.photos.store'), [
         'slug' => 'bad slug',
         'alt_text' => 'Test',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'image_file' => $file,
     ]);
 

@@ -95,7 +95,7 @@ final class Photo extends Model implements HasMedia
      */
     public function isPublic(): bool
     {
-        return $this->status === Status::Published
+        return $this->status === Status::Public
             && $this->published_at !== null
             && $this->published_at <= now();
     }
@@ -159,7 +159,7 @@ final class Photo extends Model implements HasMedia
     #[Scope]
     protected function published(\Illuminate\Database\Eloquent\Builder $query): void
     {
-        $query->where('status', Status::Published)
+        $query->where('status', Status::Public)
             ->where('published_at', '<=', now());
     }
 
@@ -169,7 +169,7 @@ final class Photo extends Model implements HasMedia
     #[Scope]
     protected function draft(\Illuminate\Database\Eloquent\Builder $query): void
     {
-        $query->where('status', Status::Draft);
+        $query->where('status', Status::Private);
     }
 
     /**

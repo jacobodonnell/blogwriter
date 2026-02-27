@@ -70,7 +70,7 @@ it('photo zip contains image file when photo has media', function (): void {
     $found = false;
     for ($i = 0; $i < $za->numFiles; $i++) {
         $name = $za->getNameIndex($i);
-        if (str_starts_with($name, 'images/') && str_ends_with($name, 'test-photo.jpg')) {
+        if ($name === 'images/with-image.jpg') {
             $found = true;
             break;
         }

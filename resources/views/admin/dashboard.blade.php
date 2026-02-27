@@ -13,12 +13,12 @@
             @php
                 $cards = [
                     ['label' => 'Total Articles', 'value' => $stats['total_articles'], 'route' => route('admin.articles.index'), 'icon' => 'article', 'color' => 'primary'],
-                    ['label' => 'Published Articles', 'value' => $stats['published_articles'], 'route' => route('admin.articles.index', ['status' => 'published']), 'icon' => 'check-circle', 'color' => 'success', 'valueColor' => 'text-success'],
-                    ['label' => 'Draft Articles', 'value' => $stats['draft_articles'], 'route' => route('admin.articles.index', ['status' => 'draft']), 'icon' => 'pencil-line', 'color' => 'warning', 'valueColor' => 'text-warning'],
+                    ['label' => 'Public Articles', 'value' => $stats['published_articles'], 'route' => route('admin.articles.index', ['status' => 'public']), 'icon' => 'check-circle', 'color' => 'success', 'valueColor' => 'text-success'],
+                    ['label' => 'Private Articles', 'value' => $stats['draft_articles'], 'route' => route('admin.articles.index', ['status' => 'private']), 'icon' => 'pencil-line', 'color' => 'warning', 'valueColor' => 'text-warning'],
                     ['label' => 'Categories', 'value' => $stats['categories'], 'route' => route('admin.categories.index'), 'icon' => 'folder', 'color' => 'secondary'],
                     ['label' => 'Total Photos', 'value' => $stats['total_photos'], 'route' => route('admin.photos.index'), 'icon' => 'image', 'color' => 'info'],
-                    ['label' => 'Published Photos', 'value' => $stats['published_photos'], 'route' => route('admin.photos.index', ['status' => 'published']), 'icon' => 'image-square', 'color' => 'success', 'valueColor' => 'text-success'],
-                    ['label' => 'Draft Photos', 'value' => $stats['draft_photos'], 'route' => route('admin.photos.index', ['status' => 'draft']), 'icon' => 'image-broken', 'color' => 'warning', 'valueColor' => 'text-warning'],
+                    ['label' => 'Public Photos', 'value' => $stats['published_photos'], 'route' => route('admin.photos.index', ['status' => 'public']), 'icon' => 'image-square', 'color' => 'success', 'valueColor' => 'text-success'],
+                    ['label' => 'Private Photos', 'value' => $stats['draft_photos'], 'route' => route('admin.photos.index', ['status' => 'private']), 'icon' => 'image-broken', 'color' => 'warning', 'valueColor' => 'text-warning'],
                 ];
             @endphp
 
@@ -59,8 +59,8 @@
                                         <div class="flex items-center gap-2 mt-1 text-sm text-base-content/60">
                                             <span @class([
                                                 'badge badge-sm',
-                                                'badge-success' => $article->status->value === 'published',
-                                                'badge-warning' => $article->status->value === 'draft',
+                                                'badge-success' => $article->status->value === 'public',
+                                                'badge-warning' => $article->status->value === 'private',
                                             ])>
                                                 {{ $article->status->label() }}
                                             </span>
@@ -120,8 +120,8 @@
                                         <div class="flex items-center gap-2 text-sm text-base-content/60">
                                             <span @class([
                                                 'badge badge-sm',
-                                                'badge-success' => $photo->status->value === 'published',
-                                                'badge-warning' => $photo->status->value === 'draft',
+                                                'badge-success' => $photo->status->value === 'public',
+                                                'badge-warning' => $photo->status->value === 'private',
                                             ])>
                                                 {{ $photo->status->label() }}
                                             </span>

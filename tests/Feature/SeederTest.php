@@ -25,8 +25,8 @@ describe('seeder tests', function (): void {
 
         expect(Article::count())->toBeGreaterThanOrEqual(5);
 
-        $publishedCount = Article::where('status', Status::Published)->count();
-        $draftCount = Article::where('status', Status::Draft)->count();
+        $publishedCount = Article::where('status', Status::Public)->count();
+        $draftCount = Article::where('status', Status::Private)->count();
 
         expect($publishedCount)->toBeGreaterThan(0);
         expect($draftCount)->toBeGreaterThan(0);
@@ -52,7 +52,7 @@ describe('seeder tests', function (): void {
         $seeder = new DatabaseSeeder;
         $seeder->withState('demo')->seed();
 
-        $publishedArticles = Article::where('status', Status::Published)->get();
+        $publishedArticles = Article::where('status', Status::Public)->get();
 
         foreach ($publishedArticles as $article) {
             expect($article->published_at)->not->toBeNull();

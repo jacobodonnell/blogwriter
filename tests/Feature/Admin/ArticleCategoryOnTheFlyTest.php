@@ -22,7 +22,7 @@ it('creates a category on the fly and assigns it to the article', function (): v
         'title' => $this->article->title,
         'slug' => $this->article->slug,
         'content' => 'Some content here',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'new_category_name' => 'Web Development',
         'new_category_slug' => 'web-development',
     ])->assertRedirect(route('admin.articles.edit', $this->article));
@@ -41,7 +41,7 @@ it('stores parent_id and description when provided', function (): void {
         'title' => $this->article->title,
         'slug' => $this->article->slug,
         'content' => 'Some content here',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'new_category_name' => 'Child Category',
         'new_category_parent_id' => $parent->id,
         'new_category_description' => 'A child of the parent.',
@@ -59,7 +59,7 @@ it('returns validation error for non-existent parent_id', function (): void {
         'title' => $this->article->title,
         'slug' => $this->article->slug,
         'content' => 'Some content here',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'new_category_name' => 'Orphan Category',
         'new_category_parent_id' => 99999,
     ])->assertSessionHasErrors('new_category_parent_id');
@@ -70,7 +70,7 @@ it('auto-generates slug when new_category_slug is omitted', function (): void {
         'title' => $this->article->title,
         'slug' => $this->article->slug,
         'content' => 'Some content here',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'new_category_name' => 'My Cool Category',
     ])->assertRedirect();
 
@@ -88,7 +88,7 @@ it('returns validation error for duplicate category slug', function (): void {
         'title' => $this->article->title,
         'slug' => $this->article->slug,
         'content' => 'Some content here',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'new_category_name' => 'New Category',
         'new_category_slug' => 'existing-slug',
     ])->assertSessionHasErrors('new_category_slug');
@@ -99,7 +99,7 @@ it('returns validation error when new_category_name is too short', function (): 
         'title' => $this->article->title,
         'slug' => $this->article->slug,
         'content' => 'Some content here',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'new_category_name' => 'A',
     ])->assertSessionHasErrors('new_category_name');
 });
@@ -111,7 +111,7 @@ it('normal save without new_category_name is unaffected', function (): void {
         'title' => $this->article->title,
         'slug' => $this->article->slug,
         'content' => 'Some content here',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])->assertRedirect(route('admin.articles.edit', $this->article));
 
     expect(Category::count())->toBe($categoryCount)
@@ -125,7 +125,7 @@ it('new_category_name takes precedence over category_id when both are submitted'
         'title' => $this->article->title,
         'slug' => $this->article->slug,
         'content' => 'Some content here',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'category_id' => $existing->id,
         'new_category_name' => 'Brand New Category',
     ])->assertRedirect();
@@ -141,7 +141,7 @@ it('store path creates category on the fly and assigns it to the new article', f
         'title' => 'New Article',
         'slug' => 'new-article',
         'content' => 'Some content here',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'new_category_name' => 'Fresh Category',
         'new_category_slug' => 'fresh-category',
     ])->assertRedirect();
@@ -161,7 +161,7 @@ it('requires authentication to save with new category', function (): void {
         'title' => $this->article->title,
         'slug' => $this->article->slug,
         'content' => 'Some content here',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'new_category_name' => 'Unauthorized Category',
     ])->assertRedirect();
 

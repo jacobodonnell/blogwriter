@@ -80,7 +80,7 @@
             <x-filter-banner.search placeholder="Search by title or slug..." />
             <x-filter-banner.category-select :categories="$categories" />
             <x-filter-banner.select name="status" label="Status"
-                :options="['published' => 'Published', 'draft' => 'Draft']"
+                :options="['public' => 'Public', 'private' => 'Private']"
                 emptyLabel="All Status" />
             <x-filter-banner.per-page :options="[10, 20, 50, 100]" :default="$perPage" />
         </x-filter-banner>

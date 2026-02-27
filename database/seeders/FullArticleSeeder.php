@@ -35,8 +35,8 @@ final class FullArticleSeeder extends Seeder
         foreach ($articles as $data) {
             // Convert hidden status to draft (hidden status removed in refactoring)
             $status = match ($data['status']) {
-                'published' => Status::Published,
-                default => Status::Draft,
+                'public' => Status::Public,
+                default => Status::Private,
             };
 
             // Handle photo creation — only local demo images, external URLs go to column
@@ -58,7 +58,7 @@ final class FullArticleSeeder extends Seeder
                         'caption' => null,
                         'alt_text' => $data['title'].' featured image',
                         'status' => $status,
-                        'published_at' => $status === Status::Published ? now()->subDays(random_int(1, 30)) : null,
+                        'published_at' => $status === Status::Public ? now()->subDays(random_int(1, 30)) : null,
                         'taken_at' => null,
                         'meta' => [],
                     ]);
@@ -80,7 +80,7 @@ final class FullArticleSeeder extends Seeder
                     'content' => $data['content'],
                     'summary' => $data['summary'] ?? null,
                     'status' => $status,
-                    'published_at' => $status === Status::Published ? now()->subDays(random_int(1, 30)) : null,
+                    'published_at' => $status === Status::Public ? now()->subDays(random_int(1, 30)) : null,
                     'photo_id' => $photoId,
                     'external_featured_img_url' => $externalUrl,
                     'meta' => $meta ?: null,

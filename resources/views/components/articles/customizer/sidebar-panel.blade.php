@@ -14,8 +14,8 @@
         <legend class="fieldset-legend">Status</legend>
         <select name="status" x-model="currentStatus" data-test="status-select"
                 class="select select-bordered w-full @error('status') select-error @enderror">
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
+            <option value="private">Private</option>
+            <option value="public">Public</option>
         </select>
         @error('status')
         <span class="text-error text-sm">{{ $message }}</span>

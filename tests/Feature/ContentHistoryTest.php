@@ -119,7 +119,7 @@ it('clears content_history on full save', function (): void {
             'title' => $article->title,
             'slug' => $article->slug,
             'content' => '## Final version',
-            'status' => 'draft',
+            'status' => 'private',
         ]);
 
     $article->refresh();

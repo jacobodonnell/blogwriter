@@ -12,8 +12,8 @@
                         <div class="absolute top-2 left-2">
                             <span @class([
                                 'badge',
-                                'badge-success' => $photo->status->value === 'published',
-                                'badge-warning' => $photo->status->value === 'draft',
+                                'badge-success' => $photo->status->value === 'public',
+                                'badge-warning' => $photo->status->value === 'private',
                             ])>
                                 {{ $photo->status->label() }}
                             </span>

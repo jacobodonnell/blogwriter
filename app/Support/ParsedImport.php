@@ -18,5 +18,7 @@ final readonly class ParsedImport
         public ?array $settingsYaml = null,
         public ?array $photosYaml = null,
         public ?string $imagesTempDir = null,
+        /** @var array<string, string> Map of original long filenames to safe short filenames */
+        public array $imageNameMap = [],
     ) {}
 }

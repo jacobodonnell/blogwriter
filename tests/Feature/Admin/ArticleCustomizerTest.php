@@ -35,7 +35,7 @@ it('returns preview partial for ajax preview update', function (): void {
         'title' => 'Updated Title',
         'slug' => $article->slug,
         'content' => 'Updated content here',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])
         ->assertOk()
         ->assertViewIs('admin.articles.preview')
@@ -54,7 +54,7 @@ it('redirects normally for full save update requests', function (): void {
         'title' => 'Updated Title',
         'slug' => $article->slug,
         'content' => 'Updated content',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])
         ->assertRedirect(route('admin.articles.edit', $article))
         ->assertSessionHas('success');
@@ -67,7 +67,7 @@ it('rejects update with empty content', function (): void {
         'title' => 'Updated Title',
         'slug' => $article->slug,
         'content' => '',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])->assertSessionHasErrors('content');
 });
 
@@ -77,7 +77,7 @@ it('rejects update with missing content', function (): void {
     put(route('admin.articles.update', $article), [
         'title' => 'Updated Title',
         'slug' => $article->slug,
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])->assertSessionHasErrors('content');
 });
 
@@ -90,7 +90,7 @@ it('preview update accepts relaxed validation', function (): void {
     put(route('admin.articles.preview.update', $article), [
         'title' => 'Hi',
         'slug' => 'untitled-abcd1234',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])
         ->assertOk()
         ->assertViewIs('admin.articles.preview');
@@ -105,7 +105,7 @@ it('preview update auto-generates slug from title when placeholder', function ()
     put(route('admin.articles.preview.update', $article), [
         'title' => 'My Great Post',
         'slug' => 'untitled-abcd1234',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])->assertOk();
 
     $fresh = $article->fresh();
@@ -126,7 +126,7 @@ it('preview update uniquifies slug when it conflicts with another article', func
     put(route('admin.articles.preview.update', $article), [
         'title' => 'There',
         'slug' => 'untitled-abcd1234',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])->assertOk();
 
     $fresh = $article->fresh();
@@ -144,7 +144,7 @@ it('full save preserves existing featured image', function (): void {
         'title' => 'Updated Title',
         'slug' => $article->slug,
         'content' => 'Updated content',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])->assertRedirect();
 
     expect($article->fresh()->external_featured_img_url)->toBe('https://example.com/image.jpg');
@@ -158,7 +158,7 @@ it('accepts POST with _method PUT for ajax preview update', function (): void {
         'title' => 'Updated Title',
         'slug' => $article->slug,
         'content' => 'Updated content',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])
         ->assertOk()
         ->assertViewIs('admin.articles.preview');
@@ -196,7 +196,7 @@ it('stores content submitted from tiptap editor', function (): void {
         'title' => 'Tiptap Article',
         'slug' => $article->slug,
         'content' => "## Hello\n\nThis is a paragraph.",
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])->assertRedirect(route('admin.articles.edit', $article));
 
     expect($article->fresh()->content)->toBe("## Hello\n\nThis is a paragraph.");
@@ -209,7 +209,7 @@ it('stores bold and italic markdown content correctly', function (): void {
         'title' => 'Formatting Test',
         'slug' => $article->slug,
         'content' => '**bold** and _italic_ text',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])->assertRedirect();
 
     $content = $article->fresh()->content;
@@ -225,7 +225,7 @@ it('rejects content containing an H1 heading submitted from editor', function ()
         'title' => 'H1 Bypass Test',
         'slug' => $article->slug,
         'content' => "# Top level heading\n\nContent",
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])->assertSessionHasErrors('content');
 });
 
@@ -236,7 +236,7 @@ it('stores blockquote markdown correctly', function (): void {
         'title' => 'Blockquote Test',
         'slug' => $article->slug,
         'content' => '> This is a quote',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])->assertRedirect();
 
     expect($article->fresh()->content)->toContain('> This is a quote');
@@ -249,7 +249,7 @@ it('stores link markdown correctly', function (): void {
         'title' => 'Link Test',
         'slug' => $article->slug,
         'content' => '[Visit example](https://example.com)',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])->assertRedirect();
 
     expect($article->fresh()->content)->toContain('[Visit example](https://example.com)');
@@ -268,7 +268,7 @@ it('preview update writes to draft JSON, not live content', function (): void {
         'title' => $article->title,
         'slug' => $article->slug,
         'content' => 'Typed in editor',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])->assertOk();
 
     $fresh = $article->fresh();
@@ -285,7 +285,7 @@ it('preview update does NOT overwrite live title on published article', function
         'title' => 'Draft Title',
         'slug' => $article->slug,
         'content' => $article->content,
-        'status' => Status::Published->value,
+        'status' => Status::Public->value,
     ])->assertOk();
 
     $fresh = $article->fresh();
@@ -305,7 +305,7 @@ it('preview update does NOT overwrite live category on published article', funct
         'title' => $article->title,
         'slug' => $article->slug,
         'category_id' => $newCategory->id,
-        'status' => Status::Published->value,
+        'status' => Status::Public->value,
     ])->assertOk();
 
     $fresh = $article->fresh();
@@ -322,7 +322,7 @@ it('preview update does NOT overwrite live meta on published article', function 
         'title' => $article->title,
         'slug' => $article->slug,
         'meta' => ['meta_title' => 'Draft SEO Title'],
-        'status' => Status::Published->value,
+        'status' => Status::Public->value,
     ])->assertOk();
 
     $fresh = $article->fresh();
@@ -341,7 +341,7 @@ it('full save promotes draft content and clears draft', function (): void {
         'title' => $article->title,
         'slug' => $article->slug,
         'content' => 'Staged draft edits',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])->assertRedirect(route('admin.articles.edit', $article));
 
     $fresh = $article->fresh();
@@ -358,7 +358,7 @@ it('full save without prior draft uses submitted content', function (): void {
         'title' => $article->title,
         'slug' => $article->slug,
         'content' => 'Brand new content',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])->assertRedirect();
 
     $fresh = $article->fresh();
@@ -411,7 +411,7 @@ it('preview renders draft content in preview pane', function (): void {
         'title' => $article->title,
         'slug' => $article->slug,
         'content' => 'Brand new draft text',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])
         ->assertOk()
         ->assertSee('Brand new draft text');

@@ -15,7 +15,7 @@
     {{-- View Live (only when article is published on server) --}}
     @if($article?->exists && $article->isPublished())
         <a href="{{ route('articles.show', $article->slug) }}"
-           x-show="initialStatus === 'published'"
+           x-show="initialStatus === 'public'"
            class="btn btn-outline w-full gap-2">
             <i class="ph ph-arrow-square-out"></i>
             View Live

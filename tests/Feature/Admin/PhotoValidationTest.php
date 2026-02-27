@@ -20,7 +20,7 @@ beforeEach(function (): void {
 it('store rejects missing image_file', function (): void {
     $this->post(route('admin.photos.store'), [
         'alt_text' => 'Test',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])->assertSessionHasErrors('image_file');
 });
 
@@ -30,7 +30,7 @@ it('store rejects non-image file', function (): void {
     $this->post(route('admin.photos.store'), [
         'image_file' => $file,
         'alt_text' => 'Test',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])->assertSessionHasErrors('image_file');
 });
 
@@ -39,7 +39,7 @@ it('store rejects missing alt_text', function (): void {
 
     $this->post(route('admin.photos.store'), [
         'image_file' => $file,
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])->assertSessionHasErrors('alt_text');
 });
 
@@ -69,7 +69,7 @@ it('update succeeds without replacing image', function (): void {
 
     $this->put(route('admin.photos.update', $photo), [
         'alt_text' => 'Updated alt',
-        'status' => Status::Published->value,
+        'status' => Status::Public->value,
     ])->assertSessionHasNoErrors();
 });
 
@@ -80,7 +80,7 @@ it('update rejects non-image file when replacing', function (): void {
     $this->put(route('admin.photos.update', $photo), [
         'image_file' => $file,
         'alt_text' => 'Updated alt',
-        'status' => Status::Published->value,
+        'status' => Status::Public->value,
     ])->assertSessionHasErrors('image_file');
 });
 
@@ -93,7 +93,7 @@ it('rejects values over max length', function (string $field, int $maxLength): v
         'image_file' => $file,
         'alt_text' => $field === 'alt_text' ? str_repeat('a', $maxLength + 1) : 'Valid alt',
         'caption' => $field === 'caption' ? str_repeat('a', $maxLength + 1) : null,
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ])->assertSessionHasErrors($field);
 })->with([
     'alt_text over 500' => ['alt_text', 500],
@@ -108,7 +108,7 @@ it('rejects non-existent category_id', function (): void {
     $this->post(route('admin.photos.store'), [
         'image_file' => $file,
         'alt_text' => 'Test',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'category_id' => 99999,
     ])->assertSessionHasErrors('category_id');
 });
@@ -119,7 +119,7 @@ it('rejects invalid date format for taken_at', function (): void {
     $this->post(route('admin.photos.store'), [
         'image_file' => $file,
         'alt_text' => 'Test',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
         'taken_at' => 'not-a-date',
     ])->assertSessionHasErrors('taken_at');
 });

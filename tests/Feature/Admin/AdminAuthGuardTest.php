@@ -31,7 +31,7 @@ it('redirects unauthenticated users on admin article routes', function (): void 
         'title' => 'Hacked',
         'slug' => 'hacked',
         'content' => 'x',
-        'status' => 'draft',
+        'status' => 'private',
     ])->assertRedirect();
     $this->delete(route('admin.articles.destroy', $article))->assertRedirect();
 
@@ -44,7 +44,7 @@ it('redirects unauthenticated users on admin photo routes', function (): void {
     $this->get(route('admin.photos.edit', $photo))->assertRedirect();
     $this->put(route('admin.photos.update', $photo), [
         'alt_text' => 'Hacked',
-        'status' => 'draft',
+        'status' => 'private',
     ])->assertRedirect();
     $this->delete(route('admin.photos.destroy', $photo))->assertRedirect();
 

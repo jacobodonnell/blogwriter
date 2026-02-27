@@ -90,7 +90,7 @@ final class ArticleExportService
             'created_at' => $article->created_at->utc()->toIso8601String(),
             'last_edited_at' => $article->last_edited_at?->utc()->toIso8601String(),
             'slug' => $article->slug,
-            'draft' => $article->status === Status::Draft,
+            'draft' => $article->status === Status::Private,
             'description' => $article->summary ?: null,
             'author' => $article->user?->name,
             'category' => $article->category?->slug,

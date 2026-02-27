@@ -29,7 +29,7 @@
             <x-filter-banner.search placeholder="Search by alt text, slug, or caption..." />
             <x-filter-banner.category-select :categories="$categories" />
             <x-filter-banner.select name="status" label="Status"
-                :options="['published' => 'Published', 'draft' => 'Draft']"
+                :options="['public' => 'Public', 'private' => 'Private']"
                 emptyLabel="All Status" />
             <x-filter-banner.per-page :options="[12, 24, 48]" :default="$perPage" />
         </x-filter-banner>

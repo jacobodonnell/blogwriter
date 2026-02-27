@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->text('caption')->nullable();
             $table->string('alt_text');
-            $table->string('status')->default('draft');
+            $table->string('status')->default('private');
             $table->timestamp('published_at')->nullable();
             $table->timestamp('taken_at')->nullable();
             $table->foreignId('category_id')->nullable()->constrained()->nullOnDelete();

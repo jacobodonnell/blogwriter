@@ -40,7 +40,7 @@ final class UpdateArticleRequest extends FormRequest
                 'regex:/^[a-z0-9-]+$/',
                 Rule::unique('articles', 'slug')->ignore($articleId),
             ],
-            'status' => ['required', 'in:draft,published'],
+            'status' => ['required', 'in:private,public'],
         ]);
     }
 

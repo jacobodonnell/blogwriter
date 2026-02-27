@@ -66,8 +66,8 @@
                                 <td x-show="columns.status">
                                     <span @class([
                                         'badge',
-                                        'badge-success' => $article->status->value === 'published',
-                                        'badge-warning' => $article->status->value === 'draft',
+                                        'badge-success' => $article->status->value === 'public',
+                                        'badge-warning' => $article->status->value === 'private',
                                     ])>
                                         {{ $article->status->label() }}
                                     </span>

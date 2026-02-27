@@ -22,8 +22,8 @@
                     <i class="ph ph-download-simple"></i>
                     Download
                 </a>
-                @if($photo->status === \App\Enums\Status::Draft)
-                    <span class="badge badge-warning">Draft</span>
+                @if($photo->status === \App\Enums\Status::Private)
+                    <span class="badge badge-warning">Private</span>
                 @endif
             </div>
         @endauth

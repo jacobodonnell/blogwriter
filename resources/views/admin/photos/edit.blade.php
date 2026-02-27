@@ -7,11 +7,11 @@
 
     <div class="space-y-6"
          x-data="{
-             originalStatus: '{{ old('status', $photo->status?->value ?? 'draft') }}',
-             currentStatus: '{{ old('status', $photo->status?->value ?? 'draft') }}',
+             originalStatus: '{{ old('status', $photo->status?->value ?? 'private') }}',
+             currentStatus: '{{ old('status', $photo->status?->value ?? 'private') }}',
              articleCount: {{ $articleCount }},
              handleSubmit(event) {
-                 if (this.originalStatus === 'published' && this.currentStatus === 'draft' && this.articleCount > 0) {
+                 if (this.originalStatus === 'public' && this.currentStatus === 'private' && this.articleCount > 0) {
                      event.preventDefault();
                      document.getElementById('detach-modal').showModal();
                  }
@@ -103,13 +103,13 @@
             <div class="modal-box">
                 <h3 class="font-bold text-lg">Detach Photo from Articles</h3>
                 <p class="py-4">
-                    Switching this photo to draft will remove it as the featured image from
+                    Switching this photo to private will remove it as the featured image from
                     <span class="font-semibold" x-text="articleCount"></span>
                     <span x-text="articleCount === 1 ? 'article' : 'articles'"></span>.
-                    Draft photos are not publicly accessible, so the featured image would appear broken.
+                    Private photos are not publicly accessible, so the featured image would appear broken.
                 </p>
                 <div class="modal-action">
-                    <button type="button" class="btn btn-warning" @click="confirmDetach()">Switch to Draft</button>
+                    <button type="button" class="btn btn-warning" @click="confirmDetach()">Switch to Private</button>
                     <form method="dialog">
                         <button class="btn">Cancel</button>
                     </form>

@@ -95,24 +95,24 @@
         <div role="tablist" class="tabs tabs-box">
             <input type="radio"
                    name="status"
-                   value="draft"
+                   value="private"
                    class="tab"
-                   aria-label="📝 Draft"
-                   @change="currentStatus = 'draft'"
-                   {{ old('status', $photo->status?->value ?? 'draft') === 'draft' ? 'checked' : '' }}>
+                   aria-label="📝 Private"
+                   @change="currentStatus = 'private'"
+                   {{ old('status', $photo->status?->value ?? 'private') === 'private' ? 'checked' : '' }}>
             <input type="radio"
                    name="status"
-                   value="published"
+                   value="public"
                    class="tab"
-                   aria-label="✅ Published"
-                   @change="currentStatus = 'published'"
-                   {{ old('status', $photo->status?->value) === 'published' ? 'checked' : '' }}>
+                   aria-label="✅ Public"
+                   @change="currentStatus = 'public'"
+                   {{ old('status', $photo->status?->value) === 'public' ? 'checked' : '' }}>
         </div>
         @error('status')
             <span class="text-error text-sm mt-1">{{ $message }}</span>
         @enderror
         <p class="text-sm text-base-content/60 mt-2">
-            Draft photos are stored privately and not visible on your site.
+            Private photos are stored privately and not visible on your site.
         </p>
     </fieldset>
 

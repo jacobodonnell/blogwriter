@@ -33,7 +33,7 @@ final class DemoArticleSeeder extends Seeder
         $imageCounter = 0;
 
         foreach ($articles as $data) {
-            $status = $data['status'] === 'published' ? Status::Published : Status::Draft;
+            $status = $data['status'] === 'public' ? Status::Public : Status::Private;
 
             // Handle photo creation — only local demo images, external URLs go to column
             $photoId = null;
@@ -54,7 +54,7 @@ final class DemoArticleSeeder extends Seeder
                         'caption' => null,
                         'alt_text' => $data['title'].' featured image',
                         'status' => $status,
-                        'published_at' => $status === Status::Published ? now()->subDays(random_int(1, 30)) : null,
+                        'published_at' => $status === Status::Public ? now()->subDays(random_int(1, 30)) : null,
                         'taken_at' => null,
                         'meta' => [],
                     ]);
@@ -76,7 +76,7 @@ final class DemoArticleSeeder extends Seeder
                     'content' => $data['content'],
                     'summary' => $data['summary'] ?? null,
                     'status' => $status,
-                    'published_at' => $status === Status::Published ? now()->subDays(random_int(1, 30)) : null,
+                    'published_at' => $status === Status::Public ? now()->subDays(random_int(1, 30)) : null,
                     'photo_id' => $photoId,
                     'external_featured_img_url' => $externalUrl,
                     'meta' => $meta ?: null,

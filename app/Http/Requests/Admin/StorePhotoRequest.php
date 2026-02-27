@@ -27,7 +27,7 @@ final class StorePhotoRequest extends FormRequest
             'image_file' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:10240'],
             'caption' => ['nullable', 'string', 'max:5000'],
             'alt_text' => ['required', 'string', 'max:500'],
-            'status' => ['required', 'in:draft,published'],
+            'status' => ['required', 'in:private,public'],
             'taken_at' => ['nullable', 'date'],
             'category_id' => ['nullable', 'exists:categories,id'],
         ];

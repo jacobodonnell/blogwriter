@@ -22,7 +22,7 @@ function validArticleData(array $overrides = []): array
         'title' => 'My Test Article',
         'slug' => 'my-test-article',
         'content' => 'This is article content for testing.',
-        'status' => Status::Draft->value,
+        'status' => Status::Private->value,
     ], $overrides);
 }
 
