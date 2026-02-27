@@ -37,11 +37,11 @@
                         id="email"
                         name="email"
                         data-test="login-email"
-                        value="{{ old('email') }}"
+                        value="{{ old('email', config('demo.enabled') ? config('demo.credentials.email') : '') }}"
                         class="input input-bordered w-full @error('email') input-error @enderror"
                         required
                         autofocus
-                        autocomplete="username"
+                        autocomplete="{{ config('demo.enabled') ? 'off' : 'username' }}"
                     />
                     @error('email')
                         <label class="label">
@@ -60,9 +60,10 @@
                         id="password"
                         name="password"
                         data-test="login-password"
+                        value="{{ config('demo.enabled') ? config('demo.credentials.password') : '' }}"
                         class="input input-bordered w-full @error('password') input-error @enderror"
                         required
-                        autocomplete="current-password"
+                        autocomplete="{{ config('demo.enabled') ? 'off' : 'current-password' }}"
                     />
                     @error('password')
                         <label class="label">

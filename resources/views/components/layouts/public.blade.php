@@ -26,8 +26,9 @@
             class="flex flex-col min-h-screen">
 
             {{-- Header --}}
-            <nav class="navbar bg-base-100 border-b border-base-200 sticky top-0 z-30">
-                <div class="container mx-auto px-4 flex items-center">
+            <nav class="bg-base-100 border-b border-base-200 sticky top-0 z-30">
+                <x-demo-banner />
+                <div class="navbar container mx-auto px-4 flex items-center">
                     {{-- Hamburger (mobile only) --}}
                     <div class="flex-none lg:hidden">
                         <button @click="mobileMenuOpen = true" class="btn btn-ghost btn-square" aria-label="Open menu">
