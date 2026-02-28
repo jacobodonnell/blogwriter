@@ -16,7 +16,8 @@
         "laravel/tinker": "^2.10.1",
         "nunomaduro/essentials": "^1.0",
         "spatie/laravel-medialibrary": "^11.0",
-        "spatie/laravel-responsecache": "^8.2"
+        "spatie/laravel-responsecache": "^8.2",
+        "symfony/yaml": "^8.0"
     },
     "require-dev": {
         "driftingly/rector-laravel": "^2.0",
