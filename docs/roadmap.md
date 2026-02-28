@@ -8,7 +8,9 @@ title: Roadmap
 
 # Roadmap
 
-BlogWriter is in pre-alpha. This roadmap shows what's built and what's planned.
+BlogWriter is a general-purpose IndieWeb content server. Your HTML is the API — pages are published with microformats markup that any IndieWeb tool can parse, and the same HTTP routes that serve your website accept form submissions from external clients. BlogWriter is designed from the ground up for other applications to build on top of, not just to be used through its admin panel.
+
+This roadmap shows what's built and what's planned.
 
 ## Completed (Pre-Alpha)
 
