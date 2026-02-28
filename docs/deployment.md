@@ -84,10 +84,12 @@ Do this first — DNS propagation can take up to an hour, and Let's Encrypt SSL 
 
 In Forge: **Site → Settings → Deployments → Shared Paths**, add:
 
-1. `database/database.sqlite`
-2. `storage`
+| Shared File/Directory | Release File/Directory |
+|---|---|
+| `database.sqlite` | `database/database.sqlite` |
+| `storage` | `storage` |
 
-Forge keeps a single copy of each path at `{site_root}/path` and symlinks it into every release directory. Your database and uploaded media persist across all future deploys.
+Forge stores each shared file or directory at the site root (e.g. `/home/forge/yourdomain.com/database.sqlite`) and symlinks it into the release directory (e.g. `/home/forge/yourdomain.com/current/database/database.sqlite`). Your database and uploaded media persist across all future deploys.
 
 <x-callout type="warning" title="Zero-Downtime Deployments Are Set at Site Creation">
   Zero-downtime deployments can only be enabled when creating a new site in Forge — they cannot be added to an existing site. If you skipped this, you'll need to recreate the site.
@@ -130,8 +132,8 @@ In Forge: **Site → Deploy Script**, replace the contents with:
 
 ```bash
 # Create the shared SQLite file if this is the first deploy
-if [ ! -f "$FORGE_SITE_ROOT/database/database.sqlite" ]; then
-    touch "$FORGE_SITE_ROOT/database/database.sqlite"
+if [ ! -f "$FORGE_SITE_ROOT/database.sqlite" ]; then
+    touch "$FORGE_SITE_ROOT/database.sqlite"
 fi
 
 $CREATE_RELEASE()
@@ -234,7 +236,7 @@ Each deploy installs updated dependencies, rebuilds assets, refreshes caches, an
 
 **Empty site or 500 error** — Check the deploy log in Forge for the error. Most first-deploy issues are in the Composer or npm steps.
 
-**"Cannot find SQLite file"** — Your shared path for `database/database.sqlite` isn't configured or the file doesn't exist yet. Re-check Step 4 and confirm the file was created before the first deploy.
+**"Cannot find SQLite file"** — Your shared path for `database.sqlite` → `database/database.sqlite` isn't configured or the file doesn't exist yet. Re-check Step 4 and confirm the file was created before the first deploy.
 
 **Media not persisting across deploys** — The `storage` shared path isn't configured. Re-check Step 4. Note: you may need to recreate the site if zero-downtime deployments weren't enabled at creation.
 
