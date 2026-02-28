@@ -54,6 +54,11 @@ final class DemoResetCommand extends Command
             return self::FAILURE;
         }
 
+        if (empty(config('app.key'))) {
+            $this->installService->generateAppKey();
+            $this->info('✓ App key generated');
+        }
+
         $this->installService->ensureDatabaseFile();
         $this->installService->runMigrations();
         $this->info('✓ Database migrated');
