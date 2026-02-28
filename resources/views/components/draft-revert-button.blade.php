@@ -1,9 +1,8 @@
 @props(['field', 'method' => null])
 
 <button type="button"
-        x-show="isDraftField('{{ $field }}')"
+        :class="isDraftField('{{ $field }}') ? 'visible' : 'invisible'"
         @click="{{ $method ?? "revertField('" . $field . "')" }}"
-        x-cloak
         class="btn btn-ghost btn-xs tooltip tooltip-bottom"
         data-test="revert-{{ $field }}"
         data-tip="Revert to saved"

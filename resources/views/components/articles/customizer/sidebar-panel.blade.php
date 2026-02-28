@@ -26,7 +26,7 @@
     <fieldset class="fieldset">
         <legend class="fieldset-legend">
             Category
-            <span x-show="!hasNewCategory"><x-draft-revert-button field="categoryId"/></span>
+            <span :class="hasNewCategory ? 'invisible' : ''"><x-draft-revert-button field="categoryId"/></span>
         </legend>
         <x-category-select :categories="$categories ?? collect()"
                            :selected="$article->category_id"
