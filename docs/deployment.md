@@ -244,6 +244,8 @@ Each deploy installs updated dependencies, rebuilds assets, refreshes caches, an
 
 **npm errors during deploy** — Confirm Node 18+ is installed. Run `node -v` in the Forge **Commands** panel.
 
+**Import fails with 413 Content Too Large** — Nginx's default upload limit (1 MB) is too small for backup imports. In Forge: **Server → PHP → Files** → increase `upload_max_filesize` and `post_max_size` (e.g. `50M`). Then in **Site → Nginx Configuration**, add `client_max_body_size 50M;` inside the `server` block. BlogWriter's import validation allows up to 20 MB, but a higher server limit avoids surprises with large media backups.
+
 **Forgot your admin password** — Run `php artisan blogwriter:reset-password` in the Forge Commands panel.
 
 **General issues** — Run `php artisan blogwriter:diagnose` in the Forge Commands panel for a full health check.
