@@ -19,8 +19,8 @@ final class DemoResetCommand extends Command
     protected $description = 'Reset the demo instance to a clean state';
 
     public function __construct(
-        private Resettable $resetService,
-        private InstallService $installService,
+        private readonly Resettable $resetService,
+        private readonly InstallService $installService,
     ) {
         parent::__construct();
     }
