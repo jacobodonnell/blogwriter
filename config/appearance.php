@@ -68,14 +68,20 @@ return [
     'fonts' => [
         // Sans-Serif
         'noto-sans' => 'Noto Sans',
-        'nunito' => 'Nunito',
         'inter' => 'Inter',
+        'geist-sans' => 'Geist',
+        'open-sans' => 'Open Sans',
+        'roboto' => 'Roboto',
+        'fira-sans' => 'Fira Sans',
+        'nunito' => 'Nunito',
         'poppins' => 'Poppins',
         'work-sans' => 'Work Sans',
 
         // Serif
-        'lora' => 'Lora',
+        'noto-serif' => 'Noto Serif',
         'merriweather' => 'Merriweather',
+        'crimson-pro' => 'Crimson Pro',
+        'lora' => 'Lora',
         'playfair-display' => 'Playfair Display',
         'source-serif-4' => 'Source Serif 4',
 
@@ -83,15 +89,17 @@ return [
         'instrument-sans' => 'Instrument Sans',
 
         // Monospace
+        'fira-code' => 'Fira Code',
         'jetbrains-mono' => 'JetBrains Mono',
+        'source-code-pro' => 'Source Code Pro',
 
     ],
 
     'font_categories' => [
-        'Sans-Serif' => ['noto-sans', 'nunito', 'inter', 'poppins', 'work-sans'],
-        'Serif' => ['lora', 'merriweather', 'playfair-display', 'source-serif-4'],
+        'Sans-Serif' => ['noto-sans', 'inter', 'geist-sans', 'open-sans', 'roboto', 'fira-sans', 'nunito', 'poppins', 'work-sans'],
+        'Serif' => ['noto-serif', 'merriweather', 'crimson-pro', 'lora', 'playfair-display', 'source-serif-4'],
         'Admin UI' => ['instrument-sans'],
-        'Monospace' => ['jetbrains-mono'],
+        'Monospace' => ['fira-code', 'jetbrains-mono', 'source-code-pro'],
     ],
 
     /*
