@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 return [
-    'enabled' => env('DEMO_MODE', false),
+    'enabled'     => env('DEMO_MODE', false),
     'credentials' => [
-        'email' => env('DEMO_EMAIL', 'demo@blogwriter.dev'),
+        'email'    => env('DEMO_EMAIL', 'demo@blogwriter.tech'),
         'password' => env('DEMO_PASSWORD', 'BlogWriter-Demo-2026!'),
     ],
 ];
