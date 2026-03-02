@@ -162,7 +162,7 @@ body {
     border-color: color-mix(in oklch, var(--color-base-content) 20%, transparent);
     margin: 1.5rem 0;
 }
-.tiptap-editor .ProseMirror img { max-width: 100%; }
+.tiptap-editor .ProseMirror img { width: 100%; max-width: none; height: auto; }
 .tiptap-editor .ProseMirror div[data-youtube-video] {
     max-width: 100%;
     aspect-ratio: 16 / 9;
@@ -214,10 +214,24 @@ body {
 
 /* Images are always centered */
 .tiptap-editor .ProseMirror [data-resize-container] { justify-content: center; margin-top: 0.75rem; }
-.tiptap-editor .ProseMirror figure { margin: 1rem 0; }
+.tiptap-editor .ProseMirror figure { margin: 1rem 0; margin-inline: auto; }
+@media (min-width: 768px) {
+    .tiptap-editor .ProseMirror figure[style*='--figure-width'] { width: var(--figure-width); }
+}
+.tiptap-editor .ProseMirror figure img { width: 100%; max-width: none; height: auto; }
 .tiptap-editor .ProseMirror figcaption { font-size: 0.8125rem; text-align: center; opacity: 0.6; margin-top: 0.375rem; min-height: 1.25rem; }
 .tiptap-editor .ProseMirror figcaption:empty::before,
 .tiptap-editor .ProseMirror figcaption:has(> br:only-child)::before { content: attr(data-placeholder); opacity: 0.4; pointer-events: none; }
+
+/* Public view: figures with width are responsive */
+.e-content figure[style*='--figure-width'],
+.prose figure[style*='--figure-width'] { margin-inline: auto; min-width: 120px; }
+@media (min-width: 768px) {
+    .e-content figure[style*='--figure-width'],
+    .prose figure[style*='--figure-width'] { width: var(--figure-width); }
+}
+.e-content figure img,
+.prose figure img { width: 100%; max-width: none; height: auto; }
 .e-content img, .prose img { display: block; margin-inline: auto; max-width: 100%; }
 .e-content figure, .prose figure { margin: 1.5rem 0; }
 .e-content figcaption, .prose figcaption { font-size: 0.875rem; text-align: center; opacity: 0.65; margin-top: 0.5rem; }

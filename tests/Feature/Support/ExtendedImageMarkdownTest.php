@@ -37,12 +37,14 @@ it('applies align:full class on wrapper div', function () {
 
 it('applies width style', function () {
     $html = Markdown::render('![Image|width:400](https://example.com/img.jpg)');
-    expect($html)->toContain('style="width:400px;max-width:100%"');
+    expect($html)->toContain('<figure style="--figure-width:400px">')
+        ->toContain('<img src="https://example.com/img.jpg" alt="Image">');
 });
 
 it('applies percentage width style', function () {
     $html = Markdown::render('![Image|width:50%](https://example.com/img.jpg)');
-    expect($html)->toContain('style="width:50%;max-width:100%"');
+    expect($html)->toContain('<figure style="--figure-width:50%">')
+        ->toContain('<img src="https://example.com/img.jpg" alt="Image">');
 });
 
 it('wraps in figure with figcaption when caption present', function () {
@@ -55,7 +57,7 @@ it('wraps in figure with figcaption when caption present', function () {
 it('combines align width and caption', function () {
     $html = Markdown::render('![Photo|align:center|width:500|caption:Nice%20photo](https://example.com/img.jpg)');
     expect($html)->toContain('class="img-align-center"')
-        ->toContain('style="width:500px;max-width:100%"')
+        ->toContain('style="--figure-width:500px"')
         ->toContain('<figure')
         ->toContain('<figcaption>Nice photo</figcaption>')
         ->not->toContain('<div class="img-align-center">');

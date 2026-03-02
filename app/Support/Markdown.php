@@ -226,14 +226,22 @@ final class Markdown
 
             $class = $align ? 'img-align-'.$align : null;
 
-            $style = $width ? 'width:'.$width.';max-width:100%' : null;
+            $figureStyle = $width ? '--figure-width:'.$width : null;
 
-            $imgTag = '<img src="'.e($src).'" alt="'.e($alt).'"'
-                .($style ? ' style="'.e($style).'"' : '')
-                .'>';
+            $imgTag = '<img src="'.e($src).'" alt="'.e($alt).'">';
 
-            if ($caption) {
-                $replacement = '<figure'.($class ? ' class="'.e($class).'"' : '').'>'.$imgTag.'<figcaption>'.e($caption).'</figcaption></figure>';
+            if ($caption || $width) {
+                $figureAttrs = '';
+                if ($class) {
+                    $figureAttrs .= ' class="'.e($class).'"';
+                }
+
+                if ($figureStyle) {
+                    $figureAttrs .= ' style="'.e($figureStyle).'"';
+                }
+
+                $captionHtml = $caption ? '<figcaption>'.e($caption).'</figcaption>' : '';
+                $replacement = '<figure'.$figureAttrs.'>'.$imgTag.$captionHtml.'</figure>';
             } elseif ($class) {
                 $replacement = '<div class="'.e($class).'">'.$imgTag.'</div>';
             } else {

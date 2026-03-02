@@ -68,18 +68,18 @@ it('image at less than full width is visually narrower than container', function
         ->assertNoJavaScriptErrors();
 
     $widths = $page->script("(() => {
-        const wrapper = document.querySelector('[data-resize-wrapper]');
-        const container = document.querySelector('[data-resize-container]');
-        if (!wrapper || !container) return [0, 0];
-        return [wrapper.offsetWidth, container.offsetWidth];
+        const figure = document.querySelector('.ProseMirror figure');
+        const editor = document.querySelector('.ProseMirror');
+        if (!figure || !editor) return [0, 0];
+        return [figure.offsetWidth, editor.offsetWidth];
     })()");
 
-    $wrapperWidth = $widths[0];
-    $containerWidth = $widths[1];
+    $figureWidth = $widths[0];
+    $editorWidth = $widths[1];
 
-    // Wrapper should be roughly 50% of container (within 10% tolerance)
-    expect($containerWidth)->toBeGreaterThan(0);
-    $ratio = $wrapperWidth / $containerWidth;
+    // Figure should be roughly 50% of editor (within 15% tolerance)
+    expect($editorWidth)->toBeGreaterThan(0);
+    $ratio = $figureWidth / $editorWidth;
     expect($ratio)->toBeLessThan(0.65)
         ->and($ratio)->toBeGreaterThan(0.35);
 })->group('slow');
@@ -117,14 +117,13 @@ it('image width renders in server-side preview HTML', function (): void {
     $page->wait(5)
         ->assertNoJavaScriptErrors();
 
-    // Check preview panel for image with width style
-    $hasWidthStyle = $page->script("(() => {
-        const img = document.querySelector('#preview-panel img[src*=\"placehold\"]');
-        if (!img) return false;
-        return img.style.cssText.includes('width') || (img.getAttribute('style') || '').includes('width');
+    // Check preview panel for figure with --figure-width custom property
+    $hasFigureWidth = $page->script("(() => {
+        const figure = document.querySelector('#preview-panel figure[style*=\"--figure-width\"]');
+        return !!figure;
     })()");
 
-    expect($hasWidthStyle)->toBeTrue();
+    expect($hasFigureWidth)->toBeTrue();
 })->group('slow');
 
 it('image cannot be resized beyond editor container width', function (): void {

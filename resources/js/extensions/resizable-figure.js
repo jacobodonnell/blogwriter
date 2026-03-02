@@ -26,10 +26,15 @@ export function createResizableFigure(getEditor) {
                     getAttrs(dom) {
                         const img = dom.querySelector('img');
                         if (!img) return false;
+                        let width = null;
+                        const style = dom.getAttribute('style') || '';
+                        const match = style.match(/--figure-width:\s*(\d+)%/);
+                        if (match) width = parseInt(match[1], 10) || null;
                         return {
                             src: img.getAttribute('src'),
                             alt: img.getAttribute('alt'),
                             title: img.getAttribute('title'),
+                            width,
                         };
                     },
                 },
@@ -48,10 +53,9 @@ export function createResizableFigure(getEditor) {
 
         renderHTML({ HTMLAttributes }) {
             const { width, ...rest } = HTMLAttributes;
-            const imgAttrs = mergeAttributes(rest, {
-                style: width ? `width:${width}%;max-width:100%` : 'max-width:100%',
-            });
-            return ['figure', {}, ['img', imgAttrs], ['figcaption', 0]];
+            const figureAttrs = width ? { style: `--figure-width:${width}%` } : {};
+            const imgAttrs = mergeAttributes(rest);
+            return ['figure', figureAttrs, ['img', imgAttrs], ['figcaption', 0]];
         },
 
         renderMarkdown(node, { renderChildren }) {
@@ -102,9 +106,11 @@ export function createResizableFigure(getEditor) {
             return ({ node, getPos, editor, HTMLAttributes }) => {
                 // Build the DOM: figure > [resize-container > wrapper > img + handles] + figcaption
                 const figure = document.createElement('figure');
+                figure.style.marginInline = 'auto';
+                const editorElement = editor.options.element;
 
                 const img = document.createElement('img');
-                img.style.maxWidth = '100%';
+                img.style.width = '100%';
                 img.style.height = 'auto';
                 if (HTMLAttributes.src) img.src = HTMLAttributes.src;
                 img.alt = HTMLAttributes.alt ?? '';
@@ -127,18 +133,18 @@ export function createResizableFigure(getEditor) {
                     node,
                     getPos,
                     onResize: (width) => {
-                        const containerWidth = resizableNodeView.container.offsetWidth;
-                        const clamped = Math.min(width, containerWidth);
+                        const editorWidth = editorElement.offsetWidth;
+                        const clamped = Math.min(width, editorWidth);
                         resizableNodeView.wrapper.style.width = `${clamped}px`;
-                        img.style.width = `${clamped}px`;
-                        img.style.height = 'auto';
+                        figure.style.width = `${clamped}px`;
                     },
                     onCommit: (finalWidth) => {
-                        const containerWidth = resizableNodeView.container.offsetWidth;
-                        const pct = Math.round(finalWidth / containerWidth * 100);
+                        const editorWidth = editorElement.offsetWidth;
+                        const pct = Math.round(finalWidth / editorWidth * 100);
                         const pos = getPos();
                         if (pos === undefined) return;
                         const editor_ = getEditor();
+                        figure.style.width = '';
                         if (pct >= 98) {
                             editor_.chain().setNodeSelection(pos).updateAttributes('figure', { width: null }).run();
                         } else {
@@ -160,15 +166,17 @@ export function createResizableFigure(getEditor) {
                 const syncAttrs = (attrs) => {
                     if (attrs.src && img.src !== attrs.src) img.src = attrs.src;
                     img.alt = attrs.alt ?? '';
-                    img.style.maxWidth = '100%';
-                    img.style.height = 'auto';
                     if (attrs.width) {
-                        resizableNodeView.wrapper.style.width = `${attrs.width}%`;
-                        img.style.width = '100%';
+                        figure.style.setProperty('--figure-width', `${attrs.width}%`);
+                        figure.style.width = `${attrs.width}%`;
+                        resizableNodeView.wrapper.style.width = '100%';
                     } else {
+                        figure.style.removeProperty('--figure-width');
+                        figure.style.width = '';
                         resizableNodeView.wrapper.style.width = '';
-                        img.style.width = '';
                     }
+                    img.style.width = '100%';
+                    img.style.height = 'auto';
                 };
                 syncAttrs(node.attrs);
 
