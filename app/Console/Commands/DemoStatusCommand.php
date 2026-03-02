@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use Carbon\CarbonInterval;
+use Cron\CronExpression;
 use Illuminate\Console\Command;
 
 final class DemoStatusCommand extends Command
@@ -32,28 +33,13 @@ final class DemoStatusCommand extends Command
             ['Reset Interval', $interval.' minutes'],
         ]);
 
-        $lockFile = storage_path('installed.lock');
-
-        if (! file_exists($lockFile)) {
-            $this->newLine();
-            $this->warn('No reset has been run yet. Run: php artisan demo:reset');
-
-            return self::SUCCESS;
-        }
-
-        $lastReset = filemtime($lockFile);
-        $elapsed = time() - $lastReset;
-        $intervalSeconds = $interval * 60;
-        $remaining = max(0, $intervalSeconds - $elapsed);
+        $cron = new CronExpression("*/{$interval} * * * *");
+        $nextReset = $cron->getNextRunDate();
+        $remaining = $nextReset->getTimestamp() - time();
 
         $this->newLine();
-        $this->info('Last reset: '.date('Y-m-d H:i:s', $lastReset));
-
-        if ($remaining === 0) {
-            $this->warn('Next reset is overdue (scheduler may not be running).');
-        } else {
-            $this->info('Next reset in: '.CarbonInterval::seconds($remaining)->cascade()->forHumans(['short' => true]));
-        }
+        $this->info('Next reset at: '.$nextReset->format('Y-m-d H:i:s'));
+        $this->info('Next reset in: '.CarbonInterval::seconds($remaining)->cascade()->forHumans(['short' => true]));
 
         return self::SUCCESS;
     }
