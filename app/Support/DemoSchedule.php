@@ -11,6 +11,7 @@ final class DemoSchedule
     public static function cronExpression(): string
     {
         $interval = self::effectiveInterval();
+        $startHour = self::startHour();
 
         if ($interval < 60) {
             return "*/{$interval} * * * *";
@@ -18,12 +19,30 @@ final class DemoSchedule
 
         $hours = max(1, (int) ceil($interval / 60));
 
-        return "0 */{$hours} * * *";
+        if ($hours >= 24) {
+            return "0 {$startHour} * * *";
+        }
+
+        $hourList = [];
+        for ($h = $startHour; count($hourList) < (int) (24 / $hours); $h = ($h + $hours) % 24) {
+            $hourList[] = $h;
+        }
+
+        sort($hourList);
+
+        return '0 '.implode(',', $hourList).' * * *';
     }
 
     public static function effectiveInterval(): int
     {
         return min(self::MAX_INTERVAL, max(1, (int) self::configuredInterval()));
+    }
+
+    public static function startHour(): int
+    {
+        $hour = (int) (config('demo.reset_start_hour') ?? 0);
+
+        return max(0, min(23, $hour));
     }
 
     public static function wasIntervalClamped(): bool

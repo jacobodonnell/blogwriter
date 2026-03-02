@@ -45,6 +45,30 @@ it('shows effective interval for intervals over 60 minutes', function (): void {
         ->expectsOutputToContain('120 minutes');
 });
 
+it('shows start hour in status output', function (): void {
+    config()->set('demo.enabled', true);
+    config()->set('demo.reset_interval', 1440);
+    config()->set('demo.reset_start_hour', 21);
+    config()->set('demo.credentials.email', 'test@example.com');
+    config()->set('demo.credentials.password', 'secret');
+
+    $this->artisan('demo:status')
+        ->assertSuccessful()
+        ->expectsOutputToContain('21:00');
+});
+
+it('shows zero-padded start hour in status output', function (): void {
+    config()->set('demo.enabled', true);
+    config()->set('demo.reset_interval', 120);
+    config()->set('demo.reset_start_hour', 3);
+    config()->set('demo.credentials.email', 'test@example.com');
+    config()->set('demo.credentials.password', 'secret');
+
+    $this->artisan('demo:status')
+        ->assertSuccessful()
+        ->expectsOutputToContain('03:00');
+});
+
 it('warns when interval exceeds maximum', function (): void {
     config()->set('demo.enabled', true);
     config()->set('demo.reset_interval', 2880);

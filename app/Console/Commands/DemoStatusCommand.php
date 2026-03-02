@@ -33,10 +33,13 @@ final class DemoStatusCommand extends Command
         $this->info('Demo mode is active.');
         $this->newLine();
 
+        $startHour = DemoSchedule::startHour();
+
         $this->table(['Setting', 'Value'], [
             ['Email', config('demo.credentials.email')],
             ['Password', config('demo.credentials.password')],
             ['Reset Interval', $interval.' minutes'],
+            ['Reset Start Hour', mb_str_pad((string) $startHour, 2, '0', STR_PAD_LEFT).':00'],
         ]);
 
         $cron = new CronExpression(DemoSchedule::cronExpression());
