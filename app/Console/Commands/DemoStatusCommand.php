@@ -9,8 +9,6 @@ use Illuminate\Console\Command;
 
 final class DemoStatusCommand extends Command
 {
-    private const RESET_INTERVAL_MINUTES = 30;
-
     protected $signature = 'demo:status';
 
     protected $description = 'Show demo mode status and time until next reset';
@@ -23,12 +21,15 @@ final class DemoStatusCommand extends Command
             return self::SUCCESS;
         }
 
+        $interval = (int) config('demo.reset_interval', 30);
+
         $this->info('Demo mode is active.');
         $this->newLine();
 
         $this->table(['Setting', 'Value'], [
             ['Email', config('demo.credentials.email')],
             ['Password', config('demo.credentials.password')],
+            ['Reset Interval', $interval.' minutes'],
         ]);
 
         $lockFile = storage_path('installed.lock');
@@ -42,7 +43,7 @@ final class DemoStatusCommand extends Command
 
         $lastReset = filemtime($lockFile);
         $elapsed = time() - $lastReset;
-        $intervalSeconds = self::RESET_INTERVAL_MINUTES * 60;
+        $intervalSeconds = $interval * 60;
         $remaining = max(0, $intervalSeconds - $elapsed);
 
         $this->newLine();
