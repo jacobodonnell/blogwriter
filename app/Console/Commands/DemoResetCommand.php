@@ -7,6 +7,7 @@ namespace App\Console\Commands;
 use App\Contracts\Resettable;
 use App\Models\Setting;
 use App\Services\InstallService;
+use App\Support\DemoSchedule;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -31,6 +32,11 @@ final class DemoResetCommand extends Command
             $this->error('Demo mode is not enabled. Set DEMO_MODE=true in your .env file.');
 
             return self::FAILURE;
+        }
+
+        if (DemoSchedule::wasIntervalClamped()) {
+            $configured = (int) config('demo.reset_interval');
+            $this->warn("DEMO_RESET_INTERVAL is set to {$configured} minutes, but the maximum supported interval is 1440 minutes (24 hours). The demo will reset every 24 hours instead.");
         }
 
         DB::prohibitDestructiveCommands(false);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Support\DemoSchedule;
 use Carbon\CarbonInterval;
 use Cron\CronExpression;
 use Illuminate\Console\Command;
@@ -22,7 +23,12 @@ final class DemoStatusCommand extends Command
             return self::SUCCESS;
         }
 
-        $interval = (int) config('demo.reset_interval', 30);
+        if (DemoSchedule::wasIntervalClamped()) {
+            $configured = (int) config('demo.reset_interval');
+            $this->warn("DEMO_RESET_INTERVAL is set to {$configured} minutes, but the maximum supported interval is 1440 minutes (24 hours). The demo will reset every 24 hours instead.");
+        }
+
+        $interval = DemoSchedule::effectiveInterval();
 
         $this->info('Demo mode is active.');
         $this->newLine();
@@ -33,7 +39,7 @@ final class DemoStatusCommand extends Command
             ['Reset Interval', $interval.' minutes'],
         ]);
 
-        $cron = new CronExpression("*/{$interval} * * * *");
+        $cron = new CronExpression(DemoSchedule::cronExpression());
         $nextReset = $cron->getNextRunDate();
         $remaining = $nextReset->getTimestamp() - time();
 

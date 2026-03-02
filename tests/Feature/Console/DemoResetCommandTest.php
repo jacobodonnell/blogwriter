@@ -44,3 +44,18 @@ it('fails when reset service fails', function (): void {
     $this->artisan('demo:reset')
         ->assertFailed();
 });
+
+it('warns when interval exceeds maximum', function (): void {
+    config()->set('demo.enabled', true);
+    config()->set('demo.reset_interval', 2880);
+    config()->set('demo.credentials.email', 'demo@blogwriter.dev');
+    config()->set('demo.credentials.password', 'demo1234');
+
+    $mock = Mockery::mock(Resettable::class);
+    $mock->shouldReceive('reset')->once()->andReturn(Command::SUCCESS);
+    $this->app->instance(Resettable::class, $mock);
+
+    $this->artisan('demo:reset')
+        ->assertSuccessful()
+        ->expectsOutputToContain('DEMO_RESET_INTERVAL is set to 2880 minutes');
+});

@@ -31,7 +31,21 @@ it('passes correct next reset timestamp from cron schedule', function (): void {
     config()->set('demo.enabled', true);
     config()->set('demo.reset_interval', 15);
 
-    $cron = new Cron\CronExpression('*/15 * * * *');
+    $cron = new Cron\CronExpression(App\Support\DemoSchedule::cronExpression());
+    $expectedNextReset = $cron->getNextRunDate()->getTimestamp();
+
+    $view = $this->blade('<x-demo-banner />');
+
+    $view->assertSee("demoCountdown({$expectedNextReset})", escape: false);
+});
+
+it('uses hour-level cron for intervals over 60 minutes', function (): void {
+    config()->set('demo.enabled', true);
+    config()->set('demo.reset_interval', 120);
+    config()->set('demo.credentials.email', 'demo@test.com');
+    config()->set('demo.credentials.password', 'secret');
+
+    $cron = new Cron\CronExpression('0 */2 * * *');
     $expectedNextReset = $cron->getNextRunDate()->getTimestamp();
 
     $view = $this->blade('<x-demo-banner />');
