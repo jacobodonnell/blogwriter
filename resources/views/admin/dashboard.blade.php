@@ -8,6 +8,22 @@
             <p class="text-base-content/70 mt-1">Welcome to your BlogWriter admin panel.</p>
         </div>
 
+        {{-- Quick Actions --}}
+        <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
+            <a href="{{ route('admin.articles.create') }}" class="btn btn-primary btn-block sm:w-auto">
+                <i class="ph ph-plus text-xl mr-2"></i>
+                New Article
+            </a>
+            <a href="{{ route('admin.photos.create') }}" class="btn btn-primary btn-block sm:w-auto">
+                <i class="ph ph-camera text-xl mr-2"></i>
+                Upload Photo
+            </a>
+            <a href="{{ route('admin.categories.index') }}" class="btn btn-secondary btn-block sm:w-auto">
+                <i class="ph ph-folder text-xl mr-2"></i>
+                Manage Categories
+            </a>
+        </div>
+
         {{-- Stats Grid --}}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             @php
@@ -53,7 +69,7 @@
                     @if($recentArticles->count() > 0)
                         <div class="space-y-4">
                             @foreach($recentArticles as $article)
-                                <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg">
+                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-base-200 rounded-lg">
                                     <div class="flex-1 min-w-0">
                                         <h3 class="font-semibold truncate">{{ $article->title }}</h3>
                                         <div class="flex items-center gap-2 mt-1 text-sm text-base-content/60">
@@ -67,7 +83,7 @@
                                             <span>{{ $article->updated_at->diffForHumans() }}</span>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-2 ml-4">
+                                    <div class="flex items-center gap-2 sm:ml-4">
                                         <x-admin.icon-button tooltip="Edit" href="{{ route('admin.articles.edit', $article) }}" icon="pencil-simple" />
                                         @if($article->isPublished())
                                             <x-admin.icon-button tooltip="View on Site" href="{{ $article->permalink() }}" icon="eye" />
@@ -104,7 +120,7 @@
                                         <figure class="px-4 pt-4">
                                             <img
                                                 src="{{ $photo->thumbnail_url }}"
-                                                alt="{{ $photo->caption ?? 'Photo' }}"
+                                                alt="{{ $photo->alt_text }}"
                                                 class="rounded-lg w-full h-48 object-contain bg-base-300"
                                             >
                                         </figure>
@@ -116,7 +132,7 @@
                                         </figure>
                                     @endif
                                     <div class="card-body p-4">
-                                        <h3 class="card-title text-sm truncate">{{ $photo->caption ?? 'Untitled Photo' }}</h3>
+                                        <h3 class="card-title text-sm truncate">{{ $photo->alt_text }}</h3>
                                         <div class="flex items-center gap-2 text-sm text-base-content/60">
                                             <span @class([
                                                 'badge badge-sm',
@@ -147,20 +163,5 @@
             </div>
         </div>
 
-        {{-- Quick Actions --}}
-        <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
-            <a href="{{ route('admin.articles.create') }}" class="btn btn-primary btn-block sm:w-auto">
-                <i class="ph ph-plus text-xl mr-2"></i>
-                New Article
-            </a>
-            <a href="{{ route('admin.photos.create') }}" class="btn btn-primary btn-block sm:w-auto">
-                <i class="ph ph-camera text-xl mr-2"></i>
-                Upload Photo
-            </a>
-            <a href="{{ route('admin.categories.index') }}" class="btn btn-secondary btn-block sm:w-auto">
-                <i class="ph ph-folder text-xl mr-2"></i>
-                Manage Categories
-            </a>
-        </div>
     </div>
 </x-layouts.admin>

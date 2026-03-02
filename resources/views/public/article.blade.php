@@ -9,16 +9,16 @@
 
         {{-- Auth Toolbar --}}
         @auth
-            <div class="flex items-center gap-2 mb-6">
-                <a href="{{ route('admin.articles.index') }}" class="btn btn-ghost btn-sm gap-2">
+            <div class="flex flex-wrap items-center gap-4 mb-6">
+                <a href="{{ route('articles.index') }}" class="link link-hover inline-flex items-center gap-1 text-sm">
                     <i class="ph ph-article"></i>
                     All Articles
                 </a>
-                <a href="{{ route('admin.articles.edit', $article) }}" class="btn btn-ghost btn-sm gap-2">
+                <a href="{{ route('admin.articles.edit', $article) }}" class="link link-hover inline-flex items-center gap-1 text-sm">
                     <i class="ph ph-pencil-simple"></i>
                     Edit
                 </a>
-                <a href="{{ route('admin.articles.download', $article) }}" class="btn btn-ghost btn-sm gap-2">
+                <a href="{{ route('admin.articles.download', $article) }}" class="link link-hover inline-flex items-center gap-1 text-sm">
                     <i class="ph ph-download-simple"></i>
                     Download
                 </a>
@@ -85,10 +85,10 @@
         {{-- Footer Meta --}}
         <footer class="mt-12 pt-8 border-t border-base-200">
             {{-- Permalink --}}
-            <div class="flex items-center gap-2 text-sm text-base-content/60 mb-4">
+            <div class="flex flex-wrap items-center gap-2 text-sm text-base-content/60 mb-4">
                 <i class="ph ph-link"></i>
                 <span>Permalink:</span>
-                <a href="{{ route('articles.show', $article->slug) }}" class="u-url link link-primary">
+                <a href="{{ route('articles.show', $article->slug) }}" class="u-url link link-primary break-all">
                     {{ url()->current() }}
                 </a>
             </div>

@@ -60,7 +60,7 @@
                                     @endif
                                 </td>
                                 <td x-show="columns.title">
-                                    <div class="font-semibold">{{ $article->title }}</div>
+                                    <a href="{{ route('admin.articles.edit', $article) }}" class="font-semibold link link-hover">{{ $article->title }}</a>
                                     <div class="text-sm text-base-content/60">{{ Str::limit($article->slug, 40) }}</div>
                                 </td>
                                 <td x-show="columns.status">

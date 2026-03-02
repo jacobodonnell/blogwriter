@@ -21,7 +21,7 @@
     @endif
 
     {{-- Toolbar row: Filter Toggle + Clear + toolbar slot --}}
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2">
         <button @click="open = !open" class="btn btn-ghost btn-sm gap-1" type="button">
             <i class="ph ph-funnel text-lg"></i>
             Filters
