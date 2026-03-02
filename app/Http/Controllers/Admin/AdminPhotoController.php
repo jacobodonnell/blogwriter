@@ -94,7 +94,7 @@ final class AdminPhotoController extends Controller
                 ]);
             }
 
-            return redirect()->route('admin.photos.edit', $photo)
+            return redirect()->route('photos.show', $photo->slug)
                 ->with('success', 'Photo created successfully.');
         } catch (Exception $exception) {
             Log::error('Failed to create photo', [
