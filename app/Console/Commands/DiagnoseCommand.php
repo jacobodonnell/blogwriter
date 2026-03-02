@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Models\User;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Route;
@@ -39,8 +40,17 @@ final class DiagnoseCommand extends Command
             }
         }, 'Database tables missing - run php artisan migrate');
 
+        // Check 3b: Database has users
+        $this->check('Database has users', function (): bool {
+            try {
+                return User::exists();
+            } catch (Exception) {
+                return false;
+            }
+        }, 'No users found - run php artisan blogwriter:install or create a user');
+
         // Check 4: Controllers exist
-        $this->check('Controllers exist', fn (): bool => file_exists(app_path('Http/Controllers/Admin/SettingsController.php')), 'SettingsController.php is missing - try re-installing BlogWriter');
+        $this->check('Controllers exist', fn (): bool => file_exists(app_path('Http/Controllers/Admin/SiteSettingsController.php')), 'SiteSettingsController.php is missing - try re-installing BlogWriter');
 
         // Check 5: Routes registered
         $this->check('Routes cached', function () {

@@ -26,7 +26,7 @@ final class ResetService implements Resettable
 
         try {
             // 1. Remove installation lock
-            info('[1/5] Removing installation lock...');
+            info('[1/4] Removing installation lock...');
             if (file_exists(storage_path('installed.lock'))) {
                 unlink(storage_path('installed.lock'));
             }
@@ -34,7 +34,7 @@ final class ResetService implements Resettable
             info('  ✓ Lock removed');
 
             // 2. Wipe database
-            info('[2/5] Wiping database...');
+            info('[2/4] Wiping database...');
             $dbPath = config('database.connections.sqlite.database');
 
             // Close all connections properly
@@ -62,48 +62,33 @@ final class ResetService implements Resettable
                     continue;
                 }
 
-                if (unlink($file)) {
+                // Symlink-safe: operate on the real target so Forge shared
+                // paths survive the reset.
+                $target = is_link($file) ? readlink($file) : $file;
+
+                if (unlink($target)) {
                     continue;
                 }
 
                 throw new RuntimeException(sprintf('Failed to delete file: %s. File may be locked.', $file));
             }
 
-            // Create fresh empty database
-            if (! touch($dbPath)) {
+            // Create fresh empty database (touch the real target if symlinked)
+            $touchTarget = is_link($dbPath) ? readlink($dbPath) : $dbPath;
+            if (! touch($touchTarget)) {
                 throw new RuntimeException(sprintf('Failed to create database file: %s. Check file permissions.', $dbPath));
-            }
-
-            // Reconnect and run migrations using exec to avoid deadlocks
-            DB::reconnect('sqlite');
-            exec('php artisan migrate --force --no-interaction 2>&1', $output, $returnCode);
-
-            if ($returnCode !== 0) {
-                throw new RuntimeException('Migration failed: '.implode("\n", $output));
             }
 
             info('  ✓ Database reset');
 
             // 3. Clear all storage (public and private)
-            info('[3/5] Clearing storage...');
+            info('[3/4] Clearing storage...');
             Storage::disk('public')->deleteDirectory('');
             Storage::disk('private')->deleteDirectory('');
             info('  ✓ Storage cleared');
 
-            // 4. Recreate storage structure
-            info('[4/5] Recreating storage structure...');
-            exec('php artisan storage:link --force 2>&1', $output, $returnCode);
-            if ($returnCode !== 0) {
-                warning('  ! Storage link failed (may already exist)');
-            } else {
-                info('  ✓ Storage linked');
-            }
-
-            // 5. Clear caches
-            info('[5/5] Clearing caches...');
-            exec('php artisan config:clear 2>&1');
-            exec('php artisan cache:clear 2>&1');
-            info('  ✓ Caches cleared');
+            // 4. Ready for caller to run migrations and re-seed
+            info('[4/4] Ready for reinstallation...');
 
             $command->newLine();
             info('✅ BlogWriter reset complete!');

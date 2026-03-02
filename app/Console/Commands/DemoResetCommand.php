@@ -81,6 +81,15 @@ final class DemoResetCommand extends Command
         $this->installService->clearCaches();
         $this->info('✓ Caches cleared');
 
+        // Restore production caches so the server doesn't run uncached
+        // after a demo reset (Forge only runs config:cache during deploys).
+        if (app()->environment('production')) {
+            Artisan::call('config:cache');
+            Artisan::call('route:cache');
+            Artisan::call('view:cache');
+            $this->info('✓ Production caches restored');
+        }
+
         $this->newLine();
         $this->info('Demo instance reset complete!');
 
