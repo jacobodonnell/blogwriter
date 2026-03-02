@@ -1,5 +1,7 @@
 # BlogWriter
 
+*Check out the live demo at [https://blogwriter-demo.on-forge.com/](https://blogwriter-demo.on-forge.com/)*
+
 **Own your content. Own your domain.**
 
 BlogWriter is a personal blogging platform you install on your own server. No platform fees, no content policies you
