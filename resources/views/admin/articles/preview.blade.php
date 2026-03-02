@@ -4,7 +4,7 @@
         {{-- Category --}}
         @if($article->category)
             <div class="flex flex-wrap gap-2 mb-4">
-                <span class="badge badge-primary badge-outline">{{ $article->category->name }}</span>
+                <span class="badge badge-primary badge-sm">{{ $article->category->name }}</span>
             </div>
         @endif
 

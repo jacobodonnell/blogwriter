@@ -6,7 +6,7 @@
 
     <div class="space-y-6">
         {{-- Header --}}
-        <div class="flex justify-between items-center">
+        <div class="flex flex-wrap justify-between items-center gap-2">
             <div>
                 <h1 class="text-3xl font-bold">Edit Category</h1>
                 <p class="text-base-content/70 mt-1">Update category details.</p>

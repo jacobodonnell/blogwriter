@@ -43,7 +43,7 @@
             :defaultOpen="true" :filterParams="['search', 'category', 'status']">
             <x-slot:toolbar>
                 {{-- Columns Toggle --}}
-                <div class="dropdown md:dropdown-end">
+                <div class="dropdown dropdown-end">
                     <div tabindex="0" role="button" class="btn btn-ghost btn-sm gap-1">
                         <i class="ph ph-columns text-lg"></i>
                         <span class="hidden sm:inline">Columns</span>
