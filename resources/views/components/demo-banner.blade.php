@@ -1,9 +1,8 @@
 @if(config('demo.enabled'))
     @php
-        $lockFile = storage_path('installed.lock');
-        $intervalSeconds = (int) config('demo.reset_interval', 30) * 60;
-        $lastReset = file_exists($lockFile) ? filemtime($lockFile) : time();
-        $nextReset = $lastReset + $intervalSeconds;
+        $interval = (int) config('demo.reset_interval', 120);
+        $cron = new Cron\CronExpression("*/{$interval} * * * *");
+        $nextReset = $cron->getNextRunDate()->getTimestamp();
     @endphp
     <div
         x-data="demoCountdown({{ $nextReset }})"
