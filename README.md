@@ -1,6 +1,6 @@
 # BlogWriter
 
-*Check out the live demo at [https://blogwriter-demo.on-forge.com/](https://blogwriter-demo.on-forge.com/)*
+*Check out the live demo at [https://blogwriter-demo.on-forge.com/login](https://blogwriter-demo.on-forge.com/login)*
 
 **Own your content. Own your domain.**
 
