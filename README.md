@@ -99,9 +99,9 @@ regularly. If you're not a fairly technical person, you should not be using this
 Auth,
 MediaLibrary, Microformats (h-card, h-entry, h-feed, rel="me"), RSS/Atom/JSON Feeds, Import & Export, PWA
 
-**Planned:** Notes, Tags, IndieAuth, Webmentions
+**Planned:** Tags, IndieAuth, Subscribers, Newsletter (Buttondown), Paid Content (Stripe), Pages, Webmentions
 
-**Future:** Monetization, podcasts, video, plugin marketplace, managed hosting
+**Future:** Notes, Federation (Micropub, ActivityPub, POSSE), podcasts, video, plugin marketplace, managed hosting
 
 See the full [Roadmap](docs/roadmap.md).
 

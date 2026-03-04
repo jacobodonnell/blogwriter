@@ -36,24 +36,17 @@ IMPORTANT: Activate the `daisyui-development` skill when:
 ## Content Types
 
 - **Articles** - Long-form posts with titles (Tiptap WYSIWYG editor)
-- **Notes** - Short posts (planned)
 - **Photos** - Images with captions
+- **Pages** - Static pages (home, about) with layout choices (V0.2)
+- **Notes** - Short posts (V0.3)
 
 All posts support draft/published workflow, categories, tags, permalinks, and microformats markup.
 
 ## Current Goal
 
-Building V0.1 for personal use on Laravel Forge. See `docs/roadmap.md` for the implementation checklist.
+V0.1 is live and deployed on Laravel Forge. V0.2 focuses on subscribers, monetization, and newsletter integration — making BlogWriter a viable Substack/Patreon alternative. See `docs/roadmap.md` for the full roadmap.
 
-**Success metric:** Personal site runs on BlogWriter and validates on IndieWeb validators.
+## Future Plans
 
-## Plugin Architecture (Planned)
-
-BlogWriter's planned plugin architecture is inspired by the IBM PC's expansion bus model. **This is a design specification — not yet implemented.**
-
-- **Open Protocol** - Plugin store API spec will be public, anyone can run a store
-- **Multiple Stores** - Official (curated) + third-party (open) stores will coexist
-- **Composer-Based** - Plugins will be standard Composer packages
-- **Three Install Methods** - UI store, direct Composer, manual filesystem
-- **No Lock-In** - Plugins will work regardless of store source
+Plugin architecture planned for future versions. Laravel Cashier (Stripe) and Buttondown newsletter integration are part of V0.2.
 

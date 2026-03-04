@@ -9,14 +9,16 @@ Documentation and specifications for the BlogWriter platform are stored in the `
 IMPORTANT: Activate the `blogwriter-docs` skill when:
 
 - User asks about BlogWriter architecture, models, or design specifications
-- User asks about themes, components, or customization features
+- User asks about themes, appearance, or customization features
 - User asks about the installation system or requirements
 - User asks about configuration, settings, or IndieWeb integration
 - User references "docs", "documentation", or "specifications"
-- User mentions building or implementing Articles, Notes, or Photos
-- User is working on theme system or component library
+- User mentions building or implementing Articles, Photos, or Pages
 - User needs to understand content types or data models
 - User asks about feeds, IndieAuth, or IndieWeb features
+- User asks about subscribers, newsletter, or payments
+- User asks about Stripe, Cashier, Buttondown, or monetization
+- User asks about pages system or content gating
 
 ## Local Documentation
 
@@ -25,11 +27,12 @@ All documentation is in the `docs/` directory with YAML frontmatter (HydePHP-com
 Documentation files:
 - `introduction.md` - Product vision and content types
 - `installation.md` - CLI installer (working) and web installer (coming soon)
+- `local-development.md` - Local development setup
+- `deployment.md` - Production deployment with Laravel Forge
 - `writing-content.md` - Content creation workflows
-- `themes.md` - Theme system specification (coming soon)
-- `components.md` - Component library (stub)
+- `appearance.md` - Themes and fonts
 - `settings.md` - Configuration options
-- `feeds-and-indieweb.md` - RSS/Atom/JSON feeds and IndieWeb features (coming soon)
+- `feeds-and-indieweb.md` - RSS/Atom/JSON feeds and IndieWeb features
 - `architecture.md` - Tech stack, models, and design decisions
 - `roadmap.md` - Feature status and milestones
 

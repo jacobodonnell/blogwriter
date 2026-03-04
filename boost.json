@@ -10,7 +10,8 @@
     "nightwatch_mcp": false,
     "packages": [
         "laravel/fortify",
-        "spatie/laravel-medialibrary"
+        "spatie/laravel-medialibrary",
+        "spatie/laravel-responsecache"
     ],
     "sail": false,
     "skills": [
@@ -18,8 +19,10 @@
         "tailwindcss-development",
         "developing-with-fortify",
         "medialibrary-development",
+        "responsecache-development",
         "alpine-development",
         "blogwriter-docs",
-        "daisyui-development"
+        "daisyui-development",
+        "v02-architecture"
     ]
 }

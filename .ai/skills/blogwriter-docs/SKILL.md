@@ -11,7 +11,8 @@ Access BlogWriter documentation from the local `docs/` directory to understand s
 
 **Some features documented are specifications for future implementation, not current state.** Documentation includes both:
 - ✅ **Implemented features** - Articles, Photos, Categories, Admin, Authentication, CLI Installer, Feeds, Microformats, Import/Export, Appearance System, PWA
-- 🚧 **Coming Soon features** - Notes, Tags, Themes, IndieWeb protocols, Web Installer UI
+- 🚧 **Coming Soon (V0.2)** - Subscribers, IndieAuth, Stripe/Cashier, Buttondown Newsletter, Pages, Webmentions, Member-only Content
+- 🚧 **Coming Soon (V0.3)** - Notes, Micropub, ActivityPub, POSSE
 
 **Always verify actual codebase implementation status before claiming a feature exists.**
 
@@ -20,16 +21,17 @@ Access BlogWriter documentation from the local `docs/` directory to understand s
 All files use YAML frontmatter (HydePHP-compatible format for future static site generation):
 
 ### Getting Started
-- **`introduction.md`** - Product vision, target audience, content types (Articles, Photos, Notes*)
+- **`introduction.md`** - Product vision, target audience, content types
 - **`installation.md`** - CLI installer (✅ working), Web installer UI (🚧 coming soon)
-- **`roadmap.md`** - Feature status, V0.1 progress, and future milestones
+- **`local-development.md`** - Local development setup (✅)
+- **`deployment.md`** - Production deployment with Laravel Forge (✅)
+- **`roadmap.md`** - Feature status, milestones, and future plans
 
 ### Content & Writing
-- **`writing-content.md`** - Tiptap WYSIWYG editor with Markdown storage (✅), Notes (🚧 coming soon), Photos (✅), Tags (🚧 coming soon)
+- **`writing-content.md`** - Tiptap WYSIWYG editor with Markdown storage (✅), Photos (✅), Tags (🚧 coming soon)
 
-### Customization (Planned)
-- **`themes.md`** - Theme system specification (🚧 coming soon - entire system not yet built)
-- **`components.md`** - Component library (stub, needs content or specification)
+### Customization
+- **`appearance.md`** - 35 DaisyUI themes, 11 fonts, three-way theme cycling (✅)
 
 ### Configuration
 - **`settings.md`** - Settings UI (✅ functional)
@@ -42,14 +44,14 @@ All files use YAML frontmatter (HydePHP-compatible format for future static site
 
 Activate this skill when:
 - User asks about BlogWriter architecture, models, or design specifications
-- User asks about themes, components, or customization features
+- User asks about themes, appearance, or customization features
 - User asks about the installation system or requirements
 - User asks about configuration, settings, or IndieWeb integration
 - User references "docs", "documentation", or "specifications"
-- User mentions building or implementing Articles, Notes, or Photos
-- User is working on theme system or component library
+- User mentions building or implementing Articles, Photos, or Pages
 - User needs to understand content types or data models
 - User asks about feeds, IndieAuth, or IndieWeb features
+- User asks about subscribers, newsletter, payments, or content gating
 
 ## Using the Documentation
 
@@ -57,23 +59,10 @@ Read files directly from the `docs/` directory using the Read tool:
 - Full path: `/Users/jacobodonnell/Dev-Projects/php/laravel/blogwriter/docs/[filename].md`
 - Or relative from project root: `docs/[filename].md`
 
-Example:
-```
-Read tool: docs/architecture.md
-```
-
 ## Implementation Status Key
 
 - ✅ **Implemented** - Feature is built and working
 - 🚧 **Coming Soon** - Feature is documented but not yet implemented (specification only)
-- Documentation with "Coming Soon" callouts includes GitHub issue links for feedback
-
-## Important Reminders
-
-1. **Verify before implementing** - Check actual codebase to confirm if documented feature exists
-2. **YAML frontmatter preserved** - Will be used by HydePHP for static site generation
-3. **Specifications vs Reality** - Documentation serves dual purpose: current features + planned roadmap
-4. **GitHub feedback welcome** - "Coming Soon" sections invite community input on design
 
 ## Current Implementation vs Documentation
 
@@ -92,11 +81,18 @@ Read tool: docs/architecture.md
 - Response Caching: Performance optimization for public pages
 - Settings UI: Functional settings management
 
-**What's Documented But Missing (🚧):**
-- Notes: Model, controller, views, routes — not yet built
-- Tags: Polymorphic tagging system — not yet built
-- Theme System: Custom template/override system — not yet built
-- IndieAuth: Authorization/token/metadata endpoints — not yet built
-- Webmentions: Send and receive — not yet built
-- Web Installer UI: Only CLI installer works
-- Component Override System: Documented but not built
+**What's Coming in V0.2 (🚧):**
+- Subscribers: Subscriber model, custom auth guard, IndieAuth login, magic link fallback
+- Monetization: Stripe via Laravel Cashier (Checkout + Customer Portal)
+- Newsletter: Buttondown integration with newsletter provider interface
+- Content Gating: Member-only content (everyone/subscribers/paid visibility)
+- IndieAuth: Server endpoints (authorization, token, metadata)
+- Pages: Home + about pages with layout choices
+- Webmentions: Send and receive
+- Authenticated Feeds: Premium content delivery via feed readers
+
+**What's Coming in V0.3 (🚧):**
+- Notes: Short posts with hashtag-to-tag parsing
+- Micropub: Publish from third-party clients
+- ActivityPub: Federation support
+- POSSE: Syndication to Bluesky and Mastodon

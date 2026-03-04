@@ -79,64 +79,52 @@ This roadmap shows what's built and what's planned.
 
 ---
 
-## Planned
+## Planned (V0.1 Polish)
 
-### Content Types
-
-- Notes (short posts without titles)
-- Tags (polymorphic tagging across content types)
+- Tags (polymorphic across articles, photos, future content types)
 - Tag management interface
-
-### IndieWeb Protocols
-
-- IndieAuth server (authorization, token, metadata endpoints)
-- Webmention support (send and receive)
-
-### Feeds & Distribution
-
-- Markdown export (`.md` URLs per article)
-
-### CI/CD
-
-- GitHub Actions pipeline (Pest tests, Pint formatting, Rector analysis)
-
-### Installation
-
-- Shared hosting installers (Softaculous, Installatron, shell script for SSH)
 
 ---
 
-## Future
+## V0.2 — Subscribers & Monetization
 
-### V0.2 — Social Reader
+- `Subscriber` model with dedicated `subscribers` table (separate from single-admin User)
+- Custom `subscriber` auth guard and middleware (Fortify stays admin-only)
+- IndieAuth server (authorization, token, metadata endpoints)
+- IndieAuth login for subscribers (primary auth — sign in with your domain)
+- Magic link email login (fallback, requires SMTP/transactional provider)
+- Direct Stripe integration via Laravel Cashier (Checkout + Customer Portal)
+- First-party Buttondown newsletter integration (API-based delivery channel)
+- Newsletter provider interface for future providers
+- Member-only content gating (everyone/subscribers/paid visibility)
+- Authenticated feeds for premium content
+- Ticketing for IndieAuth for feed reader access
+- Pages system (home + about with layout choices)
+- Home page layouts (editorial, photo-driven)
+- Webmention support (send and receive)
 
-An IndieWeb-agnostic social reader that builds social-media-style feeds around IndieAuth server content resources. Not BlogWriter-specific — works with any IndieWeb-compatible server.
+---
 
-### V0.3 — Federation & Discovery
+## V0.3 — Notes & Federation
 
+- Notes (short posts, hashtag-to-tag parsing)
 - Micropub support (publish from third-party clients)
 - ActivityPub integration
 - Webmention dashboard
 - POSSE to Bluesky and Mastodon
 
-### V0.4 — Creator Monetization
+---
 
-- Member-only content
-- Newsletter support (BYOK email relay)
-- Stripe integration
-
-### Beyond V0.4
+## Beyond V0.3
 
 - Podcast hosting (audio files + RSS podcast feed)
 - Video integration (Bunny.net or Vimeo API)
 - Theme system with custom templates and overrides
 - Plugin architecture (Composer-based, open store spec)
-- Theme and plugin marketplace
 - Import tools (Substack, Medium, WordPress, Ghost)
-
-### BlogWriter Hosted
-
-Managed hosting for non-technical users who want BlogWriter without server administration. Initial offering: $200 one-time setup fee + $20/mo on a shared Laravel VPS, or setup on the customer's own Laravel Forge + VPS account. A self-service SaaS provisioning app is a future evolution.
+- Shared hosting installers (Softaculous, Installatron, shell script for SSH)
+- GitHub Actions CI/CD pipeline
+- BlogWriter Hosted (managed hosting for non-technical users)
 
 ---
 
@@ -162,4 +150,4 @@ Check issues tagged `good first issue` or `help wanted` to get started.
 
 No fixed release dates. Features ship when they're ready and tested.
 
-Last updated: February 2026
+Last updated: March 2026
