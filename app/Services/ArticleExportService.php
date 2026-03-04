@@ -56,6 +56,33 @@ final class ArticleExportService
     }
 
     /**
+     * Stream a single article's category (with ancestor chain) as categories.yaml into the ZipStream.
+     *
+     * Does nothing if the article has no category.
+     */
+    public function streamArticleCategoryToZip(ZipStream $zip, Article $article): void
+    {
+        if (! $article->category) {
+            return;
+        }
+
+        $article->category->loadMissing('parent');
+        $ancestors = $article->category->ancestors();
+        $ancestors->each(fn (Category $c) => $c->loadMissing('parent'));
+        $ancestors->push($article->category);
+
+        $data = $ancestors->map(fn (Category $category): array => [
+            'id' => $category->id,
+            'name' => $category->name,
+            'slug' => $category->slug,
+            'description' => $category->description,
+            'parent_slug' => $category->parent?->slug,
+        ])->values()->all();
+
+        $zip->addFile('categories.yaml', Yaml::dump($data, 2, 2));
+    }
+
+    /**
      * Stream site settings as a settings.yaml file into the given ZipStream.
      */
     public function streamSettingsToZip(ZipStream $zip): void

@@ -550,3 +550,160 @@ it('streams articles as markdown files to a zip', function (): void {
         ->toContain('slug: hello-world')
         ->toContain('Some content.');
 });
+
+// --- Single article export ---
+
+it('exports a single article as a downloadable zip', function (): void {
+    $article = Article::factory()->published()->create(['slug' => 'single-export']);
+
+    $response = $this->get(route('admin.articles.export', $article));
+
+    $response->assertSuccessful();
+    $response->assertHeader('Content-Type', 'application/zip');
+    expect($response->headers->get('Content-Disposition'))->toContain('single-export-export-');
+});
+
+it('redirects unauthenticated users from single article export', function (): void {
+    auth()->logout();
+
+    $article = Article::factory()->published()->create();
+
+    $this->get(route('admin.articles.export', $article))
+        ->assertRedirect(route('login'));
+});
+
+it('single article zip contains the article markdown', function (): void {
+    $article = Article::factory()->published()->create([
+        'title' => 'Export Me',
+        'slug' => 'export-me',
+        'content' => 'Body content here.',
+    ]);
+
+    $response = $this->get(route('admin.articles.export', $article));
+    $zipBytes = $response->streamedContent();
+
+    $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
+    file_put_contents($tmpFile, $zipBytes);
+
+    $za = new ZipArchive();
+    $za->open($tmpFile, ZipArchive::RDONLY);
+    $contents = $za->getFromName('articles/export-me.md');
+    $za->close();
+    unlink($tmpFile);
+
+    expect($contents)
+        ->toContain('title: \'Export Me\'')
+        ->toContain('slug: export-me')
+        ->toContain('Body content here.');
+});
+
+it('includes categories.yaml with ancestor chain when article has a category', function (): void {
+    $parent = Category::factory()->create(['name' => 'Tech', 'slug' => 'tech']);
+    $child = Category::factory()->withParent($parent)->create(['name' => 'PHP', 'slug' => 'php']);
+    $article = Article::factory()->published()->create([
+        'slug' => 'cat-article',
+        'category_id' => $child->id,
+    ]);
+
+    $response = $this->get(route('admin.articles.export', $article));
+    $zipBytes = $response->streamedContent();
+
+    $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
+    file_put_contents($tmpFile, $zipBytes);
+
+    $za = new ZipArchive();
+    $za->open($tmpFile, ZipArchive::RDONLY);
+    $yamlContent = $za->getFromName('categories.yaml');
+    $za->close();
+    unlink($tmpFile);
+
+    $data = Yaml::parse($yamlContent);
+
+    expect($data)->toHaveCount(2);
+
+    $techEntry = collect($data)->firstWhere('slug', 'tech');
+    $phpEntry = collect($data)->firstWhere('slug', 'php');
+
+    expect($techEntry['name'])->toBe('Tech')
+        ->and($techEntry['parent_slug'])->toBeNull()
+        ->and($phpEntry['name'])->toBe('PHP')
+        ->and($phpEntry['parent_slug'])->toBe('tech');
+});
+
+it('omits categories.yaml when article has no category', function (): void {
+    $article = Article::factory()->published()->create([
+        'slug' => 'no-cat',
+        'category_id' => null,
+    ]);
+
+    $response = $this->get(route('admin.articles.export', $article));
+    $zipBytes = $response->streamedContent();
+
+    $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
+    file_put_contents($tmpFile, $zipBytes);
+
+    $za = new ZipArchive();
+    $za->open($tmpFile, ZipArchive::RDONLY);
+    $result = $za->getFromName('categories.yaml');
+    $za->close();
+    unlink($tmpFile);
+
+    expect($result)->toBeFalse();
+});
+
+it('includes photos.yaml and image when article has a featured photo', function (): void {
+    Storage::fake('public');
+
+    $photo = Photo::factory()->create(['slug' => 'featured-img']);
+    $fakeFile = UploadedFile::fake()->image('featured.jpg', 100, 100);
+    $photo->addMedia($fakeFile->getRealPath())
+        ->usingFileName('featured.jpg')
+        ->toMediaCollection('image', 'public');
+
+    $article = Article::factory()->published()->create([
+        'slug' => 'with-photo',
+        'photo_id' => $photo->id,
+    ]);
+
+    $response = $this->get(route('admin.articles.export', $article));
+    $zipBytes = $response->streamedContent();
+
+    $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
+    file_put_contents($tmpFile, $zipBytes);
+
+    $za = new ZipArchive();
+    $za->open($tmpFile, ZipArchive::RDONLY);
+    $photosYaml = $za->getFromName('photos.yaml');
+    $imageFile = $za->getFromName('images/featured-img.jpg');
+    $za->close();
+    unlink($tmpFile);
+
+    expect($photosYaml)->not->toBeFalse();
+
+    $data = Yaml::parse($photosYaml);
+    expect($data)->toHaveCount(1)
+        ->and($data[0]['slug'])->toBe('featured-img');
+
+    expect($imageFile)->not->toBeFalse();
+});
+
+it('omits photos.yaml when article has no featured photo', function (): void {
+    $article = Article::factory()->published()->create([
+        'slug' => 'no-photo',
+        'photo_id' => null,
+    ]);
+
+    $response = $this->get(route('admin.articles.export', $article));
+    $zipBytes = $response->streamedContent();
+
+    $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
+    file_put_contents($tmpFile, $zipBytes);
+
+    $za = new ZipArchive();
+    $za->open($tmpFile, ZipArchive::RDONLY);
+    $result = $za->getFromName('photos.yaml');
+    $za->close();
+    unlink($tmpFile);
+
+    expect($result)->toBeFalse();
+});

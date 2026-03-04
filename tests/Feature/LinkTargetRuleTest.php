@@ -91,7 +91,12 @@ it('enforces link target rule on all pages', function (): void {
             continue;
         }
 
-        preg_match_all('/<a\b([^>]*)>/i', $response->getContent(), $tags, PREG_SET_ORDER);
+        $content = $response->getContent();
+        if (! is_string($content)) {
+            continue;
+        }
+
+        preg_match_all('/<a\b([^>]*)>/i', $content, $tags, PREG_SET_ORDER);
 
         foreach ($tags as $tag) {
             $tagHtml = '<a'.$tag[1].'>';
