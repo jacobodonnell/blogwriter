@@ -10,7 +10,7 @@ beforeEach(function (): void {
     $this->actingAs($this->user);
 });
 
-it('downloads an article as a markdown file', function (): void {
+it('downloads an article as a zip file', function (): void {
     $article = Article::factory()->published()->create([
         'slug' => 'my-article',
         'title' => 'My Article',
@@ -20,11 +20,11 @@ it('downloads an article as a markdown file', function (): void {
     $response = $this->get(route('admin.articles.download', $article));
 
     $response->assertSuccessful();
-    $response->assertHeader('Content-Type', 'text/markdown; charset=utf-8');
-    expect($response->headers->get('Content-Disposition'))->toContain('my-article.md');
+    $response->assertHeader('Content-Type', 'application/zip');
+    expect($response->headers->get('Content-Disposition'))->toContain('my-article-export-');
 });
 
-it('markdown download contains frontmatter and body', function (): void {
+it('zip download contains article markdown with frontmatter and body', function (): void {
     $article = Article::factory()->published()->create([
         'slug' => 'my-article',
         'title' => 'My Article',
@@ -32,10 +32,18 @@ it('markdown download contains frontmatter and body', function (): void {
     ]);
 
     $response = $this->get(route('admin.articles.download', $article));
+    $zipBytes = $response->streamedContent();
 
-    $content = $response->streamedContent();
+    $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
+    file_put_contents($tmpFile, $zipBytes);
 
-    expect($content)
+    $za = new ZipArchive();
+    $za->open($tmpFile, ZipArchive::RDONLY);
+    $contents = $za->getFromName('articles/my-article.md');
+    $za->close();
+    unlink($tmpFile);
+
+    expect($contents)
         ->toContain('title:')
         ->toContain('My Article')
         ->toContain('slug: my-article')

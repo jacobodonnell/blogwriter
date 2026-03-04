@@ -128,7 +128,7 @@
            class="btn btn-ghost btn-sm gap-2 w-full justify-start"
            data-test="article-download-btn">
             <i class="ph ph-download-simple text-lg"></i>
-            Download Markdown
+            Download
         </a>
     @endunless
 

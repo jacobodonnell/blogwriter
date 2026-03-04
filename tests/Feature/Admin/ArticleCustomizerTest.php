@@ -182,7 +182,7 @@ it('index view button links to permalink for published', function (): void {
     get(route('admin.articles.index'))
         ->assertOk()
         ->assertSee($article->permalink())
-        ->assertSee('View Published');
+        ->assertSee('View');
 });
 
 it('stores markdown content from tiptap editor with all formatting', function (): void {

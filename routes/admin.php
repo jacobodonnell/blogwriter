@@ -7,7 +7,6 @@ use App\Http\Controllers\Admin\AppearanceController;
 use App\Http\Controllers\Admin\ArticleController;
 use App\Http\Controllers\Admin\ArticleDownloadController;
 use App\Http\Controllers\Admin\ArticleExportController;
-use App\Http\Controllers\Admin\ArticleExportSingleController;
 use App\Http\Controllers\Admin\ArticleImportController;
 use App\Http\Controllers\Admin\ArticleLivePreviewController;
 use App\Http\Controllers\Admin\ArticlePreviewController;
@@ -41,8 +40,7 @@ Route::middleware(['auth', 'auth.session', DoNotCacheResponse::class])->prefix('
     Route::put('/articles/{article}', [ArticleController::class, 'update'])->name('articles.update');
     Route::match(['post', 'put'], '/articles/{article}/preview', ArticlePreviewController::class)->name('articles.preview.update');
     Route::get('/articles/{article}/preview/live', ArticleLivePreviewController::class)->name('articles.preview.live');
-    Route::get('/articles/{article}/download', [ArticleDownloadController::class, 'show'])->name('articles.download');
-    Route::get('/articles/{article}/export', ArticleExportSingleController::class)->name('articles.export');
+    Route::get('/articles/{article}/download', ArticleDownloadController::class)->name('articles.download');
     Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy');
 
     // Photos

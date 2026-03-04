@@ -556,7 +556,7 @@ it('streams articles as markdown files to a zip', function (): void {
 it('exports a single article as a downloadable zip', function (): void {
     $article = Article::factory()->published()->create(['slug' => 'single-export']);
 
-    $response = $this->get(route('admin.articles.export', $article));
+    $response = $this->get(route('admin.articles.download', $article));
 
     $response->assertSuccessful();
     $response->assertHeader('Content-Type', 'application/zip');
@@ -568,7 +568,7 @@ it('redirects unauthenticated users from single article export', function (): vo
 
     $article = Article::factory()->published()->create();
 
-    $this->get(route('admin.articles.export', $article))
+    $this->get(route('admin.articles.download', $article))
         ->assertRedirect(route('login'));
 });
 
@@ -579,7 +579,7 @@ it('single article zip contains the article markdown', function (): void {
         'content' => 'Body content here.',
     ]);
 
-    $response = $this->get(route('admin.articles.export', $article));
+    $response = $this->get(route('admin.articles.download', $article));
     $zipBytes = $response->streamedContent();
 
     $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
@@ -605,7 +605,7 @@ it('includes categories.yaml with ancestor chain when article has a category', f
         'category_id' => $child->id,
     ]);
 
-    $response = $this->get(route('admin.articles.export', $article));
+    $response = $this->get(route('admin.articles.download', $article));
     $zipBytes = $response->streamedContent();
 
     $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
@@ -636,7 +636,7 @@ it('omits categories.yaml when article has no category', function (): void {
         'category_id' => null,
     ]);
 
-    $response = $this->get(route('admin.articles.export', $article));
+    $response = $this->get(route('admin.articles.download', $article));
     $zipBytes = $response->streamedContent();
 
     $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
@@ -665,7 +665,7 @@ it('includes photos.yaml and image when article has a featured photo', function 
         'photo_id' => $photo->id,
     ]);
 
-    $response = $this->get(route('admin.articles.export', $article));
+    $response = $this->get(route('admin.articles.download', $article));
     $zipBytes = $response->streamedContent();
 
     $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
@@ -693,7 +693,7 @@ it('omits photos.yaml when article has no featured photo', function (): void {
         'photo_id' => null,
     ]);
 
-    $response = $this->get(route('admin.articles.export', $article));
+    $response = $this->get(route('admin.articles.download', $article));
     $zipBytes = $response->streamedContent();
 
     $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');

@@ -91,10 +91,7 @@
                                 <td class="text-right">
                                     <div class="flex justify-end gap-2">
                                         <x-admin.icon-button tooltip="Edit" href="{{ route('admin.articles.edit', $article) }}" icon="pencil-simple" />
-                                        <x-admin.icon-button tooltip="Export" href="{{ route('admin.articles.export', $article) }}" icon="download-simple" />
-                                        @if($article->isPublished())
-                                            <x-admin.icon-button tooltip="View Published" href="{{ $article->permalink() }}" icon="eye" />
-                                        @endif
+                                        <x-admin.icon-button tooltip="View" href="{{ $article->permalink() }}" icon="eye" />
                                         <button type="button"
                                                 @click="deleteAction = '{{ route('admin.articles.destroy', $article) }}'; $refs.deleteModal.showModal()"
                                                 class="btn btn-ghost btn-sm btn-square text-error"
