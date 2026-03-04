@@ -153,7 +153,7 @@ final class InstallCommand extends Command
         }
 
         $config = $this->gatherConfiguration();
-        $this->install($config, skipDatabase: $didFreshInstall);
+        $this->install($config);
 
         return self::SUCCESS;
     }
