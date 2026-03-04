@@ -95,8 +95,8 @@ it('rejects invalid duplicate_strategy with 422', function (): void {
 // ---------------------------------------------------------------------------
 
 it('imports articles from a valid zip', function (): void {
-    $md1 = makeArticleMd(['title' => 'First Article', 'slug' => 'first-article', 'draft' => false, 'date' => '2024-01-01T00:00:00+00:00']);
-    $md2 = makeArticleMd(['title' => 'Second Article', 'slug' => 'second-article', 'draft' => false, 'date' => '2024-01-02T00:00:00+00:00']);
+    $md1 = makeArticleMd(['title' => 'First Article', 'slug' => 'first-article', 'status' => 'public', 'date' => '2024-01-01T00:00:00+00:00']);
+    $md2 = makeArticleMd(['title' => 'Second Article', 'slug' => 'second-article', 'status' => 'public', 'date' => '2024-01-02T00:00:00+00:00']);
 
     $zip = makeImportZip([
         'articles/first-article.md' => $md1,
@@ -127,8 +127,8 @@ it('returns ok with zero imported for an empty zip', function (): void {
 it('skips duplicate slugs when strategy is skip', function (): void {
     Article::factory()->create(['slug' => 'existing-article', 'title' => 'Original Title']);
 
-    $md = makeArticleMd(['title' => 'New Title', 'slug' => 'existing-article', 'draft' => false, 'date' => '2024-01-01T00:00:00+00:00']);
-    $fresh = makeArticleMd(['title' => 'Fresh Article', 'slug' => 'fresh-article', 'draft' => false, 'date' => '2024-01-01T00:00:00+00:00']);
+    $md = makeArticleMd(['title' => 'New Title', 'slug' => 'existing-article', 'status' => 'public', 'date' => '2024-01-01T00:00:00+00:00']);
+    $fresh = makeArticleMd(['title' => 'Fresh Article', 'slug' => 'fresh-article', 'status' => 'public', 'date' => '2024-01-01T00:00:00+00:00']);
 
     $zip = makeImportZip([
         'articles/existing-article.md' => $md,
@@ -146,7 +146,7 @@ it('skips duplicate slugs when strategy is skip', function (): void {
 it('overwrites duplicate slugs when strategy is overwrite', function (): void {
     Article::factory()->create(['slug' => 'my-article', 'title' => 'Old Title']);
 
-    $md = makeArticleMd(['title' => 'Updated Title', 'slug' => 'my-article', 'draft' => false, 'date' => '2024-01-01T00:00:00+00:00']);
+    $md = makeArticleMd(['title' => 'Updated Title', 'slug' => 'my-article', 'status' => 'public', 'date' => '2024-01-01T00:00:00+00:00']);
 
     $zip = makeImportZip(['articles/my-article.md' => $md]);
 
@@ -168,7 +168,7 @@ it('resolves category slug to category_id on import', function (): void {
     $md = makeArticleMd([
         'title' => 'Tech Article',
         'slug' => 'tech-article',
-        'draft' => false,
+        'status' => 'public',
         'date' => '2024-01-01T00:00:00+00:00',
         'category' => 'tech',
     ]);
@@ -188,7 +188,7 @@ it('returns preflight_warning when article references unknown category slug', fu
     $md = makeArticleMd([
         'title' => 'Mystery Article',
         'slug' => 'mystery-article',
-        'draft' => false,
+        'status' => 'public',
         'date' => '2024-01-01T00:00:00+00:00',
         'category' => 'unknown-cat',
     ]);
@@ -214,7 +214,7 @@ it('confirm imports articles with category_id null for missing categories', func
     $md = makeArticleMd([
         'title' => 'No Category',
         'slug' => 'no-category',
-        'draft' => false,
+        'status' => 'public',
         'date' => '2024-01-01T00:00:00+00:00',
         'category' => 'unknown-cat',
     ]);
@@ -257,7 +257,7 @@ it('creates categories from categories.yaml and imports articles without warning
     $md = makeArticleMd([
         'title' => 'Tech Post',
         'slug' => 'tech-post',
-        'draft' => false,
+        'status' => 'public',
         'date' => '2024-01-01T00:00:00+00:00',
         'category' => 'technology',
     ]);
@@ -283,7 +283,7 @@ it('fires preflight warning when categories.yaml present but article has extra u
     $md = makeArticleMd([
         'title' => 'Mystery Post',
         'slug' => 'mystery-post',
-        'draft' => false,
+        'status' => 'public',
         'date' => '2024-01-01T00:00:00+00:00',
         'category' => 'extra-unknown',
     ]);
@@ -307,7 +307,7 @@ it('maps featured_image_url in frontmatter to external_featured_img_url column',
     $md = makeArticleMd([
         'title' => 'Image Article',
         'slug' => 'image-article',
-        'draft' => false,
+        'status' => 'public',
         'date' => '2024-01-01T00:00:00+00:00',
         'featured_image_url' => 'https://cdn.example.com/hero.jpg',
     ]);
@@ -437,7 +437,7 @@ it('silently converts H1 headings to H2 during import', function (): void {
     $md = makeArticleMd([
         'title' => 'H1 Article',
         'slug' => 'h1-article',
-        'draft' => false,
+        'status' => 'public',
         'date' => '2024-01-01T00:00:00+00:00',
     ], $content);
 
@@ -576,7 +576,7 @@ it('reconnects photo_id on articles via photo_slug frontmatter', function (): vo
     $md = makeArticleMd([
         'title' => 'Photo Article',
         'slug' => 'photo-article',
-        'draft' => false,
+        'status' => 'public',
         'date' => '2024-01-01T00:00:00+00:00',
         'photo_slug' => 'my-hero-photo',
     ]);
@@ -595,11 +595,112 @@ it('reconnects photo_id on articles via photo_slug frontmatter', function (): vo
     expect($article->photo_id)->toBe($photo->id);
 });
 
+it('imports articles with CRLF line endings', function (): void {
+    $frontmatter = Yaml::dump([
+        'title' => 'CRLF Article',
+        'slug' => 'crlf-article',
+        'status' => 'public',
+        'date' => '2024-01-01T00:00:00+00:00',
+    ], 2, 2);
+
+    // Build the file with CRLF line endings
+    $md = "---\n".$frontmatter."---\n\nHello from Windows.";
+    $md = str_replace("\n", "\r\n", $md);
+
+    $zip = makeImportZip(['articles/crlf-article.md' => $md]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok', 'imported' => 1]);
+
+    $article = Article::query()->where('slug', 'crlf-article')->first();
+    expect($article)->not->toBeNull()
+        ->and($article->title)->toBe('CRLF Article');
+});
+
+it('generates slug from title when slug is missing', function (): void {
+    $md = makeArticleMd([
+        'title' => 'My Great Article',
+        'status' => 'public',
+        'date' => '2024-01-01T00:00:00+00:00',
+    ]);
+
+    $zip = makeImportZip(['articles/my-great-article.md' => $md]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok', 'imported' => 1]);
+
+    $article = Article::query()->where('slug', 'my-great-article')->first();
+    expect($article)->not->toBeNull()
+        ->and($article->title)->toBe('My Great Article');
+});
+
+it('defaults to private status when status key is absent', function (): void {
+    $md = makeArticleMd([
+        'title' => 'No Status Article',
+        'slug' => 'no-status-article',
+        'date' => '2024-01-01T00:00:00+00:00',
+    ]);
+
+    $zip = makeImportZip(['articles/no-status-article.md' => $md]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok', 'imported' => 1]);
+
+    $article = Article::query()->where('slug', 'no-status-article')->first();
+    expect($article->status)->toBe(App\Enums\Status::Private)
+        ->and($article->published_at?->toIso8601String())->toBe('2024-01-01T00:00:00+00:00');
+});
+
+it('sets published_at to now when public article has no date', function (): void {
+    $md = makeArticleMd([
+        'title' => 'No Date Public',
+        'slug' => 'no-date-public',
+        'status' => 'public',
+    ]);
+
+    $zip = makeImportZip(['articles/no-date-public.md' => $md]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok', 'imported' => 1]);
+
+    $article = Article::query()->where('slug', 'no-date-public')->first();
+    expect($article->status)->toBe(App\Enums\Status::Public)
+        ->and($article->published_at)->not->toBeNull();
+});
+
+it('preserves published_at on private articles', function (): void {
+    $md = makeArticleMd([
+        'title' => 'Private With Date',
+        'slug' => 'private-with-date',
+        'status' => 'private',
+        'date' => '2024-06-15T10:00:00+00:00',
+    ]);
+
+    $zip = makeImportZip(['articles/private-with-date.md' => $md]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok', 'imported' => 1]);
+
+    $article = Article::query()->where('slug', 'private-with-date')->first();
+    expect($article->status)->toBe(App\Enums\Status::Private)
+        ->and($article->published_at->toIso8601String())->toBe('2024-06-15T10:00:00+00:00');
+});
+
 it('restores created_at from frontmatter', function (): void {
     $md = makeArticleMd([
         'title' => 'Old Post',
         'slug' => 'old-post',
-        'draft' => false,
+        'status' => 'public',
         'date' => '2023-06-15T10:00:00+00:00',
         'created_at' => '2023-01-01T08:00:00+00:00',
     ]);

@@ -76,6 +76,7 @@ final class ArticleImportController extends Controller
             'imported' => $result->imported,
             'skipped' => $result->skipped,
             'photos_imported' => $photosImported,
+            'errors' => $result->errors,
         ]);
     }
 }

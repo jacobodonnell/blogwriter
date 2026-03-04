@@ -86,7 +86,7 @@ it('builds correct frontmatter for a published article', function (): void {
     $frontmatter = $service->buildFrontmatter($article);
 
     expect($frontmatter['slug'])->toBe('my-article')
-        ->and($frontmatter['draft'])->toBeFalse()
+        ->and($frontmatter['status'])->toBe('public')
         ->and($frontmatter['description'])->toBe('A brief summary.')
         ->and($frontmatter['category'])->toBe('tech')
         ->and($frontmatter['past_slugs'])->toContain('old-slug')
@@ -95,15 +95,14 @@ it('builds correct frontmatter for a published article', function (): void {
         ->and($frontmatter)->toHaveKey('created_at');
 });
 
-it('marks draft articles as draft in frontmatter', function (): void {
+it('marks private articles with status private in frontmatter', function (): void {
     $article = Article::factory()->draft()->create(['slug' => 'draft-article']);
     $article->load('user', 'category', 'featuredPhoto.media');
 
     $service = new ArticleExportService();
     $frontmatter = $service->buildFrontmatter($article);
 
-    expect($frontmatter['draft'])->toBeTrue()
-        ->and($frontmatter['draft'])->toBe($article->status === Status::Private);
+    expect($frontmatter['status'])->toBe('private');
 });
 
 it('omits null frontmatter fields', function (): void {
@@ -124,6 +123,16 @@ it('omits null frontmatter fields', function (): void {
         ->and($frontmatter)->not->toHaveKey('last_edited_at')
         ->and($frontmatter)->not->toHaveKey('featured_image_url')
         ->and($frontmatter)->not->toHaveKey('featured_image_alt');
+});
+
+it('omits author from exported frontmatter', function (): void {
+    $article = Article::factory()->published()->create();
+    $article->load('user', 'category', 'featuredPhoto.media');
+
+    $service = new ArticleExportService();
+    $frontmatter = $service->buildFrontmatter($article);
+
+    expect($frontmatter)->not->toHaveKey('author');
 });
 
 it('exports last_edited_at when set and omits it when null', function (): void {
@@ -154,15 +163,14 @@ it('always exports created_at', function (): void {
         ->and($frontmatter['created_at'])->toBe($article->created_at->utc()->toIso8601String());
 });
 
-it('serializes empty past_slugs as a YAML list not an object', function (): void {
+it('omits empty past_slugs from frontmatter', function (): void {
     $article = Article::factory()->published()->create(['past_slugs' => []]);
     $article->load('user', 'category', 'featuredPhoto.media');
 
     $service = new ArticleExportService();
     $frontmatter = $service->buildFrontmatter($article);
 
-    // past_slugs must be an indexed array so Yaml::dump renders it as [] not {}
-    expect(array_is_list($frontmatter['past_slugs']))->toBeTrue();
+    expect($frontmatter)->not->toHaveKey('past_slugs');
 });
 
 it('exports featured_image_url from external_featured_img_url column', function (): void {

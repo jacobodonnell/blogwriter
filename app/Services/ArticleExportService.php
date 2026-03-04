@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Enums\Status;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\Setting;
@@ -90,9 +89,8 @@ final class ArticleExportService
             'created_at' => $article->created_at->utc()->toIso8601String(),
             'last_edited_at' => $article->last_edited_at?->utc()->toIso8601String(),
             'slug' => $article->slug,
-            'draft' => $article->status === Status::Private,
+            'status' => $article->status->value,
             'description' => $article->summary ?: null,
-            'author' => $article->user?->name,
             'category' => $article->category?->slug,
             'past_slugs' => array_values($article->past_slugs ?? []),
             'meta_title' => $article->meta['meta_title'] ?? null,
@@ -106,6 +104,6 @@ final class ArticleExportService
             'og_image' => $article->meta['og_image'] ?? null,
         ];
 
-        return array_filter($frontmatter, fn ($value): bool => $value !== null);
+        return array_filter($frontmatter, fn ($value): bool => $value !== null && $value !== []);
     }
 }

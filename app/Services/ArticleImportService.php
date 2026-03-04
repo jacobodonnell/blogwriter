@@ -15,6 +15,7 @@ use App\Support\ParsedImport;
 use App\Support\PreflightResult;
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 use Throwable;
@@ -164,9 +165,16 @@ final class ArticleImportService
         foreach ($parsed->articles as $entry) {
             $frontmatter = $entry['frontmatter'];
             $content = preg_replace('/^# (?!#)/m', '## ', $entry['content']);
-            $slug = $frontmatter['slug'] ?? null;
+            $slug = $this->resolveSlug($frontmatter);
+            if ($slug === null) {
+                continue;
+            }
 
-            if (empty($slug)) {
+            if ($slug === '') {
+                continue;
+            }
+
+            if ($slug === '0') {
                 continue;
             }
 
@@ -179,12 +187,16 @@ final class ArticleImportService
                     continue;
                 }
 
-                $isDraft = (bool) ($frontmatter['draft'] ?? false);
-                $status = $isDraft ? Status::Private : Status::Public;
+                $status = ($frontmatter['status'] ?? 'private') === 'public'
+                    ? Status::Public
+                    : Status::Private;
 
-                $publishedAt = null;
-                if (! $isDraft && ! empty($frontmatter['date'])) {
-                    $publishedAt = Carbon::parse($frontmatter['date'])->startOfSecond();
+                $publishedAt = empty($frontmatter['date'])
+                    ? null
+                    : Carbon::parse($frontmatter['date'])->startOfSecond();
+
+                if ($status === Status::Public && ! $publishedAt instanceof Carbon) {
+                    $publishedAt = now()->startOfSecond();
                 }
 
                 $meta = array_filter([
@@ -238,8 +250,16 @@ final class ArticleImportService
                 continue;
             }
 
-            $slug = $entry['frontmatter']['slug'] ?? null;
-            if (empty($slug)) {
+            $slug = $this->resolveSlug($entry['frontmatter']);
+            if ($slug === null) {
+                continue;
+            }
+
+            if ($slug === '') {
+                continue;
+            }
+
+            if ($slug === '0') {
                 continue;
             }
 
@@ -363,6 +383,8 @@ final class ArticleImportService
      */
     private function parseMarkdownFile(string $raw): ?array
     {
+        $raw = str_replace("\r\n", "\n", $raw);
+
         // Files start with ---\n, split on the closing ---
         if (! str_starts_with($raw, "---\n")) {
             return null;
@@ -417,6 +439,22 @@ final class ArticleImportService
             'private', 'draft' => Status::Private,
             default => Status::Private,
         };
+    }
+
+    /**
+     * Resolve a slug from frontmatter, falling back to title if missing.
+     *
+     * @param  array<string, mixed>  $frontmatter
+     */
+    private function resolveSlug(array $frontmatter): ?string
+    {
+        if (! empty($frontmatter['slug'])) {
+            return $frontmatter['slug'];
+        }
+
+        $slug = Str::slug($frontmatter['title'] ?? 'Untitled');
+
+        return $slug !== '' ? $slug : null;
     }
 
     /**
