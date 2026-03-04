@@ -1,13 +1,3 @@
----
-title: Installation
-description: Get BlogWriter running on your server in a few minutes.
-extends: _layouts.documentation
-section: content
-category: getting-started
-category_order: 1
-order: 2
----
-
 # Installation
 
 Get BlogWriter running on your server in a few minutes.
@@ -75,7 +65,8 @@ php artisan blogwriter:install \
   --admin-password="SecureP@ss1234"
 ```
 
-Add `--seed` to include demo content, `--no-seed` to skip it (defaults to seeding), or `--force` to reinstall over an existing installation.
+Add `--seed` to include demo content, `--no-seed` to skip it (defaults to seeding), or `--force` to reinstall over an
+existing installation.
 
 <x-callout type="info" title="Install Page">
   If you visit your site before running the installer, you'll see a page at `/install` with instructions to run the CLI command.

@@ -1,12 +1,3 @@
----
-title: Architecture
-description: Technical overview of BlogWriter's codebase, stack, and design decisions.
-extends: _layouts.documentation
-section: content
-category: advanced
-order: 8
----
-
 # Architecture
 
 Technical overview of BlogWriter for contributors.
@@ -15,18 +6,18 @@ Technical overview of BlogWriter for contributors.
 
 ## Tech Stack
 
-| Layer             | Technology              | Version |
-|-------------------|-------------------------|---------|
-| Backend           | Laravel                 | 12      |
-| Language          | PHP                     | 8.4+    |
-| Database          | SQLite                  | ---     |
-| Frontend          | Alpine.js + Alpine AJAX | v3      |
-| CSS               | Tailwind CSS            | v4      |
-| CSS Components    | DaisyUI                 | v5      |
-| Auth Backend      | Laravel Fortify         | v1      |
-| Media             | Spatie MediaLibrary     | ---     |
-| Editor            | Tiptap + tiptap-markdown| ---     |
-| Testing           | Pest                    | v4      |
+| Layer          | Technology               | Version |
+|----------------|--------------------------|---------|
+| Backend        | Laravel                  | 12      |
+| Language       | PHP                      | 8.4+    |
+| Database       | SQLite                   | ---     |
+| Frontend       | Alpine.js + Alpine AJAX  | v3      |
+| CSS            | Tailwind CSS             | v4      |
+| CSS Components | DaisyUI                  | v5      |
+| Auth Backend   | Laravel Fortify          | v1      |
+| Media          | Spatie MediaLibrary      | ---     |
+| Editor         | Tiptap + tiptap-markdown | ---     |
+| Testing        | Pest                     | v4      |
 
 ---
 
@@ -45,34 +36,45 @@ BlogWriter uses SQLite as its only supported database. No MySQL, no Postgres.
 
 The entire application --- admin and public --- uses Alpine.js for interactivity. No Livewire, no Vue, no React.
 
-Alpine AJAX handles dynamic updates (auto-save, search, form submissions, sortable tables) without page reloads. Standard Laravel controllers handle the backend.
+Alpine AJAX handles dynamic updates (auto-save, search, form submissions, sortable tables) without page reloads.
+Standard Laravel controllers handle the backend.
 
 ### Custom Auth UI
 
-Authentication uses Laravel Fortify for the backend, with a custom login UI built using Alpine AJAX and DaisyUI forms. Login is the only web auth flow — registration, password reset, and email verification are all handled via CLI commands.
+Authentication uses Laravel Fortify for the backend, with a custom login UI built using Alpine AJAX and DaisyUI forms.
+Login is the only web auth flow — registration, password reset, and email verification are all handled via CLI commands.
 
 ### Single-Author Only
 
-One admin account. One blog. Registration is disabled after the first user is created. A `SingleUserViolationException` is thrown if additional user creation is attempted. Enforcement is via a `booted()` model event on `User` that runs before any save.
+One admin account. One blog. Registration is disabled after the first user is created. A `SingleUserViolationException`
+is thrown if additional user creation is attempted. Enforcement is via a `booted()` model event on `User` that runs
+before any save.
 
 ### Tiptap Editor
 
-Articles use Tiptap, a WYSIWYG editor with a rich formatting toolbar. Content is entered as WYSIWYG and stored as Markdown in the database via the tiptap-markdown extension — users never see raw Markdown syntax.
+Articles use Tiptap, a WYSIWYG editor with a rich formatting toolbar. Content is entered as WYSIWYG and stored as
+Markdown in the database via the tiptap-markdown extension — users never see raw Markdown syntax.
 
-The toolbar provides: Bold, Italic, H2, H3, Blockquote, Bullet list, Ordered list, YouTube embed (dialog), and Image alignment/resize controls.
+The toolbar provides: Bold, Italic, H2, H3, Blockquote, Bullet list, Ordered list, YouTube embed (dialog), and Image
+alignment/resize controls.
 
-Custom syntax is handled transparently by the client-side Markdown serializer and the server-side `Markdown::render()` renderer:
+Custom syntax is handled transparently by the client-side Markdown serializer and the server-side `Markdown::render()`
+renderer:
 
 - **YouTube embeds** — Rendered as responsive iframes; stored as `@[youtube](url)` internally
-- **Image alignment/sizing** — Controlled via editor UI; stored as extended Markdown syntax (`![alt|align:center,width:50%,caption:text](url)`) internally
+- **Image alignment/sizing** — Controlled via editor UI; stored as extended Markdown syntax (
+  `![alt|align:center,width:50%,caption:text](url)`) internally
 
 ### Content Newline Normalization
 
-Article content undergoes newline normalization: double newlines are collapsed on save and expanded on read, while preserving formatting inside code blocks. This ensures consistent storage and display.
+Article content undergoes newline normalization: double newlines are collapsed on save and expanded on read, while
+preserving formatting inside code blocks. This ensures consistent storage and display.
 
 ### Dual-Disk Media Storage
 
-Photos use conditional disk assignment based on publish status. Draft photos are stored on the `private` disk and served through `MediaController` with authentication checks. Published photos are moved to the `public` disk and served directly via symlink — no controller overhead, no auth required.
+Photos use conditional disk assignment based on publish status. Draft photos are stored on the `private` disk and served
+through `MediaController` with authentication checks. Published photos are moved to the `public` disk and served
+directly via symlink — no controller overhead, no auth required.
 
 ---
 
@@ -253,14 +255,16 @@ blogwriter/
 
 ### Article
 
-- `title`, `slug`, `past_slugs` (JSON), `summary`, `content` (Markdown), `status`, `published_at`, `last_edited_at`, `meta` (JSON)
+- `title`, `slug`, `past_slugs` (JSON), `summary`, `content` (Markdown), `status`, `published_at`, `last_edited_at`,
+  `meta` (JSON)
 - `belongsTo(User)`, `belongsTo(Category)`, `belongsTo(Photo, 'photo_id')` for featured image
 - `content_html` accessor renders Markdown to HTML
 - `past_slugs` enables 301 redirects when slugs change
 
 ### Photo
 
-- `filename`, `slug`, `past_slugs` (JSON), `caption` (Markdown), `alt_text`, `status`, `published_at`, `taken_at`, `meta` (JSON for EXIF)
+- `filename`, `slug`, `past_slugs` (JSON), `caption` (Markdown), `alt_text`, `status`, `published_at`, `taken_at`,
+  `meta` (JSON for EXIF)
 - `belongsTo(User)`, `belongsTo(Category)`
 - Uses Spatie MediaLibrary: `HasMedia` interface, `InteractsWithMedia` trait
 - Conversions: thumbnail (300×300), medium (768×768), large (1536×1536)
@@ -272,7 +276,8 @@ blogwriter/
 - `belongsTo(Category)` (parent), `hasMany(Category)` (children) — hierarchical parent/child subcategories
 - `hasMany(Article)`, `hasMany(Photo)`
 - Slug auto-generated from name
-- Recursive CTEs for tree operations: `flatTree()` (ordered tree for dropdowns), `ancestors()` (breadcrumb path), `descendantIds()` (all nested children)
+- Recursive CTEs for tree operations: `flatTree()` (ordered tree for dropdowns), `ancestors()` (breadcrumb path),
+  `descendantIds()` (all nested children)
 
 ### User
 
@@ -287,11 +292,11 @@ blogwriter/
 
 ## Content Storage
 
-| Type    | Editor  | Storage             | Rendering        |
-|---------|---------|---------------------|------------------|
-| Article | Tiptap  | `content` (Markdown)| Markdown -> HTML |
-| Photo   | Upload  | MediaLibrary files  | Image conversions|
-| Photo   | Caption | `caption` (Markdown)| Markdown -> HTML |
+| Type    | Editor  | Storage              | Rendering         |
+|---------|---------|----------------------|-------------------|
+| Article | Tiptap  | `content` (Markdown) | Markdown -> HTML  |
+| Photo   | Upload  | MediaLibrary files   | Image conversions |
+| Photo   | Caption | `caption` (Markdown) | Markdown -> HTML  |
 
 ---
 
@@ -304,13 +309,15 @@ Fortify provides routes and controllers. Only `/login` and `/logout` are active 
 - `/login` --- POST to authenticate
 - `/logout` --- POST to destroy session
 
-Registration, password reset, and email verification are disabled. User creation and password resets are handled via CLI commands (`blogwriter:install`, `blogwriter:reset-password`).
+Registration, password reset, and email verification are disabled. User creation and password resets are handled via CLI
+commands (`blogwriter:install`, `blogwriter:reset-password`).
 
 BlogWriter does not send or receive email out of the box.
 
 ### Frontend: Custom Alpine UI
 
-All auth views use Alpine AJAX (`x-target`) for form submissions. On success, redirect. On error, validation errors display inline.
+All auth views use Alpine AJAX (`x-target`) for form submissions. On success, redirect. On error, validation errors
+display inline.
 
 ---
 

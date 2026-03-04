@@ -1,14 +1,9 @@
----
-extends: _layouts.documentation
-section: content
-category: advanced
-order: 99
-title: Roadmap
----
-
 # Roadmap
 
-BlogWriter is a general-purpose IndieWeb content server. Your HTML is the API — pages are published with microformats markup that any IndieWeb tool can parse, and the same HTTP routes that serve your website accept form submissions from external clients. BlogWriter is designed from the ground up for other applications to build on top of, not just to be used through its admin panel.
+BlogWriter is a general-purpose IndieWeb content server. Your HTML is the API — pages are published with microformats
+markup that any IndieWeb tool can parse, and the same HTTP routes that serve your website accept form submissions from
+external clients. BlogWriter is designed from the ground up for other applications to build on top of, not just to be
+used through its admin panel.
 
 This roadmap shows what's built and what's planned.
 
@@ -46,7 +41,8 @@ This roadmap shows what's built and what's planned.
 
 ### IndieWeb
 
-- Microformats2 markup: h-card (footer, profile page), h-entry (articles, photos), h-feed (home, articles index, photos index, category pages)
+- Microformats2 markup: h-card (footer, profile page), h-entry (articles, photos), h-feed (home, articles index, photos
+  index, category pages)
 - `rel="me"` links (GitHub, Mastodon, Bluesky, Email)
 
 ### Infrastructure
@@ -140,7 +136,8 @@ This roadmap shows what's built and what's planned.
 
 ## How to Contribute
 
-[Open an issue on GitHub](https://github.com/jacobodonnell/blogwriter/issues) to request features, suggest priorities, discuss implementation, or report bugs.
+[Open an issue on GitHub](https://github.com/jacobodonnell/blogwriter/issues) to request features, suggest priorities,
+discuss implementation, or report bugs.
 
 Check issues tagged `good first issue` or `help wanted` to get started.
 

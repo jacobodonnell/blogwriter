@@ -1,13 +1,3 @@
----
-title: Local Development
-description: Set up BlogWriter on your local machine for development and testing.
-extends: _layouts.documentation
-section: content
-category: getting-started
-category_order: 1
-order: 3
----
-
 # Local Development
 
 Set up BlogWriter on your local machine before deploying to production.
@@ -22,11 +12,13 @@ Developers who want to:
 
 ## Laravel Herd (Recommended for Mac)
 
-[Laravel Herd](https://herd.laravel.com) is the fastest way to get a PHP development environment running on macOS. It includes PHP, Nginx, and DNS — no configuration needed.
+[Laravel Herd](https://herd.laravel.com) is the fastest way to get a PHP development environment running on macOS. It
+includes PHP, Nginx, and DNS — no configuration needed.
 
 ### 1. Install Herd
 
-Download and install Herd from [herd.laravel.com](https://herd.laravel.com). It runs in your menu bar and includes PHP 8.4, Composer, and a local development server.
+Download and install Herd from [herd.laravel.com](https://herd.laravel.com). It runs in your menu bar and includes PHP
+8.4, Composer, and a local development server.
 
 ### 2. Open Terminal
 

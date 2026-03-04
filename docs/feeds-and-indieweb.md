@@ -1,15 +1,7 @@
----
-title: Feeds & IndieWeb
-description: Microformats markup, RSS/Atom/JSON feeds, and IndieWeb protocol support.
-extends: _layouts.documentation
-section: content
-category: configuration
-order: 7
----
-
 # Feeds & IndieWeb
 
-BlogWriter implements IndieWeb microformats markup and feed generation throughout its templates. Additional IndieWeb protocols (IndieAuth, Webmentions) are planned.
+BlogWriter implements IndieWeb microformats markup and feed generation throughout its templates. Additional IndieWeb
+protocols (IndieAuth, Webmentions) are planned.
 
 ---
 
@@ -25,6 +17,7 @@ An h-card is a virtual business card embedded in your site. BlogWriter renders h
 - **Profile page** — Full h-card with all author information
 
 ```html
+
 <div class="h-card">
     <img src="/avatar.jpg" alt="Your Name" class="u-photo">
     <a href="https://yourdomain.com" class="u-url p-name" rel="me">Your Name</a>
@@ -59,6 +52,7 @@ Post listing pages are wrapped in h-feed markup, identifying them as feeds of h-
 - Category pages
 
 ```html
+
 <div class="h-feed">
     <span class="p-name hidden">My Blog</span>
     <article class="h-entry"><!-- post 1 --></article>
@@ -68,7 +62,8 @@ Post listing pages are wrapped in h-feed markup, identifying them as feeds of h-
 
 ### rel="me" Links
 
-BlogWriter outputs `rel="me"` links for identity verification across services. These are rendered in the site footer and profile page for:
+BlogWriter outputs `rel="me"` links for identity verification across services. These are rendered in the site footer and
+profile page for:
 
 - GitHub
 - Mastodon
@@ -91,23 +86,26 @@ You can verify your microformats implementation using:
 
 BlogWriter generates three feed formats from your published articles and photos.
 
-| Feed      | URL                                 | Format        |
-|-----------|-------------------------------------|---------------|
-| RSS       | `/feed` (or `/rss`)                 | RSS 2.0       |
-| Atom      | `/atom`                             | Atom 1.0      |
-| JSON Feed | `/feed.json`                        | JSON Feed 1.1 |
+| Feed      | URL                 | Format        |
+|-----------|---------------------|---------------|
+| RSS       | `/feed` (or `/rss`) | RSS 2.0       |
+| Atom      | `/atom`             | Atom 1.0      |
+| JSON Feed | `/feed.json`        | JSON Feed 1.1 |
 
-All feeds include full content (not excerpts) for the 20 most recent published items across articles and photos, sorted chronologically.
+All feeds include full content (not excerpts) for the 20 most recent published items across articles and photos, sorted
+chronologically.
 
 ### Feed Discovery
 
-Feed discovery `<link>` tags are included in the HTML `<head>` for all public pages, enabling feed readers to automatically detect your feeds.
+Feed discovery `<link>` tags are included in the HTML `<head>` for all public pages, enabling feed readers to
+automatically detect your feeds.
 
 ---
 
 ## IndieAuth: Planned
 
-IndieAuth will let you sign in to websites by proving you control your domain. Your domain becomes your identity, and your BlogWriter installation becomes your identity provider.
+IndieAuth will let you sign in to websites by proving you control your domain. Your domain becomes your identity, and
+your BlogWriter installation becomes your identity provider.
 
 When implemented, BlogWriter will provide authorization, token, and metadata endpoints automatically.
 
@@ -115,7 +113,8 @@ When implemented, BlogWriter will provide authorization, token, and metadata end
 
 ## Webmentions: Planned
 
-Webmentions are a protocol for sites to notify each other when they link to one another. When implemented, BlogWriter will support both sending and receiving webmentions.
+Webmentions are a protocol for sites to notify each other when they link to one another. When implemented, BlogWriter
+will support both sending and receiving webmentions.
 
 ---
 

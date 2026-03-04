@@ -1,16 +1,7 @@
----
-title: Deployment
-description: Deploy BlogWriter to a production server using Laravel Forge.
-extends: _layouts.documentation
-section: content
-category: getting-started
-category_order: 1
-order: 4
----
-
 # Deployment
 
-Deploy BlogWriter to your own server with Laravel Forge — the recommended way to host a Laravel application without managing a full server stack yourself.
+Deploy BlogWriter to your own server with Laravel Forge — the recommended way to host a Laravel application without
+managing a full server stack yourself.
 
 **Prerequisites:**
 
@@ -24,10 +15,15 @@ Deploy BlogWriter to your own server with Laravel Forge — the recommended way 
 
 Forge offers several server types. For BlogWriter, two are relevant:
 
-- **Web Server** *(recommended for new setups)* — Nginx + PHP + Node + Supervisor. No database or cache software. Because BlogWriter uses SQLite — a file, not a server — there's nothing to install or manage. File-based cache is perfectly adequate for a personal blog. This is the leaner, cheaper choice.
-- **App Server** *(fine if you already have one)* — All-in-one: Nginx + PHP + MySQL + Redis + Memcached + Node + Supervisor. If you've already provisioned an App Server, you can use it — just make sure your `.env` uses `DB_CONNECTION=sqlite`. The extra services run idle but cause no harm.
+- **Web Server** *(recommended for new setups)* — Nginx + PHP + Node + Supervisor. No database or cache software.
+  Because BlogWriter uses SQLite — a file, not a server — there's nothing to install or manage. File-based cache is
+  perfectly adequate for a personal blog. This is the leaner, cheaper choice.
+- **App Server** *(fine if you already have one)* — All-in-one: Nginx + PHP + MySQL + Redis + Memcached + Node +
+  Supervisor. If you've already provisioned an App Server, you can use it — just make sure your `.env` uses
+  `DB_CONNECTION=sqlite`. The extra services run idle but cause no harm.
 
-A single Web Server can also host multiple BlogWriter sites — for family, friends, or side projects — each with its own isolated SQLite database, at no extra infrastructure cost.
+A single Web Server can also host multiple BlogWriter sites — for family, friends, or side projects — each with its own
+isolated SQLite database, at no extra infrastructure cost.
 
 ---
 
@@ -49,12 +45,13 @@ Confirm the repo is visible on github.com before continuing.
 
 In your DNS provider, add A records pointing to your Forge server's IP address:
 
-| Type | Name | Value |
-|------|------|-------|
-| A | `yourdomain.com` | Your Forge server IP |
-| A | `www` | Your Forge server IP |
+| Type | Name             | Value                |
+|------|------------------|----------------------|
+| A    | `yourdomain.com` | Your Forge server IP |
+| A    | `www`            | Your Forge server IP |
 
-Do this first — DNS propagation can take up to an hour, and Let's Encrypt SSL (Step 7) requires your domain to be resolving before it can issue a certificate.
+Do this first — DNS propagation can take up to an hour, and Let's Encrypt SSL (Step 7) requires your domain to be
+resolving before it can issue a certificate.
 
 <x-callout type="warning" title="Cloudflare Users">
   Start with the orange cloud (proxy) **disabled** — use DNS-only mode — until your SSL certificate is confirmed working. You can re-enable proxying after.
@@ -84,12 +81,14 @@ Do this first — DNS propagation can take up to an hour, and Let's Encrypt SSL 
 
 In Forge: **Site → Settings → Deployments → Shared Paths**, add:
 
-| Shared File/Directory | Release File/Directory |
-|---|---|
-| `database.sqlite` | `database/database.sqlite` |
-| `storage` | `storage` |
+| Shared File/Directory | Release File/Directory     |
+|-----------------------|----------------------------|
+| `database.sqlite`     | `database/database.sqlite` |
+| `storage`             | `storage`                  |
 
-Forge stores each shared file or directory at the site root (e.g. `/home/forge/yourdomain.com/database.sqlite`) and symlinks it into the release directory (e.g. `/home/forge/yourdomain.com/current/database/database.sqlite`). Your database and uploaded media persist across all future deploys.
+Forge stores each shared file or directory at the site root (e.g. `/home/forge/yourdomain.com/database.sqlite`) and
+symlinks it into the release directory (e.g. `/home/forge/yourdomain.com/current/database/database.sqlite`). Your
+database and uploaded media persist across all future deploys.
 
 <x-callout type="warning" title="Zero-Downtime Deployments Are Set at Site Creation">
   Zero-downtime deployments can only be enabled when creating a new site in Forge — they cannot be added to an existing site. If you skipped this, you'll need to recreate the site.
@@ -106,20 +105,20 @@ Forge stores each shared file or directory at the site root (e.g. `/home/forge/y
 In Forge: **Site → Environment**, set the following:
 
 ```ini
-APP_NAME="Your Blog Name"
-APP_ENV=production
-APP_KEY=                          # Leave blank — the install command generates it
-APP_DEBUG=false
-APP_URL=https://yourdomain.com
+APP_NAME = "Your Blog Name"
+APP_ENV = production
+APP_KEY =                          # Leave blank — the install command generates it
+APP_DEBUG = false
+APP_URL = https://yourdomain.com
 
-DB_CONNECTION=sqlite
+DB_CONNECTION = sqlite
 
-SESSION_DRIVER=file
-CACHE_STORE=file
-QUEUE_CONNECTION=sync
+SESSION_DRIVER = file
+CACHE_STORE = file
+QUEUE_CONNECTION = sync
 
-LOG_CHANNEL=stack
-LOG_LEVEL=error
+LOG_CHANNEL = stack
+LOG_LEVEL = error
 ```
 
 Leave `APP_KEY` blank. The `blogwriter:install` command generates it when you run it manually in Step 9.
@@ -158,10 +157,13 @@ $RESTART_QUEUES()
 <x-callout type="info" title="What This Script Does">
   The script runs in three phases:
 
-  1. **Before `$CREATE_RELEASE()`** — Creates the shared SQLite file if it doesn't exist yet (first deploy only). This runs in the site root, not the release directory.
-  2. **Between `$CREATE_RELEASE()` and `$ACTIVATE_RELEASE()`** — Installs dependencies, builds frontend assets, and warms caches. This all happens in the new release directory before it goes live.
-  3. **After `$ACTIVATE_RELEASE()`** — The new release is now live. Forge restarts queue workers (a no-op for sync queues, but safe to include).
-</x-callout>
+1. **Before `$CREATE_RELEASE()`** — Creates the shared SQLite file if it doesn't exist yet (first deploy only). This
+   runs in the site root, not the release directory.
+2. **Between `$CREATE_RELEASE()` and `$ACTIVATE_RELEASE()`** — Installs dependencies, builds frontend assets, and warms
+   caches. This all happens in the new release directory before it goes live.
+3. **After `$ACTIVATE_RELEASE()`** — The new release is now live. Forge restarts queue workers (a no-op for sync queues,
+   but safe to include).
+   </x-callout>
 
 ---
 
@@ -169,7 +171,8 @@ $RESTART_QUEUES()
 
 In Forge: **Site → SSL → Let's Encrypt → Obtain Certificate**.
 
-Wait for DNS to propagate before doing this — the cert request will fail if your domain isn't resolving yet. Check propagation at [dnschecker.org](https://dnschecker.org).
+Wait for DNS to propagate before doing this — the cert request will fail if your domain isn't resolving yet. Check
+propagation at [dnschecker.org](https://dnschecker.org).
 
 <x-callout type="info" title="Cloudflare Users">
   Wait for the Let's Encrypt cert to be issued successfully, then re-enable orange-cloud proxying in Cloudflare if you want it.
@@ -179,7 +182,8 @@ Wait for DNS to propagate before doing this — the cert request will fail if yo
 
 ## Step 8 — Deploy
 
-Click **Deploy Now** in Forge. The first deploy is slower than usual — Composer installs all dependencies and npm builds your frontend assets from scratch. Watch the deploy log in real-time to confirm everything completes.
+Click **Deploy Now** in Forge. The first deploy is slower than usual — Composer installs all dependencies and npm builds
+your frontend assets from scratch. Watch the deploy log in real-time to confirm everything completes.
 
 The site won't be fully usable yet — the installer hasn't run. That's Step 9.
 
@@ -226,25 +230,34 @@ Once the installer finishes:
 
 ## Subsequent Deploys
 
-Push changes to GitHub. Forge can auto-deploy on push (enable in Site → Deployments), or you can click **Deploy Now** manually.
+Push changes to GitHub. Forge can auto-deploy on push (enable in Site → Deployments), or you can click **Deploy Now**
+manually.
 
-Each deploy installs updated dependencies, rebuilds assets, refreshes caches, and activates the new release. Your database and uploaded media are untouched.
+Each deploy installs updated dependencies, rebuilds assets, refreshes caches, and activates the new release. Your
+database and uploaded media are untouched.
 
 ---
 
 ## Troubleshooting
 
-**Empty site or 500 error** — Check the deploy log in Forge for the error. Most first-deploy issues are in the Composer or npm steps.
+**Empty site or 500 error** — Check the deploy log in Forge for the error. Most first-deploy issues are in the Composer
+or npm steps.
 
-**"Cannot find SQLite file"** — Your shared path for `database.sqlite` → `database/database.sqlite` isn't configured or the file doesn't exist yet. Re-check Step 4 and confirm the file was created before the first deploy.
+**"Cannot find SQLite file"** — Your shared path for `database.sqlite` → `database/database.sqlite` isn't configured or
+the file doesn't exist yet. Re-check Step 4 and confirm the file was created before the first deploy.
 
-**Media not persisting across deploys** — The `storage` shared path isn't configured. Re-check Step 4. Note: you may need to recreate the site if zero-downtime deployments weren't enabled at creation.
+**Media not persisting across deploys** — The `storage` shared path isn't configured. Re-check Step 4. Note: you may
+need to recreate the site if zero-downtime deployments weren't enabled at creation.
 
-**SSL certificate request failed** — DNS hasn't propagated yet. Check [dnschecker.org](https://dnschecker.org) and retry once your domain resolves.
+**SSL certificate request failed** — DNS hasn't propagated yet. Check [dnschecker.org](https://dnschecker.org) and retry
+once your domain resolves.
 
 **npm errors during deploy** — Confirm Node 18+ is installed. Run `node -v` in the Forge **Commands** panel.
 
-**Import fails with 413 Content Too Large** — Nginx's default upload limit (1 MB) is too small for backup imports. In Forge: **Server → PHP → Files** → increase `upload_max_filesize` and `post_max_size` (e.g. `50M`). Then in **Site → Nginx Configuration**, add `client_max_body_size 50M;` inside the `server` block. BlogWriter's import validation allows up to 20 MB, but a higher server limit avoids surprises with large media backups.
+**Import fails with 413 Content Too Large** — Nginx's default upload limit (1 MB) is too small for backup imports. In
+Forge: **Server → PHP → Files** → increase `upload_max_filesize` and `post_max_size` (e.g. `50M`). Then in **Site →
+Nginx Configuration**, add `client_max_body_size 50M;` inside the `server` block. BlogWriter's import validation allows
+up to 20 MB, but a higher server limit avoids surprises with large media backups.
 
 **Forgot your admin password** — Run `php artisan blogwriter:reset-password` in the Forge Commands panel.
 

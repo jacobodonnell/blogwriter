@@ -1,18 +1,9 @@
----
-title: BlogWriter
-description: A personal blogging platform you install on your own server. Articles, photos, and full ownership of your content.
-extends: _layouts.documentation
-section: content
-category: getting-started
-category_order: 1
-order: 1
----
-
 # BlogWriter
 
 **Own your content. Own your domain.**
 
-BlogWriter is a personal blogging platform you install on your own server. Your words, your photos, your domain. No platform fees, no content policies you didn't write, no risk of your work disappearing because a company pivoted.
+BlogWriter is a personal blogging platform you install on your own server. Your words, your photos, your domain. No
+platform fees, no content policies you didn't write, no risk of your work disappearing because a company pivoted.
 
 ## Who It's For
 
@@ -22,14 +13,18 @@ BlogWriter is for personal bloggers who want independence:
 - Developers who want a blog that's simple code, not a sprawling CMS
 - Anyone who cares about owning their content and keeping it portable
 
-You'll need basic comfort with a terminal — copying and pasting a few commands, and optionally SSH access to your server. If that sounds doable, you can run BlogWriter.
+You'll need basic comfort with a terminal — copying and pasting a few commands, and optionally SSH access to your
+server. If that sounds doable, you can run BlogWriter.
 
 ## What You Get
 
 **Two ways to publish:**
 
-- **Articles** — Long-form posts with a Tiptap WYSIWYG editor, live preview customizer, categories, featured images, and permalink redirects
-- **Photos** — Your own media library, stored on your server. Upload images with captions, alt text, and EXIF display. Draft photos stay private until you publish; published photos are served directly from your server. Automatic image conversions (thumbnail, medium, large) via Spatie MediaLibrary.
+- **Articles** — Long-form posts with a Tiptap WYSIWYG editor, live preview customizer, categories, featured images, and
+  permalink redirects
+- **Photos** — Your own media library, stored on your server. Upload images with captions, alt text, and EXIF display.
+  Draft photos stay private until you publish; published photos are served directly from your server. Automatic image
+  conversions (thumbnail, medium, large) via Spatie MediaLibrary.
 - **Feeds** — RSS 2.0, Atom 1.0, and JSON Feed 1.1 at `/feed`, `/atom`, and `/feed.json`
 
 **Appearance customization:**
@@ -48,7 +43,8 @@ You'll need basic comfort with a terminal — copying and pasting a few commands
 
 **IndieWeb markup:**
 
-- Microformats2 throughout: h-card (footer and profile page), h-entry (articles and photos), h-feed (home, articles index, photos index, category pages)
+- Microformats2 throughout: h-card (footer and profile page), h-entry (articles and photos), h-feed (home, articles
+  index, photos index, category pages)
 - `rel="me"` links for identity verification (GitHub, Mastodon, Bluesky, Email)
 
 **Simple by design:**
@@ -61,7 +57,8 @@ You'll need basic comfort with a terminal — copying and pasting a few commands
 
 ## How It Works
 
-1. **Install** — Upload to your server and run `php artisan blogwriter:install`. The CLI installer checks requirements, creates your database, and sets up your admin account.
+1. **Install** — Upload to your server and run `php artisan blogwriter:install`. The CLI installer checks requirements,
+   creates your database, and sets up your admin account.
 2. **Configure** — Set your appearance (theme, font) and profile information from the admin panel.
 3. **Write** — Log into your admin dashboard and start publishing articles and photos.
 4. **Own it** — Your content lives on your server, at your domain, with IndieWeb microformats markup built in.

@@ -1,12 +1,3 @@
----
-title: Settings
-description: Configure your BlogWriter profile and appearance.
-extends: _layouts.documentation
-section: content
-category: configuration
-order: 6
----
-
 # Settings
 
 BlogWriter settings are accessible from the admin sidebar under **Settings**.
@@ -33,11 +24,13 @@ See the [Appearance](appearance.md) guide for details on available themes and fo
 
 ## Site Settings
 
-Site-level settings (site name, tagline, domain, and author info) are managed via the **Site Settings** tab in the admin settings panel. These values are stored in the `settings` database table via the `Setting` model.
+Site-level settings (site name, tagline, domain, and author info) are managed via the **Site Settings** tab in the admin
+settings panel. These values are stored in the `settings` database table via the `Setting` model.
 
 ## Robots.txt Settings
 
-Manage your site's `robots.txt` file from **Settings → Robots.txt** in the admin panel. The content is stored in the database and served dynamically via `RobotsController` at `/robots.txt`.
+Manage your site's `robots.txt` file from **Settings → Robots.txt** in the admin panel. The content is stored in the
+database and served dynamically via `RobotsController` at `/robots.txt`.
 
 This lets you control search engine crawling behavior without editing files on the server.
 
@@ -46,6 +39,7 @@ This lets you control search engine crawling behavior without editing files on t
 For developers who prefer working with configuration files:
 
 **Config files:**
+
 - `config/appearance.php` — Available themes, fonts, and defaults
 
 **Clear config cache after changes:**

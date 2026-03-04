@@ -1,13 +1,3 @@
----
-title: Writing Content
-description: Create and manage articles and photos with BlogWriter's editors and publishing workflow.
-extends: _layouts.documentation
-section: content
-category: content
-category_order: 2
-order: 3
----
-
 # Writing Content
 
 BlogWriter supports two content types: **articles** and **photos**. Each has its own editor and publishing workflow.
@@ -35,31 +25,41 @@ Articles are long-form posts with titles. Blog posts, essays, tutorials.
 
 ### The Customizer
 
-The Customizer is BlogWriter's article editor — a Statamic-inspired split-pane layout with editing controls on the left and a live preview of your article on the right. The preview updates as you type and the pane is resizable.
+The Customizer is BlogWriter's article editor — a Statamic-inspired split-pane layout with editing controls on the left
+and a live preview of your article on the right. The preview updates as you type and the pane is resizable.
 
-As you type, your changes auto-save in the background via AJAX and the preview updates. The editor uses **Tiptap**, a WYSIWYG rich-text editor — you format your content with toolbar buttons and never see raw Markdown syntax. A full-width toggle hides the preview panel when you want more writing room.
+As you type, your changes auto-save in the background via AJAX and the preview updates. The editor uses **Tiptap**, a
+WYSIWYG rich-text editor — you format your content with toolbar buttons and never see raw Markdown syntax. A full-width
+toggle hides the preview panel when you want more writing room.
 
-The toolbar includes: **Bold**, **Italic**, **H2**, **H3**, **Blockquote**, **Bullet list**, **Ordered list**, **YouTube embed** (dialog), and **Image alignment/resize** controls.
+The toolbar includes: **Bold**, **Italic**, **H2**, **H3**, **Blockquote**, **Bullet list**, **Ordered list**, **YouTube
+embed** (dialog), and **Image alignment/resize** controls.
 
 Markdown is the underlying storage format, but all syntax is handled transparently:
 
-- **YouTube embeds** — Click the embed button, paste a URL, and it renders as a responsive iframe. Stored as `@[youtube](url)` internally.
-- **Image alignment and sizing** — Select an image in the editor to access alignment and resize handles. Stored as extended Markdown syntax internally.
+- **YouTube embeds** — Click the embed button, paste a URL, and it renders as a responsive iframe. Stored as
+  `@[youtube](url)` internally.
+- **Image alignment and sizing** — Select an image in the editor to access alignment and resize handles. Stored as
+  extended Markdown syntax internally.
 
 ### Fields
 
-- **Title** (required) — Your article's headline. A URL slug is auto-generated from the title. You can edit the slug manually.
+- **Title** (required) — Your article's headline. A URL slug is auto-generated from the title. You can edit the slug
+  manually.
 - **Summary** (optional) — A short description used in article lists and SEO meta tags.
-- **Content** (required) — Rich text via Tiptap editor. A `NoH1Heading` validation rule prevents H1 headings in content (the title serves as the H1).
+- **Content** (required) — Rich text via Tiptap editor. A `NoH1Heading` validation rule prevents H1 headings in
+  content (the title serves as the H1).
 - **Featured Image** (optional) — Attach a photo in two ways:
-  1. Select an existing photo from the dropdown
-  2. Upload a new photo directly from the customizer via a modal — the photo is created and associated automatically
-  - Featured images can also be set via an external URL
+    1. Select an existing photo from the dropdown
+    2. Upload a new photo directly from the customizer via a modal — the photo is created and associated automatically
+
+    - Featured images can also be set via an external URL
 - **Categories** — Assign a category. Create new categories on the fly from the editor.
 
 ### Content Storage
 
-Article content is stored as Markdown in the database. On save, double newlines are normalized. On read, collapsed newlines are expanded back, preserving code blocks. The `content_html` accessor renders Markdown to HTML for display.
+Article content is stored as Markdown in the database. On save, double newlines are normalized. On read, collapsed
+newlines are expanded back, preserving code blocks. The `content_html` accessor renders Markdown to HTML for display.
 
 ### Publishing Workflow
 
@@ -79,13 +79,16 @@ Articles live at:
 yourdomain.com/articles/your-article-slug
 ```
 
-The slug is generated from the title when you create the article. If you change the slug later, BlogWriter stores the old slug in a `past_slugs` JSON column. Anyone visiting the old URL gets a **301 permanent redirect** to the new address.
+The slug is generated from the title when you create the article. If you change the slug later, BlogWriter stores the
+old slug in a `past_slugs` JSON column. Anyone visiting the old URL gets a **301 permanent redirect** to the new
+address.
 
 ---
 
 ## Photos
 
-Photos are image posts with captions. For photographers, visual bloggers, or anyone sharing images as standalone content.
+Photos are image posts with captions. For photographers, visual bloggers, or anyone sharing images as standalone
+content.
 
 Uses [Spatie Laravel MediaLibrary](https://spatie.be/docs/laravel-medialibrary) for image handling.
 
@@ -109,17 +112,21 @@ MediaLibrary automatically generates three conversions:
 
 ### EXIF Data
 
-MediaLibrary extracts EXIF metadata from uploaded photos. This data (camera model, date taken, dimensions, etc.) is stored in the photo's `meta` column and can be displayed on the photo page.
+MediaLibrary extracts EXIF metadata from uploaded photos. This data (camera model, date taken, dimensions, etc.) is
+stored in the photo's `meta` column and can be displayed on the photo page.
 
 ### Draft and Publish
 
 Same workflow as articles. Draft until ready, then publish.
 
-When a photo is used as a featured image on an article and the article is set to draft, the photo is automatically detached.
+When a photo is used as a featured image on an article and the article is set to draft, the photo is automatically
+detached.
 
 ### Media Serving
 
-Draft photos are stored on a private disk and served through a controller with authentication checks, keeping unpublished media access-controlled. When a photo is published, it moves to the public disk and is served directly — no authentication required.
+Draft photos are stored on a private disk and served through a controller with authentication checks, keeping
+unpublished media access-controlled. When a photo is published, it moves to the public disk and is served directly — no
+authentication required.
 
 ### Where Photos Live
 
@@ -127,7 +134,8 @@ Draft photos are stored on a private disk and served through a controller with a
 yourdomain.com/photos/your-photo-slug
 ```
 
-Photos use a slug in their URL. If you change a photo's slug, BlogWriter stores old slugs in a `past_slugs` JSON column and returns a **301 permanent redirect** from the old URL to the new one — the same behavior as articles.
+Photos use a slug in their URL. If you change a photo's slug, BlogWriter stores old slugs in a `past_slugs` JSON column
+and returns a **301 permanent redirect** from the old URL to the new one — the same behavior as articles.
 
 ---
 
@@ -137,7 +145,8 @@ Categories organize your content into broad topics. Both articles and photos can
 
 ### Hierarchy
 
-Categories support parent/child subcategories. A category can have a parent category, creating a tree structure. The admin panel includes a **Category Explorer** for browsing the hierarchy.
+Categories support parent/child subcategories. A category can have a parent category, creating a tree structure. The
+admin panel includes a **Category Explorer** for browsing the hierarchy.
 
 ### Managing Categories
 
@@ -174,7 +183,8 @@ The dashboard displays content stats and quick action links.
 
 ### Exporting Articles
 
-Go to **Settings → Import & Export → Export Articles** to download a ZIP containing all your articles as Markdown files with YAML frontmatter, plus a `categories.yaml` file.
+Go to **Settings → Import & Export → Export Articles** to download a ZIP containing all your articles as Markdown files
+with YAML frontmatter, plus a `categories.yaml` file.
 
 The ZIP is compatible with Hugo, Jekyll, Eleventy, and other static site generators.
 
