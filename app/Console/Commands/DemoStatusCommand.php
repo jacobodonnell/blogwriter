@@ -25,7 +25,7 @@ final class DemoStatusCommand extends Command
 
         if (DemoSchedule::wasIntervalClamped()) {
             $configured = (int) config('demo.reset_interval');
-            $this->warn("DEMO_RESET_INTERVAL is set to {$configured} minutes, but the maximum supported interval is 1440 minutes (24 hours). The demo will reset every 24 hours instead.");
+            $this->warn(sprintf('DEMO_RESET_INTERVAL is set to %d minutes, but the maximum supported interval is 1440 minutes (24 hours). The demo will reset every 24 hours instead.', $configured));
         }
 
         $interval = DemoSchedule::effectiveInterval();

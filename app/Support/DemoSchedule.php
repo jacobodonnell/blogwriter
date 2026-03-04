@@ -14,13 +14,13 @@ final class DemoSchedule
         $startHour = self::startHour();
 
         if ($interval < 60) {
-            return "*/{$interval} * * * *";
+            return sprintf('*/%d * * * *', $interval);
         }
 
         $hours = max(1, (int) ceil($interval / 60));
 
         if ($hours >= 24) {
-            return "0 {$startHour} * * *";
+            return sprintf('0 %d * * *', $startHour);
         }
 
         $hourList = [];
@@ -35,7 +35,7 @@ final class DemoSchedule
 
     public static function effectiveInterval(): int
     {
-        return min(self::MAX_INTERVAL, max(1, (int) self::configuredInterval()));
+        return min(self::MAX_INTERVAL, max(1, self::configuredInterval()));
     }
 
     public static function startHour(): int
@@ -47,7 +47,7 @@ final class DemoSchedule
 
     public static function wasIntervalClamped(): bool
     {
-        return (int) self::configuredInterval() > self::MAX_INTERVAL;
+        return self::configuredInterval() > self::MAX_INTERVAL;
     }
 
     private static function configuredInterval(): int
