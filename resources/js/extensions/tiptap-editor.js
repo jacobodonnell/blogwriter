@@ -156,11 +156,22 @@ export function createTiptapEditor({ element, content, onUpdate, onSelectionUpda
         canUndo() { return editor?.can().undo() ?? false; },
         canRedo() { return editor?.can().redo() ?? false; },
 
+        setEditable(editable) {
+            editor?.setEditable(editable);
+        },
+
         setContent(markdown) {
             if (!editor) return;
             const normalized = normalizeMarkdown(markdown) ?? '';
             const json = editor.markdown.parse(normalized);
             editor.commands.setContent(json, false);
+        },
+
+        roundTripMarkdown(markdown) {
+            if (!editor || !markdown) return markdown ?? '';
+            const normalized = normalizeMarkdown(markdown) ?? '';
+            const json = editor.markdown.parse(normalized);
+            return editor.markdown.serialize(json);
         },
 
         get wordCount() {

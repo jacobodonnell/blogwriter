@@ -13,6 +13,7 @@ export function makeTiptapCommands(getEditor) {
             const editor = getEditor();
             if (!editor) return;
             const signal = editor.command(name);
+            this.updatedAt = Date.now();
             if (signal === 'link') {
                 this.linkUrl = '';
                 this.showLinkDialog = true;
@@ -51,7 +52,7 @@ export function makeTiptapCommands(getEditor) {
         },
 
         insertImage() {
-            if (!this.imageUrl) return;
+            if (!this.imageUrl || !this.imageAlt?.trim()) return;
             const editor = getEditor();
             const attrs = {
                 src: this.imageUrl,

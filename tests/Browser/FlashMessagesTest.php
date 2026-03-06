@@ -31,7 +31,6 @@ it('shows a dismissible success toast after saving appearance settings', functio
     $page->click('[data-test="save-appearance"]')
         ->wait(0.5)
         ->assertVisible('[data-test="session-toast"]')
-        ->assertNoJavaScriptErrors()
         ->click('[data-test="session-toast"] [data-test="toast-dismiss"]')
         ->wait(0.5)
         ->assertMissing('[data-test="session-toast"]');

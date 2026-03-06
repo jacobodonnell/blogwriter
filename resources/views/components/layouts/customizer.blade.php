@@ -7,34 +7,48 @@
     js-entry="resources/js/app-editor.js">
 
 
-    <div x-data="customizerLayout()"
+    <div x-data="customizerLayout(@js(['editorMode' => setting('customizer_editor_mode', 'fullscreen')]))"
          @pointermove.window="handleDrag($event)"
          @pointerup.window="stopDrag()"
-         class="flex flex-col h-screen">
+         @keydown.escape.window="if (mode === 'fullscreen') { mode = _preFullscreenMode ?? 'split'; _preFullscreenMode = null }"
+         class="h-screen" :class="mode === 'fullscreen' ? 'grid grid-rows-[auto_1fr]' : 'flex flex-col'">
 
         {{-- Top Navbar --}}
         <header class="navbar flex-nowrap bg-base-100 border-b border-base-300 px-4 shrink-0 z-30">
             <div class="flex flex-1 items-center gap-2">
-                {{-- Drawer Toggle (left side) --}}
-                <button @click="drawerOpen ? closeDrawer() : drawerOpen = true"
+                {{-- Drawer Toggle (hidden in fullscreen — drawer is always open) --}}
+                <button @click="isMobile ? (mobileMode = mobileMode === 'editor' ? 'preview' : 'editor') : (mode = mode === 'preview' ? 'split' : 'preview')"
+                        x-show="mode !== 'fullscreen'"
                         class="btn btn-ghost btn-sm btn-square tooltip tooltip-right z-10"
-                        :class="{ 'btn-active': drawerOpen }"
-                        :data-tip="drawerOpen ? 'Close editor' : 'Open editor'"
+                        :class="{ 'btn-active': mode !== 'preview' }"
+                        :data-tip="mode !== 'preview' ? 'Close editor' : 'Open editor'"
                         aria-label="Toggle editor">
                     <i class="ph ph-sidebar-simple text-lg"></i>
                 </button>
 
-                <button @click="classicEditor = !classicEditor"
-                        x-show="drawerOpen"
+                {{-- Classic editor toggle (hidden in fullscreen) --}}
+                <button @click="mode = mode === 'classic' ? 'split' : 'classic'"
+                        x-show="mode !== 'fullscreen'"
                         class="btn btn-ghost btn-sm btn-square tooltip tooltip-right hidden md:inline-flex"
-                        :class="{ 'btn-active': classicEditor }"
-                        :data-tip="classicEditor ? 'Exit classic editor' : 'Classic editor'"
+                        :class="{ 'btn-active': mode === 'classic' }"
+                        :data-tip="mode === 'classic' ? 'Exit classic editor' : 'Classic editor'"
                         aria-label="Toggle classic editor"
                         x-cloak>
-                    <i class="ph text-lg" :class="classicEditor ? 'ph-arrows-in-simple' : 'ph-frame-corners'"></i>
+                    <i class="ph text-lg" :class="mode === 'classic' ? 'ph-arrows-in-simple' : 'ph-frame-corners'"></i>
                 </button>
 
-                <div class="divider divider-horizontal mx-0 hidden md:flex"></div>
+                {{-- Fullscreen editor toggle (hidden in fullscreen) --}}
+                <button @click="_preFullscreenMode = mode; mode = 'fullscreen'"
+                        x-show="mode !== 'fullscreen'"
+                        class="btn btn-ghost btn-sm btn-square tooltip tooltip-right hidden md:inline-flex"
+                        data-tip="Fullscreen editor"
+                        aria-label="Fullscreen editor"
+                        data-test="navbar-fullscreen"
+                        x-cloak>
+                    <i class="ph ph-pencil-simple-line text-lg"></i>
+                </button>
+
+                <div class="divider divider-horizontal mx-0 hidden md:flex" x-show="mode !== 'fullscreen'"></div>
 
                 <a href="{{ route('admin.articles.index') }}" class="btn btn-ghost btn-sm gap-2">
                     <i class="ph ph-arrow-left text-lg"></i>
@@ -63,9 +77,9 @@
                     </a>
                 @endif
 
-                {{-- Draft/Live preview toggle — shown reactively when hasDraft is true --}}
+                {{-- Draft/Live preview toggle — hidden in classic/fullscreen --}}
                 <div class="hidden md:flex items-center gap-1.5 tooltip tooltip-bottom"
-                     x-show="$store.saveButton.hasDraft && !classicEditor"
+                     x-show="$store.saveButton.hasDraft && hasPreview"
                      x-cloak
                      :data-tip="$store.preview.mode === 'live' ? 'Switch to draft preview' : 'Switch to live preview'">
                     <span class="text-xs text-base-content/50 select-none">Live</span>
@@ -74,8 +88,8 @@
                            @change="$store.preview.mode = $event.target.checked ? 'live' : 'draft'">
                 </div>
 
-                {{-- Viewport Presets --}}
-                <div class="join hidden md:flex" x-show="!classicEditor" x-cloak>
+                {{-- Viewport Presets — hidden in classic/fullscreen --}}
+                <div class="join hidden md:flex" x-show="hasPreview" x-cloak>
                     <div class="tooltip tooltip-bottom" data-tip="Phone (375px)">
                         <button @click="setPreset(375)" class="btn btn-ghost btn-xs join-item"
                                 :class="{ 'btn-active': previewWidth === 375 }">
@@ -109,17 +123,17 @@
         <x-flash-messages/>
 
         {{-- Main Content Area --}}
-        <div class="flex-1 overflow-hidden flex relative">
+        <div class="overflow-hidden relative" :class="mode === 'fullscreen' ? 'flex-1 flex min-h-0' : 'flex-1 flex'">
 
-            {{-- Left-Edge Reopen Tab (visible when drawer closed) --}}
+            {{-- Left-Edge Reopen Tab (hidden in fullscreen) --}}
             <div class="tooltip tooltip-right absolute left-0 top-1/2 -translate-y-1/2 z-20"
                  data-tip="Open editor"
-                 x-show="!drawerOpen"
+                 x-show="mode === 'preview'"
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0 -translate-x-full"
                  x-transition:enter-end="opacity-100 translate-x-0"
                  x-cloak>
-                <button @click="drawerOpen = true"
+                <button @click="mode = 'split'"
                         class="bg-base-300 hover:bg-primary/20 rounded-r-lg px-1 py-6 transition-colors"
                         aria-label="Open editor">
                     <i class="ph ph-caret-right text-sm"></i>
@@ -127,19 +141,23 @@
             </div>
 
             {{-- Drawer (Form Panel) --}}
-            <div x-show="drawerOpen"
+            <div x-show="mode !== 'preview'"
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0 -translate-x-4"
                  x-transition:enter-end="opacity-100 translate-x-0"
                  x-transition:leave="transition ease-in duration-150"
                  x-transition:leave-start="opacity-100 translate-x-0"
                  x-transition:leave-end="opacity-0 -translate-x-4"
-                 :class="classicEditor ? 'shrink-0 overflow-y-auto md:overflow-hidden bg-base-100 w-full relative' : 'shrink-0 overflow-y-auto overflow-x-hidden bg-base-100 md:max-w-none max-w-full relative'"
-                 :style="{ width: isMobile || classicEditor ? '100%' : panelWidth + 'px' }"
+                 :class="{
+                     'shrink-0 overflow-y-auto md:overflow-hidden bg-base-100 w-full relative': mode === 'classic',
+                     'fullscreen-drawer flex-1 min-w-0 overflow-hidden bg-base-100 relative grid min-h-0': mode === 'fullscreen',
+                     'shrink-0 overflow-y-auto overflow-x-hidden bg-base-100 md:max-w-none max-w-full relative': mode === 'split',
+                 }"
+                 :style="{ width: mode === 'fullscreen' ? 'auto' : ((isMobile || mode === 'classic') ? '100%' : panelWidth + 'px') }"
                  x-cloak>
 
-                {{-- Mobile close button --}}
-                <div class="md:hidden flex justify-between items-center p-4 pb-0">
+                {{-- Mobile close button (hidden in fullscreen) --}}
+                <div class="md:hidden flex justify-between items-center p-4 pb-0" x-show="mode !== 'fullscreen'">
                     <span class="font-medium text-sm">Editor</span>
                     <button @click="closeDrawer()" class="btn btn-ghost btn-xs btn-circle" aria-label="Close editor">
                         <i class="ph ph-x text-lg"></i>
@@ -158,24 +176,27 @@
                 @endif
 
                 {{-- Scrollable form content with bottom padding for sticky save button --}}
-                <div :class="classicEditor ? '' : 'p-4 pb-20'">
+                <div :class="mode === 'classic' ? '' : (mode === 'fullscreen' ? 'grid min-h-0' : 'p-4 pb-20')">
                     {{ $slot }}
                 </div>
             </div>
 
-            {{-- Gutter: Right edge of drawer --}}
-            <div x-show="drawerOpen && !classicEditor"
+            {{-- Teleport target for revision panel (push sidebar in fullscreen) --}}
+            <div id="revision-panel-target" x-show="mode === 'fullscreen'" class="shrink-0" x-cloak></div>
+
+            {{-- Gutter: Right edge of drawer (hidden in fullscreen) --}}
+            <div x-show="mode === 'split'"
                  class="shrink-0 w-2 bg-base-300 cursor-col-resize hover:bg-primary/20 transition-colors items-center justify-center hidden md:flex"
                  @pointerdown.prevent="startDrag('drawer', $event)"
                  x-cloak>
                 <div class="w-0.5 h-8 bg-base-content/20 rounded-full"></div>
             </div>
 
-            {{-- Preview Area --}}
+            {{-- Preview Area (hidden in fullscreen) --}}
             <div class="flex-1 overflow-hidden bg-base-300 hidden md:flex items-stretch"
                  data-test="preview-panel"
-                 x-show="!(classicEditor && drawerOpen)"
-                 :class="{ '!flex': !drawerOpen || !isMobile }">
+                 x-show="hasPreview"
+                 :class="{ '!flex': hasPreview }">
 
                 {{-- Preview wrapper: gutter-left + preview + gutter-right --}}
                 <div class="flex mx-auto items-stretch"
@@ -208,7 +229,7 @@
         </div>
 
         {{-- Floating save button (mobile, when drawer closed) --}}
-        <button x-show="!drawerOpen && $store.saveButton.ready"
+        <button x-show="mode === 'preview' && $store.saveButton.ready"
                 @click="window.dispatchEvent(new CustomEvent('save-article'))"
                 x-transition:enter="transition ease-out duration-200"
                 x-transition:enter-start="opacity-0 translate-y-4"

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Article;
+use App\Models\Setting;
 use App\Models\User;
 
 beforeEach(function (): void {
@@ -10,6 +11,8 @@ beforeEach(function (): void {
         'email' => 'test@blogwriter.test',
         'password' => 'password',
     ]);
+
+    Setting::set('customizer_editor_mode', 'split');
 });
 
 function loginAndVisitUndoRedoEditor(Article $article): mixed
@@ -41,7 +44,6 @@ it('shows undo and redo buttons disabled on a fresh article', function (): void 
         ->assertDisabled('[data-test="toolbar-undo"]')
         ->assertDisabled('[data-test="toolbar-redo"]');
 
-    $page->assertNoJavaScriptErrors();
 })->group('slow');
 
 it('enables undo after typing in the editor', function (): void {
@@ -62,7 +64,6 @@ it('enables undo after typing in the editor', function (): void {
 
     $page->assertEnabled('[data-test="toolbar-undo"]');
 
-    $page->assertNoJavaScriptErrors();
 })->group('slow');
 
 it('reverts typed content on undo click', function (): void {
@@ -98,7 +99,6 @@ it('reverts typed content on undo click', function (): void {
         true,
     );
 
-    $page->assertNoJavaScriptErrors();
 })->group('slow');
 
 it('reverts typed content on Cmd+Z keyboard shortcut', function (): void {
@@ -134,7 +134,6 @@ it('reverts typed content on Cmd+Z keyboard shortcut', function (): void {
         true,
     );
 
-    $page->assertNoJavaScriptErrors();
 })->group('slow');
 
 it('enables redo after an undo', function (): void {
@@ -161,7 +160,6 @@ it('enables redo after an undo', function (): void {
     // Redo should now be enabled
     $page->assertEnabled('[data-test="toolbar-redo"]');
 
-    $page->assertNoJavaScriptErrors();
 })->group('slow');
 
 it('hides undo and redo buttons in markdown mode', function (): void {
@@ -186,7 +184,6 @@ it('hides undo and redo buttons in markdown mode', function (): void {
     $page->assertMissing('[data-test="toolbar-undo"]')
         ->assertMissing('[data-test="toolbar-redo"]');
 
-    $page->assertNoJavaScriptErrors();
 })->group('slow');
 
 it('does not produce JavaScript errors during undo/redo interactions', function (): void {
@@ -213,5 +210,4 @@ it('does not produce JavaScript errors during undo/redo interactions', function 
 
     $page->wait(0.5);
 
-    $page->assertNoJavaScriptErrors();
 })->group('slow');

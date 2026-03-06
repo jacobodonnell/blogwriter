@@ -3,6 +3,7 @@ import { makeDirtyTracker } from './dirty-tracker';
 import { makePublishState } from './publish-state';
 import { makeTiptapCommands } from './tiptap-commands';
 import { makeSave } from './save';
+import { makeRevisionBrowser } from './revision-browser';
 
 function mergeDescriptors(target, ...sources) {
     for (const source of sources) {
@@ -46,6 +47,8 @@ export default function articleCustomizer(config) {
             markdownMode: false,
             hasNewPhoto: false,
             hasNewCategory: false,
+            photoUrls: config.photoUrls ?? {},
+            photoCaptions: config.photoCaptions ?? {},
             newCategoryName: '',
             updatedAt: 0,
             isNew: config.isNew ?? false,
@@ -62,6 +65,19 @@ export default function articleCustomizer(config) {
             },
             set displaySlug(v) {
                 this.slug = v;
+            },
+
+            get featuredImagePreview() {
+                if (this.uploadedPhotoUrl) return this.uploadedPhotoUrl;
+                if (this.selectedPhotoId && this.photoUrls[this.selectedPhotoId]) return this.photoUrls[this.selectedPhotoId];
+                return this.featuredImageUrl || null;
+            },
+
+            get effectiveCaption() {
+                if (this.usePhotoCaption && this.selectedPhotoId && this.photoCaptions[this.selectedPhotoId]) {
+                    return this.photoCaptions[this.selectedPhotoId];
+                }
+                return this.featuredImageCaption || '';
             },
 
             get wordCount() {
@@ -118,6 +134,7 @@ export default function articleCustomizer(config) {
                         content: this.content,
                         onUpdate: (e) => {
                             this.updatedAt = Date.now();
+                            if (this.browsingRevision) return;
                             this.content = e.getMarkdown();
                             this.checkDirty();
                             this.contentError = false;
@@ -133,9 +150,7 @@ export default function articleCustomizer(config) {
                     this.editorReady = true;
                     const normalised = editor.getMarkdown();
                     this.content = normalised;
-                    if (!config.hasDraft) {
-                        this.savedContent = normalised;
-                    }
+                    this.savedContent = editor.roundTripMarkdown(this.savedContent);
                     this.updatedAt = Date.now();
 
                     const ro = new ResizeObserver(entries => {
@@ -211,5 +226,6 @@ export default function articleCustomizer(config) {
         makePublishState(),
         makeTiptapCommands(getEditor),
         makeSave(config, getEditor),
+        makeRevisionBrowser(config, getEditor),
     );
 }

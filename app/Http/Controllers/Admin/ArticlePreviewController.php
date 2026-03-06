@@ -30,7 +30,7 @@ final class ArticlePreviewController extends Controller
 
         // Only store fields that differ from the live DB values
         foreach ($data as $key => $value) {
-            if (in_array($key, ['status', 'meta'], true)) {
+            if (in_array($key, ['status', 'meta', 'history_pointer'], true)) {
                 continue;
             }
 

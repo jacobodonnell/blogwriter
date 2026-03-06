@@ -458,6 +458,43 @@ it('draft does not store photo_id null when live photo_id is already null', func
         ->and($draft)->not->toHaveKey('photo_id');
 });
 
+it('history_pointer alone does not create a draft', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'title' => 'Original Title',
+        'content' => 'Original content',
+    ]);
+
+    put(route('admin.articles.preview.update', $article), [
+        'title' => 'Original Title',
+        'slug' => $article->slug,
+        'content' => 'Original content',
+        'summary' => $article->summary ?? '',
+        'history_pointer' => '3',
+        'status' => $article->status->value,
+    ])->assertOk();
+
+    expect($article->fresh()->draft)->toBeNull();
+});
+
+it('history_pointer does not leak into draft JSON', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'title' => 'Original Title',
+        'content' => 'Original content',
+    ]);
+
+    put(route('admin.articles.preview.update', $article), [
+        'title' => 'Changed Title',
+        'slug' => $article->slug,
+        'content' => 'Original content',
+        'history_pointer' => '3',
+        'status' => $article->status->value,
+    ])->assertOk();
+
+    $draft = $article->fresh()->draft;
+    expect($draft)->toHaveKey('title')
+        ->and($draft)->not->toHaveKey('history_pointer');
+});
+
 it('clearing external URL via preview writes null to draft', function (): void {
     $article = Article::factory()->draft()->for($this->user)->create([
         'external_featured_img_url' => 'https://example.com/image.jpg',

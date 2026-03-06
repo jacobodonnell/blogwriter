@@ -1,4 +1,4 @@
-import { Node, mergeAttributes, ResizableNodeView } from '@tiptap/core';
+import { Node, mergeAttributes } from '@tiptap/core';
 
 export function createResizableFigure(getEditor) {
     return Node.create({
@@ -103,18 +103,39 @@ export function createResizableFigure(getEditor) {
         },
 
         addNodeView() {
-            return ({ node, getPos, editor, HTMLAttributes }) => {
-                // Build the DOM: figure > [resize-container > wrapper > img + handles] + figcaption
+            return ({ node, getPos, editor }) => {
+                const MIN_WIDTH = 150;
+
+                const getContentWidth = () => {
+                    const pm = editor.view.dom;
+                    const style = getComputedStyle(pm);
+                    return pm.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+                };
+
+                // Build DOM: figure > container > wrapper > [handleL, img, handleR] + figcaption
                 const figure = document.createElement('figure');
                 figure.style.marginInline = 'auto';
-                const editorElement = editor.options.element;
+
+                const container = document.createElement('div');
+                container.setAttribute('data-resize-container', '');
+                container.style.visibility = 'hidden';
+                container.style.pointerEvents = 'none';
+
+                const wrapper = document.createElement('div');
+                wrapper.setAttribute('data-resize-wrapper', '');
+                wrapper.style.position = 'relative';
+
+                const handleLeft = document.createElement('div');
+                handleLeft.setAttribute('data-resize-handle', 'left');
+                handleLeft.style.position = 'absolute';
+
+                const handleRight = document.createElement('div');
+                handleRight.setAttribute('data-resize-handle', 'right');
+                handleRight.style.position = 'absolute';
 
                 const img = document.createElement('img');
                 img.style.width = '100%';
                 img.style.height = 'auto';
-                if (HTMLAttributes.src) img.src = HTMLAttributes.src;
-                img.alt = HTMLAttributes.alt ?? '';
-                if (HTMLAttributes.title) img.title = HTMLAttributes.title;
 
                 img.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -123,79 +144,111 @@ export function createResizableFigure(getEditor) {
                     editor.commands.setNodeSelection(pos);
                 });
 
+                wrapper.appendChild(handleLeft);
+                wrapper.appendChild(img);
+                wrapper.appendChild(handleRight);
+                container.appendChild(wrapper);
+
                 const figcaption = document.createElement('figcaption');
                 figcaption.setAttribute('data-placeholder', 'Add a caption…');
 
-                const resizableNodeView = new ResizableNodeView({
-                    element: img,
-                    contentElement: figcaption,
-                    editor,
-                    node,
-                    getPos,
-                    onResize: (width) => {
-                        const editorWidth = editorElement.offsetWidth;
-                        const clamped = Math.min(width, editorWidth);
-                        resizableNodeView.wrapper.style.width = `${clamped}px`;
-                        figure.style.width = `${clamped}px`;
-                    },
-                    onCommit: (finalWidth) => {
-                        const editorWidth = editorElement.offsetWidth;
-                        const pct = Math.round(finalWidth / editorWidth * 100);
-                        const pos = getPos();
-                        if (pos === undefined) return;
-                        const editor_ = getEditor();
-                        figure.style.width = '';
-                        if (pct >= 98) {
-                            editor_.chain().setNodeSelection(pos).updateAttributes('figure', { width: null }).run();
-                        } else {
-                            editor_.chain().setNodeSelection(pos).updateAttributes('figure', { width: pct }).run();
-                        }
-                    },
-                    onUpdate: (updatedNode) => {
-                        if (updatedNode.type.name !== 'figure') return false;
-                        syncAttrs(updatedNode.attrs);
-                        return true;
-                    },
-                    options: {
-                        directions: ['left', 'right'],
-                        min: { width: 60 },
-                        preserveAspectRatio: true,
-                    },
-                });
+                figure.appendChild(container);
+                figure.appendChild(figcaption);
 
+                // Sync node attrs to DOM
                 const syncAttrs = (attrs) => {
                     if (attrs.src && img.src !== attrs.src) img.src = attrs.src;
                     img.alt = attrs.alt ?? '';
+                    img.title = attrs.title ?? '';
                     if (attrs.width) {
                         figure.style.setProperty('--figure-width', `${attrs.width}%`);
                         figure.style.width = `${attrs.width}%`;
-                        resizableNodeView.wrapper.style.width = '100%';
+                        wrapper.style.width = '100%';
                     } else {
                         figure.style.removeProperty('--figure-width');
                         figure.style.width = '';
-                        resizableNodeView.wrapper.style.width = '';
+                        wrapper.style.width = '';
                     }
                     img.style.width = '100%';
                     img.style.height = 'auto';
                 };
                 syncAttrs(node.attrs);
 
-                // Reparent: move the resize container into our figure, add figcaption
-                const resizeContainer = resizableNodeView.dom;
-                figure.appendChild(resizeContainer);
-                figure.appendChild(figcaption);
-
-                // Show resize container once image loads for correct initial dimensions
+                // Show container once image loads
                 img.onload = () => {
-                    resizeContainer.style.visibility = '';
-                    resizeContainer.style.pointerEvents = '';
+                    container.style.visibility = '';
+                    container.style.pointerEvents = '';
                 };
+
+                // Resize drag state
+                let dragState = null;
+                let onMouseMove = null;
+                let onMouseUp = null;
+
+                const cleanupDrag = () => {
+                    if (onMouseMove) document.removeEventListener('mousemove', onMouseMove);
+                    if (onMouseUp) document.removeEventListener('mouseup', onMouseUp);
+                    document.body.style.userSelect = '';
+                    onMouseMove = null;
+                    onMouseUp = null;
+                    dragState = null;
+                };
+
+                const startDrag = (e, direction) => {
+                    e.preventDefault();
+                    document.body.style.userSelect = 'none';
+                    const contentWidth = getContentWidth();
+                    dragState = {
+                        startX: e.clientX,
+                        startWidth: wrapper.offsetWidth,
+                        direction,
+                        contentWidth,
+                    };
+
+                    onMouseMove = (e) => {
+                        if (!dragState) return;
+                        let deltaX = e.clientX - dragState.startX;
+                        if (dragState.direction === 'left') deltaX = -deltaX;
+                        const newWidth = Math.max(MIN_WIDTH, Math.min(dragState.startWidth + deltaX, dragState.contentWidth));
+                        wrapper.style.width = `${newWidth}px`;
+                        figure.style.width = `${newWidth}px`;
+                    };
+
+                    onMouseUp = () => {
+                        if (!dragState) return;
+                        const contentWidth = getContentWidth();
+                        const pct = Math.round(wrapper.offsetWidth / contentWidth * 100);
+                        const pos = getPos();
+                        figure.style.width = '';
+
+                        if (pos !== undefined) {
+                            const editor_ = getEditor();
+                            if (pct >= 98) {
+                                editor_.chain().setNodeSelection(pos).updateAttributes('figure', { width: null }).run();
+                            } else {
+                                editor_.chain().setNodeSelection(pos).updateAttributes('figure', { width: pct }).run();
+                            }
+                        }
+
+                        cleanupDrag();
+                    };
+
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', onMouseUp);
+                };
+
+                handleLeft.addEventListener('mousedown', (e) => startDrag(e, 'left'));
+                handleRight.addEventListener('mousedown', (e) => startDrag(e, 'right'));
 
                 return {
                     dom: figure,
                     contentDOM: figcaption,
-                    update: resizableNodeView.update.bind(resizableNodeView),
-                    destroy: resizableNodeView.destroy?.bind(resizableNodeView),
+                    update: (updatedNode) => {
+                        if (updatedNode.type.name !== 'figure') return false;
+                        syncAttrs(updatedNode.attrs);
+                        return true;
+                    },
+                    destroy: cleanupDrag,
                     ignoreMutation: (mutation) => {
                         if (mutation.type === 'attributes' && mutation.target === figcaption) return true;
                         if (figcaption.contains(mutation.target)) return false;

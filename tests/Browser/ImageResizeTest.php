@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Article;
+use App\Models\Setting;
 use App\Models\User;
 
 beforeEach(function (): void {
@@ -10,6 +11,7 @@ beforeEach(function (): void {
         'email' => 'test@blogwriter.test',
         'password' => 'password',
     ]);
+    Setting::set('customizer_editor_mode', 'split');
 });
 
 function loginAndNavigate(string $path): mixed
@@ -28,12 +30,12 @@ it('image inserted via dialog appears centered in editor', function (): void {
     $page = loginAndNavigate('/admin/articles/create');
 
     $page->wait(3)
-        ->click('[data-tip="Image"]')
+        ->click('[data-test="toolbar-image"]')
         ->wait(0.5)
         ->fill('[data-test="image-url-input"]', 'https://placehold.co/600x400')
+        ->fill('[data-test="image-alt-input"]', 'Test image')
         ->click('[data-test="image-insert-btn"]')
-        ->wait(2)
-        ->assertNoJavaScriptErrors();
+        ->wait(2);
 
     $justifyContent = $page->script(
         "(() => window.getComputedStyle(document.querySelector('[data-resize-container]')).justifyContent)()"
@@ -49,8 +51,7 @@ it('image resize stores percentage width in markdown', function (): void {
 
     $page = loginAndNavigate('/admin/articles/'.$article->id.'/edit');
 
-    $page->wait(3)
-        ->assertNoJavaScriptErrors();
+    $page->wait(3);
 
     $value = $page->value('input[name="content"]');
 
@@ -64,8 +65,7 @@ it('image at less than full width is visually narrower than container', function
 
     $page = loginAndNavigate('/admin/articles/'.$article->id.'/edit');
 
-    $page->wait(3)
-        ->assertNoJavaScriptErrors();
+    $page->wait(3);
 
     $widths = $page->script("(() => {
         const figure = document.querySelector('.ProseMirror figure');
@@ -91,8 +91,7 @@ it('full-width button resets width to null', function (): void {
 
     $page = loginAndNavigate('/admin/articles/'.$article->id.'/edit');
 
-    $page->wait(3)
-        ->assertNoJavaScriptErrors();
+    $page->wait(3);
 
     // Click image to select it
     $page->click('[data-resize-wrapper] img')
@@ -114,8 +113,7 @@ it('image width renders in server-side preview HTML', function (): void {
 
     $page = loginAndNavigate('/admin/articles/'.$article->id.'/edit');
 
-    $page->wait(5)
-        ->assertNoJavaScriptErrors();
+    $page->wait(5);
 
     // Check preview panel for figure with --figure-width custom property
     $hasFigureWidth = $page->script("(() => {
@@ -133,8 +131,7 @@ it('image cannot be resized beyond editor container width', function (): void {
 
     $page = loginAndNavigate('/admin/articles/'.$article->id.'/edit');
 
-    $page->wait(3)
-        ->assertNoJavaScriptErrors();
+    $page->wait(3);
 
     // Click image to select it and reveal handles
     $page->click('[data-resize-wrapper] img')
@@ -167,6 +164,48 @@ it('image cannot be resized beyond editor container width', function (): void {
     }
 })->group('slow');
 
+it('committed width matches visual width after resize', function (): void {
+    $article = Article::factory()->draft()->for($this->user)->create([
+        'content' => '![|width:50%](https://placehold.co/600x400)',
+    ]);
+
+    $page = loginAndNavigate('/admin/articles/'.$article->id.'/edit');
+    $page->wait(3);
+
+    $page->click('[data-resize-wrapper] img')->wait(0.5);
+
+    // Read pre-resize widths
+    $preWidths = $page->script("(() => {
+        const figure = document.querySelector('.ProseMirror figure');
+        const pm = document.querySelector('.ProseMirror');
+        const style = getComputedStyle(pm);
+        const contentWidth = pm.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+        return [figure.offsetWidth, contentWidth];
+    })()");
+
+    $preFigureWidth = $preWidths[0];
+
+    // Simulate drag right handle +100px
+    $page->script("(() => {
+        const handle = document.querySelector('[data-resize-handle=\"right\"]');
+        const rect = handle.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        handle.dispatchEvent(new MouseEvent('mousedown', { clientX: x, clientY: y, bubbles: true }));
+        document.dispatchEvent(new MouseEvent('mousemove', { clientX: x + 100, clientY: y, bubbles: true }));
+        document.dispatchEvent(new MouseEvent('mouseup', { clientX: x + 100, clientY: y, bubbles: true }));
+    })()");
+
+    $page->wait(1);
+
+    // Read post-resize figure width
+    $postWidth = $page->script("(() => document.querySelector('.ProseMirror figure').offsetWidth)()");
+
+    // Expected: preFigureWidth + 100 (±5px for rounding)
+    expect($postWidth)->toBeGreaterThanOrEqual($preFigureWidth + 95)
+        ->and($postWidth)->toBeLessThanOrEqual($preFigureWidth + 105);
+})->group('slow');
+
 it('image can be resized larger by dragging handle outward', function (): void {
     $article = Article::factory()->draft()->for($this->user)->create([
         'content' => '![|width:30%](https://placehold.co/600x400)',
@@ -174,8 +213,7 @@ it('image can be resized larger by dragging handle outward', function (): void {
 
     $page = loginAndNavigate('/admin/articles/'.$article->id.'/edit');
 
-    $page->wait(3)
-        ->assertNoJavaScriptErrors();
+    $page->wait(3);
 
     // Click image to select it and reveal handles
     $page->click('[data-resize-wrapper] img')

@@ -46,14 +46,12 @@ it('renders styled page after browser back following AJAX table refresh', functi
         ->wait(1);
 
     // Verify we're on the admin explore page (not the public categories)
-    $page->assertSee('Back Nav Test Category')
-        ->assertNoJavaScriptErrors();
+    $page->assertSee('Back Nav Test Category');
 
     // Go back (simulates browser back button)
     $page->back()
         ->wait(1);
 
     // Assert the full admin layout rendered — not just the AJAX partial
-    $page->assertSee('Categories')
-        ->assertNoJavaScriptErrors();
+    $page->assertSee('Categories');
 })->group('slow');

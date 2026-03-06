@@ -35,9 +35,7 @@ export function makeDirtyTracker(config, getEditor) {
         checkDirty() {
             const dirty = !this.isClean();
             this.hasChanges = dirty;
-            if (dirty || !config.hasDraft) {
-                this.hasDraft = dirty;
-            }
+            this.hasDraft = dirty;
             if (dirty && Alpine.store('preview').mode === 'live') {
                 Alpine.store('preview').mode = 'draft';
             }
