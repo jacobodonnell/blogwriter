@@ -13,6 +13,7 @@ use App\Models\Article;
 use App\Models\Category;
 use App\Models\Photo;
 use App\Services\ContentFilterService;
+use App\Services\RevisionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -28,6 +29,7 @@ final class ArticleController extends Controller
         private readonly ApplyArticleFeaturedImageAction $applyFeaturedImage,
         private readonly CreateCategoryFromArticleAction $createCategory,
         private readonly ContentFilterService $contentFilter,
+        private readonly RevisionService $revisionService,
     ) {}
 
     /**
@@ -77,7 +79,7 @@ final class ArticleController extends Controller
      */
     public function edit(Article $article): View
     {
-        $article->load('category');
+        $article->load('category', 'revisions');
 
         if ($article->hasDraft()) {
             $article->applyDraft();
@@ -126,6 +128,9 @@ final class ArticleController extends Controller
 
         $this->createCategory->handle($data);
 
+        $originalTitle = $article->title;
+        $originalContent = $article->content ?? '';
+
         $article->update([
             'title' => $data['title'],
             'slug' => $data['slug'],
@@ -140,6 +145,8 @@ final class ArticleController extends Controller
             'external_featured_img_url' => $imageResult['external_featured_img_url'],
             'category_id' => $data['category_id'] ?? null,
         ]);
+
+        $this->revisionService->createRevisionIfChanged($article, $originalTitle, $originalContent);
 
         return redirect()->route('admin.articles.edit', $article)
             ->with('success', 'Article updated successfully.');

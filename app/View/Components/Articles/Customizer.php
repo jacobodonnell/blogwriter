@@ -7,6 +7,7 @@ namespace App\View\Components\Articles;
 use App\Models\Article;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Str;
 use Illuminate\View\Component;
 
 final class Customizer extends Component
@@ -66,7 +67,26 @@ final class Customizer extends Component
             'savedMetaTitle' => $this->liveMeta['meta_title'] ?? '',
             'savedMetaDescription' => $this->liveMeta['meta_description'] ?? '',
             'savedOgImage' => $this->liveMeta['og_image'] ?? '',
+            'photoUrls' => $this->photos->mapWithKeys(fn ($p): array => [$p->id => $p->image_url])->toArray(),
+            'photoCaptions' => $this->photos->mapWithKeys(fn ($p): array => [$p->id => $p->caption])->toArray(),
             'contentHistory' => $this->article->content_history ?? ['entries' => [], 'pointer' => 0],
+            'articleId' => $this->article->exists ? $this->article->id : null,
+            'revisions' => $this->article->exists
+                ? $this->article->revisions->sortByDesc('id')->take(20)
+                    ->map(fn ($rev): array => [
+                        'id' => $rev->id,
+                        'title' => Str::limit($rev->title, 50),
+                        'created_at' => $rev->created_at->diffForHumans(),
+                    ])
+                    ->values()
+                    ->all()
+                : [],
+            'revisionShowUrl' => $this->article->exists
+                ? route('admin.articles.revisions.show', [$this->article, '__REVISION__'])
+                : '',
+            'revisionDestroyUrl' => $this->article->exists
+                ? route('admin.articles.revisions.destroy', [$this->article, '__REVISION__'])
+                : '',
         ];
     }
 

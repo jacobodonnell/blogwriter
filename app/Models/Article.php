@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use Spatie\ResponseCache\Facades\ResponseCache;
 
@@ -66,6 +67,14 @@ final class Article extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * @return HasMany<ArticleRevision, $this>
+     */
+    public function revisions(): HasMany
+    {
+        return $this->hasMany(ArticleRevision::class);
     }
 
     /**
