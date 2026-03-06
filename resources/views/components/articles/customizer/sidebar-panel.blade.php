@@ -1,12 +1,49 @@
 @props(['article', 'categories', 'photos', 'isNew'])
 
-<div class="space-y-4" :class="classicEditor && 'md:pt-6'">
+<div class="space-y-4" :class="mode === 'classic' && 'md:pt-6'">
 
     {{-- Save button (classic editor mode only) --}}
-    <template x-if="classicEditor">
+    <template x-if="mode === 'classic'">
         <div>
             <x-article-save-button :article="$article"/>
         </div>
+    </template>
+
+    {{-- Slug (fullscreen only — normally shown in editor panel) --}}
+    <template x-if="mode === 'fullscreen'">
+        <fieldset class="fieldset">
+            <legend class="fieldset-legend">
+                Slug
+                <x-draft-revert-button field="slug" />
+            </legend>
+            <div class="join w-full">
+                <span class="join-item btn btn-sm btn-disabled no-animation">/articles/</span>
+                <input type="text" x-model="displaySlug"
+                       @input="checkDirty()"
+                       class="join-item input input-bordered input-sm flex-1 @error('slug') input-error @enderror"
+                       placeholder="auto-generated from title">
+            </div>
+            @error('slug')
+            <span class="text-error text-sm">{{ $message }}</span>
+            @enderror
+        </fieldset>
+    </template>
+
+    {{-- Summary (fullscreen only — normally shown in editor panel) --}}
+    <template x-if="mode === 'fullscreen'">
+        <fieldset class="fieldset">
+            <legend class="fieldset-legend">
+                Summary
+                <x-draft-revert-button field="summary" />
+            </legend>
+            <textarea x-model="summary"
+                      @input="checkDirty()"
+                      class="textarea textarea-bordered w-full h-20 text-sm @error('summary') textarea-error @enderror"
+                      placeholder="Auto-generated if empty"></textarea>
+            @error('summary')
+            <span class="text-error text-sm">{{ $message }}</span>
+            @enderror
+        </fieldset>
     </template>
 
     {{-- Status --}}

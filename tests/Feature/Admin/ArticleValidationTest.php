@@ -59,6 +59,59 @@ it('update allows own slug', function (): void {
     ]))->assertSessionDoesntHaveErrors('slug');
 });
 
+it('update auto-generates slug from title when slug is empty', function (): void {
+    $article = Article::factory()->create(['title' => 'Original Title', 'slug' => 'original-title']);
+
+    $this->put(route('admin.articles.update', $article), validArticleData([
+        'title' => 'New Article Title',
+        'slug' => '',
+        'content' => $article->content,
+        'status' => $article->status->value,
+    ]))->assertSessionDoesntHaveErrors('slug')
+        ->assertRedirect();
+
+    expect($article->fresh()->slug)->toBe('new-article-title');
+});
+
+it('update auto-generates unique slug when slug is empty and title conflicts', function (): void {
+    Article::factory()->create(['slug' => 'my-title']);
+    $article = Article::factory()->create(['title' => 'Old', 'slug' => 'old-slug']);
+
+    $this->put(route('admin.articles.update', $article), validArticleData([
+        'title' => 'My Title',
+        'slug' => '',
+        'content' => $article->content,
+        'status' => $article->status->value,
+    ]))->assertSessionDoesntHaveErrors('slug')
+        ->assertRedirect();
+
+    expect($article->fresh()->slug)->toBe('my-title-1');
+});
+
+it('update preserves custom slug when provided', function (): void {
+    $article = Article::factory()->create();
+
+    $this->put(route('admin.articles.update', $article), validArticleData([
+        'title' => $article->title,
+        'slug' => 'custom-slug-value',
+        'content' => $article->content,
+        'status' => $article->status->value,
+    ]))->assertSessionDoesntHaveErrors('slug')
+        ->assertRedirect();
+
+    expect($article->fresh()->slug)->toBe('custom-slug-value');
+});
+
+it('store auto-generates slug from title when slug is empty', function (): void {
+    $this->post(route('admin.articles.store'), validArticleData([
+        'title' => 'My Brand New Article',
+        'slug' => '',
+    ]))->assertRedirect();
+
+    $article = Article::latest('id')->first();
+    expect($article->slug)->toBe('my-brand-new-article');
+});
+
 it('store rejects invalid status value', function (): void {
     $this->post(route('admin.articles.store'), validArticleData([
         'status' => 'archived',
@@ -110,6 +163,31 @@ it('preview enforces max lengths and valid status', function (): void {
         'title' => str_repeat('a', 256),
         'status' => 'archived',
     ])->assertSessionHasErrors(['title', 'status']);
+});
+
+// --- CRLF normalization ---
+
+it('store normalizes CRLF to LF in content', function (): void {
+    $this->post(route('admin.articles.store'), validArticleData([
+        'content' => "Line one\r\nLine two\r\nLine three",
+    ]));
+
+    $article = Article::latest('id')->first();
+
+    expect($article->content)->toBe("Line one\nLine two\nLine three");
+});
+
+it('update normalizes CRLF to LF in content', function (): void {
+    $article = Article::factory()->create();
+
+    $this->put(route('admin.articles.update', $article), validArticleData([
+        'title' => $article->title,
+        'slug' => $article->slug,
+        'content' => "Updated\r\nwith\r\nCRLF",
+        'status' => $article->status->value,
+    ]));
+
+    expect($article->fresh()->content)->toBe("Updated\nwith\nCRLF");
 });
 
 // --- Mutual exclusivity ---

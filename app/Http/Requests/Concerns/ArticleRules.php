@@ -4,11 +4,33 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Concerns;
 
+use App\Actions\GenerateUniqueSlugAction;
+use App\Models\Article;
 use App\Rules\NoH1Heading;
 use App\Rules\PublishedPhoto;
 
 trait ArticleRules
 {
+    /**
+     * Normalize input before validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        if (is_string($this->input('content'))) {
+            $this->merge([
+                'content' => str_replace("\r\n", "\n", $this->input('content')),
+            ]);
+        }
+
+        if (empty($this->input('slug')) && ! empty($this->input('title'))) {
+            $articleId = $this->route('article')?->id;
+            $this->merge([
+                'slug' => app(GenerateUniqueSlugAction::class)
+                    ->handle($this->input('title'), Article::class, $articleId),
+            ]);
+        }
+    }
+
     /**
      * Get the shared validation rules for articles.
      *
