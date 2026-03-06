@@ -16,7 +16,7 @@ final class ArticleExportController extends Controller
     public function store(ArticleExportService $exportService, PhotoExportService $photoService): StreamedResponse
     {
         $articles = Article::query()
-            ->with('user', 'category', 'featuredPhoto.media')
+            ->with('category', 'featuredPhoto.media', 'revisions')
             ->orderBy('created_at')
             ->get();
 

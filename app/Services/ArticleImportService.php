@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Enums\Status;
 use App\Models\Article;
+use App\Models\ArticleRevision;
 use App\Models\Category;
 use App\Models\Photo;
 use App\Models\Setting;
@@ -21,10 +22,17 @@ use Symfony\Component\Yaml\Yaml;
 use Throwable;
 use ZipArchive;
 
-final class ArticleImportService
+final readonly class ArticleImportService
 {
+    public function __construct(private RevisionService $revisionService) {}
+
     /**
      * Parse a ZIP file and return its articles and optional categories.
+     *
+     * Detects three path patterns:
+     * - `articles/{slug}.md` → flat article
+     * - `articles/{slug}/current.md` → article from folder
+     * - `articles/{slug}/revisions/{timestamp}.md` → revision file
      */
     public function parseZip(UploadedFile $zip): ParsedImport
     {
@@ -36,6 +44,7 @@ final class ArticleImportService
         $photosYaml = $this->extractYaml($za, 'photos.yaml');
 
         $articles = [];
+        $revisionFiles = [];
         $imagesTempDir = null;
         $imageNameMap = [];
 
@@ -78,6 +87,35 @@ final class ArticleImportService
                 continue;
             }
 
+            // Determine which pattern this file matches
+            $relativePath = mb_substr($name, mb_strlen('articles/'));
+
+            // Pattern: {slug}/revisions/{timestamp}.md
+            if (preg_match('#^([^/]+)/revisions/([^/]+)\.md$#', $relativePath, $matches)) {
+                $slug = $matches[1];
+                $parsed = $this->parseMarkdownFile($raw);
+                if ($parsed !== null) {
+                    $revisionFiles[$slug][] = [
+                        'title' => $parsed['frontmatter']['title'] ?? 'Untitled',
+                        'content' => $parsed['content'],
+                        'created_at' => $parsed['frontmatter']['created_at'] ?? now()->toIso8601String(),
+                    ];
+                }
+
+                continue;
+            }
+
+            // Pattern: {slug}/current.md
+            if (preg_match('#^([^/]+)/current\.md$#', $relativePath)) {
+                $parsed = $this->parseMarkdownFile($raw);
+                if ($parsed !== null) {
+                    $articles[] = $parsed;
+                }
+
+                continue;
+            }
+
+            // Pattern: {slug}.md (flat file)
             $parsed = $this->parseMarkdownFile($raw);
             if ($parsed !== null) {
                 $articles[] = $parsed;
@@ -86,6 +124,11 @@ final class ArticleImportService
 
         $za->close();
 
+        // Sort revision files by created_at within each slug
+        foreach (array_keys($revisionFiles) as $slug) {
+            usort($revisionFiles[$slug], fn (array $a, array $b): int => strcmp((string) $a['created_at'], (string) $b['created_at']));
+        }
+
         return new ParsedImport(
             articles: $articles,
             categoriesYaml: $categoriesYaml,
@@ -93,6 +136,7 @@ final class ArticleImportService
             photosYaml: $photosYaml,
             imagesTempDir: $imagesTempDir,
             imageNameMap: $imageNameMap,
+            revisionFiles: $revisionFiles,
         );
     }
 
@@ -158,6 +202,7 @@ final class ArticleImportService
         $imported = 0;
         $skipped = 0;
         $errors = [];
+        $importedSlugs = [];
 
         // Build slug→id map for categories
         $categoryMap = Category::query()->pluck('id', 'slug')->all();
@@ -167,14 +212,6 @@ final class ArticleImportService
             $content = preg_replace('/^# (?!#)/m', '## ', $entry['content']);
             $slug = $this->resolveSlug($frontmatter);
             if ($slug === null) {
-                continue;
-            }
-
-            if ($slug === '') {
-                continue;
-            }
-
-            if ($slug === '0') {
                 continue;
             }
 
@@ -191,9 +228,9 @@ final class ArticleImportService
                     ? Status::Public
                     : Status::Private;
 
-                $publishedAt = empty($frontmatter['date'])
+                $publishedAt = empty($frontmatter['published_at'])
                     ? null
-                    : Carbon::parse($frontmatter['date'])->startOfSecond();
+                    : Carbon::parse($frontmatter['published_at'])->startOfSecond();
 
                 if ($status === Status::Public && ! $publishedAt instanceof Carbon) {
                     $publishedAt = now()->startOfSecond();
@@ -238,31 +275,21 @@ final class ArticleImportService
                 });
 
                 $imported++;
+                $importedSlugs[] = $slug;
             } catch (Throwable $e) {
                 $errors[$slug] = $e->getMessage();
             }
         }
 
-        // Reconnect featured photos by photo_slug after all articles are saved
-        foreach ($parsed->articles as $entry) {
-            $photoSlug = $entry['frontmatter']['photo_slug'] ?? null;
-            if (empty($photoSlug)) {
-                continue;
-            }
+        // Reconnect featured photos by photo_slug after all articles are saved.
+        // Uses importedSlugs to avoid re-resolving/re-validating slugs from frontmatter.
+        $photoSlugMap = collect($parsed->articles)
+            ->keyBy(fn (array $entry): ?string => $this->resolveSlug($entry['frontmatter']))
+            ->map(fn (array $entry): ?string => $entry['frontmatter']['photo_slug'] ?? null)
+            ->filter()
+            ->only($importedSlugs);
 
-            $slug = $this->resolveSlug($entry['frontmatter']);
-            if ($slug === null) {
-                continue;
-            }
-
-            if ($slug === '') {
-                continue;
-            }
-
-            if ($slug === '0') {
-                continue;
-            }
-
+        foreach ($photoSlugMap as $slug => $photoSlug) {
             $article = Article::query()->where('slug', $slug)->first();
             $photo = Photo::query()->where('slug', $photoSlug)->first();
             if ($article !== null && $photo !== null) {
@@ -270,7 +297,7 @@ final class ArticleImportService
             }
         }
 
-        return new ImportResult(imported: $imported, skipped: $skipped, errors: $errors);
+        return new ImportResult(imported: $imported, skipped: $skipped, errors: $errors, importedSlugs: $importedSlugs);
     }
 
     /**
@@ -372,6 +399,53 @@ final class ArticleImportService
         foreach ($stringKeys as $key) {
             if (isset($settingsYaml[$key])) {
                 Setting::set($key, $settingsYaml[$key]);
+            }
+        }
+    }
+
+    /**
+     * Import revisions for recently imported articles.
+     *
+     * When directory-based revision files are present, the first revision is stored
+     * as full content (base), and subsequent revisions get diffs generated.
+     * Articles without revision files simply have no revision history.
+     * On overwrite, existing revisions are deleted before creating new ones.
+     *
+     * @param  array<int, string>  $importedSlugs
+     */
+    public function importRevisions(ParsedImport $parsed, string $duplicateStrategy, array $importedSlugs): void
+    {
+        if ($importedSlugs === []) {
+            return;
+        }
+
+        $articles = Article::query()->whereIn('slug', $importedSlugs)->get()->keyBy('slug');
+
+        foreach ($articles as $slug => $article) {
+            if ($duplicateStrategy === 'overwrite') {
+                $article->revisions()->delete();
+            }
+
+            if (isset($parsed->revisionFiles[$slug])) {
+                // Restore revision chain from directory-based files
+                $previousContent = null;
+                foreach ($parsed->revisionFiles[$slug] as $rev) {
+                    $content = $rev['content'];
+
+                    // First revision stores full content, subsequent get diffs
+                    $storedContent = $previousContent === null ? $content : $this->revisionService->generateDiff($previousContent, $content);
+
+                    ArticleRevision::query()->forceCreate([
+                        'article_id' => $article->id,
+                        'title' => $rev['title'] ?? $article->title,
+                        'content' => $storedContent,
+                        'created_at' => isset($rev['created_at'])
+                            ? Carbon::parse($rev['created_at'])
+                            : now(),
+                    ]);
+
+                    $previousContent = $content;
+                }
             }
         }
     }

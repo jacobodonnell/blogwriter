@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 use App\Enums\Status;
 use App\Models\Article;
+use App\Models\ArticleRevision;
 use App\Models\Category;
 use App\Models\Photo;
 use App\Models\User;
 use App\Services\ArticleExportService;
 use App\Services\PhotoExportService;
+use App\Services\RevisionService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -82,7 +84,7 @@ it('builds correct frontmatter for a published article', function (): void {
     ]);
     $article->load('user', 'category', 'featuredPhoto.media');
 
-    $service = new ArticleExportService();
+    $service = app(ArticleExportService::class);
     $frontmatter = $service->buildFrontmatter($article);
 
     expect($frontmatter['slug'])->toBe('my-article')
@@ -92,17 +94,41 @@ it('builds correct frontmatter for a published article', function (): void {
         ->and($frontmatter['past_slugs'])->toContain('old-slug')
         ->and($frontmatter['meta_title'])->toBe('Custom Title')
         ->and($frontmatter['meta_description'])->toBe('Custom desc.')
-        ->and($frontmatter)->toHaveKey('created_at');
+        ->and($frontmatter)->toHaveKey('created_at')
+        ->and($frontmatter)->toHaveKey('published_at');
 });
 
 it('marks private articles with status private in frontmatter', function (): void {
     $article = Article::factory()->draft()->create(['slug' => 'draft-article']);
     $article->load('user', 'category', 'featuredPhoto.media');
 
-    $service = new ArticleExportService();
+    $service = app(ArticleExportService::class);
     $frontmatter = $service->buildFrontmatter($article);
 
     expect($frontmatter['status'])->toBe('private');
+});
+
+it('omits published_at for private never-published articles', function (): void {
+    $article = Article::factory()->draft()->create(['published_at' => null]);
+    $article->load('user', 'category', 'featuredPhoto.media');
+
+    $service = app(ArticleExportService::class);
+    $frontmatter = $service->buildFrontmatter($article);
+
+    expect($frontmatter)->not->toHaveKey('published_at');
+});
+
+it('includes published_at for private previously-published articles', function (): void {
+    $article = Article::factory()->draft()->create([
+        'published_at' => now()->subDay(),
+    ]);
+    $article->load('user', 'category', 'featuredPhoto.media');
+
+    $service = app(ArticleExportService::class);
+    $frontmatter = $service->buildFrontmatter($article);
+
+    expect($frontmatter)->toHaveKey('published_at')
+        ->and($frontmatter['published_at'])->toBe($article->published_at->utc()->toIso8601String());
 });
 
 it('omits null frontmatter fields', function (): void {
@@ -113,7 +139,7 @@ it('omits null frontmatter fields', function (): void {
     ]);
     $article->load('user', 'category', 'featuredPhoto.media');
 
-    $service = new ArticleExportService();
+    $service = app(ArticleExportService::class);
     $frontmatter = $service->buildFrontmatter($article);
 
     expect($frontmatter)->not->toHaveKey('description')
@@ -129,7 +155,7 @@ it('omits author from exported frontmatter', function (): void {
     $article = Article::factory()->published()->create();
     $article->load('user', 'category', 'featuredPhoto.media');
 
-    $service = new ArticleExportService();
+    $service = app(ArticleExportService::class);
     $frontmatter = $service->buildFrontmatter($article);
 
     expect($frontmatter)->not->toHaveKey('author');
@@ -146,7 +172,7 @@ it('exports last_edited_at when set and omits it when null', function (): void {
     ]);
     $articleNoEdit->load('user', 'category', 'featuredPhoto.media');
 
-    $service = new ArticleExportService();
+    $service = app(ArticleExportService::class);
 
     expect($service->buildFrontmatter($articleWithEdit))->toHaveKey('last_edited_at')
         ->and($service->buildFrontmatter($articleNoEdit))->not->toHaveKey('last_edited_at');
@@ -156,7 +182,7 @@ it('always exports created_at', function (): void {
     $article = Article::factory()->published()->create();
     $article->load('user', 'category', 'featuredPhoto.media');
 
-    $service = new ArticleExportService();
+    $service = app(ArticleExportService::class);
     $frontmatter = $service->buildFrontmatter($article);
 
     expect($frontmatter)->toHaveKey('created_at')
@@ -167,7 +193,7 @@ it('omits empty past_slugs from frontmatter', function (): void {
     $article = Article::factory()->published()->create(['past_slugs' => []]);
     $article->load('user', 'category', 'featuredPhoto.media');
 
-    $service = new ArticleExportService();
+    $service = app(ArticleExportService::class);
     $frontmatter = $service->buildFrontmatter($article);
 
     expect($frontmatter)->not->toHaveKey('past_slugs');
@@ -179,7 +205,7 @@ it('exports featured_image_url from external_featured_img_url column', function 
     ]);
     $article->load('user', 'category', 'featuredPhoto.media');
 
-    $service = new ArticleExportService();
+    $service = app(ArticleExportService::class);
     $frontmatter = $service->buildFrontmatter($article);
 
     expect($frontmatter['featured_image_url'])->toBe('https://example.com/image.jpg');
@@ -193,7 +219,7 @@ it('does not use title as fallback for featured_image_alt', function (): void {
     ]);
     $article->load('user', 'category', 'featuredPhoto.media');
 
-    $service = new ArticleExportService();
+    $service = app(ArticleExportService::class);
     $frontmatter = $service->buildFrontmatter($article);
 
     // featured_image_alt must not fall back to title — it should be absent entirely
@@ -206,7 +232,7 @@ it('exports featured_image_alt from meta when set', function (): void {
     ]);
     $article->load('user', 'category', 'featuredPhoto.media');
 
-    $service = new ArticleExportService();
+    $service = app(ArticleExportService::class);
     $frontmatter = $service->buildFrontmatter($article);
 
     expect($frontmatter['featured_image_alt'])->toBe('A descriptive alt text');
@@ -218,7 +244,7 @@ it('omits featured_image_url when only a photo_id is set and no meta URL', funct
     ]);
     $article->load('user', 'category', 'featuredPhoto.media');
 
-    $service = new ArticleExportService();
+    $service = app(ArticleExportService::class);
     $frontmatter = $service->buildFrontmatter($article);
 
     expect($frontmatter)->not->toHaveKey('featured_image_url');
@@ -230,7 +256,7 @@ it('zip contains categories.yaml', function (): void {
     $stream = fopen('php://memory', 'r+');
     $zip = new ZipStream(outputName: null, sendHttpHeaders: false, outputStream: $stream);
 
-    $service = new ArticleExportService();
+    $service = app(ArticleExportService::class);
     $service->streamCategoriesToZip($zip);
     $zip->finish();
 
@@ -257,7 +283,7 @@ it('categories.yaml lists categories with correct slug and name', function (): v
     $stream = fopen('php://memory', 'r+');
     $zip = new ZipStream(outputName: null, sendHttpHeaders: false, outputStream: $stream);
 
-    $service = new ArticleExportService();
+    $service = app(ArticleExportService::class);
     $service->streamCategoriesToZip($zip);
     $zip->finish();
 
@@ -291,7 +317,7 @@ it('zip contains settings.yaml', function (): void {
     $stream = fopen('php://memory', 'r+');
     $zip = new ZipStream(outputName: null, sendHttpHeaders: false, outputStream: $stream);
 
-    $service = new ArticleExportService();
+    $service = app(ArticleExportService::class);
     $service->streamSettingsToZip($zip);
     $zip->finish();
 
@@ -320,7 +346,7 @@ it('settings.yaml includes expected keys from settings and user', function (): v
     $stream = fopen('php://memory', 'r+');
     $zip = new ZipStream(outputName: null, sendHttpHeaders: false, outputStream: $stream);
 
-    $service = new ArticleExportService();
+    $service = app(ArticleExportService::class);
     $service->streamSettingsToZip($zip);
     $zip->finish();
 
@@ -353,7 +379,7 @@ it('exports photo_slug in frontmatter when article has a featured photo', functi
     ]);
     $article->load('user', 'category', 'featuredPhoto.media');
 
-    $service = new ArticleExportService();
+    $service = app(ArticleExportService::class);
     $frontmatter = $service->buildFrontmatter($article);
 
     expect($frontmatter['photo_slug'])->toBe('my-photo');
@@ -363,7 +389,7 @@ it('omits photo_slug from frontmatter when article has no featured photo', funct
     $article = Article::factory()->published()->create(['photo_id' => null]);
     $article->load('user', 'category', 'featuredPhoto.media');
 
-    $service = new ArticleExportService();
+    $service = app(ArticleExportService::class);
     $frontmatter = $service->buildFrontmatter($article);
 
     expect($frontmatter)->not->toHaveKey('photo_slug');
@@ -527,7 +553,7 @@ it('streams articles as markdown files to a zip', function (): void {
 
     $zip = new ZipStream(outputName: null, sendHttpHeaders: false, outputStream: $stream);
 
-    $service = new ArticleExportService();
+    $service = app(ArticleExportService::class);
     $service->streamToZip($zip, new Collection([$article]));
     $zip->finish();
 
@@ -706,4 +732,183 @@ it('omits photos.yaml when article has no featured photo', function (): void {
     unlink($tmpFile);
 
     expect($result)->toBeFalse();
+});
+
+// --- Directory-based revisions export ---
+
+it('articles without revisions export as flat articles/{slug}.md', function (): void {
+    $article = Article::factory()->published()->create([
+        'slug' => 'flat-article',
+        'content' => 'Flat content.',
+    ]);
+    $article->load('revisions');
+
+    $stream = fopen('php://memory', 'r+');
+    $zip = new ZipStream(outputName: null, sendHttpHeaders: false, outputStream: $stream);
+
+    $service = app(ArticleExportService::class);
+    $service->streamToZip($zip, new Collection([$article]));
+    $zip->finish();
+
+    rewind($stream);
+    $zipBytes = stream_get_contents($stream);
+    fclose($stream);
+
+    $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
+    file_put_contents($tmpFile, $zipBytes);
+
+    $za = new ZipArchive();
+    $za->open($tmpFile, ZipArchive::RDONLY);
+
+    expect($za->getFromName('articles/flat-article.md'))->not->toBeFalse()
+        ->and($za->getFromName('articles/flat-article/current.md'))->toBeFalse();
+
+    $za->close();
+    unlink($tmpFile);
+});
+
+it('articles with revisions export as articles/{slug}/current.md with revisions directory', function (): void {
+    $article = Article::factory()->published()->create([
+        'slug' => 'dir-article',
+        'content' => 'Current content.',
+    ]);
+    $rev = ArticleRevision::factory()->create([
+        'article_id' => $article->id,
+        'title' => 'Base Rev',
+        'content' => 'Base content',
+        'created_at' => Carbon\Carbon::parse('2026-03-01T12:00:00Z'),
+    ]);
+    $article->load('revisions');
+
+    $stream = fopen('php://memory', 'r+');
+    $zip = new ZipStream(outputName: null, sendHttpHeaders: false, outputStream: $stream);
+
+    $service = app(ArticleExportService::class);
+    $service->streamToZip($zip, new Collection([$article]));
+    $zip->finish();
+
+    rewind($stream);
+    $zipBytes = stream_get_contents($stream);
+    fclose($stream);
+
+    $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
+    file_put_contents($tmpFile, $zipBytes);
+
+    $za = new ZipArchive();
+    $za->open($tmpFile, ZipArchive::RDONLY);
+
+    // Should have directory structure, not flat file
+    expect($za->getFromName('articles/dir-article.md'))->toBeFalse()
+        ->and($za->getFromName('articles/dir-article/current.md'))->not->toBeFalse()
+        ->and($za->getFromName('articles/dir-article/revisions/2026-03-01T12-00-00Z.md'))->not->toBeFalse();
+
+    $za->close();
+    unlink($tmpFile);
+});
+
+it('revision files contain full reconstructed content with title and created_at frontmatter', function (): void {
+    $revisionService = app(RevisionService::class);
+
+    $article = Article::factory()->published()->create([
+        'slug' => 'rev-content',
+        'content' => 'Final version.',
+    ]);
+
+    // Base revision — full content
+    ArticleRevision::factory()->create([
+        'article_id' => $article->id,
+        'title' => 'First Draft',
+        'content' => 'Initial content.',
+        'created_at' => Carbon\Carbon::parse('2026-03-01T12:00:00Z'),
+    ]);
+
+    // Second revision — stored as diff
+    $diff = $revisionService->generateDiff('Initial content.', 'Updated content.');
+    ArticleRevision::factory()->create([
+        'article_id' => $article->id,
+        'title' => 'Second Draft',
+        'content' => $diff,
+        'created_at' => Carbon\Carbon::parse('2026-03-04T08:30:00Z'),
+    ]);
+
+    $article->load('revisions');
+
+    $stream = fopen('php://memory', 'r+');
+    $zip = new ZipStream(outputName: null, sendHttpHeaders: false, outputStream: $stream);
+
+    $service = app(ArticleExportService::class);
+    $service->streamToZip($zip, new Collection([$article]));
+    $zip->finish();
+
+    rewind($stream);
+    $zipBytes = stream_get_contents($stream);
+    fclose($stream);
+
+    $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
+    file_put_contents($tmpFile, $zipBytes);
+
+    $za = new ZipArchive();
+    $za->open($tmpFile, ZipArchive::RDONLY);
+
+    $rev1 = $za->getFromName('articles/rev-content/revisions/2026-03-01T12-00-00Z.md');
+    $rev2 = $za->getFromName('articles/rev-content/revisions/2026-03-04T08-30-00Z.md');
+    $za->close();
+    unlink($tmpFile);
+
+    // First revision should have full reconstructed content
+    expect($rev1)
+        ->toContain('title: \'First Draft\'')
+        ->toContain('created_at:')
+        ->toContain('Initial content.');
+
+    // Second revision should have full reconstructed content (not a diff)
+    expect($rev2)
+        ->toContain('title: \'Second Draft\'')
+        ->toContain('Updated content.')
+        ->not->toContain('@@');
+});
+
+it('single article download uses directory structure when article has revisions', function (): void {
+    $article = Article::factory()->published()->create(['slug' => 'single-dir']);
+    ArticleRevision::factory()->create([
+        'article_id' => $article->id,
+        'title' => 'Base',
+        'content' => 'Content',
+        'created_at' => Carbon\Carbon::parse('2026-03-01T10:00:00Z'),
+    ]);
+
+    $response = $this->get(route('admin.articles.download', $article));
+    $zipBytes = $response->streamedContent();
+
+    $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
+    file_put_contents($tmpFile, $zipBytes);
+
+    $za = new ZipArchive();
+    $za->open($tmpFile, ZipArchive::RDONLY);
+
+    expect($za->getFromName('articles/single-dir/current.md'))->not->toBeFalse()
+        ->and($za->getFromName('articles/single-dir/revisions/2026-03-01T10-00-00Z.md'))->not->toBeFalse()
+        ->and($za->getFromName('articles/single-dir.md'))->toBeFalse();
+
+    $za->close();
+    unlink($tmpFile);
+});
+
+it('single article download uses flat file when article has no revisions', function (): void {
+    $article = Article::factory()->published()->create(['slug' => 'single-flat']);
+
+    $response = $this->get(route('admin.articles.download', $article));
+    $zipBytes = $response->streamedContent();
+
+    $tmpFile = tempnam(sys_get_temp_dir(), 'bw-test-');
+    file_put_contents($tmpFile, $zipBytes);
+
+    $za = new ZipArchive();
+    $za->open($tmpFile, ZipArchive::RDONLY);
+
+    expect($za->getFromName('articles/single-flat.md'))->not->toBeFalse()
+        ->and($za->getFromName('articles/single-flat/current.md'))->toBeFalse();
+
+    $za->close();
+    unlink($tmpFile);
 });

@@ -8,21 +8,54 @@ use App\Models\Article;
 use App\Models\Category;
 use App\Models\Setting;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\Yaml\Yaml;
 use ZipStream\ZipStream;
 
-final class ArticleExportService
+final readonly class ArticleExportService
 {
+    public function __construct(private RevisionService $revisionService) {}
+
     /**
      * Stream all articles as a ZIP of Markdown files into the given ZipStream.
+     *
+     * Articles without revisions are written as flat `articles/{slug}.md`.
+     * Articles with revisions become `articles/{slug}/current.md` plus
+     * individual `articles/{slug}/revisions/{timestamp}.md` files.
      *
      * @param  Collection<int, Article>  $articles
      */
     public function streamToZip(ZipStream $zip, Collection $articles): void
     {
+        $articles->loadMissing('revisions');
+
         foreach ($articles as $article) {
-            $zip->addFile(sprintf('articles/%s.md', $article->slug), $this->buildArticleMarkdown($article));
+            if ($article->revisions->isNotEmpty()) {
+                $zip->addFile(
+                    sprintf('articles/%s/current.md', $article->slug),
+                    $this->buildArticleMarkdown($article),
+                );
+
+                $sortedRevisions = $article->revisions->sortBy('id')->values();
+                $baseRevision = $sortedRevisions->first();
+                $runningContent = $baseRevision->content;
+
+                $zip->addFile(
+                    sprintf('articles/%s/revisions/%s.md', $article->slug, $this->formatTimestampFilename($baseRevision->created_at)),
+                    $this->buildRevisionMarkdown($baseRevision->title, $runningContent, $baseRevision->created_at),
+                );
+
+                foreach ($sortedRevisions->skip(1) as $revision) {
+                    $runningContent = $this->revisionService->applyPatch($runningContent, $revision->content);
+                    $zip->addFile(
+                        sprintf('articles/%s/revisions/%s.md', $article->slug, $this->formatTimestampFilename($revision->created_at)),
+                        $this->buildRevisionMarkdown($revision->title, $runningContent, $revision->created_at),
+                    );
+                }
+            } else {
+                $zip->addFile(sprintf('articles/%s.md', $article->slug), $this->buildArticleMarkdown($article));
+            }
         }
     }
 
@@ -32,7 +65,7 @@ final class ArticleExportService
     public function buildArticleMarkdown(Article $article): string
     {
         $frontmatter = $this->buildFrontmatter($article);
-        $content = $article->getAttributes()['content'] ?? '';
+        $content = $article->content ?? '';
 
         return "---\n".Yaml::dump($frontmatter, 2, 2)."---\n\n".$content;
     }
@@ -111,8 +144,7 @@ final class ArticleExportService
     {
         $frontmatter = [
             'title' => $article->title,
-            'date' => $article->published_at?->utc()->toIso8601String()
-                                        ?? $article->created_at->utc()->toIso8601String(),
+            'published_at' => $article->published_at?->utc()->toIso8601String(),
             'created_at' => $article->created_at->utc()->toIso8601String(),
             'last_edited_at' => $article->last_edited_at?->utc()->toIso8601String(),
             'slug' => $article->slug,
@@ -124,6 +156,7 @@ final class ArticleExportService
             'meta_description' => $article->meta['meta_description'] ?? null,
             'featured_image_url' => $article->external_featured_img_url,
             'photo_slug' => $article->featuredPhoto?->slug,
+            // Exported as top-level key; on import it's stored back into the meta JSON column
             'featured_image_caption' => $article->featured_image_caption ?: null,
             'featured_image_alt' => $article->meta['featured_image_alt']
                                         ?? $article->featuredPhoto?->alt_text
@@ -132,5 +165,26 @@ final class ArticleExportService
         ];
 
         return array_filter($frontmatter, fn ($value): bool => $value !== null && $value !== []);
+    }
+
+    /**
+     * Build a revision Markdown file with simple frontmatter (title + created_at) and full content.
+     */
+    private function buildRevisionMarkdown(string $title, string $content, CarbonInterface $createdAt): string
+    {
+        $frontmatter = [
+            'title' => $title,
+            'created_at' => $createdAt->utc()->toIso8601String(),
+        ];
+
+        return "---\n".Yaml::dump($frontmatter, 2, 2)."---\n\n".$content;
+    }
+
+    /**
+     * Format a Carbon timestamp as a filesystem-safe filename (no colons).
+     */
+    private function formatTimestampFilename(CarbonInterface $timestamp): string
+    {
+        return $timestamp->utc()->format('Y-m-d\TH-i-s\Z');
     }
 }

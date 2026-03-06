@@ -8,10 +8,12 @@ final readonly class ImportResult
 {
     /**
      * @param  array<string, string>  $errors  Keyed by slug
+     * @param  array<int, string>  $importedSlugs  Slugs of successfully imported articles
      */
     public function __construct(
         public int $imported,
         public int $skipped,
         public array $errors,
+        public array $importedSlugs = [],
     ) {}
 }

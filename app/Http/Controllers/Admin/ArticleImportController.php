@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ArticleImportConfirmRequest;
 use App\Http\Requests\ArticleImportRequest;
 use App\Services\ArticleImportService;
 use App\Support\ParsedImport;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 final class ArticleImportController extends Controller
@@ -35,16 +35,11 @@ final class ArticleImportController extends Controller
             ]);
         }
 
-        return $this->performImport($parsed, $request->input('duplicate_strategy'), auth()->id(), $importService);
+        return $this->performImport($parsed, $request->input('duplicate_strategy'), $request->user()->id, $importService);
     }
 
-    public function confirm(Request $request, ArticleImportService $importService): JsonResponse
+    public function confirm(ArticleImportConfirmRequest $request, ArticleImportService $importService): JsonResponse
     {
-        $request->validate([
-            'token' => ['required', 'string'],
-            'duplicate_strategy' => ['required', 'in:skip,overwrite'],
-        ]);
-
         $token = $request->input('token');
         $sessionKey = 'import_token_'.$token;
         $parsed = session()->get($sessionKey);
@@ -55,7 +50,7 @@ final class ArticleImportController extends Controller
 
         session()->forget($sessionKey);
 
-        return $this->performImport($parsed, $request->input('duplicate_strategy'), auth()->id(), $importService);
+        return $this->performImport($parsed, $request->input('duplicate_strategy'), $request->user()->id, $importService);
     }
 
     private function performImport(
@@ -70,6 +65,8 @@ final class ArticleImportController extends Controller
 
         $photosImported = $importService->importPhotos($parsed, $duplicateStrategy, $userId);
         $result = $importService->import($parsed, $duplicateStrategy, $userId);
+
+        $importService->importRevisions($parsed, $duplicateStrategy, $result->importedSlugs);
 
         return response()->json([
             'status' => 'ok',

@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Services\ArticleExportService;
 use App\Services\PhotoExportService;
+use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use ZipStream\ZipStream;
 
@@ -18,7 +19,7 @@ final class ArticleDownloadController extends Controller
         ArticleExportService $exportService,
         PhotoExportService $photoService,
     ): StreamedResponse {
-        $article->loadMissing('category', 'featuredPhoto.media');
+        $article->loadMissing('category', 'featuredPhoto.media', 'revisions');
 
         $filename = $article->slug.'-export-'.now()->format('Y-m-d').'.zip';
 
@@ -29,10 +30,7 @@ final class ArticleDownloadController extends Controller
                 outputName: null,
             );
 
-            $zip->addFile(
-                sprintf('articles/%s.md', $article->slug),
-                $exportService->buildArticleMarkdown($article),
-            );
+            $exportService->streamToZip($zip, new Collection([$article]));
 
             $exportService->streamArticleCategoryToZip($zip, $article);
 

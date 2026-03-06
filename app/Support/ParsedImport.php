@@ -11,6 +11,7 @@ final readonly class ParsedImport
      * @param  array<int, array<string, mixed>>|null  $categoriesYaml
      * @param  array<string, mixed>|null  $settingsYaml
      * @param  array<int, array<string, mixed>>|null  $photosYaml
+     * @param  array<string, array<int, array{title: string, content: string, created_at: string}>>  $revisionFiles  slug => parsed revision entries
      */
     public function __construct(
         public array $articles,
@@ -20,5 +21,6 @@ final readonly class ParsedImport
         public ?string $imagesTempDir = null,
         /** @var array<string, string> Map of original long filenames to safe short filenames */
         public array $imageNameMap = [],
+        public array $revisionFiles = [],
     ) {}
 }
