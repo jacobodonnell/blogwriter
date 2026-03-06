@@ -1,9 +1,20 @@
 const MOBILE_BREAKPOINT = 768;
 
-export default function customizerLayout() {
+export default function customizerLayout(serverDefaults = {}) {
+    const serverMode = serverDefaults.editorMode ?? 'fullscreen';
+    const lastServerMode = localStorage.getItem('customizerServerEditorMode');
+    const serverModeChanged = lastServerMode !== null && lastServerMode !== serverMode;
+
+    if (serverModeChanged) {
+        localStorage.removeItem('customizerMode');
+        localStorage.removeItem('customizerMobileMode');
+    }
+
+    localStorage.setItem('customizerServerEditorMode', serverMode);
+
     return {
-        drawerOpen: JSON.parse(localStorage.getItem('customizerDrawerOpen') ?? 'true'),
-        classicEditor: JSON.parse(localStorage.getItem('customizerClassicEditor') ?? 'false'),
+        mode: serverModeChanged ? serverMode : (localStorage.getItem('customizerMode') ?? serverMode),
+        mobileMode: localStorage.getItem('customizerMobileMode') ?? 'editor',
         panelWidth: parseInt(localStorage.getItem('customizerWidth')) || 480,
         previewWidth: parseInt(localStorage.getItem('customizerPreviewWidth')) || 0,
         windowWidth: window.innerWidth,
@@ -11,27 +22,29 @@ export default function customizerLayout() {
         dragTarget: null,
         startX: 0,
         saved: false,
+        _preFullscreenMode: null,
 
         get isMobile() {
             return this.windowWidth < MOBILE_BREAKPOINT;
         },
 
+        get hasPreview() {
+            return this.mode === 'split' || this.mode === 'preview';
+        },
+
         init() {
-            this.$watch('drawerOpen', v => localStorage.setItem('customizerDrawerOpen', JSON.stringify(v)));
-            this.$watch('classicEditor', v => localStorage.setItem('customizerClassicEditor', JSON.stringify(v)));
+            this.$watch('mode', v => localStorage.setItem('customizerMode', v));
+            this.$watch('mobileMode', v => localStorage.setItem('customizerMobileMode', v));
             this.$watch('panelWidth', w => localStorage.setItem('customizerWidth', w));
             this.$watch('previewWidth', w => localStorage.setItem('customizerPreviewWidth', w));
 
             window.addEventListener('resize', () => {
                 this.windowWidth = window.innerWidth;
-                if (this.isMobile) this.classicEditor = false;
             });
-
-            if (this.isMobile) this.classicEditor = false;
         },
 
         get previewAreaWidth() {
-            const drawer = this.drawerOpen ? this.panelWidth + 8 : 0;
+            const drawer = this.mode !== 'preview' ? this.panelWidth + 8 : 0;
             return this.windowWidth - drawer;
         },
 
@@ -40,10 +53,11 @@ export default function customizerLayout() {
         },
 
         closeDrawer() {
-            if (this.classicEditor) {
-                this.classicEditor = false;
+            if (this.isMobile) {
+                this.mobileMode = 'preview';
+            } else {
+                this.mode = 'preview';
             }
-            this.drawerOpen = false;
         },
 
         startDrag(target, event) {

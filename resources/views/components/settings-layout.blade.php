@@ -7,6 +7,7 @@
             'profile' => 'Profile',
             'site' => 'Site',
             'appearance' => 'Appearance',
+            'customizer' => 'Customizer',
             'robots' => 'Robots',
             'export' => 'Import & Export',
         } }}</li>
@@ -31,6 +32,12 @@
                 <a href="{{ route('admin.settings.appearance') }}" class="{{ $active === 'appearance' ? 'menu-active' : '' }}">
                     <i class="ph ph-palette text-lg"></i>
                     Appearance
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.settings.customizer') }}" class="{{ $active === 'customizer' ? 'menu-active' : '' }}">
+                    <i class="ph ph-sliders-horizontal text-lg"></i>
+                    Customizer
                 </a>
             </li>
             <li>

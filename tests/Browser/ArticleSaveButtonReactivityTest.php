@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\Article;
 use App\Models\Photo;
+use App\Models\Setting;
 use App\Models\User;
 
 beforeEach(function (): void {
@@ -11,6 +12,7 @@ beforeEach(function (): void {
         'email' => 'test@blogwriter.test',
         'password' => 'password',
     ]);
+    Setting::set('customizer_editor_mode', 'split');
 });
 
 function loginAndVisitEditor(Article $article): mixed

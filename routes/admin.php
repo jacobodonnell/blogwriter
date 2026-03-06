@@ -14,12 +14,14 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CategoryExploreController;
 use App\Http\Controllers\Admin\CreateArticleController;
 use App\Http\Controllers\Admin\CreateArticlePreviewController;
+use App\Http\Controllers\Admin\CustomizerSettingsController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ExportController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\PhotoDownloadController;
 use App\Http\Controllers\Admin\PlaceholderImageController;
 use App\Http\Controllers\Admin\ProfileSettingsController;
+use App\Http\Controllers\Admin\RevisionController;
 use App\Http\Controllers\Admin\RobotsSettingsController;
 use App\Http\Controllers\Admin\SiteSettingsController;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +43,8 @@ Route::middleware(['auth', 'auth.session', DoNotCacheResponse::class])->prefix('
     Route::match(['post', 'put'], '/articles/{article}/preview', ArticlePreviewController::class)->name('articles.preview.update');
     Route::get('/articles/{article}/preview/live', ArticleLivePreviewController::class)->name('articles.preview.live');
     Route::get('/articles/{article}/download', ArticleDownloadController::class)->name('articles.download');
+    Route::get('/articles/{article}/revisions/{revision}', [RevisionController::class, 'show'])->name('articles.revisions.show');
+    Route::delete('/articles/{article}/revisions/{revision}', [RevisionController::class, 'destroy'])->name('articles.revisions.destroy');
     Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy');
 
     // Photos
@@ -82,6 +86,10 @@ Route::middleware(['auth', 'auth.session', DoNotCacheResponse::class])->prefix('
     // Appearance
     Route::get('/settings/appearance', [AppearanceController::class, 'edit'])->name('settings.appearance');
     Route::put('/settings/appearance', [AppearanceController::class, 'update'])->name('settings.appearance.update');
+
+    // Customizer
+    Route::get('/settings/customizer', [CustomizerSettingsController::class, 'edit'])->name('settings.customizer');
+    Route::put('/settings/customizer', [CustomizerSettingsController::class, 'update'])->name('settings.customizer.update');
 
     // Robots
     Route::get('/settings/robots', [RobotsSettingsController::class, 'edit'])->name('settings.robots');
