@@ -100,7 +100,9 @@ it('replaces existing user when creating a new one', function (): void {
 it('generates a passphrase string', function (): void {
     $passphrase = App\Services\PasswordGenerator::generate();
 
-    expect($passphrase)->toBeString()->not->toBeEmpty();
+    expect($passphrase)->toBeString()->not->toBeEmpty()
+        ->and($passphrase)->toMatch('/^[a-z]+-[a-z]+-[a-z]+-[a-z]+-[a-z]+-[a-z]+-\d{4}$/i')
+        ->and($passphrase)->toMatch('/[A-Z]/');
 });
 
 it('ensureDatabaseFile cleans orphaned WAL files and creates database', function (): void {

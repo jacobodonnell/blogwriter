@@ -45,10 +45,10 @@ Confirm the repo is visible on github.com before continuing.
 
 In your DNS provider, add A records pointing to your Forge server's IP address:
 
-| Type | Name             | Value                |
-|------|------------------|----------------------|
-| A    | `yourdomain.com` | Your Forge server IP |
-| A    | `www`            | Your Forge server IP |
+| Type  | Name                 | Value                |
+|-------|----------------------|----------------------|
+| A     | `yourdomain.com`     | Your Forge server IP |
+| CNAME | `www.yourdomain.com` | `yourdomain.com`     |
 
 Do this first — DNS propagation can take up to an hour, and Let's Encrypt SSL (Step 7) requires your domain to be
 resolving before it can issue a certificate.
@@ -169,7 +169,7 @@ $RESTART_QUEUES()
 
 ## Step 7 — Obtain an SSL Certificate
 
-In Forge: **Site → SSL → Let's Encrypt → Obtain Certificate**.
+In Forge: **Site → Domains → Certificates -> Click "Add certificate" -> Let's Encrypt → Obtain Certificate**.
 
 Wait for DNS to propagate before doing this — the cert request will fail if your domain isn't resolving yet. Check
 propagation at [dnschecker.org](https://dnschecker.org).

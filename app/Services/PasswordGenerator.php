@@ -15,11 +15,14 @@ final class PasswordGenerator
         }
 
         $words = [];
-        for ($i = 0; $i < 4; $i++) {
+        for ($i = 0; $i < 6; $i++) {
             $words[] = self::$wordlist[array_rand(self::$wordlist)];
         }
 
-        $number = mb_str_pad((string) random_int(0, 99), 2, '0', STR_PAD_LEFT);
+        $capitalizeIndex = random_int(0, 5);
+        $words[$capitalizeIndex] = ucfirst($words[$capitalizeIndex]);
+
+        $number = mb_str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
 
         return implode('-', $words).'-'.$number;
     }
