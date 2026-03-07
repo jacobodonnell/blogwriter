@@ -15,6 +15,8 @@ beforeEach(function (): void {
     Setting::set('customizer_editor_mode', 'split');
 });
 
+// Per-file login helper is intentional: each browser test combines login + navigation
+// + page-specific setup in one call. Extracting just login would save little and add indirection.
 function loginToAdmin(): mixed
 {
     $page = visit('/login');

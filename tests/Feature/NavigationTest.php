@@ -72,6 +72,7 @@ it('renders custom 404 page', function (): void {
         ->assertSee('Go Home');
 });
 
+// Basic sanity check — comprehensive link coverage is in LinkTargetRuleTest.
 it('has no broken links in public pages smoke test', function (): void {
     $article = App\Models\Article::factory()->published()->create();
 

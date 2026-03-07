@@ -57,6 +57,7 @@ it('toggles bullet list active state', function (): void {
 })->group('slow');
 
 it('toggles ordered list active state', function (): void {
+    $this->article->update(['content' => 'plain text']);
     $page = loginAndEnterFullscreen($this->article);
 
     $page->click('[data-test="fs-toolbar-ordered-list"]')

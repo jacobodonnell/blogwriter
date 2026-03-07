@@ -6,6 +6,11 @@ use App\Models\Article;
 use App\Models\Photo;
 use App\Models\User;
 
+// Cross-cutting auth boundary regression tests. These intentionally overlap with
+// page-specific tests (ArticlesPageTest, PhotoTest, HomepageTest) to guard the
+// draft-visibility contract independently — if someone changes a query scope,
+// this file catches it even if the page-specific tests are modified.
+
 // --- Articles Index ---
 
 it('shows draft articles to authenticated users via status=private', function (): void {

@@ -79,10 +79,10 @@ it('requires unique slugs', function (): void {
         'slug' => 'unique-photo',
         'alt_text' => 'Test',
         'status' => Status::Public->value,
-        'image' => $file,
+        'image_file' => $file,
     ]);
 
-    $response->assertSessionHasErrors();
+    $response->assertSessionHasErrors('slug');
     expect(Photo::count())->toBe(1);
 });
 
