@@ -2,6 +2,7 @@ import { Editor, Extension } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 import { Slice } from '@tiptap/pm/model';
 import StarterKit from '@tiptap/starter-kit';
+import Placeholder from '@tiptap/extension-placeholder';
 import Youtube from '@tiptap/extension-youtube';
 import { Markdown } from '@tiptap/markdown';
 import { createResizableFigure } from './resizable-figure';
@@ -81,10 +82,10 @@ export function createTiptapEditor({ element, content, onUpdate, onSelectionUpda
                 },
             }),
             Markdown.configure({ html: false }),
+            Placeholder.configure({ placeholder: 'Start writing...' }),
             MarkdownPaste,
         ],
-        content: normalizeMarkdown(content) ?? '',
-        contentType: 'markdown',
+        ...(content ? { content: normalizeMarkdown(content), contentType: 'markdown' } : {}),
         onUpdate: ({ editor: e }) => onUpdate?.(e),
         onSelectionUpdate: () => onSelectionUpdate?.(),
     });

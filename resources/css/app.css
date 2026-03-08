@@ -215,8 +215,8 @@ body {
 .fullscreen-tiptap .ProseMirror figure { margin: 1.5rem 0; }
 
 /* Tiptap placeholder text for empty editor */
-.tiptap-editor .ProseMirror:has(> p:first-child:last-child > br:only-child)::before {
-    content: 'Start writing...';
+.tiptap-editor .tiptap p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
     color: var(--color-base-content);
     opacity: 0.3;
     pointer-events: none;
