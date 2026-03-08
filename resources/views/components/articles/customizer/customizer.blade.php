@@ -39,7 +39,7 @@
                     {{-- Sidebar panel: inline in normal/classic, slide-over in fullscreen --}}
                     <div :class="{
                         'p-4 md:overflow-y-auto md:px-4 md:py-6 scroll-fade': mode === 'classic',
-                        'fixed right-0 top-0 bottom-0 w-80 z-50 bg-base-100 border-l border-base-300 shadow-xl overflow-y-auto p-4': mode === 'fullscreen' && sidebarPanelOpen,
+                        'fixed right-0 top-0 bottom-0 w-80 max-w-[calc(100vw-3rem)] z-50 bg-base-100 border-l border-base-300 shadow-xl overflow-y-auto p-4': mode === 'fullscreen' && sidebarPanelOpen,
                         'hidden': mode === 'fullscreen' && !sidebarPanelOpen,
                     }"
                          x-show="mode !== 'fullscreen' || sidebarPanelOpen"
@@ -87,7 +87,7 @@
                  x-transition:leave="transition ease-in duration-150"
                  x-transition:leave-start="opacity-100 translate-x-0"
                  x-transition:leave-end="opacity-0 -translate-x-4"
-                 class="w-80 shrink-0 bg-base-100 border-l border-base-300 overflow-y-auto h-full"
+                 class="w-80 max-w-[calc(100vw-3rem)] shrink-0 bg-base-100 border-l border-base-300 overflow-y-auto h-full"
                  x-cloak>
                 <div class="p-4">
                     <div class="flex justify-between items-center mb-4">

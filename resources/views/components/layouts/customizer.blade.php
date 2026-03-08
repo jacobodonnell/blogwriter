@@ -17,7 +17,7 @@
         <header class="navbar flex-nowrap bg-base-100 border-b border-base-300 px-4 shrink-0 z-30">
             <div class="flex flex-1 items-center gap-2">
                 {{-- Drawer Toggle (hidden in fullscreen — drawer is always open) --}}
-                <button @click="isMobile ? (mobileMode = mobileMode === 'editor' ? 'preview' : 'editor') : (mode = mode === 'preview' ? 'split' : 'preview')"
+                <button @click="mode = mode === 'preview' ? 'split' : 'preview'"
                         x-show="mode !== 'fullscreen'"
                         class="btn btn-ghost btn-sm btn-square tooltip tooltip-right z-10"
                         :class="{ 'btn-active': mode !== 'preview' }"
@@ -40,7 +40,7 @@
                 {{-- Fullscreen editor toggle (hidden in fullscreen) --}}
                 <button @click="_preFullscreenMode = mode; mode = 'fullscreen'"
                         x-show="mode !== 'fullscreen'"
-                        class="btn btn-ghost btn-sm btn-square tooltip tooltip-right hidden md:inline-flex"
+                        class="btn btn-ghost btn-sm btn-square tooltip tooltip-right inline-flex"
                         data-tip="Fullscreen editor"
                         aria-label="Fullscreen editor"
                         data-test="navbar-fullscreen"
@@ -52,7 +52,7 @@
 
                 <a href="{{ route('admin.articles.index') }}" class="btn btn-ghost btn-sm gap-2">
                     <i class="ph ph-arrow-left text-lg"></i>
-                    <span class="hidden md:inline">Articles</span>
+                    <span>Articles</span>
                 </a>
                 <span
                     class="text-sm text-base-content/60 truncate max-w-xs hidden md:inline">{{ $article->title }}</span>
@@ -61,7 +61,7 @@
                 {{-- Compact save button (desktop) --}}
                 <button x-show="$store.saveButton.ready"
                         @click="window.dispatchEvent(new CustomEvent('save-article'))"
-                        class="btn btn-sm btn-square hidden md:inline-flex tooltip tooltip-bottom"
+                        class="btn btn-sm btn-square tooltip tooltip-bottom"
                         :class="$store.saveButton.cssClass"
                         :data-tip="$store.saveButton.label"
                         x-cloak>
@@ -71,7 +71,7 @@
                 {{-- View Live (only for published articles) --}}
                 @if($article->exists && $article->isPublished())
                     <a href="{{ $article->permalink() }}"
-                       class="btn btn-ghost btn-sm btn-square tooltip tooltip-bottom hidden md:inline-flex"
+                       class="btn btn-ghost btn-sm btn-square tooltip tooltip-bottom"
                        data-tip="View Live">
                         <i class="ph ph-arrow-square-out text-lg"></i>
                     </a>
@@ -159,7 +159,7 @@
                 {{-- Mobile close button (hidden in fullscreen) --}}
                 <div class="md:hidden flex justify-between items-center p-4 pb-0" x-show="mode !== 'fullscreen'">
                     <span class="font-medium text-sm">Editor</span>
-                    <button @click="closeDrawer()" class="btn btn-ghost btn-xs btn-circle" aria-label="Close editor">
+                    <button @click="mode = 'preview'" class="btn btn-ghost btn-xs btn-circle" aria-label="Close editor">
                         <i class="ph ph-x text-lg"></i>
                     </button>
                 </div>

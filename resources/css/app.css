@@ -52,6 +52,8 @@
 @theme {
     --font-sans: 'Noto Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
     'Segoe UI Symbol', 'Noto Color Emoji';
+    --z-resize-handle: 10;
+    --z-toolbar-tooltip: 100;
 }
 
 body {
@@ -178,7 +180,7 @@ body {
 }
 .tiptap-toolbar .tooltip::before,
 .tiptap-toolbar .tooltip::after {
-    z-index: 100;
+    z-index: var(--z-toolbar-tooltip);
 }
 
 /* Fullscreen TipTap editor — prose-scale typography */
@@ -212,6 +214,16 @@ body {
 .fullscreen-tiptap .ProseMirror hr { margin: 2rem 0; }
 .fullscreen-tiptap .ProseMirror figure { margin: 1.5rem 0; }
 
+/* Tiptap placeholder text for empty editor */
+.tiptap-editor .ProseMirror:has(> p:first-child:last-child > br:only-child)::before {
+    content: 'Start writing...';
+    color: var(--color-base-content);
+    opacity: 0.3;
+    pointer-events: none;
+    float: left;
+    height: 0;
+}
+
 /* Propagate min-width:0 through the fullscreen editor flex chain
    so content reflows when the revision panel pushes the drawer narrower */
 .fullscreen-drawer * {
@@ -240,7 +252,7 @@ body {
     justify-content: center;
     cursor: col-resize;
     transition: background 150ms ease;
-    z-index: 10;
+    z-index: var(--z-resize-handle);
 }
 [data-resize-wrapper]:hover [data-resize-handle] {
     background: color-mix(in oklch, var(--color-primary) 20%, transparent);

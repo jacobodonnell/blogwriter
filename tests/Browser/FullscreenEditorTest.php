@@ -15,20 +15,37 @@ beforeEach(function (): void {
     Setting::set('customizer_editor_mode', 'split');
 });
 
-function loginAndOpenFullscreenArticle(Article $article): mixed
+function loginToArticle(Article $article, bool $mobile = false): mixed
 {
     $page = visit('/login');
+    if ($mobile) {
+        $page->resize(375, 812);
+    }
     $page->fill('@login-email', 'test@blogwriter.test')
         ->fill('@login-password', 'password')
         ->click('@login-submit');
     $page->navigate(route('admin.articles.edit', $article));
+    $page->wait(3);
 
-    // Wait for editor to initialize then enter fullscreen
-    $page->wait(3)
-        ->click('[data-test="navbar-fullscreen"]')
+    return $page;
+}
+
+function loginAndOpenFullscreenArticle(Article $article, bool $mobile = false): mixed
+{
+    $page = loginToArticle($article, $mobile);
+
+    $page->click('[data-test="navbar-fullscreen"]')
         ->wait(1);
 
     return $page;
+}
+
+function getCustomizerMode(mixed $page): string
+{
+    return $page->script("(() => {
+        const el = document.querySelector('[x-ref=\"customizerForm\"]').closest('[x-data]');
+        return Alpine.\$data(el).mode;
+    })()");
 }
 
 it('editor content scrolls in fullscreen', function (): void {
@@ -99,12 +116,7 @@ it('collapses to classic editor', function (): void {
         ->wait(1)
         ->assertMissing('[data-test="fs-toolbar-classic"]');
 
-    $mode = $page->script("(() => {
-        const el = document.querySelector('[x-ref=\"customizerForm\"]').closest('[x-data]');
-        return Alpine.\$data(el).mode;
-    })()");
-
-    expect($mode)->toBe('classic');
+    expect(getCustomizerMode($page))->toBe('classic');
 })->group('slow');
 
 it('collapses to live preview', function (): void {
@@ -115,12 +127,7 @@ it('collapses to live preview', function (): void {
         ->assertMissing('[data-test="fs-toolbar-preview"]')
         ->assertVisible('[data-test="preview-panel"]');
 
-    $mode = $page->script("(() => {
-        const el = document.querySelector('[x-ref=\"customizerForm\"]').closest('[x-data]');
-        return Alpine.\$data(el).mode;
-    })()");
-
-    expect($mode)->toBe('preview');
+    expect(getCustomizerMode($page))->toBe('preview');
 })->group('slow');
 
 it('exits fullscreen on Escape key', function (): void {
@@ -206,6 +213,48 @@ it('saves article with keyboard shortcut', function (): void {
 
     $page->wait(3)
         ->assertSee('Article updated successfully.');
+})->group('slow');
+
+it('enters fullscreen on mobile', function (): void {
+    $page = loginAndOpenFullscreenArticle($this->article, mobile: true);
+
+    $page->assertVisible('[data-test="fs-toolbar-bold"]')
+        ->assertVisible('[data-test="fs-toolbar-split"]')
+        ->assertVisible('[data-test="fs-toolbar-preview"]')
+        ->assertMissing('[data-test="fs-toolbar-classic"]');
+})->group('slow');
+
+it('exits fullscreen on mobile via preview button', function (): void {
+    $page = loginAndOpenFullscreenArticle($this->article, mobile: true);
+
+    $page->click('[data-test="fs-toolbar-preview"]')
+        ->wait(1);
+
+    expect(getCustomizerMode($page))->toBe('preview');
+})->group('slow');
+
+it('opens settings slide-over on mobile fullscreen', function (): void {
+    $page = loginAndOpenFullscreenArticle($this->article, mobile: true);
+
+    $page->click('[data-test="fs-toolbar-settings"]')
+        ->wait(0.5)
+        ->assertVisible('[data-test="status-select"]');
+})->group('slow');
+
+it('toggle button switches between editor and preview on mobile', function (): void {
+    Setting::set('customizer_editor_mode', 'preview');
+
+    $page = loginToArticle($this->article, mobile: true);
+
+    expect(getCustomizerMode($page))->toBe('preview');
+
+    $page->click('[aria-label="Toggle editor"]')
+        ->wait(0.5);
+    expect(getCustomizerMode($page))->toBe('split');
+
+    $page->click('[aria-label="Toggle editor"]')
+        ->wait(0.5);
+    expect(getCustomizerMode($page))->toBe('preview');
 })->group('slow');
 
 it('content preserved across fullscreen toggle', function (): void {

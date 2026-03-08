@@ -63,16 +63,17 @@
             {{-- Fullscreen: single-line WYSIWYG toolbar --}}
             <div x-show="mode === 'fullscreen' && !markdownMode" x-cloak class="tiptap-toolbar">
                 <div class="flex items-center gap-1 bg-base-200 p-2 px-3">
-                {{-- Collapse to split panel --}}
+                {{-- Collapse to split panel (shows as "Editor" on mobile) --}}
                 <button type="button"
                         @click="mode = 'split'"
                         class="btn btn-ghost btn-xs gap-1" data-test="fs-toolbar-split">
-                    <i class="ph ph-split-horizontal text-base"></i> Split
+                    <i class="ph text-base" :class="isMobile ? 'ph-note-pencil' : 'ph-split-horizontal'"></i>
+                    <span x-text="isMobile ? 'Editor' : 'Split'"></span>
                 </button>
-                {{-- Collapse to classic editor --}}
+                {{-- Collapse to classic editor (desktop only) --}}
                 <button type="button"
                         @click="mode = 'classic'"
-                        class="btn btn-ghost btn-xs gap-1" data-test="fs-toolbar-classic">
+                        class="btn btn-ghost btn-xs gap-1 hidden md:inline-flex" data-test="fs-toolbar-classic">
                     <i class="ph ph-frame-corners text-base"></i> Classic
                 </button>
                 {{-- Collapse to live preview --}}
@@ -159,16 +160,17 @@
             {{-- Fullscreen: markdown mode toolbar (minimal) --}}
             <div x-show="mode === 'fullscreen' && markdownMode" x-cloak class="tiptap-toolbar">
                 <div class="flex items-center gap-1 bg-base-200 p-2 px-3">
-                {{-- Collapse to split panel --}}
+                {{-- Collapse to split panel (shows as "Editor" on mobile) --}}
                 <button type="button"
                         @click="mode = 'split'"
                         class="btn btn-ghost btn-xs gap-1" data-test="fs-md-toolbar-split">
-                    <i class="ph ph-split-horizontal text-base"></i> Split
+                    <i class="ph text-base" :class="isMobile ? 'ph-note-pencil' : 'ph-split-horizontal'"></i>
+                    <span x-text="isMobile ? 'Editor' : 'Split'"></span>
                 </button>
-                {{-- Collapse to classic editor --}}
+                {{-- Collapse to classic editor (desktop only) --}}
                 <button type="button"
                         @click="mode = 'classic'"
-                        class="btn btn-ghost btn-xs gap-1" data-test="fs-md-toolbar-classic">
+                        class="btn btn-ghost btn-xs gap-1 hidden md:inline-flex" data-test="fs-md-toolbar-classic">
                     <i class="ph ph-frame-corners text-base"></i> Classic
                 </button>
                 {{-- Collapse to live preview --}}

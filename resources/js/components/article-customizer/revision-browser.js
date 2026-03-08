@@ -12,6 +12,10 @@ export function makeRevisionBrowser(config, getEditor) {
         _workingTitle: null,
         _revisionCache: {},
 
+        _showError(message) {
+            this.$dispatch('toast:show', { message, type: 'error' });
+        },
+
         _clearBrowsingState() {
             this.browsingRevision = false;
             this.browsingIndex = -1;
@@ -94,13 +98,16 @@ export function makeRevisionBrowser(config, getEditor) {
                     },
                 });
 
-                if (!response.ok) return;
+                if (!response.ok) {
+                    this._showError('Failed to delete revision.');
+                    return;
+                }
 
                 this.revisions.splice(index, 1);
                 this._revisionCache = {};
                 this.exitRevisionBrowsing();
             } catch {
-                // Silently handle deletion failure — UI already reflects prior state
+                this._showError('Failed to delete revision.');
             }
         },
 
@@ -109,14 +116,22 @@ export function makeRevisionBrowser(config, getEditor) {
                 return this._revisionCache[revisionId];
             }
 
-            try {
+            const promise = (async () => {
                 const response = await fetch(this._revisionUrl(this.revisionShowUrl, revisionId));
-                if (!response.ok) return null;
+                if (!response.ok) {
+                    throw new Error('Failed to fetch revision');
+                }
 
-                const data = await response.json();
-                this._revisionCache[revisionId] = data;
-                return data;
+                return await response.json();
+            })();
+
+            this._revisionCache[revisionId] = promise;
+
+            try {
+                return await promise;
             } catch {
+                delete this._revisionCache[revisionId];
+                this._showError('Failed to load revision.');
                 return null;
             }
         },
