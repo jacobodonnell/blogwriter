@@ -190,6 +190,26 @@ it('update normalizes CRLF to LF in content', function (): void {
     expect($article->fresh()->content)->toBe("Updated\nwith\nCRLF");
 });
 
+// --- H1 heading validation (server-side safety net) ---
+
+it('store rejects content with H1 markdown heading', function (): void {
+    $this->post(route('admin.articles.store'), validArticleData([
+        'content' => "# This is an H1 heading\n\nSome content.",
+    ]))->assertSessionHasErrors('content');
+});
+
+it('store accepts content with H2 heading', function (): void {
+    $this->post(route('admin.articles.store'), validArticleData([
+        'content' => "## This is an H2 heading\n\nSome content.",
+    ]))->assertSessionDoesntHaveErrors('content');
+});
+
+it('store accepts content with H3 and deeper headings', function (): void {
+    $this->post(route('admin.articles.store'), validArticleData([
+        'content' => "### H3\n\n#### H4\n\n##### H5",
+    ]))->assertSessionDoesntHaveErrors('content');
+});
+
 // --- Mutual exclusivity ---
 
 it('rejects multiple featured image methods', function (): void {

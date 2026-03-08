@@ -18,6 +18,7 @@ function normalizeMarkdown(text) {
     const parts = text.split(/(```[\s\S]*?```)/g);
     return parts.map((part, i) => {
         if (i % 2 !== 0) return part;
+        part = part.replace(/^# (?!#)/gm, '## ');
         part = part.replace(/\n{3,}/g, '\n\n');
         part = part.replace(/([^\n])\n([^\n])/g, '$1\n\n$2');
         return part;

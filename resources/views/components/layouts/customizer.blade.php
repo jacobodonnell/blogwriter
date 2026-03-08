@@ -164,19 +164,12 @@
                     </button>
                 </div>
 
-                {{-- Validation errors banner (inside drawer) --}}
-                @if ($errors->any())
-                    <div class="px-4 pt-4" x-data="{ show: true }" x-show="show"
-                         x-init="setTimeout(() => show = false, 5000)" x-transition>
-                        <div role="alert" class="alert alert-error">
-                            <i class="ph ph-x-circle text-xl"></i>
-                            <span>Something went wrong. Please fix the errors below and try again.</span>
-                        </div>
-                    </div>
-                @endif
-
                 {{-- Scrollable form content with bottom padding for sticky save button --}}
                 <div :class="mode === 'classic' ? '' : (mode === 'fullscreen' ? 'grid min-h-0' : 'p-4 pb-20')">
+                    {{-- Validation errors toast (dispatched, inside content wrapper to avoid grid row) --}}
+                    @if ($errors->any())
+                        <div x-data x-init="$dispatch('toast:show', { message: 'Something went wrong. Please fix the errors below and try again.', type: 'error' })" class="hidden"></div>
+                    @endif
                     {{ $slot }}
                 </div>
             </div>

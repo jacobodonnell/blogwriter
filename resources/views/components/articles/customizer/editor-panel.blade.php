@@ -407,26 +407,8 @@
         </div>
 
         @error('content')
-        <div role="alert" class="alert alert-error mt-2" x-data="{ show: true }" x-show="show"
-             x-init="setTimeout(() => show = false, 8000)" x-transition>
-            <i class="ph ph-x-circle text-xl"></i>
-            <span>{{ $message }}</span>
-        </div>
+        <div x-data x-init="$dispatch('toast:show', { message: '{{ addslashes($message) }}', type: 'error' })" class="hidden"></div>
         @enderror
-
-        {{-- Client-side: content required warning --}}
-        <div x-show="contentError" x-cloak x-transition role="alert" class="alert alert-error mt-2">
-            <i class="ph ph-x-circle text-xl"></i>
-            <span>Please add some content before saving.</span>
-        </div>
-
-        {{-- H1 Warning (client-side only, hidden when server already shows error) --}}
-        @unless($errors->has('content'))
-            <div x-show="/^# (?!#)/m.test(content)" x-cloak x-transition class="alert alert-warning mt-2">
-                <i class="ph ph-warning text-xl"></i>
-                <span>H1 headings (#) are not allowed — the article title is already H1. Use ## or smaller.</span>
-            </div>
-        @endunless
     </fieldset>
 
     {{-- Summary (hidden in fullscreen) --}}

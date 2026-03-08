@@ -7,6 +7,7 @@ export function makeSave(config, getEditor) {
             }
             if (!this.content?.trim()) {
                 this.contentError = true;
+                this.$dispatch('toast:show', { message: 'Please add some content before saving.', type: 'error' });
                 editor?.focus();
                 return;
             }

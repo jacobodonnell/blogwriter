@@ -148,6 +148,7 @@ export default function articleCustomizer(config) {
                     });
 
                     this.editorReady = true;
+
                     const normalised = editor.getMarkdown();
                     this.content = normalised;
                     this.savedContent = editor.roundTripMarkdown(this.savedContent);
