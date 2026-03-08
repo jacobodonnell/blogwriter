@@ -2,7 +2,7 @@
 {{-- Expects Alpine.js context with: expanded, mobileDrawerOpen, isDesktop, toggle() --}}
 
 <header class="bg-base-100 sticky top-0 z-30 shadow-sm">
-    <x-demo-banner />
+    <x-demo-banner/>
     <div class="navbar h-16">
         <div class="flex-none">
             <button @click="toggle()" class="btn btn-square btn-ghost" aria-label="Toggle sidebar">
@@ -18,29 +18,31 @@
         </div>
 
         <div class="flex-none gap-2">
-            <x-theme-toggle />
+            <x-theme-toggle/>
 
             {{-- User Dropdown --}}
             <div class="dropdown dropdown-end" x-data="{ open: false }" @click.outside="open = false">
                 <button @click="open = !open" class="btn btn-ghost btn-circle avatar">
-                    <div class="w-10 rounded-full bg-primary text-primary-content flex items-center justify-center font-semibold">
+                    <div
+                        class="w-10 rounded-full bg-primary text-primary-content flex items-center justify-center font-semibold">
                         {{ auth()->user()?->name ? substr(auth()->user()->name, 0, 1) : 'U' }}
                     </div>
                 </button>
-                <ul x-show="open" x-transition x-cloak class="dropdown-content menu menu-sm z-[1] mt-3 w-52 p-2 shadow bg-base-100 rounded-box">
-                    <li class="menu-title">
-                        <span>{{ auth()->user()?->name ?? 'User' }}</span>
-                        <span class="text-xs text-base-content/60">{{ auth()->user()?->email ?? '' }}</span>
-                    </li>
-                    <li><a href="{{ route('admin.settings') }}">Settings</a></li>
-                    <div class="divider my-1"></div>
-                    <li>
-                        <form method="POST" action="{{ route('logout') }}" class="w-full">
-                            @csrf
-                            <button type="submit" @click.stop class="w-full text-left text-error">Logout</button>
-                        </form>
-                    </li>
-                </ul>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <ul x-show="open" x-transition x-cloak
+                        class="dropdown-content menu menu-sm z-[1] mt-3 w-52 p-2 shadow bg-base-100 rounded-box">
+                        <li class="menu-title">
+                            <span>{{ auth()->user()?->name ?? 'User' }}</span>
+                            <span class="text-xs text-base-content/60">{{ auth()->user()?->email ?? '' }}</span>
+                        </li>
+                        <li><a href="{{ route('admin.settings') }}">Settings</a></li>
+                        <div class="divider my-1"></div>
+                        <li>
+                            <button type="submit" @click.stop class="text-error">Logout</button>
+                        </li>
+                    </ul>
+                </form>
             </div>
         </div>
     </div>
