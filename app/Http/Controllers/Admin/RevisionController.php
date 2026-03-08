@@ -10,6 +10,11 @@ use App\Models\ArticleRevision;
 use App\Services\RevisionService;
 use Illuminate\Http\JsonResponse;
 
+/**
+ * Returns ad-hoc JSON responses rather than Eloquent API Resources.
+ * This is the established pattern across all JSON-returning controllers
+ * in this app (ArticleImportController, AdminPhotoController, FeedController).
+ */
 final class RevisionController extends Controller
 {
     public function __construct(

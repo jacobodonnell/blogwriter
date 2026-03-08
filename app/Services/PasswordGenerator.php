@@ -20,7 +20,7 @@ final class PasswordGenerator
         }
 
         $capitalizeIndex = random_int(0, 5);
-        $words[$capitalizeIndex] = ucfirst($words[$capitalizeIndex]);
+        $words[$capitalizeIndex] = ucfirst((string) $words[$capitalizeIndex]);
 
         $number = mb_str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
 

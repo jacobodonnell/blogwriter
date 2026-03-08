@@ -432,6 +432,10 @@ final readonly class ArticleImportService
                 foreach ($parsed->revisionFiles[$slug] as $rev) {
                     $content = $rev['content'];
 
+                    if ($content === '') {
+                        continue;
+                    }
+
                     // First revision stores full content, subsequent get diffs
                     $storedContent = $previousContent === null ? $content : $this->revisionService->generateDiff($previousContent, $content);
 

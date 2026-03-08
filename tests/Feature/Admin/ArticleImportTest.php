@@ -1045,3 +1045,28 @@ it('roundtrip export then import preserves revision content', function (): void 
     expect($revisionService->reconstructContent($imported, $revisions[0]))->toBe('Initial content.')
         ->and($revisionService->reconstructContent($imported, $revisions[1]))->toBe('Updated content.');
 });
+
+it('skips revisions with empty content during import', function (): void {
+    $currentMd = makeArticleMd([
+        'title' => 'Empty Rev Test',
+        'slug' => 'empty-rev-test',
+        'status' => 'public',
+        'published_at' => '2024-01-01T00:00:00+00:00',
+    ], 'Current content.');
+
+    $emptyRev = makeRevisionMd('Empty Rev', '2024-01-01T00:00:00+00:00', '');
+
+    $zip = makeImportZip([
+        'articles/empty-rev-test/current.md' => $currentMd,
+        'articles/empty-rev-test/revisions/2024-01-01T00-00-00Z.md' => $emptyRev,
+    ]);
+
+    $this->post(route('admin.import.articles'), [
+        'file' => $zip,
+        'duplicate_strategy' => 'skip',
+    ])->assertJson(['status' => 'ok', 'imported' => 1]);
+
+    $article = Article::query()->where('slug', 'empty-rev-test')->first();
+    expect($article)->not->toBeNull()
+        ->and($article->revisions)->toHaveCount(0);
+});
