@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use App\Services\InstallService;
 
 const INSTALL_TEST_PASSWORD = 'SecurePass123!@#456';
 
@@ -23,16 +24,17 @@ beforeEach(function (): void {
         unlink(storage_path('installed.lock'));
     }
 
-    $this->envPath = base_path('.env');
-    $this->envBackupPath = base_path('.env.test-backup');
-    if (file_exists($this->envPath)) {
-        copy($this->envPath, $this->envBackupPath);
-    }
+    $this->tempEnvPath = tempnam(sys_get_temp_dir(), 'env_test_');
+    copy(base_path('.env'), $this->tempEnvPath);
+
+    $this->app->singleton(InstallService::class, function (): InstallService {
+        return new InstallService($this->tempEnvPath);
+    });
 });
 
 afterEach(function (): void {
-    if (file_exists($this->envBackupPath)) {
-        rename($this->envBackupPath, $this->envPath);
+    if (file_exists($this->tempEnvPath)) {
+        unlink($this->tempEnvPath);
     }
 });
 
@@ -108,7 +110,7 @@ describe('non-interactive installation (arguments/flags)', function (): void {
             '--site-url' => 'https://custom.example.com',
         ]))->assertSuccessful();
 
-        $envContent = file_get_contents(base_path('.env'));
+        $envContent = file_get_contents($this->tempEnvPath);
         expect($envContent)->toContain('APP_NAME="Custom Blog Name"');
         expect($envContent)->toContain('APP_URL="https://custom.example.com"');
     });
@@ -301,15 +303,14 @@ describe('already installed detection', function (): void {
 
 describe('environment configuration', function (): void {
     it('creates .env file from .env.example', function (): void {
-        if (file_exists(base_path('.env'))) {
-            unlink(base_path('.env'));
-        }
+        // Delete the temp env file to simulate missing .env
+        unlink($this->tempEnvPath);
 
         $this->artisan('blogwriter:install', installArgs())
             ->expectsOutputToContain('Creating .env file')
             ->assertSuccessful();
 
-        expect(file_exists(base_path('.env')))->toBeTrue();
+        expect(file_exists($this->tempEnvPath))->toBeTrue();
     });
 
     it('generates application key', function (): void {
@@ -317,7 +318,7 @@ describe('environment configuration', function (): void {
             ->expectsOutputToContain('Generating application key')
             ->assertSuccessful();
 
-        $envContent = file_get_contents(base_path('.env'));
+        $envContent = file_get_contents($this->tempEnvPath);
         expect($envContent)->toContain('APP_KEY=base64:');
     });
 
@@ -327,9 +328,8 @@ describe('environment configuration', function (): void {
 
         $hasExample = file_exists($envExamplePath);
 
-        if (file_exists(base_path('.env'))) {
-            unlink(base_path('.env'));
-        }
+        // Delete the temp env file to simulate missing .env
+        unlink($this->tempEnvPath);
 
         if ($hasExample) {
             rename($envExamplePath, $envExampleBackupPath);
@@ -342,6 +342,8 @@ describe('environment configuration', function (): void {
             if ($hasExample && file_exists($envExampleBackupPath)) {
                 rename($envExampleBackupPath, $envExamplePath);
             }
+            // Recreate temp file so afterEach cleanup doesn't warn
+            touch($this->tempEnvPath);
         }
     });
 });

@@ -11,6 +11,12 @@ use RuntimeException;
 
 final class InstallService
 {
+    public function __construct(
+        private string $envPath = '',
+    ) {
+        $this->envPath = $envPath ?: base_path('.env');
+    }
+
     /**
      * Check if BlogWriter is already installed.
      *
@@ -19,7 +25,7 @@ final class InstallService
      */
     public function isAlreadyInstalled(): bool
     {
-        if (! file_exists(base_path('.env'))) {
+        if (! file_exists($this->envPath)) {
             return false;
         }
 
@@ -174,17 +180,15 @@ final class InstallService
      */
     public function setupEnvironmentFile(): void
     {
-        $envPath = base_path('.env');
-
-        if (file_exists($envPath)) {
-            $this->enforceSqliteConnection($envPath);
+        if (file_exists($this->envPath)) {
+            $this->enforceSqliteConnection($this->envPath);
 
             return;
         }
 
         $envExamplePath = base_path('.env.example');
         if (file_exists($envExamplePath)) {
-            copy($envExamplePath, $envPath);
+            copy($envExamplePath, $this->envPath);
 
             return;
         }
@@ -200,16 +204,15 @@ final class InstallService
      */
     public function generateAppKey(): void
     {
-        $envPath = base_path('.env');
-        if (! file_exists($envPath)) {
+        if (! file_exists($this->envPath)) {
             return;
         }
 
         $key = 'base64:'.base64_encode(random_bytes(32));
 
-        $content = file_get_contents($envPath);
+        $content = file_get_contents($this->envPath);
         $content = preg_replace('/^APP_KEY=.*$/m', 'APP_KEY='.$key, $content);
-        file_put_contents($envPath, $content);
+        file_put_contents($this->envPath, $content);
     }
 
     /**
@@ -217,13 +220,11 @@ final class InstallService
      */
     public function updateEnvironmentFile(array $config): void
     {
-        $envPath = base_path('.env');
-
-        if (! file_exists($envPath)) {
+        if (! file_exists($this->envPath)) {
             return;
         }
 
-        $content = file_get_contents($envPath);
+        $content = file_get_contents($this->envPath);
 
         if (isset($config['site_name'])) {
             $content = $this->updateEnvValue($content, 'APP_NAME', $config['site_name']);
@@ -233,7 +234,7 @@ final class InstallService
             $content = $this->updateEnvValue($content, 'APP_URL', $config['site_url']);
         }
 
-        file_put_contents($envPath, $content);
+        file_put_contents($this->envPath, $content);
     }
 
     /**
