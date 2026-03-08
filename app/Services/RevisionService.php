@@ -16,7 +16,7 @@ final readonly class RevisionService
 
     public function __construct()
     {
-        $this->differ = new Differ(new UnifiedDiffOutputBuilder(''));
+        $this->differ = new Differ(new UnifiedDiffOutputBuilder('', true));
     }
 
     /**

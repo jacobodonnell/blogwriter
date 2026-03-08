@@ -222,3 +222,47 @@ it('deletes the only revision cleanly', function (): void {
     expect(ArticleRevision::find($revision->id))->toBeNull()
         ->and($article->revisions()->count())->toBe(0);
 });
+
+it('reconstructs multi-paragraph HTML through a 4-revision chain with multi-hunk diffs', function (): void {
+    $article = Article::factory()->create();
+
+    $v1 = "<h2>Introduction</h2>\n<p>Welcome to the blog.</p>\n\n<h2>Details</h2>\n<p>Here are the details.</p>\n\n<h2>Conclusion</h2>\n<p>Thanks for reading.</p>";
+    $v2 = "<h2>Introduction</h2>\n<p>Welcome to the updated blog.</p>\n\n<h2>Details</h2>\n<p>Here are the revised details.</p>\n\n<h2>Conclusion</h2>\n<p>Thanks for reading.</p>";
+    $v3 = "<h2>Introduction</h2>\n<p>Welcome to the updated blog.</p>\n\n<h2>Main Content</h2>\n<p>Here are the revised details.</p>\n<p>With an extra paragraph.</p>\n\n<h2>Conclusion</h2>\n<p>See you next time.</p>";
+    $v4 = "<h2>Intro</h2>\n<p>Welcome to the updated blog.</p>\n\n<h2>Main Content</h2>\n<p>Here are the final details.</p>\n<p>With an extra paragraph.</p>\n\n<h2>Summary</h2>\n<p>See you next time.</p>";
+
+    $now = now();
+
+    $base = ArticleRevision::factory()->create([
+        'article_id' => $article->id,
+        'title' => 'Test',
+        'content' => $v1,
+        'created_at' => $now,
+    ]);
+
+    $diff1 = ArticleRevision::factory()->create([
+        'article_id' => $article->id,
+        'title' => 'Test',
+        'content' => $this->service->generateDiff($v1, $v2),
+        'created_at' => $now,
+    ]);
+
+    $diff2 = ArticleRevision::factory()->create([
+        'article_id' => $article->id,
+        'title' => 'Test',
+        'content' => $this->service->generateDiff($v2, $v3),
+        'created_at' => $now->copy()->addMinute(),
+    ]);
+
+    $diff3 = ArticleRevision::factory()->create([
+        'article_id' => $article->id,
+        'title' => 'Test',
+        'content' => $this->service->generateDiff($v3, $v4),
+        'created_at' => $now->copy()->addMinutes(2),
+    ]);
+
+    expect($this->service->reconstructContent($article, $base))->toBe($v1)
+        ->and($this->service->reconstructContent($article, $diff1))->toBe($v2)
+        ->and($this->service->reconstructContent($article, $diff2))->toBe($v3)
+        ->and($this->service->reconstructContent($article, $diff3))->toBe($v4);
+});
