@@ -11,8 +11,8 @@ didn't write, no risk of your work disappearing because a company pivoted. Your 
 
 **Content:**
 
-- **Articles** --- Long-form posts with Tiptap WYSIWYG editor, live preview customizer, categories, featured images, and
-  permalink slug redirects
+- **Articles** --- Long-form posts with Tiptap WYSIWYG editor, four layout modes (fullscreen, split, classic, preview),
+  revision history, categories, featured images, and permalink slug redirects
 - **Photos** --- Image posts with captions, alt text, EXIF display, categories, permalink slug redirects, and automatic
   image conversions (thumbnail, medium, large) via Spatie MediaLibrary
 
@@ -26,7 +26,7 @@ didn't write, no risk of your work disappearing because a company pivoted. Your 
 
 - Dashboard with content stats
 - Sortable, filterable articles table with column toggles and per-page pagination
-- Statamic-inspired live preview customizer with resizable split-pane editor and AJAX auto-save
+- Four-mode article editor with revision history, markdown toggle, keyboard shortcuts, and AJAX auto-save
 - Markdown export (ZIP) and import for round-tripping content
 
 **IndieWeb:**
@@ -95,9 +95,9 @@ Full documentation is in the [`docs/`](docs/) directory:
 BlogWriter is in pre-alpha. Expect breaking changes. I'll still do my best to prevent them, but back up your data
 regularly. If you're not a fairly technical person, you should not be using this for the time being!
 
-**Built:** Articles, Photos, Categories (hierarchical), Appearance (35 themes, 11 fonts), Admin panel, CLI Installer,
-Auth,
-MediaLibrary, Microformats (h-card, h-entry, h-feed, rel="me"), RSS/Atom/JSON Feeds, Import & Export, PWA
+**Built:** Articles (four editor modes, revision history, markdown toggle), Photos, Categories (hierarchical),
+Appearance (35 themes, 11 fonts), Admin panel, CLI Installer, Auth, MediaLibrary,
+Microformats (h-card, h-entry, h-feed, rel="me"), RSS/Atom/JSON Feeds, Import & Export, PWA
 
 **Planned:** Tags, IndieAuth, Subscribers, Newsletter (Buttondown), Paid Content (Stripe), Pages, Webmentions
 

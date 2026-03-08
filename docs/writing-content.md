@@ -25,22 +25,92 @@ Articles are long-form posts with titles. Blog posts, essays, tutorials.
 
 ### The Customizer
 
-The Customizer is BlogWriter's article editor — a Statamic-inspired split-pane layout with editing controls on the left
-and a live preview of your article on the right. The preview updates as you type and the pane is resizable.
+The Customizer is BlogWriter's article editor. It has four layout modes, a Tiptap WYSIWYG editor with a markdown toggle,
+a revision history browser, and AJAX auto-save. You can write in a distraction-free fullscreen, a side-by-side split
+view, a traditional form layout, or a preview-only mode — and switch between them from the toolbar.
 
-As you type, your changes auto-save in the background via AJAX and the preview updates. The editor uses **Tiptap**, a
-WYSIWYG rich-text editor — you format your content with toolbar buttons and never see raw Markdown syntax. A full-width
-toggle hides the preview panel when you want more writing room.
+### Editor Modes
 
-The toolbar includes: **Bold**, **Italic**, **H2**, **H3**, **Blockquote**, **Bullet list**, **Ordered list**, **YouTube
-embed** (dialog), and **Image alignment/resize** controls.
+The Customizer offers four distinct modes. Your choice persists to `localStorage` and syncs with the default set in
+Settings.
+
+- **Fullscreen** — Distraction-free writing. A single-line toolbar sits at the top with an auto-growing title area and
+  the content editor below. The featured image displays below the title. Settings and revision history slide in as
+  overlays from the right edge. This is the default mode.
+- **Split** — Editor on the left, live preview on the right. The divider between the two panels is draggable so you can
+  resize them. On mobile, the editor and preview are separate tabs.
+- **Classic** — A traditional form layout with title, slug, content, and summary fields in one column and a sidebar for
+  categories and featured images. Desktop only — on mobile this falls back to split mode.
+- **Preview** — Full-width live preview of your article. An edge tab on the left lets you reopen the editor panel.
+
+Switch modes using the collapse buttons at the left end of the toolbar (Split, Classic, Preview). In non-fullscreen modes
+the same buttons appear with the addition of Fullscreen.
+
+### Markdown Mode
+
+Click the code icon in the toolbar to toggle between WYSIWYG and raw markdown editing. In markdown mode, the formatting
+toolbar is hidden and you edit the underlying markdown directly in a plain textarea. Toggle back to return to the rich
+editor.
+
+### Revision History
+
+Every time you save an article where the title or content has changed, BlogWriter automatically creates a revision.
+
+Open the revision browser by clicking the clock icon in the toolbar (only visible when revisions exist). A panel slides
+in from the right listing all past revisions with human-readable timestamps.
+
+From the revision browser you can:
+
+- **Preview** a revision — loads it into the editor in read-only mode with a "Viewing revision" banner
+- **Restore** a revision — replaces the current title and content with the revision's snapshot
+- **Delete** a revision — permanently removes it (with confirmation)
+
+Press the back arrow or click away to exit revision browsing and return to your unsaved working content.
+
+**How revisions are stored:** The first revision for an article stores a full snapshot of the title and content. Every
+subsequent revision stores a unified diff against the previous state. When you preview or restore a revision, BlogWriter
+replays the diff chain to reconstruct the full content. This keeps storage efficient while preserving complete history.
+
+**Export and import:** Revisions are included when you export articles. Each revision is exported as a full markdown file
+(diffs are reconstructed to snapshots). On import, the revision chain is rebuilt with diffs regenerated.
+
+### Keyboard Shortcuts
+
+| Shortcut | Action |
+|---|---|
+| Cmd/Ctrl + S | Save article |
+| Cmd/Ctrl + Z | Undo |
+| Cmd/Ctrl + Shift + Z | Redo |
+
+### Editor Toolbar
+
+The WYSIWYG toolbar includes: **Bold**, **Italic**, **H2**, **H3**, **H4**, **H5**, **Blockquote**, **Bullet list**,
+**Ordered list**, **Link** (dialog), **Image** (dialog), **Inline code**, **Horizontal rule**, **YouTube embed**
+(dialog), **Undo**, **Redo**, and the **Markdown toggle**.
+
+When a figure is selected, a contextual toolbar appears with **Full Width** toggle, **Edit Image**, and **Remove Image**
+buttons.
+
+### Editor Features
+
+- **Word count** — Displayed in the status bar below the editor
+- **Unsaved changes detection** — A browser warning prevents you from navigating away with unsaved work
+- **Draft revert buttons** — Individual revert buttons on the title, slug, content, and summary fields let you discard
+  changes to a single field
+- **Featured image preview** — The featured image displays inline in fullscreen mode and in the sidebar in classic mode
+
+### Images
 
 Markdown is the underlying storage format, but all syntax is handled transparently:
 
 - **YouTube embeds** — Click the embed button, paste a URL, and it renders as a responsive iframe. Stored as
   `@[youtube](url)` internally.
-- **Image alignment and sizing** — Select an image in the editor to access alignment and resize handles. Stored as
-  extended Markdown syntax internally.
+- **Resizable figures** — Images in the editor are wrapped in `<figure>` elements with drag handles on the left and
+  right edges. Drag to resize (minimum 150px, snaps to full-width at 98%+). Click an image to access the contextual
+  toolbar for full-width toggle, editing, or removal.
+- **Captions** — Each figure has a caption area below the image. Click "Add a caption…" to type. Captions are stored in
+  extended markdown syntax: `![alt|width:50%|caption:\`text\`](url)`.
+- **Image dialog** — The image button opens a dialog for URL and alt text input. Alt text is required.
 
 ### Fields
 

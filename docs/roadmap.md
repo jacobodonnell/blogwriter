@@ -12,7 +12,7 @@ This roadmap shows what's built and what's planned.
 ### Content
 
 - Article CRUD with Tiptap WYSIWYG editor (Markdown storage)
-- Statamic-inspired live preview customizer with resizable split-pane editor
+- Four-mode article editor (fullscreen, split, classic, preview) with live preview
 - AJAX auto-save while editing
 - Draft/published workflow with timestamps
 - Featured images (upload or external URL)
@@ -23,6 +23,11 @@ This roadmap shows what's built and what's planned.
 - EXIF metadata extraction and display
 - Category management with article associations
 - Content newline normalization (preserves code blocks)
+- Four editor modes (fullscreen, split, classic, preview) with mode persistence
+- Revision history with diff-based storage and browser UI (preview, restore, delete)
+- Markdown mode toggle (WYSIWYG ↔ raw markdown)
+- Resizable figure extension with drag handles and captions
+- Word count, keyboard shortcuts (Cmd+S, Cmd+Z, Cmd+Shift+Z), unsaved changes detection
 
 ### Admin Panel
 

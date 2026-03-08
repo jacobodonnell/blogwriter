@@ -52,18 +52,21 @@ before any save.
 
 ### Tiptap Editor
 
-Articles use Tiptap, a WYSIWYG editor with a rich formatting toolbar. Content is entered as WYSIWYG and stored as
-Markdown in the database via the tiptap-markdown extension — users never see raw Markdown syntax.
+Articles use Tiptap, a WYSIWYG editor with a rich formatting toolbar and four layout modes (fullscreen, split, classic,
+preview). Content is entered as WYSIWYG and stored as Markdown in the database via the tiptap-markdown extension — users
+never see raw Markdown syntax. A markdown mode toggle switches between WYSIWYG and raw markdown editing.
 
-The toolbar provides: Bold, Italic, H2, H3, Blockquote, Bullet list, Ordered list, YouTube embed (dialog), and Image
-alignment/resize controls.
+The toolbar provides: Bold, Italic, H2–H5, Blockquote, Bullet list, Ordered list, Link, Image, Inline code, Horizontal
+rule, YouTube embed (dialog), Undo, Redo, and Markdown toggle.
 
-Custom syntax is handled transparently by the client-side Markdown serializer and the server-side `Markdown::render()`
-renderer:
+A revision history system tracks changes on every save. Revisions use a hybrid snapshot + unified diff storage strategy
+(see ArticleRevision model below). The revision browser panel lets users preview, restore, and delete past revisions.
 
+Custom extensions:
+
+- **Resizable figure** (`resizable-figure.js`) — Images wrapped in `<figure>` with drag handles for resizing, caption
+  support, and full-width toggle. Stored as `![alt|width:50%|caption:\`text\`](url)` internally.
 - **YouTube embeds** — Rendered as responsive iframes; stored as `@[youtube](url)` internally
-- **Image alignment/sizing** — Controlled via editor UI; stored as extended Markdown syntax (
-  `![alt|align:center,width:50%,caption:text](url)`) internally
 
 ### Content Newline Normalization
 
@@ -118,6 +121,7 @@ blogwriter/
 │   │   │   │   ├── AppearanceController.php
 │   │   │   │   ├── ArticleController.php   # Article CRUD
 │   │   │   │   ├── ArticleDownloadController.php
+│   │   │   │   ├── RevisionController.php  # Show/delete article revisions
 │   │   │   │   ├── ArticleExportController.php
 │   │   │   │   ├── ArticleImportController.php
 │   │   │   │   ├── ArticleLivePreviewController.php
@@ -162,6 +166,7 @@ blogwriter/
 │   │   ├── Concerns/
 │   │   │   └── InvalidatesResponseCache.php
 │   │   ├── Article.php
+│   │   ├── ArticleRevision.php
 │   │   ├── Category.php
 │   │   ├── Photo.php
 │   │   ├── Setting.php
@@ -178,7 +183,8 @@ blogwriter/
 │   │   ├── PasswordGenerator.php
 │   │   ├── PasswordRules.php
 │   │   ├── PhotoExportService.php
-│   │   └── ResetService.php
+│   │   ├── ResetService.php
+│   │   └── RevisionService.php         # Diff generation, reconstruction, deletion
 │   ├── Support/
 │   │   ├── ImportResult.php
 │   │   ├── Markdown.php                    # Custom Markdown renderer
@@ -243,7 +249,15 @@ blogwriter/
 │   │   └── app.css                         # Tailwind entry point
 │   └── js/
 │       ├── app.js                          # Alpine.js setup
-│       └── bootstrap.js
+│       ├── bootstrap.js
+│       ├── components/
+│       │   ├── article-customizer/
+│       │   │   ├── index.js                # Editor core, keyboard shortcuts
+│       │   │   ├── dirty-tracker.js        # Unsaved changes detection
+│       │   │   └── revision-browser.js     # Revision preview/restore/delete
+│       │   └── customizer-layout.js        # Editor mode switching
+│       └── extensions/
+│           └── resizable-figure.js         # Draggable figure with captions
 └── tests/
     ├── Feature/
     └── Unit/
@@ -260,6 +274,15 @@ blogwriter/
 - `belongsTo(User)`, `belongsTo(Category)`, `belongsTo(Photo, 'photo_id')` for featured image
 - `content_html` accessor renders Markdown to HTML
 - `past_slugs` enables 301 redirects when slugs change
+
+### ArticleRevision
+
+- `title`, `content` (full snapshot or unified diff), `created_at`
+- `belongsTo(Article)` — cascading delete when the parent article is removed
+- Indexed on `(article_id, id)` for efficient chain replay
+- `RevisionService` handles diff generation (`SebastianBergmann\Diff`), content reconstruction by replaying the diff
+  chain, and safe deletion with chain recalculation
+- First revision stores a full content snapshot; subsequent revisions store unified diffs against the previous state
 
 ### Photo
 

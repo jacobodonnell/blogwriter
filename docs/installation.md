@@ -13,7 +13,7 @@ BlogWriter works on most modern web hosting. You need:
 
 - **PHP 8.4 or newer** — Most hosts support this now
 - **A web server** — VPS or cloud hosting (shared hosting support is planned)
-- **About 100 MB of disk space** — For the application and your content
+- **About 100 MB minimum of disk space** — For the application and your content
 
 That's it. No separate database server to set up. No Redis. No Node.js. BlogWriter uses SQLite, which means your
 database is just a simple file on your server.

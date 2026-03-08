@@ -20,8 +20,8 @@ server. If that sounds doable, you can run BlogWriter.
 
 **Two ways to publish:**
 
-- **Articles** — Long-form posts with a Tiptap WYSIWYG editor, live preview customizer, categories, featured images, and
-  permalink redirects
+- **Articles** — Long-form posts with a Tiptap WYSIWYG editor, four layout modes (fullscreen, split, classic, preview),
+  revision history, categories, featured images, and permalink redirects
 - **Photos** — Your own media library, stored on your server. Upload images with captions, alt text, and EXIF display.
   Draft photos stay private until you publish; published photos are served directly from your server. Automatic image
   conversions (thumbnail, medium, large) via Spatie MediaLibrary.
@@ -37,7 +37,7 @@ server. If that sounds doable, you can run BlogWriter.
 
 - Dashboard with article and photo stats
 - Sortable, filterable articles table with column toggles and per-page pagination
-- Statamic-inspired live preview customizer with resizable split-pane editor
+- Four-mode article editor with revision history, markdown toggle, and keyboard shortcuts
 - AJAX auto-save while editing
 - Markdown export (ZIP) and import — round-trip your content with full fidelity
 
