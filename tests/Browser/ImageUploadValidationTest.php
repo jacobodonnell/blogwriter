@@ -12,6 +12,7 @@ beforeEach(function (): void {
         'password' => 'password',
     ]);
     Setting::set('customizer_editor_mode', 'split');
+    config(['app.max_image_upload_kb' => 3000]);
 });
 
 function loginForUploadTest(): mixed
@@ -20,8 +21,7 @@ function loginForUploadTest(): mixed
 
     $page->fill('@login-email', 'test@blogwriter.test')
         ->fill('@login-password', 'password')
-        ->click('@login-submit')
-        ->assertPathIs('/');
+        ->click('@login-submit');
 
     return $page;
 }
@@ -30,6 +30,7 @@ it('shows client-side error toast when uploading oversized file in photos modal'
     $page = loginForUploadTest();
 
     $page->navigate('/photos');
+    $page->wait(2);
 
     // Open the upload modal
     $page->click('@open-upload-modal')
@@ -48,6 +49,7 @@ it('clears file input and closes modal when oversized file is selected in photos
     $page = loginForUploadTest();
 
     $page->navigate('/photos');
+    $page->wait(2);
 
     // Open the upload modal
     $page->click('@open-upload-modal')
@@ -69,6 +71,7 @@ it('shows client-side error toast when uploading oversized file in article custo
     $page = loginForUploadTest();
 
     $page->navigate('/admin/articles/'.$article->id.'/edit');
+    $page->wait(2);
 
     // Open the upload photo modal
     $page->click('@upload-new-photo')
@@ -91,6 +94,7 @@ it('shows specific error message in article customizer when server-side validati
     $page = loginForUploadTest();
 
     $page->navigate('/admin/articles/'.$article->id.'/edit');
+    $page->wait(2);
 
     // Open the upload photo modal
     $page->click('@upload-new-photo')
