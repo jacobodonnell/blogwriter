@@ -10,7 +10,8 @@
          'alert-error': type === 'error',
          'alert-warning': type === 'warning',
      }"
-     class="fixed bottom-4 right-4 z-50 alert shadow-lg">
+     class="fixed bottom-4 right-4 z-1000 alert shadow-lg"
+     data-test="ajax-toast">
     <i :class="{
          'ph ph-check-circle': type === 'success',
          'ph ph-x-circle': type === 'error',
@@ -29,7 +30,7 @@
          x-transition:leave="transition ease-in duration-300"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
-         class="fixed bottom-4 right-4 z-50 alert alert-success shadow-lg"
+         class="fixed bottom-4 right-4 z-1000 alert alert-success shadow-lg"
          data-test="session-toast">
         <i class="ph ph-check-circle text-xl"></i>
         <span>{{ $success }}</span>
@@ -42,7 +43,7 @@
 @if ($error)
     <div x-data="{ show: true }"
          x-show="show"
-         class="fixed bottom-4 right-4 z-50 alert alert-error shadow-lg"
+         class="fixed bottom-4 right-4 z-1000 alert alert-error shadow-lg"
          data-test="session-toast">
         <i class="ph ph-x-circle text-xl"></i>
         <span>{{ $error }}</span>

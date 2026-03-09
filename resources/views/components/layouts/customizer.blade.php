@@ -168,7 +168,7 @@
                 <div :class="mode === 'classic' ? '' : (mode === 'fullscreen' ? 'grid min-h-0' : 'p-4 pb-20')">
                     {{-- Validation errors toast (dispatched, inside content wrapper to avoid grid row) --}}
                     @if ($errors->any())
-                        <div x-data x-init="$dispatch('toast:show', { message: 'Something went wrong. Please fix the errors below and try again.', type: 'error' })" class="hidden"></div>
+                        <div x-data x-init="$dispatch('toast:show', { message: '{{ addslashes($errors->first()) }}', type: 'error' })" class="hidden"></div>
                     @endif
                     {{ $slot }}
                 </div>

@@ -19,6 +19,8 @@ return [
 
     'version' => '0.1.0-alpha',
 
+    'max_image_upload_kb' => (int) env('MAX_IMAGE_UPLOAD_KB', 10240),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
@@ -124,7 +126,7 @@ return [
 
     'maintenance' => [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
-        'store' => env('APP_MAINTENANCE_STORE', 'database'),
+        'store'  => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
 ];

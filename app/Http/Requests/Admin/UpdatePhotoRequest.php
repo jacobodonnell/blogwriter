@@ -24,7 +24,7 @@ final class UpdatePhotoRequest extends FormRequest
     {
         return [
             'slug' => ['nullable', 'string', 'max:255', 'regex:/^[a-z0-9-]+$/', Rule::unique('photos', 'slug')->ignore($this->route('photo')?->id)],
-            'image_file' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:10240'],
+            'image_file' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:'.config('app.max_image_upload_kb')],
             'caption' => ['nullable', 'string', 'max:5000'],
             'alt_text' => ['required', 'string', 'max:500'],
             'status' => ['required', 'in:private,public'],

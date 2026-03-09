@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\PostTooLargeException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -27,9 +29,11 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->renderable(function (Illuminate\Database\QueryException $e) {
+        $exceptions->renderable(function (QueryException $e) {
             if (! file_exists(storage_path('installed.lock'))) {
                 return redirect('/install');
             }
         });
+
+        $exceptions->renderable(fn (PostTooLargeException $e) => back()->with('error', "The uploaded file is too large. Please check your server's upload size limit."));
     })->create();

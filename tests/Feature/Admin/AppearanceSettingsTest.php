@@ -177,7 +177,8 @@ it('only shows light themes in the light dropdown', function (): void {
 });
 
 it('rejects oversized placeholder image', function (): void {
-    $file = Illuminate\Http\UploadedFile::fake()->image('large.jpg')->size(3000);
+    $maxKb = config('app.max_image_upload_kb');
+    $file = Illuminate\Http\UploadedFile::fake()->image('large.jpg')->size($maxKb + 1);
 
     $this->actingAs($this->user)
         ->put(route('admin.settings.site.image.update'), [

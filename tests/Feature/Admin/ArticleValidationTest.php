@@ -138,8 +138,18 @@ it('store rejects non-URL featured_image string', function (): void {
     ]))->assertSessionHasErrors('featured_image');
 });
 
-it('store rejects oversized featured_image_file', function (): void {
-    $file = UploadedFile::fake()->image('large.jpg')->size(3000);
+it('store accepts featured_image_file up to configured max size', function (): void {
+    $maxKb = config('app.max_image_upload_kb');
+    $file = UploadedFile::fake()->image('medium.jpg')->size($maxKb);
+
+    $this->post(route('admin.articles.store'), validArticleData([
+        'featured_image_file' => $file,
+    ]))->assertSessionDoesntHaveErrors('featured_image_file');
+});
+
+it('store rejects featured_image_file over configured max size', function (): void {
+    $maxKb = config('app.max_image_upload_kb');
+    $file = UploadedFile::fake()->image('large.jpg')->size($maxKb + 1);
 
     $this->post(route('admin.articles.store'), validArticleData([
         'featured_image_file' => $file,

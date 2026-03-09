@@ -11,6 +11,11 @@
             <x-page-heading title="Photos" :subtitle="$subtitle" class="mb-2" />
         </header>
 
+        {{-- Server-side validation errors (e.g. from photo upload) --}}
+        @if ($errors->any())
+            <div x-data x-init="$dispatch('toast:show', { message: '{{ addslashes($errors->first()) }}', type: 'error' })" class="hidden"></div>
+        @endif
+
         {{-- Filter banner + Results (Alpine AJAX target) --}}
         <div id="photo-results" x-merge="morph">
             <x-filter-banner :action="route('photos.index')" target="photo-results" :clearRoute="route('photos.index')" persistKey="photos_filters_open">
@@ -21,6 +26,7 @@
                             Manage Photos
                         </a>
                         <button class="btn btn-primary btn-sm gap-2"
+                                data-test="open-upload-modal"
                                 onclick="document.getElementById('upload-photo-modal').showModal()">
                             <i class="ph ph-upload-simple"></i>
                             Upload
@@ -68,7 +74,7 @@
                       method="POST"
                       action="{{ route('admin.photos.store') }}"
                       enctype="multipart/form-data"
-                      x-data="{ uploadPreview: null }">
+                      x-data="uploadPhotoModal()">
                     @csrf
 
                     <div class="space-y-3">
@@ -78,7 +84,9 @@
                                    class="file-input file-input-bordered w-full"
                                    accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                                    required
-                                   @change="if ($event.target.files[0]) { uploadPreview = URL.createObjectURL($event.target.files[0]); }">
+                                   data-test="photos-file-picker"
+                                   data-max-size-kb="{{ config('app.max_image_upload_kb') }}"
+                                   @change="handleFileChange($event)">
                             <img x-show="uploadPreview" :src="uploadPreview"
                                  class="w-full max-h-40 object-cover rounded-lg mt-2"
                                  alt="Upload preview"

@@ -22,7 +22,7 @@ final class UpdatePlaceholderImageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'placeholder_image' => 'required|image|max:2048',
+            'placeholder_image' => ['required', 'image', 'max:'.config('app.max_image_upload_kb')],
         ];
     }
 }

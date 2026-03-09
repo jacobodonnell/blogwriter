@@ -5,7 +5,8 @@
                 <legend class="fieldset-legend">Image</legend>
                 <input type="file" id="photo-file-picker" x-ref="filePicker" data-test="photo-file-picker"
                        class="file-input file-input-bordered w-full"
-                       accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                       accept="image/jpeg,image/jpg,image/png,image/webp"
+                       data-max-size-kb="{{ config('app.max_image_upload_kb') }}"
                        @change="handleFileChange($event)">
                 <img x-show="uploadPreview" :src="uploadPreview"
                      class="w-full max-h-40 object-contain rounded-lg mt-2"
