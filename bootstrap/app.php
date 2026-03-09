@@ -21,6 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Prevent browsers from caching Alpine AJAX partial responses
         $middleware->append(App\Http\Middleware\PreventAjaxCaching::class);
 
+        // Add security headers to all responses
+        $middleware->append(App\Http\Middleware\SetSecurityHeaders::class);
+
         // Exclude install routes from CSRF — finalize clears caches which
         // invalidates the session, making the token stale for the seed request.
         // These routes are already guarded by isAlreadyInstalled() checks.
